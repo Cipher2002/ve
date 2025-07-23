@@ -513,4 +513,30 @@ export const textOverlayTemplates: Record<string, any> = {
     },
   },
 
+lowerThirdBrushAngled: {
+  name: "Angled 3D Bar Lower Third",
+  content: "SIENNA CARTER",
+  preview: "Angled 3D Orange Bar",
+  styles: {
+    fontSize: "2.5rem",
+    fontWeight: "700",
+    backgroundColor: "transparent",
+    fontFamily: "font-sans",
+    fontStyle: "normal",
+    textDecoration: "none",
+    lineHeight: "1.2",
+    textAlign: "left",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    effect: {
+      type: "lower-third-3d-angled-bar",
+      params: {
+        textColor: "#000000",
+        imageName: "orange-angled-bar.png"
+      }
+    }
+  },
+},
+  
+
 };

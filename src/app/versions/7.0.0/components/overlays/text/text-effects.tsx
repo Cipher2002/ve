@@ -602,8 +602,44 @@ export const useTextEffects = (frame: number) => {
                     }
                 ]
             };
+   
+        case 'lower-third-3d-angled-bar':
+            const angledBarTextColor = config.params?.textColor || '#000000';
+            const angledBarImageName = config.params?.imageName || 'orange-angled-bar.png';
+            const angledBarImageUrl = `/textBgImage/${angledBarImageName}`;
+            
+            return {
+                container: { 
+                    position: 'relative', 
+                    width: 'fit-content',
+                    height: 'fit-content',
+                    margin: 'auto'
+                },
+                layers: [
+                    {
+                        style: {
+                            ...textStyle,
+                            position: 'relative',
+                            zIndex: 1,
+                            color: angledBarTextColor,
+                            backgroundImage: `url("${angledBarImageUrl}")`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            padding: '20px 60px 20px 40px',
+                            minWidth: '300px',
+                            minHeight: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start'
+                        },
+                        content
+                    }
+                ]
+            };
 
 
+        
         default:
             return null;
         }
