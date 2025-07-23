@@ -1,0 +1,19 @@
+{
+  "id": "default",
+  "name": "Empty Template",
+  "description": "Template created from editor",
+  "createdAt": "2025-07-17T08:06:20.730Z",
+  "updatedAt": "2025-07-17T08:06:20.730Z",
+  "createdBy": {
+    "id": "user-1",
+    "name": "User"
+  },
+  "category": "Custom",
+  "tags": [
+    "custom",
+    "user-created"
+  ],
+  "duration": 30,
+  "aspectRatio": "16:9",
+  "overlays": []
+}
