@@ -11,6 +11,7 @@ import Image from 'next/image';
 import ReactVideoEditor from './versions/7.0.0/react-video-editor';
 
 import styles from './page.module.scss';
+import { useEffect } from 'react';
 
 // function App() {
 //   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -331,6 +332,27 @@ import styles from './page.module.scss';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
+
+  useEffect(() => {
+    function sendHeight() {
+      const height = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'setIframeHeight', height }, '*');
+    }
+
+    // Send height initially and on resize
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', sendHeight);
+
+    // Send height when DOM changes
+    const observer = new MutationObserver(sendHeight);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      window.removeEventListener('load', sendHeight);
+      window.removeEventListener('resize', sendHeight);
+      observer.disconnect();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
