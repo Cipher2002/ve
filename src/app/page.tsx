@@ -374,7 +374,7 @@ function App() {
       {/* Centered content container */}
       <div className="w-full flex-1 flex flex-col">
         {/* Video Editor Card */}
-        <div className="bg-white shadow-lg border-b border-gray-200 mb-8 overflow-hidden">
+        <div className="bg-white border-b border-gray-200 mb-8 overflow-hidden">
           <div className={styles.generateVideoSection}>
             <div 
               className="relative w-full"
@@ -389,7 +389,7 @@ function App() {
         </div>
 
         {/* Projects Section Card */}
-        <div className="bg-white shadow-lg border-t border-gray-200 overflow-hidden flex-1">
+        <div className="bg-white border-t border-gray-200 overflow-hidden flex-1">
           <div className={styles.projectOverviewSection}>
             <div className={styles.projectOverviewContainer}>
               <div className={styles.projectSummaryColumn}>

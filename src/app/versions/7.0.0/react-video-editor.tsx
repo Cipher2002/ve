@@ -1,5 +1,7 @@
 "use client";
 
+//#490972
+
 // UI Components
 import { SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/sidebar/app-sidebar";
@@ -186,6 +188,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   // Download template function
   const downloadTemplate = async () => {
+    setIsSaving(true);
+    
     const template = {
       id: `template-${Date.now()}`,
       name: projectName,
@@ -205,6 +209,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       const jsonString = JSON.stringify(template, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
+      template['tags'] = ['preset', 'system-created'];
       
       const a = document.createElement('a');
       a.href = url;
@@ -238,6 +243,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       } catch (error) {
         console.error('Error saving template:', error);
         // You could show an error toast here
+      } finally {
+        setIsSaving(false);
       }
     }
   };
@@ -350,6 +357,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Autosave
     saveProject: handleManualSave,
     downloadTemplate,
+    isSaving,
 
     // Admin mode
     isAdminMode,
@@ -366,10 +374,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         className="flex flex-col overflow-hidden h-full"
         style={{
           backgroundColor: 'rgb(244, 242, 250)',
-          outlineOffset: '-1px',
-          borderRadius: '16px',
-          boxShadow: '4px 4px 40px 0 rgb(0, 0, 0, 0.25)',
-          outline: 'rgb(73, 9, 114) solid 1px'
         }}
       >
       <UISidebarProvider>

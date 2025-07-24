@@ -46,8 +46,8 @@ export const TemplateOverlayPanel: React.FC = () => {
       });
       
       if (response.ok) {
-        // Remove from local state
-        setClientTemplates(prev => prev.filter(template => template.id !== templateId));
+        // Refresh the list after deletion
+        await fetchClientTemplates();
       } else {
         console.error('Failed to delete template');
       }
@@ -93,6 +93,24 @@ export const TemplateOverlayPanel: React.FC = () => {
     }
   };
 
+  // Function to fetch client templates
+  const fetchClientTemplates = async () => {
+    setClientTemplatesLoading(true);
+    setClientTemplatesError(null);
+    try {
+      const response = await fetch('/api/latest/templates/client');
+      if (!response.ok) {
+        throw new Error('Failed to fetch templates');
+      }
+      const data = await response.json();
+      setClientTemplates(data);
+    } catch (error) {
+      setClientTemplatesError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setClientTemplatesLoading(false);
+    }
+  };
+
   const handleEditStart = (template: TemplateOverlay) => {
     setEditingTemplateId(template.id);
     setEditingName(template.name);
@@ -110,26 +128,43 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   // Listen for template updates from editor
+  // useEffect(() => {
+  //   const handleTemplateUpdate = (event: Event) => {
+  //     // Refresh client templates if we're on that tab
+  //     if (activeTab === "created-by-you") {
+  //       setClientTemplatesLoading(true);
+  //       fetch('/api/latest/templates/client')
+  //         .then(response => response.json())
+  //         .then(data => {
+  //           setClientTemplates(data);
+  //           setClientTemplatesLoading(false);
+  //         })
+  //         .catch(error => {
+  //           setClientTemplatesError(error.message);
+  //           setClientTemplatesLoading(false);
+  //         });
+  //     }
+  //   };
+
+  //   window.addEventListener('templateUpdated', handleTemplateUpdate);
+  //   return () => window.removeEventListener('templateUpdated', handleTemplateUpdate);
+  // }, [activeTab]);
+  // Listen for template updates from editor
   useEffect(() => {
     const handleTemplateUpdate = (event: Event) => {
-      // Refresh client templates if we're on that tab
-      if (activeTab === "created-by-you") {
-        setClientTemplatesLoading(true);
-        fetch('/api/latest/templates/client')
-          .then(response => response.json())
-          .then(data => {
-            setClientTemplates(data);
-            setClientTemplatesLoading(false);
-          })
-          .catch(error => {
-            setClientTemplatesError(error.message);
-            setClientTemplatesLoading(false);
-          });
-      }
+      // Always refresh client templates when a template is saved
+      fetchClientTemplates();
     };
 
     window.addEventListener('templateUpdated', handleTemplateUpdate);
     return () => window.removeEventListener('templateUpdated', handleTemplateUpdate);
+  }, []);
+  
+  // Fetch client templates when "Created By You" tab is active
+  useEffect(() => {
+    if (activeTab === "created-by-you") {
+      fetchClientTemplates();
+    }
   }, [activeTab]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -166,7 +201,12 @@ export const TemplateOverlayPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        if (value === "created-by-you") {
+          fetchClientTemplates();
+        }
+      }} className="flex-1 flex flex-col min-h-0">
         <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
           <TabsTrigger
             value="templates"

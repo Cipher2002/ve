@@ -86,9 +86,22 @@ export function EditorHeader() {
               variant={aspectRatio === ratio ? "default" : "outline"}
               className={`h-8 px-3 min-w-[3rem] text-xs transition-colors ${
                 aspectRatio === ratio
-                  ? "bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900 border-0"
+                  ? "text-white border-0"
                   : "bg-white hover:bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-zinc-300"
               }`}
+              style={{
+                backgroundColor: aspectRatio === ratio ? '#490972' : undefined
+              }}
+              onMouseEnter={(e) => {
+                if (aspectRatio === ratio) {
+                  e.currentTarget.style.backgroundColor = '#490972';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (aspectRatio === ratio) {
+                  e.currentTarget.style.backgroundColor = '#490972';
+                }
+              }}
             >
               {ratio}
             </Button>

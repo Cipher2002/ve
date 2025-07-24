@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { formatDistanceToNow } from "date-fns";
+import { useEditorContext } from "../../contexts/editor-context";
 
 /**
  * Interface representing a single video render attempt
@@ -122,22 +123,54 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     }
   };
 
+  const { isSaving } = useEditorContext();
+
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="relative bg-gray-700 text-white hover:bg-gray-600"
-        onClick={downloadTemplate}
-      >
-        <Save className="w-3.5 h-3.5" />
-      </Button>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="relative text-white"
+      style={{ backgroundColor: '#490972' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#490972';
+        e.currentTarget.style.color = 'white';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#490972';
+        e.currentTarget.style.color = 'white';
+      }}
+      onClick={downloadTemplate}
+      disabled={isSaving}
+      title="Save Project"
+    >
+      {isSaving ? (
+        <>
+          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+          Saving...
+        </>
+      ) : (
+        <>
+          <Save className="w-3.5 h-3.5 mr-1.5" />
+          Save Project
+        </>
+      )}
+    </Button>
       <Popover onOpenChange={() => setHasNewRender(false)}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
-            className="relative bg-gray-700 text-white hover:bg-gray-600"
+            className="relative text-white"
+            style={{ backgroundColor: '#490972' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#490972';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#490972';
+              e.currentTarget.style.color = 'white';
+            }}
           >
             <Bell className="w-3.5 h-3.5" />
             {hasNewRender && (
@@ -146,6 +179,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-60 p-3">
+          {/* ... existing PopoverContent code remains the same ... */}
           <div className="space-y-1.5">
             <h4 className="text-sm font-medium">Recent Renders</h4>
             {renders.length === 0 ? (
@@ -188,7 +222,16 @@ const RenderControls: React.FC<RenderControlsProps> = ({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="text-zinc-200 hover:text-gray-800 h-6 w-6"
+                      className="text-white h-6 w-6"
+                      style={{ backgroundColor: '#490972' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#490972';
+                        e.currentTarget.style.color = 'white';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#490972';
+                        e.currentTarget.style.color = 'white';
+                      }}
                       onClick={() => handleDownload(render.url!)}
                     >
                       <Download className="w-3.5 h-3.5" />
@@ -206,7 +249,16 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         size="sm"
         variant="outline"
         disabled={state.status === "rendering" || state.status === "invoking"}
-        className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+        className="text-white border-gray-700"
+        style={{ backgroundColor: '#490972' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#490972';
+          e.currentTarget.style.color = 'white';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#490972';
+          e.currentTarget.style.color = 'white';
+        }}
       >
         {state.status === "rendering" ? (
           <>

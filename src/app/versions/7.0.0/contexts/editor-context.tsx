@@ -70,6 +70,8 @@ interface EditorContextProps {
   // Autosave functionality
   saveProject?: () => Promise<void>; // Manual save function
   downloadTemplate?: () => void; // Download template function
+  isSaving?: boolean;
+
 
   // Add renderType to the context
   renderType: "ssr" | "lambda";
