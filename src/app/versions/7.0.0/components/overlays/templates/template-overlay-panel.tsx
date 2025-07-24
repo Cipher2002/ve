@@ -7,22 +7,23 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog";
 
 export const TemplateOverlayPanel: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("templates");
   const [selectedTemplate, setSelectedTemplate] =
     useState<TemplateOverlay | null>(null);
+  const [dialogPosition, setDialogPosition] = useState<{x: number, y: number} | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { loadTemplateIntoEditor, projectName, setProjectName } = useEditorContext();
 
@@ -37,6 +38,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [clientTemplatesError, setClientTemplatesError] = useState<string | null>(null);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
 
   // Delete template function
   const deleteTemplate = async (templateId: string) => {
@@ -127,29 +129,6 @@ export const TemplateOverlayPanel: React.FC = () => {
     setEditingName("");
   };
 
-  // Listen for template updates from editor
-  // useEffect(() => {
-  //   const handleTemplateUpdate = (event: Event) => {
-  //     // Refresh client templates if we're on that tab
-  //     if (activeTab === "created-by-you") {
-  //       setClientTemplatesLoading(true);
-  //       fetch('/api/latest/templates/client')
-  //         .then(response => response.json())
-  //         .then(data => {
-  //           setClientTemplates(data);
-  //           setClientTemplatesLoading(false);
-  //         })
-  //         .catch(error => {
-  //           setClientTemplatesError(error.message);
-  //           setClientTemplatesLoading(false);
-  //         });
-  //     }
-  //   };
-
-  //   window.addEventListener('templateUpdated', handleTemplateUpdate);
-  //   return () => window.removeEventListener('templateUpdated', handleTemplateUpdate);
-  // }, [activeTab]);
-  // Listen for template updates from editor
   useEffect(() => {
     const handleTemplateUpdate = (event: Event) => {
       // Always refresh client templates when a template is saved
@@ -177,9 +156,10 @@ export const TemplateOverlayPanel: React.FC = () => {
     setConfirmDialogOpen(false);
   };
 
-  const handleSelectTemplate = (template: TemplateOverlay) => {
+  const handleSelectTemplate = (template: TemplateOverlay, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setConfirmingTemplateId(template.id);
     setSelectedTemplate(template);
-    setConfirmDialogOpen(true);
   };
 
   const handleImportTemplate = async (
@@ -227,7 +207,7 @@ export const TemplateOverlayPanel: React.FC = () => {
         <div className="flex gap-2 flex-shrink-0">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
             <Input
-              placeholder="Search templates..."
+              placeholder="Search system templates..."
               value={searchQuery}
               className="flex-1 h-8 sm:h-10 text-xs sm:text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:ring-blue-400 md:text-base"
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -265,12 +245,38 @@ export const TemplateOverlayPanel: React.FC = () => {
                 ))
               ) : templates.length > 0 ? (
                 templates.map((template) => (
-                  <Card
-                    key={template.id}
-                    className="cursor-pointer hover:bg-accent transition-colors duration-200"
-                    onClick={() => handleSelectTemplate(template)}
-                  >
+                <Card
+                  key={template.id}
+                  className="cursor-pointer hover:bg-accent transition-colors duration-200"
+                >
+                {confirmingTemplateId === template.id ? (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
+                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
+                      Are you sure you want to add this template to your timeline? It will replace all existing overlays.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button 
+                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => setConfirmingTemplateId(null)}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={() => {
+                          handleApplyTemplate(template);
+                          setConfirmingTemplateId(null);
+                        }}
+                      >
+                        Apply Template
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div onClick={(e) => handleSelectTemplate(template, e)}>
                     <CardHeader className="p-2 sm:p-3 space-y-2">
+                      {/* Keep all the existing CardHeader content here */}
                       <div className="aspect-video w-full overflow-hidden rounded-md">
                         <TemplateThumbnail
                           thumbnail={template.thumbnail}
@@ -308,7 +314,9 @@ export const TemplateOverlayPanel: React.FC = () => {
                         </div>
                       </div>
                     </CardHeader>
-                  </Card>
+                  </div>
+                )}
+                </Card>
                 ))
               ) : (
                 <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-gray-500 text-xs sm:text-sm">
@@ -335,12 +343,38 @@ export const TemplateOverlayPanel: React.FC = () => {
                 </div>
               ) : clientTemplates.length > 0 ? (
                 clientTemplates.map((template) => (
-                  <Card
-                    key={template.id}
-                    className="cursor-pointer hover:bg-accent transition-colors duration-200 relative group/item"
-                    onClick={() => handleSelectTemplate(template)}
-                  >
+                <Card
+                  key={template.id}
+                  className="cursor-pointer hover:bg-accent transition-colors duration-200"
+                >
+                {confirmingTemplateId === template.id ? (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
+                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
+                      Are you sure you want to add this template to your timeline? It will replace all existing overlays.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button 
+                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => setConfirmingTemplateId(null)}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={() => {
+                          handleApplyTemplate(template);
+                          setConfirmingTemplateId(null);
+                        }}
+                      >
+                        Apply Template
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div onClick={(e) => handleSelectTemplate(template, e)}>
                     <CardHeader className="p-2 sm:p-3 space-y-2">
+                      {/* Keep all the existing CardHeader content here */}
                       <div className="aspect-video w-full overflow-hidden rounded-md">
                         <TemplateThumbnail
                           thumbnail={template.thumbnail}
@@ -348,41 +382,9 @@ export const TemplateOverlayPanel: React.FC = () => {
                         />
                       </div>
                       <div className="space-y-1 sm:space-y-2">
-                        <div className="flex items-center gap-1">
-                          {editingTemplateId === template.id ? (
-                            <input
-                              type="text"
-                              value={editingName}
-                              onChange={(e) => setEditingName(e.target.value)}
-                              onBlur={handleEditSave}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleEditSave();
-                                if (e.key === 'Escape') handleEditCancel();
-                              }}
-                              className="flex-1 text-xs sm:text-sm font-light bg-transparent border border-gray-300 dark:border-gray-600 rounded px-1 py-0.5"
-                              autoFocus
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          ) : (
-                            <>
-                              <CardTitle className="text-xs sm:text-sm font-light flex-1">
-                                {template.name}
-                              </CardTitle>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditStart(template);
-                                }}
-                                className="opacity-0 group-hover/item:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                title="Edit template name"
-                              >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </button>
-                            </>
-                          )}
-                        </div>
+                        <CardTitle className="text-xs sm:text-sm font-light">
+                          {template.name}
+                        </CardTitle>
                         <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                           {template.description}
                         </p>
@@ -410,21 +412,9 @@ export const TemplateOverlayPanel: React.FC = () => {
                         </div>
                       </div>
                     </CardHeader>
-
-                    {/* Delete button - only in Created By You tab */}
-                    <button
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-                        text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
-                        shadow-sm hover:shadow-md transform hover:scale-105"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await deleteTemplate(template.id);
-                      }}
-                      title="Delete template"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </Card>
+                  </div>
+                )}
+                </Card>
                 ))
               ) : (
                 <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-gray-500 text-xs sm:text-sm">
@@ -435,36 +425,6 @@ export const TemplateOverlayPanel: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-
-      <AlertDialog
-        open={confirmDialogOpen}
-        onOpenChange={setConfirmDialogOpen}
-      >
-        <AlertDialogContent className="w-[90%] max-w-md mx-auto rounded-md p-3 sm:p-6">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-sm sm:text-base">
-              Apply Template
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs sm:text-sm">
-              Are you sure you want to add this template to your timeline? It
-              will replace all existing overlays.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-3">
-            <AlertDialogCancel className="h-8 sm:h-10 text-xs sm:text-sm">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="h-8 sm:h-10 text-xs sm:text-sm"
-              onClick={() =>
-                selectedTemplate && handleApplyTemplate(selectedTemplate)
-              }
-            >
-              Apply Template
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 };

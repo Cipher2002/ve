@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useLocalMedia } from "../../contexts/local-media-context";
 import { formatBytes, formatDuration } from "../../utils/format-utils";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,24 @@ export function LocalMediaGallery({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
+  
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (confirmingMediaId) {
+        const target = event.target as Element;
+        // Only reset if the click is outside the media gallery area
+        const mediaGallery = document.querySelector('[data-media-gallery]');
+        if (mediaGallery && !mediaGallery.contains(target)) {
+          setConfirmingMediaId(null);
+        }
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [confirmingMediaId]);
+
 
   // Filter media files based on active tab
   const filteredMedia = localMediaFiles.filter((file) => {
@@ -68,10 +86,24 @@ export function LocalMediaGallery({
     fileInputRef.current?.click();
   };
 
-  // Handle media selection
   const handleMediaSelect = (file: LocalMediaFile) => {
-    setSelectedFile(file);
-    setPreviewOpen(true);
+    console.log('handleMediaSelect called with:', file.type, file.id); // Add this line
+    if (file.type === "image" || file.type === "video") {
+      console.log('Setting confirmingMediaId to:', file.id); // Add this line
+      setConfirmingMediaId(file.id);
+      setSelectedFile(file);
+    } else {
+      // For audio files, keep the original behavior
+      setSelectedFile(file);
+      setPreviewOpen(true);
+    }
+  };
+
+  const handlePreviewInNewTab = () => {
+    if (selectedFile) {
+      window.open(selectedFile.path, '_blank');
+      // Don't reset confirmingMediaId - keep the dialog open
+    }
   };
 
   // Add media to timeline
@@ -142,70 +174,115 @@ export function LocalMediaGallery({
   // Render media item
   const renderMediaItem = (file: LocalMediaFile) => {
     return (
-      <div
-        key={file.id}
-        className="relative group/item border dark:border-gray-700 border-gray-200 rounded-md overflow-hidden cursor-pointer 
-          hover:border-blue-500 dark:hover:border-blue-400 transition-all 
-          bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md"
-        onClick={() => handleMediaSelect(file)}
-      >
-        {/* Thumbnail */}
-        <div className="aspect-video relative">
-          {file.type === "image" && (
-            <img
-              src={file.thumbnail || file.path}
-              alt={file.name}
-              className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
-            />
-          )}
-          {file.type === "video" && (
-            <>
-              <img
-                src={file.thumbnail}
-                alt={file.name}
-                className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
-              />
-              <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
-                {formatDuration(file.duration)}
-              </div>
-            </>
-          )}
-          {file.type === "audio" && (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-              <Music className="w-10 h-10 text-gray-400 dark:text-gray-500" />
-            </div>
-          )}
-        </div>
-
-        {/* Media info */}
-        <div className="p-2.5">
-          <p className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">
-            {file.name}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {formatBytes(file.size)}
-          </p>
-        </div>
-
-        {/* Delete button */}
-        <button
-          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-            text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
-            shadow-sm hover:shadow-md transform hover:scale-105"
+        <div
+          key={file.id}
+          className="relative group/item border dark:border-gray-700 border-gray-200 rounded-md overflow-hidden cursor-pointer 
+            hover:border-blue-500 dark:hover:border-blue-400 transition-all 
+            bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md flex flex-col"
           onClick={(e) => {
             e.stopPropagation();
-            removeMediaFile(file.id);
+            if (confirmingMediaId === file.id) {
+              setConfirmingMediaId(null);
+            } else {
+              handleMediaSelect(file);
+            }
           }}
-          title="Delete media"
         >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        {confirmingMediaId === file.id ? (
+        <div 
+          className="flex-1 flex flex-col justify-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md"
+        >
+          <div className="flex flex-col items-center text-center space-y-3 select-none">
+            <h3 className="text-sm font-semibold">Media Options</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-300">
+              What would you like to do with this {file.type}?
+            </p>
+            <div className="flex flex-col gap-2 w-full">
+              <button 
+                className="w-full px-3 py-2 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePreviewInNewTab();
+                }}
+              >
+                Preview
+              </button>
+              <button 
+                className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToTimeline();
+                  setConfirmingMediaId(null);
+                }}
+              >
+                Add to Timeline
+              </button>
+            </div>
+          </div>
+        </div>
+        ) : (
+          <div>           
+            {/* Thumbnail */}
+            <div className="aspect-video relative">
+              {file.type === "image" && (
+                <img
+                  src={file.thumbnail || file.path}
+                  alt={file.name}
+                  className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                />
+              )}
+              {file.type === "video" && (
+                <>
+                  <img
+                    src={file.thumbnail}
+                    alt={file.name}
+                    className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                  />
+                  <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
+                    {formatDuration(file.duration)}
+                  </div>
+                </>
+              )}
+              {file.type === "audio" && (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                  <Music className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+                </div>
+              )}
+            </div>
+
+            {/* Media info */}
+            <div className="p-2.5">
+              <p className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">
+                {file.name}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {formatBytes(file.size)}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Delete button - only show when not in confirm mode */}
+        {confirmingMediaId !== file.id && (
+          <button
+            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
+              text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
+              shadow-sm hover:shadow-md transform hover:scale-105"
+            onClick={(e) => {
+              e.stopPropagation();
+              removeMediaFile(file.id);
+            }}
+            title="Delete media"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="h-full flex flex-col">
+  <div className="h-full flex flex-col" data-media-gallery>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-sm">Saved Uploads</h2>
         <div>
