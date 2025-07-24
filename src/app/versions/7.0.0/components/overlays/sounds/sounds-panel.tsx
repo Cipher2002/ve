@@ -270,7 +270,7 @@ const SoundsPanel: React.FC = () => {
   }, [playingTrack, loadingTrack, handleAddToTimeline, togglePlay]);
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/40 h-full">
+    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/40 h-full flex flex-col">
       {!localOverlay && (
         <div className="flex gap-2 flex-shrink-0">
           <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
@@ -287,25 +287,10 @@ const SoundsPanel: React.FC = () => {
           </form>
         </div>
       )}
-      {/* {!localOverlay ? (
-        localSounds
-          .filter((sound) =>
-            searchQuery === "" ||
-            sound.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            sound.artist.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-          .map(renderSoundCard)
-      ) : (
-        <SoundDetails
-          localOverlay={localOverlay}
-          setLocalOverlay={handleUpdateOverlay}
-        />
-      )} */}
       {!localOverlay ? (
         <div 
           ref={scrollContainerRef}
-          className="overflow-y-auto h-full space-y-2"
-          style={{ maxHeight: 'calc(100vh - 200px)' }} // Adjust based on your layout
+          className="overflow-y-auto flex-1 space-y-2"
         >
           {filteredSounds.map(renderSoundCard)}
           {hasMoreItems && (

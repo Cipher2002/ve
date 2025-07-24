@@ -257,6 +257,59 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </Tooltip>
         </TooltipProvider>
 
+        {/* Row Controls */}
+        <div className="flex items-center gap-1 ml-3">
+          <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+            Rows
+          </span>
+          <div className="flex items-center gap-1"></div>
+          <TooltipProvider delayDuration={50}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleRemoveRow}
+                  disabled={visibleRows <= INITIAL_ROWS}
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={5}
+                className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
+                align="start"
+              >
+                <span className="text-gray-700 dark:text-zinc-200">Remove Row</span>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={addRow}
+                  disabled={visibleRows >= MAX_ROWS}
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={5}
+                className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
+                align="start"
+              >
+                <span className="text-gray-700 dark:text-zinc-200">Add Row ({visibleRows}/{MAX_ROWS})</span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
         {/* Loading Indicator - Moved here and simplified */}
         {!SHOW_LOADING_PROJECT_ALERT && isLoadingAssets && (
           <div className="flex items-center gap-2 px-2 py-1 bg-blue-50/90 dark:bg-blue-900/20 rounded-md ml-2">
@@ -267,6 +320,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </div>
         )}
       </div>
+    
+
 
       {/* Center section: Play/Pause control and time display */}
       <div className="flex items-center justify-center gap-2 flex-grow">
@@ -346,6 +401,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </span>
         </div>
       </div>
+
       {/* Right section: Zoom, Reset Zoom & Settings menu */}
       <div className="flex items-center gap-3 flex-1 justify-end">
         {/* Zoom Slider - Refined UI with Icons */}
@@ -439,102 +495,20 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
         <Separator orientation="vertical" className="h-7" />
 
-        {/* Settings Dropdown */}
-        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors rounded-md"
-            >
-              <Settings className="h-3.5 w-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
-            side="top"
-            align="end"
-            sideOffset={8}
-            collisionPadding={16}
-            avoidCollisions={false}
+
+        {/* Reset Timeline */}
+        <div>
+          <Button
+            onClick={handleReset}
+            variant="outline"
+            size="sm"
+            className="w-full text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200
+              bg-white hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-700/80
+              border-gray-200 dark:border-gray-700"
           >
-            <DropdownMenuLabel className="text-xs text-gray-900 dark:text-zinc-200">
-              Timeline Settings
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-
-            {/* Row Controls */}
-            <div className="px-2 py-2 space-y-1">
-              <Label className="text-xs text-gray-400 dark:text-zinc-500">
-                Rows
-              </Label>
-              <div className="flex gap-1 pt-1">
-                <Button
-                  onClick={handleRemoveRow}
-                  disabled={visibleRows <= INITIAL_ROWS}
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 h-8 bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <Minus className="h-4 w-4 text-gray-700 dark:text-zinc-200" />
-                </Button>
-                <span className="flex items-center justify-center w-12 text-xs text-gray-400 dark:text-zinc-500">
-                  {visibleRows}/{MAX_ROWS}
-                </span>
-                <Button
-                  onClick={addRow}
-                  disabled={visibleRows >= MAX_ROWS}
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 h-8 bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <Plus className="h-4 w-4 text-gray-700 dark:text-zinc-200" />
-                </Button>
-              </div>
-            </div>
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-
-            {/* Aspect Ratio */}
-            <div className="px-2 py-2 space-y-1">
-              <Label className="text-xs text-gray-400 dark:text-zinc-500">
-                Aspect Ratio
-              </Label>
-              <div className="grid grid-cols-3 gap-1 pt-1">
-                {["16:9", "9:16", "4:5"].map((ratio) => (
-                  <Button
-                    key={ratio}
-                    onClick={() => handleAspectRatioChange(ratio)}
-                    size="sm"
-                    variant={aspectRatio === ratio ? "default" : "outline"}
-                    className={`h-8 transition-colors ${
-                      aspectRatio === ratio
-                        ? "bg-blue-600 hover:bg-blue-500 text-white border-0"
-                        : "bg-gray-100 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-700 dark:text-zinc-300"
-                    }`}
-                  >
-                    {ratio}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-
-            {/* Reset Timeline */}
-            <div className="px-2 py-2">
-              <Button
-                onClick={handleReset}
-                variant="outline"
-                size="sm"
-                className="w-full text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200
-                  bg-white hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-700/80
-                  border-gray-200 dark:border-gray-700"
-              >
-                Reset Timeline
-              </Button>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            Reset Timeline
+          </Button>
+        </div>
       </div>
     </div>
   );
