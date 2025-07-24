@@ -13,7 +13,7 @@ const CardFlipComponent: React.FC<CardFlipProps> = ({
   overlay,
   frontColor = "linear-gradient(45deg, #1e3a8a, #3b82f6)",
   backColor = "linear-gradient(45deg, #1e3a8a, #3b82f6)",
-  frontText = "Remotion 👋",
+  frontText = "Hello 👋",
   backText = "Back",
 }) => {
   const frame = useCurrentFrame();

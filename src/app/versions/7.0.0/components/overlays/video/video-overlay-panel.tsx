@@ -52,7 +52,7 @@ export const VideoOverlayPanel: React.FC = () => {
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   const [localOverlay, setLocalOverlay] = useState<Overlay | null>(null);
-  const [activeTab, setActiveTab] = useState('T2V');
+  const [activeTab, setActiveTab] = useState('Created Using AI');
   const { videos: renderedVideos, isLoading: renderedLoading, refetch: refetchRendered, deleteVideo } = useRenderedVideos();
 
   useEffect(() => {
@@ -70,54 +70,6 @@ export const VideoOverlayPanel: React.FC = () => {
     }
   }, [selectedOverlayId, overlays]);
 
-  const handleAddClip = (video: PexelsVideo) => {
-    const { width, height } = getAspectRatioDimensions();
-
-    const { from, row } = findNextAvailablePosition(
-      overlays,
-      visibleRows,
-      durationInFrames
-    );
-
-    // Find the best quality video file (prioritize UHD > HD > SD)
-    const videoFile =
-      video.video_files.find(
-        (file: PexelsVideoFile) => file.quality === "uhd"
-      ) ||
-      video.video_files.find(
-        (file: PexelsVideoFile) => file.quality === "hd"
-      ) ||
-      video.video_files.find(
-        (file: PexelsVideoFile) => file.quality === "sd"
-      ) ||
-      video.video_files[0]; // Fallback to first file if no matches
-
-    const newOverlay: Overlay = {
-      left: 0,
-      top: 0,
-      width,
-      height,
-      durationInFrames: 200,
-      from,
-      id: Date.now(),
-      rotation: 0,
-      row,
-      isDragging: false,
-      type: OverlayType.VIDEO,
-      content: video.image,
-      src: videoFile?.link ?? "",
-      videoStartTime: 0,
-      styles: {
-        opacity: 1,
-        zIndex: 100,
-        transform: "none",
-        objectFit: "cover",
-      },
-    };
-
-    addOverlay(newOverlay);
-  };
-
   const handleUpdateOverlay = (updatedOverlay: Overlay) => {
     setLocalOverlay(updatedOverlay);
     changeOverlay(updatedOverlay.id, updatedOverlay);
@@ -128,20 +80,13 @@ export const VideoOverlayPanel: React.FC = () => {
       {!localOverlay ? (
         <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="w-full grid grid-cols-3 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1">
+            <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1">
               <TabsTrigger
-                value="T2V"
+                value="Created Using AI"
                 className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
                 rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
               >
-                <span className="flex items-center gap-2 text-xs">T2V</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="I2V"
-                className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
-                rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-              >
-                <span className="flex items-center gap-2 text-xs">I2V</span>
+                <span className="flex items-center gap-2 text-xs">Created Using AI</span>
               </TabsTrigger>
               <TabsTrigger
                 value="Rendered Video"
@@ -152,12 +97,8 @@ export const VideoOverlayPanel: React.FC = () => {
               </TabsTrigger>
             </TabsList>
 
-
-          <TabsContent value="T2V" className="flex-1 overflow-y-auto p-0">
-            <div className="text-center text-gray-500 py-8">T2V Files</div>
-          </TabsContent>
-          <TabsContent value="I2V" className="flex-1 overflow-y-auto p-0">
-            <div className="text-center text-gray-500 py-8">I2V Files</div>
+          <TabsContent value="Created Using AI" className="flex-1 overflow-y-auto p-0">
+            <div className="text-center text-gray-500 py-8">Created Using AI Files</div>
           </TabsContent>
           <TabsContent value="Rendered Video" className="flex-1 overflow-y-auto p-0">
             {renderedLoading ? (

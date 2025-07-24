@@ -77,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       case OverlayType.IMAGE:
         return "Image";
       case OverlayType.LOCAL_DIR:
-        return "Media";
+        return "Uploads";
       case OverlayType.STICKER:
         return "Stickers";
       case OverlayType.TEMPLATE:
@@ -88,12 +88,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const navigationItems = [
+        {
+      title: getPanelTitle(OverlayType.TEMPLATE),
+      url: "#",
+      icon: Layout,
+      panel: OverlayType.TEMPLATE,
+      type: OverlayType.TEMPLATE,
+    },
     {
       title: getPanelTitle(OverlayType.VIDEO),
       url: "#",
       icon: Film,
       panel: OverlayType.VIDEO,
       type: OverlayType.VIDEO,
+    },
+        {
+      title: getPanelTitle(OverlayType.IMAGE),
+      url: "#",
+      icon: ImageIcon,
+      panel: OverlayType.IMAGE,
+      type: OverlayType.IMAGE,
     },
     {
       title: getPanelTitle(OverlayType.TEXT),
@@ -102,14 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       panel: OverlayType.TEXT,
       type: OverlayType.TEXT,
     },
-    {
-      title: getPanelTitle(OverlayType.SOUND),
-      url: "#",
-      icon: Music,
-      panel: OverlayType.SOUND,
-      type: OverlayType.SOUND,
-    },
-    {
+        {
       title: getPanelTitle(OverlayType.CAPTION),
       url: "#",
       icon: Subtitles,
@@ -117,12 +124,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       type: OverlayType.CAPTION,
     },
     {
-      title: getPanelTitle(OverlayType.IMAGE),
+      title: getPanelTitle(OverlayType.SOUND),
       url: "#",
-      icon: ImageIcon,
-      panel: OverlayType.IMAGE,
-      type: OverlayType.IMAGE,
+      icon: Music,
+      panel: OverlayType.SOUND,
+      type: OverlayType.SOUND,
     },
+
+
     {
       title: getPanelTitle(OverlayType.STICKER),
       url: "#",
@@ -137,13 +146,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       panel: OverlayType.LOCAL_DIR,
       type: OverlayType.LOCAL_DIR,
     },
-    {
-      title: getPanelTitle(OverlayType.TEMPLATE),
-      url: "#",
-      icon: Layout,
-      panel: OverlayType.TEMPLATE,
-      type: OverlayType.TEMPLATE,
-    },
+
   ];
 
   /**

@@ -9,7 +9,7 @@
     "name": "User"
   },
   "category": "Custom",
-  "tags": ["user", "user-created"],
+  "tags": ["user", "system-created"],
   "duration": 353,
   "aspectRatio": "16:9",
   "overlays": [

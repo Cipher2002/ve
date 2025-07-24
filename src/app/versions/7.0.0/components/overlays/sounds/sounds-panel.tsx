@@ -9,6 +9,9 @@ import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimeline } from "../../../contexts/timeline-context";
 import { SoundDetails } from "./sound-details";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Radio } from "lucide-react";
+
 /**
  * SoundsPanel Component
  *
@@ -30,11 +33,12 @@ const SoundsPanel: React.FC = () => {
   const [loadingTrack, setLoadingTrack] = useState<string | null>(null);
   const [localOverlay, setLocalOverlay] = useState<SoundOverlay | null>(null);
   const [itemsToShow, setItemsToShow] = useState(20);
+  const [activeTab, setActiveTab] = useState("system-audio");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 
   const filteredSounds = useMemo(() => {
-    if (localOverlay) return [];
+    if (localOverlay || activeTab !== "system-audio") return [];
     
     const filtered = localSounds.filter((sound) =>
       searchQuery === "" ||
@@ -43,17 +47,19 @@ const SoundsPanel: React.FC = () => {
     );
     
     return filtered.slice(0, itemsToShow); // Only return visible items
-  }, [searchQuery, localOverlay, itemsToShow]);
+  }, [searchQuery, localOverlay, itemsToShow, activeTab]);
 
   const hasMoreItems = useMemo(() => {
-    if (localOverlay) return false;
+    if (localOverlay || activeTab !== "system-audio") return false;
+    
     const totalFiltered = localSounds.filter((sound) =>
       searchQuery === "" ||
       sound.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sound.artist.toLowerCase().includes(searchQuery.toLowerCase())
     ).length;
-    return itemsToShow < totalFiltered;
-  }, [searchQuery, localOverlay, itemsToShow]);
+    
+    return itemsToShow < totalFiltered && totalFiltered > 0;
+  }, [searchQuery, localOverlay, itemsToShow, activeTab]);
 
   
   // Only store currently active audio instances
@@ -68,6 +74,11 @@ const SoundsPanel: React.FC = () => {
   } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
+
+  // Reset items when tab changes or search changes
+  useEffect(() => {
+    setItemsToShow(20);
+  }, [activeTab, searchQuery]);
 
   useEffect(() => {
     if (selectedOverlayId === null) {
@@ -87,20 +98,20 @@ const SoundsPanel: React.FC = () => {
   // Infinite scroll handler
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container || activeTab !== "system-audio") return;
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       
       // Load more when user scrolls to bottom (with 100px buffer)
-      if (scrollTop + clientHeight >= scrollHeight - 100 && hasMoreItems) {
+      if (scrollTop + clientHeight >= scrollHeight - 100 && hasMoreItems && !localOverlay) {
         setItemsToShow(prev => prev + 20);
       }
     };
 
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
-  }, [hasMoreItems]);
+  }, [hasMoreItems, activeTab, localOverlay]);
 
   const handleUpdateOverlay = (updatedOverlay: SoundOverlay) => {
     setLocalOverlay(updatedOverlay);
@@ -270,41 +281,92 @@ const SoundsPanel: React.FC = () => {
   }, [playingTrack, loadingTrack, handleAddToTimeline, togglePlay]);
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/40 h-full flex flex-col">
-      {!localOverlay && (
-        <div className="flex gap-2 flex-shrink-0">
-          <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                placeholder="Search sounds..."
-                value={searchQuery}
-                className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ fontSize: "16px" }}
-              />
-            </div>
-          </form>
-        </div>
-      )}
-      {!localOverlay ? (
-        <div 
-          ref={scrollContainerRef}
-          className="overflow-y-auto flex-1 space-y-2"
-        >
-          {filteredSounds.map(renderSoundCard)}
-          {hasMoreItems && (
-            <div className="flex justify-center p-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
+    <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
+          <TabsTrigger
+            value="system-audio"
+            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
+            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+          >
+            <span className="flex items-center gap-2 text-xs">System Audio</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="rendered-audio"
+            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
+            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+          >
+            <span className="flex items-center gap-2 text-xs">Rendered Audio</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="system-audio" className="flex-1 min-h-0 flex flex-col space-y-4">
+          {!localOverlay && (
+            <div className="flex gap-2 flex-shrink-0">
+              <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    placeholder="Search sounds..."
+                    value={searchQuery}
+                    className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ fontSize: "16px" }}
+                  />
+                </div>
+              </form>
             </div>
           )}
-        </div>
-      ) : (
-        <SoundDetails
-          localOverlay={localOverlay}
-          setLocalOverlay={handleUpdateOverlay}
-        />
-      )}
+          {!localOverlay ? (
+            <div 
+              ref={scrollContainerRef}
+              className="overflow-y-auto flex-1 space-y-2"
+            >
+              {filteredSounds.map(renderSoundCard)}
+              {hasMoreItems && (
+                <div className="flex justify-center p-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <SoundDetails
+              localOverlay={localOverlay}
+              setLocalOverlay={handleUpdateOverlay}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="rendered-audio" className="flex-1 min-h-0">
+          {!localOverlay && (
+            <div className="flex gap-2 flex-shrink-0">
+              <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    placeholder="Search sounds..."
+                    value={searchQuery}
+                    className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ fontSize: "16px" }}
+                  />
+                </div>
+              </form>
+            </div>
+          )}
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-3 p-4">
+            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Radio className="w-4 h-4 text-gray-400" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium">No rendered audio</p>
+              <p className="text-xs text-gray-500">
+                Rendered audio will appear here after you render audio
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

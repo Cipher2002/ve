@@ -3,11 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { TemplateOverlay } from "../../../types";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
-import { Play, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -174,7 +173,7 @@ export const TemplateOverlayPanel: React.FC = () => {
             className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
             rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           >
-            <span className="flex items-center gap-2 text-xs">Templates</span>
+            <span className="flex items-center gap-2 text-xs">System Templates</span>
           </TabsTrigger>
           <TabsTrigger
             value="created-by-you"
