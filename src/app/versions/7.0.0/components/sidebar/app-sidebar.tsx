@@ -54,6 +54,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { activePanel, setActivePanel, setIsOpen } = useSidebar();
   const { setSelectedOverlayId, selectedOverlayId } = useEditorContext();
 
+  // Add this useEffect to fix the initial state
+  React.useEffect(() => {
+    // If there's an active panel on mount but sidebar is closed, reset to no active panel
+    if (activePanel !== OverlayType.NONE) {
+      setActivePanel(OverlayType.NONE);
+    }
+  }, []);
+
   const getPanelTitle = (type: OverlayType): string => {
     switch (type) {
       case OverlayType.NONE:
