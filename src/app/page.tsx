@@ -333,7 +333,7 @@ function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col"> {/* Added flex flex-col */}
+    <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
       {/* Admin/Client Mode Toggle - Keep at top, centered */}
       {/* <div className="flex items-center justify-center py-6">
         <div className="relative flex items-center rounded-lg p-1" style={{ backgroundColor: 'rgb(73, 9, 114)' }}>
