@@ -149,6 +149,109 @@ export async function startRendering(
   return renderId;
 }
 
+export async function startAudioRendering(
+  compositionId: string,
+  inputProps: Record<string, unknown>
+) {
+  const renderId = uuidv4();
+
+  // Ensure the audio directory exists
+  const AUDIO_DIR = path.join(process.cwd(), "public", "rendered-audio");
+  if (!fs.existsSync(AUDIO_DIR)) {
+    fs.mkdirSync(AUDIO_DIR, { recursive: true });
+  }
+
+  // Initialize render state
+  saveRenderState(renderId, {
+    status: "rendering",
+    progress: 0,
+    timestamp: Date.now(),
+  });
+
+  // Start rendering asynchronously
+  (async () => {
+    try {
+      updateRenderProgress(renderId, 0);
+      const baseUrl = getBaseUrl();
+
+      const bundleLocation = await bundle(
+        path.join(
+          process.cwd(),
+          "src",
+          "app",
+          "versions",
+          "7.0.0",
+          "remotion",
+          "index.ts"
+        ),
+        undefined,
+        {
+          enableCaching: false,
+          publicDir: "public",
+          webpackOverride: (config) => {
+            return {
+              ...config,
+              resolve: {
+                ...config.resolve,
+                alias: {
+                  ...config.resolve?.alias,
+                  '@': path.resolve(process.cwd(), 'src'),
+                },
+              },
+            };
+          },
+        }
+      );
+
+      const composition = await selectComposition({
+        serveUrl: bundleLocation,
+        id: compositionId,
+        inputProps: {
+          ...inputProps,
+          baseUrl,
+        },
+      });
+      if (!composition) {
+        throw new Error(`Composition "${compositionId}" not found`);
+      }
+
+      const actualDurationInFrames =
+        (inputProps.durationInFrames as number) || composition.durationInFrames;
+
+      // Render audio only
+      await renderMedia({
+        codec: "wav",
+        composition: {
+          ...composition,
+          durationInFrames: actualDurationInFrames,
+        },
+        serveUrl: bundleLocation,
+        outputLocation: path.join(AUDIO_DIR, `${renderId}.wav`),
+        inputProps: {
+          ...inputProps,
+          baseUrl,
+        },
+        chromiumOptions: {
+          headless: true,
+        },
+        timeoutInMilliseconds: 300000,
+        onProgress: ((progress) => {
+          updateRenderProgress(renderId, progress.progress);
+        }) as RenderMediaOnProgress,
+      });
+
+      const stats = fs.statSync(path.join(AUDIO_DIR, `${renderId}.wav`));
+      const outputPath = `/rendered-audio/${renderId}.wav`;
+      completeRender(renderId, outputPath, stats.size);
+    } catch (error: any) {
+      failRender(renderId, error.message);
+      console.error(`Audio render ${renderId} failed:`, error);
+    }
+  })();
+
+  return renderId;
+}
+
 /**
  * Get the current progress of a render
  */

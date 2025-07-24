@@ -4,6 +4,7 @@ import { CompositionProps } from "../types";
 import {
   getProgress as ssrGetProgress,
   renderVideo as ssrRenderVideo,
+  renderAudio as ssrRenderAudio,
 } from "../ssr-helpers/api";
 import {
   getProgress as lambdaGetProgress,
@@ -136,13 +137,78 @@ export const useRendering = (
     setState({ status: "init" });
   }, []);
 
-  // Return memoized values to prevent unnecessary re-renders
+  // Main function to handle the audio rendering process
+  const renderAudio = useCallback(async () => {
+    setState({
+      status: "invoking",
+    });
+    try {
+      const response = await ssrRenderAudio({ id, inputProps });
+      const renderId = response.renderId;
+
+      // Add a small delay for SSR rendering to ensure initialization
+      await wait(3000);
+
+      setState({
+        status: "rendering",
+        progress: 0,
+        renderId,
+      });
+
+      let pending = true;
+
+      while (pending) {
+        const result = await ssrGetProgress({
+          id: renderId,
+          bucketName: "",
+        });
+        switch (result.type) {
+          case "error": {
+            console.error(`Audio render error: ${result.message}`);
+            setState({
+              status: "error",
+              renderId: renderId,
+              error: new Error(result.message),
+            });
+            pending = false;
+            break;
+          }
+          case "done": {
+            setState({
+              size: result.size,
+              url: result.url,
+              status: "done",
+            });
+            pending = false;
+            break;
+          }
+          case "progress": {
+            setState({
+              status: "rendering",
+              progress: result.progress,
+              renderId: renderId,
+            });
+            await wait(1000);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error during audio rendering:", err);
+      setState({
+        status: "error",
+        error: err as Error,
+        renderId: null,
+      });
+    }
+  }, [id, inputProps]);
+
   return useMemo(
-    () => ({
-      renderMedia, // Function to start rendering
-      state, // Current state of the render
-      undo, // Function to reset the state
-    }),
-    [renderMedia, state, undo]
-  );
+  () => ({
+    renderMedia, // Function to start rendering
+    renderAudio, // Function to start audio rendering
+    state, // Current state of the render
+    undo, // Function to reset the state
+  }),
+  [renderMedia, renderAudio, state, undo]
+);
 };

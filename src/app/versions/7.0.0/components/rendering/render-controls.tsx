@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Bell, Save } from "lucide-react";
+import { Download, Loader2, Bell, Save, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -8,6 +8,12 @@ import {
 } from "@/components/ui/popover";
 import { formatDistanceToNow } from "date-fns";
 import { useEditorContext } from "../../contexts/editor-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * Interface representing a single video render attempt
@@ -35,6 +41,7 @@ interface RenderItem {
 interface RenderControlsProps {
   state: any;
   handleRender: () => void;
+  handleRenderAudio: () => void;
   saveProject?: () => Promise<void>;
   downloadTemplate?: () => void;
   renderType?: "ssr" | "lambda";
@@ -55,6 +62,7 @@ interface RenderControlsProps {
 const RenderControls: React.FC<RenderControlsProps> = ({
   state,
   handleRender,
+  handleRenderAudio,
   saveProject,
   downloadTemplate,
   renderType = "ssr",
@@ -244,7 +252,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         </PopoverContent>
       </Popover>
 
-      <Button
+      {/* <Button
         onClick={handleRender}
         size="sm"
         variant="outline"
@@ -273,7 +281,59 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         ) : (
           `Render Video`
         )}
-      </Button>
+      </Button> */}
+    
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={state.status === "rendering" || state.status === "invoking"}
+          className="text-white border-gray-700"
+          style={{ backgroundColor: '#490972' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#490972';
+            e.currentTarget.style.color = 'white';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#490972';
+            e.currentTarget.style.color = 'white';
+          }}
+        >
+          {state.status === "rendering" ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              Rendering... {(state.progress * 100).toFixed(0)}%
+            </>
+          ) : state.status === "invoking" ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+              Preparing...
+            </>
+          ) : (
+            <>
+              Render
+              <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
+            </>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem 
+          onClick={handleRender}
+          disabled={state.status === "rendering" || state.status === "invoking"}
+        >
+          Render Video
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={handleRenderAudio}
+          disabled={state.status === "rendering" || state.status === "invoking"}
+        >
+          Render Audio
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+    
     </>
   );
 };

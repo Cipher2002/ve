@@ -59,6 +59,25 @@ export const renderVideo = async ({
   return response;
 };
 
+export const renderAudio = async ({
+  id,
+  inputProps,
+}: {
+  id: string;
+  inputProps: z.infer<typeof CompositionProps>;
+}) => {
+  const body: z.infer<typeof RenderRequest> = {
+    id,
+    inputProps,
+  };
+
+  const response = await makeRequest<RenderResponse>(
+    "/api/latest/ssr/render-audio",
+    body
+  );
+  return response;
+};
+
 export const getProgress = async ({
   id,
   bucketName,

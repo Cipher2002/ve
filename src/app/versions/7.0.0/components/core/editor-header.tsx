@@ -30,7 +30,7 @@ export function EditorHeader() {
    * - state: Current editor state
    * - renderType: Type of render
    */
-  const { renderMedia, state, saveProject, downloadTemplate, renderType, projectName, aspectRatio, setProjectName,setAspectRatio, newProject } = useEditorContext();
+  const { renderMedia, renderAudio, state, saveProject, downloadTemplate, renderType, projectName, aspectRatio, setProjectName,setAspectRatio, newProject } = useEditorContext();
 
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
@@ -112,6 +112,7 @@ export function EditorHeader() {
       {/* Media rendering controls */}
       <RenderControls
         handleRender={renderMedia}
+        handleRenderAudio={renderAudio}
         state={state}
         saveProject={saveProject}
         downloadTemplate={downloadTemplate}

@@ -120,7 +120,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     src: "",
   };
 
-  const { renderMedia, state } = useRendering(
+  const { renderMedia, renderAudio, state } = useRendering(
     "TestComponent",
     inputProps,
     RENDER_TYPE
@@ -341,6 +341,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Add renderType to the context
     renderType: RENDER_TYPE,
     renderMedia,
+    renderAudio,
     state,
 
     deleteOverlaysByRow,
@@ -367,6 +368,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     setProjectName,
     newProject,
     loadTemplateIntoEditor,
+
+    
   };
 
   return (
