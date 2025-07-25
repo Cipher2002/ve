@@ -4,10 +4,10 @@ import fs from "fs";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const renderedAudioDir = path.join(process.cwd(), "public", "rendered-audio");
     const filePath = path.join(renderedAudioDir, `${id}.wav`);
 
