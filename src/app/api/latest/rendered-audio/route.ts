@@ -14,13 +14,19 @@ export async function GET() {
     // Read all files in the directory
     const files = fs.readdirSync(renderedAudioDir);
     
-    // Filter only .wav files and get their stats
+    // Define supported audio extensions
+    const audioExtensions = ['.wav', '.mp3', '.aac'];
+    
+    // Filter audio files and get their stats
     const audioFiles = files
-      .filter(file => file.endsWith('.wav'))
+      .filter(file => audioExtensions.some(ext => file.endsWith(ext)))
       .map(file => {
         const filePath = path.join(renderedAudioDir, file);
         const stats = fs.statSync(filePath);
-        const id = file.replace('.wav', '');
+        
+        // Extract filename without extension
+        const extension = path.extname(file);
+        const id = file.replace(extension, '');
         
         return {
             id,

@@ -8,13 +8,39 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  // Construct the path to the video file
-  const videoPath = path.join(process.cwd(), "public", "videos", `${id}.mp4`);
+  // Try to find the file with different extensions
+  const videosDir = path.join(process.cwd(), "public", "videos");
+  const possibleExtensions = ['mp4', 'mov', 'mkv', 'gif', 'webm'];
+  
+  let videoPath: string | null = null;
+  let fileExtension: string | null = null;
+  let contentType: string = 'video/mp4';
 
-  // Check if the file exists
-  if (!fs.existsSync(videoPath)) {
+  // Find the actual file
+  for (const ext of possibleExtensions) {
+    const testPath = path.join(videosDir, `${id}.${ext}`);
+    if (fs.existsSync(testPath)) {
+      videoPath = testPath;
+      fileExtension = ext;
+      break;
+    }
+  }
+
+  // Check if file was found
+  if (!videoPath || !fileExtension) {
     return new NextResponse("Video not found", { status: 404 });
   }
+
+  // Set appropriate content type based on file extension
+  const contentTypeMap: Record<string, string> = {
+    'mp4': 'video/mp4',
+    'mov': 'video/quicktime',
+    'mkv': 'video/x-matroska',
+    'gif': 'image/gif',
+    'webm': 'video/webm'
+  };
+
+  contentType = contentTypeMap[fileExtension] || 'application/octet-stream';
 
   // Read the file
   const videoBuffer = fs.readFileSync(videoPath);
@@ -22,8 +48,8 @@ export async function GET(
   // Return the video with appropriate headers
   return new NextResponse(videoBuffer, {
     headers: {
-      "Content-Type": "video/mp4",
-      "Content-Disposition": `attachment; filename="${id}.mp4"`,
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${id}.${fileExtension}"`,
     },
   });
 }

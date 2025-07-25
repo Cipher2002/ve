@@ -43,13 +43,19 @@ export interface RenderResponse {
 export const renderVideo = async ({
   id,
   inputProps,
+  format = 'mp4',
+  codec = 'h264',
 }: {
   id: string;
   inputProps: z.infer<typeof CompositionProps>;
+  format?: string;
+  codec?: string;
 }) => {
   const body: z.infer<typeof RenderRequest> = {
     id,
     inputProps,
+    format,
+    codec,
   };
 
   const response = await makeRequest<RenderResponse>(
@@ -62,15 +68,20 @@ export const renderVideo = async ({
 export const renderAudio = async ({
   id,
   inputProps,
+  format = 'wav',
+  codec = 'wav',
 }: {
   id: string;
   inputProps: z.infer<typeof CompositionProps>;
+  format?: string;
+  codec?: string;
 }) => {
   const body: z.infer<typeof RenderRequest> = {
     id,
     inputProps,
+    format,
+    codec,
   };
-
   const response = await makeRequest<RenderResponse>(
     "/api/latest/ssr/render-audio",
     body

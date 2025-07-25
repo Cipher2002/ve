@@ -33,8 +33,11 @@ export const renderSizes = new Map<string, number>();
  */
 export async function startRendering(
   compositionId: string,
-  inputProps: Record<string, unknown>
+  inputProps: Record<string, unknown>,
+  format: string = 'mp4',
+  codec: string = 'h264'
 ) {
+  console.log('Video rendering with format:', format, 'codec:', codec); // Add this line
   const renderId = uuidv4();
 
   // Initialize render state
@@ -100,45 +103,90 @@ export async function startRendering(
       const actualDurationInFrames =
         (inputProps.durationInFrames as number) || composition.durationInFrames;
 
+      // Map user-friendly codec names to Remotion codec names
+      const codecMap: Record<string, string> = {
+        'h264': 'h264',
+        'vp8': 'vp8',
+        'gif': 'gif'
+      };
+
+      const remotionCodec = codecMap[codec] || codec;
+      console.log('Video mapped codec:', codec, 'to:', remotionCodec); // Add logging
+      console.log('Rendering video with codec:', remotionCodec, 'to file:', path.join(VIDEOS_DIR, `${renderId}.${format}`)); // Add logging
+
       // Render the video using chromium
-      await renderMedia({
-        codec: "h264",
+      // await renderMedia({
+      //   codec: remotionCodec as any,
+      //   composition: {
+      //     ...composition,
+      //     // Override the duration to use the actual duration from inputProps
+      //     durationInFrames: actualDurationInFrames,
+      //   },
+      //   serveUrl: bundleLocation,
+      //   outputLocation: path.join(VIDEOS_DIR, `${renderId}.${format}`),
+      //   inputProps: {
+      //     ...inputProps,
+      //     baseUrl,
+      //   },
+      //   chromiumOptions: {
+      //     headless: true,
+      //   },
+      //   timeoutInMilliseconds: 300000, // 5 minutes
+      //   onProgress: ((progress) => {
+      //     // Extract just the progress percentage from the detailed progress object
+      //     updateRenderProgress(renderId, progress.progress);
+      //   }) as RenderMediaOnProgress,
+      //   // Highest quality video settings
+      //   crf: 1, // Lowest CRF for near-lossless quality (range 1-51, where 1 is highest quality)
+      //   imageFormat: "png", // Use PNG for highest quality frame captures
+      //   colorSpace: "bt709", // Better color accuracy
+      //   x264Preset: "veryslow", // Highest quality compression
+      //   jpegQuality: 100, // Maximum JPEG quality for any JPEG operations
+      // });
+      // Create base render options
+      const baseRenderOptions = {
+        codec: remotionCodec as any,
         composition: {
           ...composition,
-          // Override the duration to use the actual duration from inputProps
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: path.join(VIDEOS_DIR, `${renderId}.mp4`),
+        outputLocation: path.join(VIDEOS_DIR, `${renderId}.${format}`),
         inputProps: {
           ...inputProps,
           baseUrl,
         },
-        // Enhanced quality settings for maximum quality output
-        // chromiumOptions: {
-        //   headless: true,
-        //   disableWebSecurity: false,
-        //   ignoreCertificateErrors: false,
-        // },
         chromiumOptions: {
           headless: true,
         },
-        timeoutInMilliseconds: 300000, // 5 minutes
+        timeoutInMilliseconds: 300000,
         onProgress: ((progress) => {
-          // Extract just the progress percentage from the detailed progress object
           updateRenderProgress(renderId, progress.progress);
         }) as RenderMediaOnProgress,
-        // Highest quality video settings
-        crf: 1, // Lowest CRF for near-lossless quality (range 1-51, where 1 is highest quality)
-        imageFormat: "png", // Use PNG for highest quality frame captures
-        colorSpace: "bt709", // Better color accuracy
-        x264Preset: "veryslow", // Highest quality compression
-        jpegQuality: 100, // Maximum JPEG quality for any JPEG operations
-      });
+      };
+
+      // Add codec-specific options
+      const renderOptions = codec === 'gif' 
+        ? {
+            ...baseRenderOptions,
+            // GIF-specific options (no crf, x264Preset, etc.)
+          }
+        : {
+            ...baseRenderOptions,
+            // H.264 and other codec options
+            crf: 1,
+            imageFormat: "png" as const,
+            colorSpace: "bt709" as const,
+            x264Preset: "veryslow" as const,
+            jpegQuality: 100,
+          };
+
+      // Render the video using chromium
+      await renderMedia(renderOptions);
 
       // Get file size
-      const stats = fs.statSync(path.join(VIDEOS_DIR, `${renderId}.mp4`));
-      const outputPath = `/rendered-videos/${renderId}.mp4`;
+      const stats = fs.statSync(path.join(VIDEOS_DIR, `${renderId}.${format}`));
+      const outputPath = `/rendered-videos/${renderId}.${format}`;
       completeRender(renderId, outputPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);
@@ -151,8 +199,11 @@ export async function startRendering(
 
 export async function startAudioRendering(
   compositionId: string,
-  inputProps: Record<string, unknown>
+  inputProps: Record<string, unknown>,
+  format: string = 'wav',
+  codec: string = 'wav'
 ) {
+  console.log('Audio rendering with format:', format, 'codec:', codec); // Add this line
   const renderId = uuidv4();
 
   // Ensure the audio directory exists
@@ -219,14 +270,22 @@ export async function startAudioRendering(
         (inputProps.durationInFrames as number) || composition.durationInFrames;
 
       // Render audio only
+      console.log('Rendering with codec:', codec, 'to file:', path.join(AUDIO_DIR, `${renderId}.${format}`)); // Add this line
+      const codecMap: Record<string, string> = {
+        'mp3': 'mp3',
+        'wav': 'wav', 
+        'aac': 'aac',
+      };
+      const remotionCodec = codecMap[codec] || codec;
+      console.log('Mapped codec:', codec, 'to:', remotionCodec); // Add logging
       await renderMedia({
-        codec: "wav",
+        codec: remotionCodec as any,
         composition: {
           ...composition,
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: path.join(AUDIO_DIR, `${renderId}.wav`),
+        outputLocation: path.join(AUDIO_DIR, `${renderId}.${format}`),
         inputProps: {
           ...inputProps,
           baseUrl,
@@ -240,8 +299,8 @@ export async function startAudioRendering(
         }) as RenderMediaOnProgress,
       });
 
-      const stats = fs.statSync(path.join(AUDIO_DIR, `${renderId}.wav`));
-      const outputPath = `/rendered-audio/${renderId}.wav`;
+      const stats = fs.statSync(path.join(AUDIO_DIR, `${renderId}.${format}`));
+      const outputPath = `/rendered-audio/${renderId}.${format}`;
       completeRender(renderId, outputPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);

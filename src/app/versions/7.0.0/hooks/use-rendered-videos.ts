@@ -20,7 +20,7 @@ export const useRenderedVideos = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/latest/ssr/list');
+      const response = await fetch(`/api/latest/ssr/list?t=${Date.now()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch rendered videos');
       }

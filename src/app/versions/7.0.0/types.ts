@@ -372,6 +372,8 @@ export const CompositionProps = z.object({
 export const RenderRequest = z.object({
   id: z.string(),
   inputProps: CompositionProps,
+  format: z.string().optional(),
+  codec: z.string().optional(),
 });
 
 export const ProgressRequest = z.object({

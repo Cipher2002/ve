@@ -17,11 +17,23 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Construct the path to the video file
-    const videoPath = path.join(process.cwd(), 'public', 'rendered-videos', `${videoId}.mp4`);
+    const renderedVideosDir = path.join(process.cwd(), 'public', 'rendered-videos');
     
-    // Check if file exists
-    if (!existsSync(videoPath)) {
+    // Try to find the file with different extensions
+    const possibleExtensions = ['mp4', 'mov', 'mkv', 'gif', 'webm'];
+    let videoPath: string | null = null;
+
+    // Find the actual file
+    for (const ext of possibleExtensions) {
+      const testPath = path.join(renderedVideosDir, `${videoId}.${ext}`);
+      if (existsSync(testPath)) {
+        videoPath = testPath;
+        break;
+      }
+    }
+    
+    // Check if file was found
+    if (!videoPath) {
       return NextResponse.json(
         { error: 'Video not found' },
         { status: 404 }
@@ -32,7 +44,7 @@ export async function POST(request: NextRequest) {
     await unlink(videoPath);
     
     // Also try to delete thumbnail if it exists
-    const thumbnailPath = path.join(process.cwd(), 'public', 'rendered-videos', `${videoId}_thumbnail.jpg`);
+    const thumbnailPath = path.join(renderedVideosDir, `${videoId}_thumbnail.jpg`);
     if (existsSync(thumbnailPath)) {
       await unlink(thumbnailPath);
     }

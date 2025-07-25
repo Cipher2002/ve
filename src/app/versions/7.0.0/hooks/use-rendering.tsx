@@ -58,7 +58,7 @@ export const useRendering = (
   });
 
   // Main function to handle the rendering process
-  const renderMedia = useCallback(async () => {
+  const renderMedia = useCallback(async (format?: string, codec?: string) => {
     setState({
       status: "invoking",
     });
@@ -68,7 +68,7 @@ export const useRendering = (
       const getProgress =
         renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
 
-      const response = await renderVideo({ id, inputProps });
+      const response = await renderVideo({ id, inputProps, format, codec });
       const renderId = response.renderId;
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
@@ -138,12 +138,12 @@ export const useRendering = (
   }, []);
 
   // Main function to handle the audio rendering process
-  const renderAudio = useCallback(async () => {
+  const renderAudio = useCallback(async (format?: string, codec?: string) => {
     setState({
       status: "invoking",
     });
     try {
-      const response = await ssrRenderAudio({ id, inputProps });
+      const response = await ssrRenderAudio({ id, inputProps, format, codec });
       const renderId = response.renderId;
 
       // Add a small delay for SSR rendering to ensure initialization

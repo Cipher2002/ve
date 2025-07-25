@@ -13,6 +13,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 
 /**
@@ -40,8 +43,8 @@ interface RenderItem {
  */
 interface RenderControlsProps {
   state: any;
-  handleRender: () => void;
-  handleRenderAudio: () => void;
+  handleRender: (format?: string, codec?: string) => void;
+  handleRenderAudio: (format?: string, codec?: string) => void;
   saveProject?: () => Promise<void>;
   downloadTemplate?: () => void;
   renderType?: "ssr" | "lambda";
@@ -104,16 +107,24 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     let downloadUrl = url;
 
     if (renderType === "ssr") {
+      // Extract filename from URL to get the correct extension
+      const filename = url.split("/").pop() || "";
+      const fileExtension = filename.split(".").pop() || "mp4";
+      const fileId = filename.replace(`.${fileExtension}`, "");
+      
       // Convert the video URL to a download URL for SSR
       downloadUrl = url
         .replace("/rendered-videos/", "/api/latest/ssr/download/")
-        .replace(".mp4", "");
+        .replace(`.${fileExtension}`, "");
     }
     // Lambda URLs are already in the correct format for download
 
+    // Get the actual filename from the URL for download
+    const actualFilename = url.split("/").pop() || "rendered-file";
+
     const a = document.createElement("a");
     a.href = downloadUrl;
-    a.download = "rendered-video.mp4";
+    a.download = actualFilename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -252,37 +263,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         </PopoverContent>
       </Popover>
 
-      {/* <Button
-        onClick={handleRender}
-        size="sm"
-        variant="outline"
-        disabled={state.status === "rendering" || state.status === "invoking"}
-        className="text-white border-gray-700"
-        style={{ backgroundColor: '#490972' }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#490972';
-          e.currentTarget.style.color = 'white';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#490972';
-          e.currentTarget.style.color = 'white';
-        }}
-      >
-        {state.status === "rendering" ? (
-          <>
-            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-            Rendering... {(state.progress * 100).toFixed(0)}%
-          </>
-        ) : state.status === "invoking" ? (
-          <>
-            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-            Preparing...
-          </>
-        ) : (
-          `Render Video`
-        )}
-      </Button> */}
-    
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -318,19 +298,79 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           )}
         </Button>
       </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem 
-          onClick={handleRender}
-          disabled={state.status === "rendering" || state.status === "invoking"}
-        >
-          Render Video
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={handleRenderAudio}
-          disabled={state.status === "rendering" || state.status === "invoking"}
-        >
-          Render Audio
-        </DropdownMenuItem>
+
+      <DropdownMenuContent align="end" className="p-0">
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger 
+            disabled={state.status === "rendering" || state.status === "invoking"}
+            className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
+          >
+            <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
+            Render Video
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem 
+              onClick={() => handleRender('mp4', 'h264')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in MP4
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRender('mov', 'h264')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in MOV
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRender('mkv', 'h264')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in MKV
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRender('gif', 'gif')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in GIF
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRender('webm', 'vp8')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in WebM
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger 
+            disabled={state.status === "rendering" || state.status === "invoking"}
+            className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
+          >
+            <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
+            Render Audio
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem 
+              onClick={() => handleRenderAudio('mp3', 'mp3')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in MP3
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRenderAudio('wav', 'wav')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in WAV
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => handleRenderAudio('aac', 'aac')}
+              disabled={state.status === "rendering" || state.status === "invoking"}
+            >
+              Render in AAC
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
     

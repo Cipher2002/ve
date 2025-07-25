@@ -14,13 +14,19 @@ export async function GET() {
     // Read all files in the directory
     const files = fs.readdirSync(renderedVideosDir);
     
-    // Filter only .mp4 files and get their stats
+    // Define supported video extensions
+    const videoExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm'];
+    
+    // Filter video files and get their stats
     const videoFiles = files
-      .filter(file => file.endsWith('.mp4'))
+      .filter(file => videoExtensions.some(ext => file.endsWith(ext)))
       .map(file => {
         const filePath = path.join(renderedVideosDir, file);
         const stats = fs.statSync(filePath);
-        const id = file.replace('.mp4', '');
+        
+        // Extract filename without extension
+        const extension = path.extname(file);
+        const id = file.replace(extension, '');
         
         return {
             id,

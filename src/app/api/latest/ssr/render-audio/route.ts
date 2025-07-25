@@ -9,7 +9,8 @@ export const POST = executeApi(RenderRequest, async (req, body) => {
 
   try {
     // Start the audio rendering process using our custom audio renderer
-    const renderId = await startAudioRendering(body.id, body.inputProps);
+    console.log('Route received format:', body.format, 'codec:', body.codec); // Add this
+    const renderId = await startAudioRendering(body.id, body.inputProps, body.format, body.codec);
 
     return { renderId };
   } catch (error) {

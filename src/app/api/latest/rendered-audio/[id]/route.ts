@@ -9,10 +9,22 @@ export async function DELETE(
   try {
     const { id } = await params;
     const renderedAudioDir = path.join(process.cwd(), "public", "rendered-audio");
-    const filePath = path.join(renderedAudioDir, `${id}.wav`);
+    
+    // Try to find the file with different extensions
+    const possibleExtensions = ['wav', 'mp3', 'aac'];
+    let filePath: string | null = null;
 
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    // Find the actual file
+    for (const ext of possibleExtensions) {
+      const testPath = path.join(renderedAudioDir, `${id}.${ext}`);
+      if (fs.existsSync(testPath)) {
+        filePath = testPath;
+        break;
+      }
+    }
+
+    // Check if file was found
+    if (!filePath) {
       return NextResponse.json(
         { error: "Audio file not found" },
         { status: 404 }

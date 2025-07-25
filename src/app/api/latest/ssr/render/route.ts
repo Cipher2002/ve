@@ -9,7 +9,7 @@ export const POST = executeApi(RenderRequest, async (req, body) => {
 
   try {
     // Start the rendering process using our custom renderer
-    const renderId = await startRendering(body.id, body.inputProps);
+    const renderId = await startRendering(body.id, body.inputProps, body.format, body.codec);
 
     return { renderId };
   } catch (error) {
