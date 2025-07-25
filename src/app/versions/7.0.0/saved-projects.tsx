@@ -17,7 +17,7 @@ export default function SavedProjects() {
   const [searchValue, setSearchValue] = useState('');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
@@ -27,7 +27,7 @@ export default function SavedProjects() {
                 Your Saved Projects
               </h1>
               <p className="text-gray-600 text-lg">
-                Effortlessly Manage and Edit Your Creative Canvas Projects Anytime
+                Here's what the AI suggests you need to know about this campaign
               </p>
             </div>
             
@@ -74,9 +74,10 @@ export default function SavedProjects() {
                 <SelectValue placeholder="Select Date" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
                 <SelectItem value="month">This Month</SelectItem>
-                <SelectItem value="custom">Custom Range</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
               </SelectContent>
             </Select>
 
