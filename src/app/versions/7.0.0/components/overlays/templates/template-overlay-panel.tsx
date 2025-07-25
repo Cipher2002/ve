@@ -39,24 +39,38 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
+  const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
 
-  // Delete template function
   const deleteTemplate = async (templateId: string) => {
-    try {
-      const response = await fetch(`/api/latest/templates/delete?id=${templateId}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        // Refresh the list after deletion
-        await fetchClientTemplates();
-      } else {
-        console.error('Failed to delete template');
-      }
-    } catch (error) {
-      console.error('Error deleting template:', error);
+  try {
+    console.log('Attempting to delete template:', templateId);
+    console.log('API URL:', `/api/latest/templates/delete?id=${templateId}`);
+    
+    const response = await fetch(`/api/latest/templates/delete?id=${templateId}`, {
+      method: 'DELETE',
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response:', response);
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Delete result:', result);
+      // Clear the deleting state immediately
+      setDeletingTemplateId(null);
+      // Refresh the list after deletion
+      await fetchClientTemplates();
+    } else {
+      console.error('Failed to delete template, status:', response.status);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      setDeletingTemplateId(null);
     }
-  };
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    setDeletingTemplateId(null);
+  }
+};
 
   // Update template name function
   const updateTemplateName = async (templateId: string, newName: string) => {
@@ -233,7 +247,7 @@ export const TemplateOverlayPanel: React.FC = () => {
           </div>
         )}
 
-        <TabsContent value="templates" className="flex-1 min-h-0">
+<TabsContent value="templates" className="flex-1 min-h-0">
           <div className="h-full overflow-auto">
             <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 p-1">
               {isLoading ? (
@@ -347,7 +361,30 @@ export const TemplateOverlayPanel: React.FC = () => {
                   key={template.id}
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
                 >
-                {confirmingTemplateId === template.id ? (
+                {deletingTemplateId === template.id ? (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 rounded-md">
+                    <h3 className="text-sm font-semibold mb-2">Delete Template</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
+                      Are you sure you want to delete this template? This action cannot be undone.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button 
+                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                        onClick={() => setDeletingTemplateId(null)}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="px-3 py-1.5 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                        onClick={() => {
+                          deleteTemplate(template.id);
+                        }}
+                      >
+                        Delete Template
+                      </button>
+                    </div>
+                  </div>
+                ) : confirmingTemplateId === template.id ? (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
                     <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
                     <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
@@ -373,7 +410,17 @@ export const TemplateOverlayPanel: React.FC = () => {
                   </div>
                 ) : (
                   <div onClick={(e) => handleSelectTemplate(template, e)}>
-                    <CardHeader className="p-2 sm:p-3 space-y-2">
+                    <CardHeader className="p-2 sm:p-3 space-y-2 relative group">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingTemplateId(template.id);
+                        }}
+                        className="absolute top-2 right-2 z-10 p-1 bg-red-500 hover:bg-red-600 text-white rounded-sm invisible group-hover:visible transition-all"                        
+                        title="Delete template"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                       {/* Keep all the existing CardHeader content here */}
                       <div className="aspect-video w-full overflow-hidden rounded-md">
                         <TemplateThumbnail
