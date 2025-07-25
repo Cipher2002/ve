@@ -24,6 +24,7 @@ type BaseOverlay = {
   isDragging: boolean;
   rotation: number;
   type: OverlayType;
+  isLoading?: boolean; // Add this line
 };
 
 // Base style properties

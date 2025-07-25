@@ -389,14 +389,25 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           </div>
         )}
         {item.type === OverlayType.VIDEO && (
-          <TimelineKeyframes
-            overlay={item}
-            currentFrame={currentFrame ?? 0}
-            zoomScale={zoomScale}
-            onLoadingChange={(isLoading) =>
-              onAssetLoadingChange?.(item.id, isLoading)
-            }
-          />
+          <>
+            {item.isLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-200/50 dark:bg-gray-700/50">
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                  <span className="text-xs text-gray-600 dark:text-gray-300">Loading...</span>
+                </div>
+              </div>
+            ) : (
+              <TimelineKeyframes
+                overlay={item}
+                currentFrame={currentFrame ?? 0}
+                zoomScale={zoomScale}
+                onLoadingChange={(isLoading) =>
+                  onAssetLoadingChange?.(item.id, isLoading)
+                }
+              />
+            )}
+          </>
         )}
       </>
     );

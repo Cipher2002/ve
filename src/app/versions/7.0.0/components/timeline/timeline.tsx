@@ -19,7 +19,8 @@ import TimelineGrid from "./timeline-grid";
 import TimelineMarker from "./timeline-marker";
 import TimeMarkers from "./timeline-markers";
 import { Grip, Loader2 } from "lucide-react";
-import { useFFmpeg } from "../../hooks/use-ffmpeg"; 
+import { useFFmpeg } from "../../hooks/use-ffmpeg";
+import { useVideoCache } from "../../hooks/use-video-cache";
 import {
   ROW_HEIGHT,
   SHOW_LOADING_PROJECT_ALERT,
@@ -102,6 +103,8 @@ const Timeline: React.FC<TimelineProps> = ({
 
   // FFmpeg hook for audio extraction
   const { extractAudio, isLoading: isFFmpegProcessing } = useFFmpeg();
+  // Video cache hook
+  const { downloadVideo, removeCachedVideo, shouldDeleteOnRemove } = useVideoCache();
 
   const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
     {
@@ -261,6 +264,25 @@ const Timeline: React.FC<TimelineProps> = ({
     },
     [overlays, setOverlays, addRow, extractAudio]
   );
+
+  const handleVideoAddedToTimeline = useCallback(async (videoOverlay: Overlay) => {
+    if (videoOverlay.type === OverlayType.VIDEO && videoOverlay.src) {
+      // Download video when added to timeline
+      console.log('Video added to timeline, starting download:', videoOverlay.src);
+      await downloadVideo(videoOverlay.src);
+    }
+  }, [downloadVideo]);
+
+  const handleVideoRemovedFromTimeline = useCallback(async (videoOverlay: Overlay) => {
+    if (videoOverlay.type === OverlayType.VIDEO && videoOverlay.src) {
+      // Check if we should delete this video from cache
+      const shouldDelete = await shouldDeleteOnRemove(videoOverlay.src);
+      if (shouldDelete) {
+        console.log('Removing video from cache after timeline removal:', videoOverlay.src);
+        await removeCachedVideo(videoOverlay.src);
+      }
+    }
+  }, [shouldDeleteOnRemove, removeCachedVideo]);
   
   
   const { alignmentLines, snappedGhostElement } = useTimelineSnapping({

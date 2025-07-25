@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Overlay, OverlayType, CaptionStyles, CaptionOverlay } from "../types";
 import { defaultCaptionStyles } from "../components/overlays/captions/caption-settings";
+import { deleteCachedVideo } from "../utils/indexdb-helper";
 
 /**
  * Hook to manage overlay elements in the editor
@@ -63,11 +64,22 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
   /**
    * Removes an overlay by its ID and clears the selection
    */
-  const deleteOverlay = useCallback((id: number) => {
-    setOverlays((prevOverlays) =>
-      prevOverlays.filter((overlay) => overlay.id !== id)
-    );
+  const deleteOverlay = useCallback(async (id: number) => {
+    let overlayToDelete: Overlay | undefined;
+    
+    setOverlays((prevOverlays) => {
+      overlayToDelete = prevOverlays.find(overlay => overlay.id === id);
+      return prevOverlays.filter((overlay) => overlay.id !== id);
+    });
+    
     setSelectedOverlayId(null);
+    
+    // Handle video cache cleanup
+    if (overlayToDelete && overlayToDelete.type === OverlayType.VIDEO && overlayToDelete.src) {
+      // For now, we don't delete immediately on remove to allow re-adding same video
+      // The cache will auto-expire after 48 hours
+      console.log('Video overlay removed from timeline. Cache will auto-expire in 48 hours:', overlayToDelete.src);
+    }
   }, []);
 
   /**

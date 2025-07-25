@@ -212,8 +212,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       size="lg"
                       className={`flex flex-col items-center gap-2 px-1.5 py-2 ${
                         activePanel === item.panel
-                          ? "bg-primary/10 text-primary hover:bg-primary/10"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          ? "bg-primary/10 text-primary hover:bg-white"
+                          : "text-muted-foreground hover:bg-white hover:text-black"
                       }`}
                     >
                       <item.icon

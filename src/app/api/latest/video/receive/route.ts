@@ -38,19 +38,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform the API response to match your expected format
-    const transformedProjects = Array.isArray(data.RESPONSE) ? data.RESPONSE.map((item: any) => ({
-      id: item.project_id,
-      title: `${getProjectTypeFromAction(doAction).replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${item.project_id}`,
-      thumbnail: item.thumbnail,
-      video_url: `https://d3tcauhkcmkqe0.cloudfront.net/video/${item.output}`,
-      created_at: item.create_date,
-      status: item.status || 'completed',
-      type: getProjectTypeFromAction(doAction),
-      ratio: item.ratio,
-      category: item.category,
-      output: item.output,
-      user_prompt: item.user_prompt
-    })) : [];
+    const transformedProjects = Array.isArray(data.RESPONSE)
+  ? data.RESPONSE
+      .filter((item: any) => typeof item.output === 'string' && item.output.startsWith('http'))
+      .map((item: any) => ({
+        id: item.project_id,
+        title: `${getProjectTypeFromAction(doAction).replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ${item.project_id}`,
+        thumbnail: item.thumbnail?.replace(/\\\//g, '/'),
+        video_url: item.output.replace(/\\\//g, '/'),
+        created_at: item.create_date,
+        status: item.status || 'completed',
+        type: getProjectTypeFromAction(doAction),
+        ratio: item.ratio,
+        category: item.category,
+        output: item.output,
+        user_prompt: item.user_prompt
+      }))
+  : [];
+
 
     return NextResponse.json({
       success: true,

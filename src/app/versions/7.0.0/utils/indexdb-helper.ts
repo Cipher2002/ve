@@ -5,9 +5,11 @@
  */
 
 const DB_NAME = 'VideoEditorProDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Increment to add video cache store
 const PROJECTS_STORE = 'projects';
 const AUTOSAVE_STORE = 'autosave';
+const VIDEO_CACHE_STORE = 'videoCache';
+
 
 /**
  * Initialize the IndexedDB database
@@ -41,6 +43,13 @@ export const initDatabase = (): Promise<IDBDatabase> => {
       if (!db.objectStoreNames.contains(AUTOSAVE_STORE)) {
         const autosaveStore = db.createObjectStore(AUTOSAVE_STORE, { keyPath: 'id' });
         autosaveStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+      // Create video cache store
+      if (!db.objectStoreNames.contains(VIDEO_CACHE_STORE)) {
+        const videoCacheStore = db.createObjectStore(VIDEO_CACHE_STORE, { keyPath: 'url' });
+        videoCacheStore.createIndex('lastAccessed', 'lastAccessed', { unique: false });
+        videoCacheStore.createIndex('expirationTime', 'expirationTime', { unique: false });
+        videoCacheStore.createIndex('downloadTimestamp', 'downloadTimestamp', { unique: false });
       }
     };
   });
@@ -185,5 +194,222 @@ export const hasAutosave = async (projectId: string): Promise<number | null> => 
   } catch (error) {
     console.error('Failed to check autosave:', error);
     throw error;
+  }
+};
+
+// Video cache item interface
+export interface VideoCacheItem {
+  url: string;
+  blobData: Blob;
+  downloadTimestamp: number;
+  lastAccessed: number;
+  expirationTime: number;
+  size: number;
+  filename: string;
+}
+
+/**
+ * Add a video to cache
+ */
+export const addCachedVideo = async (
+  url: string, 
+  blob: Blob, 
+  filename: string,
+  expirationHours: number = 48
+): Promise<boolean> => {
+  try {
+    const db = await initDatabase();
+    const now = Date.now();
+    
+    const cacheItem: VideoCacheItem = {
+      url,
+      blobData: blob,
+      downloadTimestamp: now,
+      lastAccessed: now,
+      expirationTime: now + (expirationHours * 60 * 60 * 1000),
+      size: blob.size,
+      filename
+    };
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([VIDEO_CACHE_STORE], 'readwrite');
+      const store = transaction.objectStore(VIDEO_CACHE_STORE);
+      
+      const request = store.put(cacheItem);
+      
+      request.onsuccess = () => {
+        resolve(true);
+      };
+      
+      request.onerror = (event) => {
+        console.error('Error caching video:', event);
+        resolve(false);
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Error in addCachedVideo:', error);
+    return false;
+  }
+};
+
+/**
+ * Get a cached video by URL
+ */
+export const getCachedVideo = async (url: string): Promise<string | null> => {
+  try {
+    const db = await initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([VIDEO_CACHE_STORE], 'readwrite');
+      const store = transaction.objectStore(VIDEO_CACHE_STORE);
+      
+      const request = store.get(url);
+      
+      request.onsuccess = () => {
+        const result = request.result as VideoCacheItem | undefined;
+        
+        if (!result) {
+          resolve(null);
+          return;
+        }
+        
+        // Check if expired
+        if (Date.now() > result.expirationTime) {
+          store.delete(url);
+          resolve(null);
+          return;
+        }
+        
+        // Update last accessed time
+        result.lastAccessed = Date.now();
+        store.put(result);
+        
+        // Create blob URL for the cached video
+        const blobUrl = URL.createObjectURL(result.blobData);
+        resolve(blobUrl);
+      };
+      
+      request.onerror = (event) => {
+        console.error('Error getting cached video:', event);
+        resolve(null);
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Error in getCachedVideo:', error);
+    return null;
+  }
+};
+
+/**
+ * Delete a cached video by URL
+ */
+export const deleteCachedVideo = async (url: string): Promise<boolean> => {
+  try {
+    const db = await initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([VIDEO_CACHE_STORE], 'readwrite');
+      const store = transaction.objectStore(VIDEO_CACHE_STORE);
+      
+      const request = store.delete(url);
+      
+      request.onsuccess = () => {
+        resolve(true);
+      };
+      
+      request.onerror = (event) => {
+        console.error('Error deleting cached video:', event);
+        resolve(false);
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Error in deleteCachedVideo:', error);
+    return false;
+  }
+};
+
+/**
+ * Clean up expired videos
+ */
+export const cleanupExpiredVideos = async (): Promise<number> => {
+  try {
+    const db = await initDatabase();
+    const now = Date.now();
+    let deletedCount = 0;
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([VIDEO_CACHE_STORE], 'readwrite');
+      const store = transaction.objectStore(VIDEO_CACHE_STORE);
+      const index = store.index('expirationTime');
+      
+      const request = index.openCursor(IDBKeyRange.upperBound(now));
+      
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          cursor.delete();
+          deletedCount++;
+          cursor.continue();
+        } else {
+          resolve(deletedCount);
+        }
+      };
+      
+      request.onerror = (event) => {
+        console.error('Error cleaning up expired videos:', event);
+        resolve(0);
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Error in cleanupExpiredVideos:', error);
+    return 0;
+  }
+};
+
+/**
+ * Clear all cached videos
+ */
+export const clearAllCachedVideos = async (): Promise<boolean> => {
+  try {
+    const db = await initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([VIDEO_CACHE_STORE], 'readwrite');
+      const store = transaction.objectStore(VIDEO_CACHE_STORE);
+      
+      const request = store.clear();
+      
+      request.onsuccess = () => {
+        resolve(true);
+      };
+      
+      request.onerror = (event) => {
+        console.error('Error clearing video cache:', event);
+        resolve(false);
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Error in clearAllCachedVideos:', error);
+    return false;
   }
 };

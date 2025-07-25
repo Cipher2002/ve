@@ -377,7 +377,7 @@ export function LocalMediaGallery({
               <div className="space-y-1">
                 <p className="text-sm font-medium">No media files</p>
                 <p className="text-xs text-gray-500">
-                  Upload your first media file to get started
+                  Choose media from your device. User agrees not to use media that infringe rights, violate privacy, or are obscene.
                 </p>
               </div>
               <Button
