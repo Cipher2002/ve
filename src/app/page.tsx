@@ -86,7 +86,7 @@ function App() {
             <div 
               className="relative w-full"
               style={{ 
-                height: '800px',
+                height: '100vh',
                 maxWidth: '100%'
               }}
             >
