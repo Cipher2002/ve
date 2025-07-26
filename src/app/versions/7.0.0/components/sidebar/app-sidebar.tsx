@@ -227,7 +227,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="border bg-background text-foreground"
+                    className="border bg-white text-foreground"
                   >
                     {item.title}
                   </TooltipContent>

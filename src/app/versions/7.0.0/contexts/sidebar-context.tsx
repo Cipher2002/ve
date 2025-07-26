@@ -31,7 +31,7 @@ export const useSidebar = () => {
 export const SidebarProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [activePanel, setActivePanel] = useState<OverlayType>(OverlayType.TEXT);
+  const [activePanel, setActivePanel] = useState<OverlayType>(OverlayType.NONE);
   const { setOpen } = useUISidebar();
 
   const value = {

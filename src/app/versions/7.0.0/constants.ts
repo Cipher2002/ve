@@ -28,10 +28,10 @@ export const DISABLE_MOBILE_LAYOUT = false;
 export const DISABLE_VIDEO_KEYFRAMES = false;
 
 // AWS deployment configuration
-export const SITE_NAME = "sams-site";
-export const LAMBDA_FUNCTION_NAME =
-  "remotion-render-4-0-272-mem2048mb-disk2048mb-120sec";
-export const REGION = "us-east-1";
+// export const SITE_NAME = "sams-site";
+// export const LAMBDA_FUNCTION_NAME =
+//   "remotion-render-4-0-272-mem2048mb-disk2048mb-120sec";
+// export const REGION = "us-east-1";
 
 // Zoom control configuration
 export const ZOOM_CONSTRAINTS = {
