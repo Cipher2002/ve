@@ -2,7 +2,7 @@
   "uid": "RXpUUWJSeERjaExXMUt0c0FtTVF4QT09",
   "projectName": "Default_07-26-2025_20-38-22",
   "createdAt": "2025-07-26T15:14:19.643Z",
-  "status": "active",
+  "status": "inactive",
   "saves": [],
   "renders": [
     {
@@ -12,6 +12,6 @@
       "url": "/rendered-videos/bc407f78-25c5-4a4b-9ae4-ddaf04cd6d0b.mp4"
     }
   ],
-  "lastUpdated": "2025-07-26T15:14:19.643Z",
+  "lastUpdated": "2025-07-27T06:44:22.041Z",
   "lastRender": "2025-07-26T15:14:19.643Z"
 }
