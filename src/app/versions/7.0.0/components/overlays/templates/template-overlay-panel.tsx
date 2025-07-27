@@ -46,7 +46,8 @@ export const TemplateOverlayPanel: React.FC = () => {
     console.log('Attempting to delete template:', templateId);
     console.log('API URL:', `/api/latest/templates/delete?id=${templateId}`);
     
-    const response = await fetch(`/api/latest/templates/delete?id=${templateId}`, {
+    const uid = getUidFromUrl();
+    const response = await fetch(`/api/latest/templates/delete?id=${templateId}&uid=${uid}`, {
       method: 'DELETE',
     });
     
@@ -75,7 +76,8 @@ export const TemplateOverlayPanel: React.FC = () => {
   // Update template name function
   const updateTemplateName = async (templateId: string, newName: string) => {
     try {
-      const response = await fetch('/api/latest/templates/update-name', {
+      const uid = getUidFromUrl();
+      const response = await fetch(`/api/latest/templates/update-name?uid=${uid}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -93,11 +95,13 @@ export const TemplateOverlayPanel: React.FC = () => {
             : template
         ));
         
-        // If this is the currently loaded project, update the project name in the editor
-        const updatedTemplate = clientTemplates.find(t => t.id === templateId);
-        if (updatedTemplate && projectName === updatedTemplate.name) {
-          setProjectName(newName);
-        }
+        // Always update the project name in the editor when renaming a template
+        setProjectName(newName);
+        
+        // Trigger a refresh of the saved projects
+        window.dispatchEvent(new CustomEvent('projectSaved', { 
+          detail: { projectName: newName } 
+        }));
         
         setEditingTemplateId(null);
         setEditingName("");
@@ -109,12 +113,19 @@ export const TemplateOverlayPanel: React.FC = () => {
     }
   };
 
+  // Get UID from URL
+  const getUidFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('uid') || 'default';
+  };
+
   // Function to fetch client templates
   const fetchClientTemplates = async () => {
     setClientTemplatesLoading(true);
     setClientTemplatesError(null);
     try {
-      const response = await fetch('/api/latest/templates/client');
+      const uid = getUidFromUrl();
+      const response = await fetch(`/api/latest/templates/client?uid=${uid}`);
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }

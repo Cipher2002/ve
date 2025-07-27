@@ -5,75 +5,71 @@ import fs from "fs";
 export async function POST(request: NextRequest) {
   try {
     const templateData = await request.json();
+    const { searchParams } = new URL(request.url);
+    const uid = searchParams.get('uid') || 'default';
     
-    // Construct the path to the client templates folder
-    const templatesPath = path.join(
-      process.cwd(),
-      "src",
-      "app", 
-      "versions",
-      "7.0.0",
-      "templates",
-      "full-templates",
-      "client-templates"
-    );
-
+    // Get project name from template data
+    const projectName = templateData.name;
+    
+    // Create user/project folder structure
+    const projectPath = path.join(process.cwd(), 'users', uid, projectName);
+    
     // Ensure the directory exists
-    if (!fs.existsSync(templatesPath)) {
-      fs.mkdirSync(templatesPath, { recursive: true });
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath, { recursive: true });
     }
 
-    // Check if a template with the same name already exists
-    let existingFilePath = null;
+    // Check if project index exists
+    const indexPath = path.join(projectPath, 'project-index.json');
+    let projectIndex: any;
     let isUpdate = false;
 
-    if (fs.existsSync(templatesPath)) {
-      const files = fs.readdirSync(templatesPath).filter(file => file.endsWith('.json'));
-      
-      for (const file of files) {
-        const filePath = path.join(templatesPath, file);
-        const content = fs.readFileSync(filePath, 'utf8');
-        const existingTemplate = JSON.parse(content);
-        
-        // Check if template with same name exists
-        if (existingTemplate.name === templateData.name) {
-          existingFilePath = filePath;
-          isUpdate = true;
-          // Keep the original ID and creation date for updates
-          templateData.id = existingTemplate.id;
-          templateData.createdAt = existingTemplate.createdAt;
-          // Update the updatedAt timestamp
-          templateData.updatedAt = new Date().toISOString();
-          break;
-        }
-      }
-    }
-
-    let filename;
-    let filePath;
-
-    if (isUpdate && existingFilePath) {
-      // Update existing template
-      filePath = existingFilePath;
-      filename = path.basename(existingFilePath);
+    if (fs.existsSync(indexPath)) {
+      const indexContent = fs.readFileSync(indexPath, 'utf-8');
+      projectIndex = JSON.parse(indexContent);
+      isUpdate = true;
     } else {
-      // Create new template with project name + timestamp
-      const sanitizedName = templateData.name
-        .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
-        .replace(/\s+/g, '_') // Replace spaces with underscores
-        .toLowerCase(); // Convert to lowercase
-      
-      filename = `${sanitizedName}_${Date.now()}.json`;
-      filePath = path.join(templatesPath, filename);
+      projectIndex = {
+        uid,
+        projectName,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+        saves: [],
+        renders: [],
+      };
     }
 
-    // Write the template data to file
-    fs.writeFileSync(filePath, JSON.stringify(templateData, null, 2));
+    // Create save file
+    const saveFileName = `project-${Date.now()}.json`;
+    const saveFilePath = path.join(projectPath, saveFileName);
+    
+    const saveData = {
+      ...templateData,
+      uid,
+      projectName,
+      savedAt: new Date().toISOString(),
+      type: 'project_save'
+    };
+
+    // Write the save file
+    fs.writeFileSync(saveFilePath, JSON.stringify(saveData, null, 2));
+
+    // Update project index
+    projectIndex.lastUpdated = new Date().toISOString();
+    projectIndex.lastSaved = new Date().toISOString();
+    projectIndex.saves.unshift({
+      fileName: saveFileName,
+      timestamp: new Date().toISOString(),
+      ...saveData,
+    });
+
+    // Write updated index
+    fs.writeFileSync(indexPath, JSON.stringify(projectIndex, null, 2));
 
     return NextResponse.json({ 
       success: true, 
       message: isUpdate ? "Template updated successfully" : "Template saved successfully",
-      filename,
+      filename: saveFileName,
       isUpdate
     });
   } catch (error) {

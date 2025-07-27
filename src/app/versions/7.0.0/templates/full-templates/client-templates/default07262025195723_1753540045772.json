@@ -1,0 +1,19 @@
+{
+  "id": "template-1753540044925",
+  "name": "Default_07-26-2025_19-57-23",
+  "description": "Template created from editor",
+  "createdAt": "2025-07-26T14:27:24.925Z",
+  "updatedAt": "2025-07-26T14:27:24.925Z",
+  "createdBy": {
+    "id": "user-1",
+    "name": "User"
+  },
+  "category": "Custom",
+  "tags": [
+    "custom",
+    "user-created"
+  ],
+  "duration": 30,
+  "aspectRatio": "16:9",
+  "overlays": []
+}

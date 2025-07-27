@@ -187,6 +187,20 @@ export async function startRendering(
       // Get file size
       const stats = fs.statSync(path.join(VIDEOS_DIR, `${renderId}.${format}`));
       const outputPath = `/rendered-videos/${renderId}.${format}`;
+      
+      // Also save to user folder if project info is available
+      if (inputProps.uid && inputProps.projectName) {
+        await saveRenderToUserFolder(
+          inputProps.uid as string,
+          inputProps.projectName as string,
+          renderId,
+          format,
+          stats.size,
+          outputPath,
+          'video'
+        );
+      }
+      
       completeRender(renderId, outputPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);
@@ -301,6 +315,20 @@ export async function startAudioRendering(
 
       const stats = fs.statSync(path.join(AUDIO_DIR, `${renderId}.${format}`));
       const outputPath = `/rendered-audio/${renderId}.${format}`;
+      
+      // Also save to user folder if project info is available
+      if (inputProps.uid && inputProps.projectName) {
+        await saveRenderToUserFolder(
+          inputProps.uid as string,
+          inputProps.projectName as string,
+          renderId,
+          format,
+          stats.size,
+          outputPath,
+          'audio'
+        );
+      }
+      
       completeRender(renderId, outputPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);
@@ -335,4 +363,76 @@ export function getRenderProgress(renderId: string) {
     url,
     size,
   };
+}
+
+// Helper function to save render info to user folder
+async function saveRenderToUserFolder(
+  uid: string, 
+  projectName: string, 
+  renderId: string, 
+  format: string, 
+  fileSize: number, 
+  outputPath: string,
+  mediaType: 'video' | 'audio' = 'video'
+) {
+  try {
+    const userFolderPath = path.join(process.cwd(), 'users', uid);
+    const projectPath = path.join(userFolderPath, projectName);
+    
+    // Ensure directories exist
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath, { recursive: true });
+    }
+
+    // Copy the rendered file to user folder
+    let sourceFile: string;
+    if (outputPath.startsWith('/rendered-videos/')) {
+      sourceFile = path.join(process.cwd(), 'public', outputPath);
+    } else if (outputPath.startsWith('/rendered-audio/')) {
+      sourceFile = path.join(process.cwd(), 'public', outputPath);
+    } else {
+      sourceFile = path.join(process.cwd(), 'public', outputPath);
+    }
+    
+    const targetFile = path.join(projectPath, `${renderId}.${format}`);
+    
+    if (fs.existsSync(sourceFile)) {
+      fs.copyFileSync(sourceFile, targetFile);
+      console.log(`Copied render file from ${sourceFile} to ${targetFile}`);
+      
+      // Also call the save-to-user API to update the project index
+      const renderData = {
+        status: 'success',
+        url: outputPath,
+        fileSize,
+        renderId,
+        format,
+        mediaType
+      };
+
+      const response = await fetch('http://localhost:3000/api/latest/save-to-user/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          projectName,
+          type: 'render',
+          data: renderData,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to update project index via API');
+      } else {
+        console.log('Successfully updated project index');
+      }
+    } else {
+      console.error(`Source file not found: ${sourceFile}`);
+    }
+  } catch (error) {
+    console.error('Error saving render to user folder:', error);
+  }
 }

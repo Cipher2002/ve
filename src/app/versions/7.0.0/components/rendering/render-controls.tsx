@@ -70,38 +70,110 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   downloadTemplate,
   renderType = "ssr",
 }) => {
+  // Get UID from URL
+  const getUidFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('uid') || 'default';
+  };
+
+  // Get editor context at component level
+  const { isSaving, projectName } = useEditorContext();
+  
+  // Get project name from context or input field
+  const getProjectName = () => {
+    return projectName && projectName.trim() !== '' ? projectName : 'Untitled Project';
+  };
   // Store multiple renders
   const [renders, setRenders] = React.useState<RenderItem[]>([]);
   // Track if there are new renders
   const [hasNewRender, setHasNewRender] = React.useState(false);
 
-  // Add new render to the list when completed
+  // // Add new render to the list when completed
+  // React.useEffect(() => {
+  //   if (state.status === "done") {
+  //     setRenders((prev) => [
+  //       {
+  //         url: state.url,
+  //         timestamp: new Date(),
+  //         id: crypto.randomUUID(),
+  //         status: "success",
+  //       },
+  //       ...prev,
+  //     ]);
+  //     setHasNewRender(true);
+  //   } else if (state.status === "error") {
+  //     setRenders((prev) => [
+  //       {
+  //         timestamp: new Date(),
+  //         id: crypto.randomUUID(),
+  //         status: "error",
+  //         error:
+  //           state.error?.message || "Failed to render video. Please try again.",
+  //       },
+  //       ...prev,
+  //     ]);
+  //     setHasNewRender(true);
+  //   }
+  // }, [state.status, state.url, state.error]);
+
+  // Add new render to the list when completed and save to user folder
   React.useEffect(() => {
     if (state.status === "done") {
-      setRenders((prev) => [
-        {
-          url: state.url,
-          timestamp: new Date(),
-          id: crypto.randomUUID(),
-          status: "success",
-        },
-        ...prev,
-      ]);
+      const newRender: RenderItem = {
+        url: state.url,
+        timestamp: new Date(),
+        id: crypto.randomUUID(),
+        status: "success" as const,
+      };
+      
+      setRenders((prev) => [newRender, ...prev]);
       setHasNewRender(true);
+      
+      // Save render info to user folder
+      saveToUserFolder('render', newRender);
     } else if (state.status === "error") {
-      setRenders((prev) => [
-        {
-          timestamp: new Date(),
-          id: crypto.randomUUID(),
-          status: "error",
-          error:
-            state.error?.message || "Failed to render video. Please try again.",
-        },
-        ...prev,
-      ]);
+      const newRender: RenderItem = {
+        timestamp: new Date(),
+        id: crypto.randomUUID(),
+        status: "error" as const,
+        error: state.error?.message || "Failed to render video. Please try again.",
+      };
+      
+      setRenders((prev) => [newRender, ...prev]);
       setHasNewRender(true);
+      
+      // Save error info to user folder
+      saveToUserFolder('render', newRender);
     }
   }, [state.status, state.url, state.error]);
+
+  // Function to save data to user folder structure
+  const saveToUserFolder = async (type: 'project' | 'render', data: any) => {
+    const uid = getUidFromUrl();
+    const projectName = getProjectName();
+    
+    try {
+      const response = await fetch('/api/latest/save-to-user/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          projectName,
+          type,
+          data,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to save to user folder');
+      }
+    } catch (error) {
+      console.error('Error saving to user folder:', error);
+    }
+  };
 
   const handleDownload = (url: string) => {
     let downloadUrl = url;
@@ -142,8 +214,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     }
   };
 
-  const { isSaving } = useEditorContext();
-
   return (
     <>
     <Button
@@ -159,7 +229,22 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         e.currentTarget.style.backgroundColor = '#490972';
         e.currentTarget.style.color = 'white';
       }}
-      onClick={downloadTemplate}
+      onClick={async () => {
+        if (downloadTemplate) {
+          downloadTemplate();
+          // Also save project info to user folder
+          await saveToUserFolder('project', {
+            name: getProjectName(),
+            savedAt: new Date().toISOString(),
+            type: 'project_save'
+          });
+          
+          // Trigger a refresh of the saved projects
+          window.dispatchEvent(new CustomEvent('projectSaved', { 
+            detail: { projectName: getProjectName() } 
+          }));
+        }
+      }}
       disabled={isSaving}
       title="Save Project"
     >

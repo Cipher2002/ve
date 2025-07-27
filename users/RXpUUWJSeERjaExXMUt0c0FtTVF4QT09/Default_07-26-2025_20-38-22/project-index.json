@@ -1,0 +1,17 @@
+{
+  "uid": "RXpUUWJSeERjaExXMUt0c0FtTVF4QT09",
+  "projectName": "Default_07-26-2025_20-38-22",
+  "createdAt": "2025-07-26T15:14:19.643Z",
+  "status": "active",
+  "saves": [],
+  "renders": [
+    {
+      "fileName": "render-1753542860638.json",
+      "timestamp": "2025-07-26T15:14:19.643Z",
+      "status": "success",
+      "url": "/rendered-videos/bc407f78-25c5-4a4b-9ae4-ddaf04cd6d0b.mp4"
+    }
+  ],
+  "lastUpdated": "2025-07-26T15:14:19.643Z",
+  "lastRender": "2025-07-26T15:14:19.643Z"
+}

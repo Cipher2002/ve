@@ -111,6 +111,13 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   const handleTimelineClick = useTimelineClick(playerRef, durationInFrames);
 
+  // Get UID from URL (client-side only)
+  const getUidFromUrl = () => {
+    if (typeof window === 'undefined') return 'default';
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('uid') || 'default';
+  };
+
   const inputProps = {
     overlays,
     durationInFrames,
@@ -118,6 +125,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     width: compositionWidth,
     height: compositionHeight,
     src: "",
+    uid: getUidFromUrl(),
+    projectName: projectName,
   };
 
   const { renderMedia, renderAudio, state } = useRendering(
@@ -125,6 +134,23 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     inputProps,
     RENDER_TYPE
   );
+
+  // Enhanced render functions that auto-save before rendering
+  const enhancedRenderMedia = async (format?: string, codec?: string) => {
+    // Auto-save project before rendering
+    await handleManualSave();
+    
+    // Then proceed with rendering
+    return renderMedia(format, codec);
+  };
+
+  const enhancedRenderAudio = async (format?: string, codec?: string) => {
+    // Auto-save project before rendering
+    await handleManualSave();
+    
+    // Then proceed with rendering
+    return renderAudio(format, codec);
+  };
 
   // Replace history management code with hook
   const { undo, redo, canUndo, canRedo } = useHistory(overlays, setOverlays);
@@ -182,7 +208,56 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   // Manual save function for use in keyboard shortcuts or save button
   const handleManualSave = async () => {
     setIsSaving(true);
-    await saveState();
+    
+    try {
+      // Save to the new user-based system
+      const uid = getUidFromUrl();
+      const saveData = {
+        overlays,
+        aspectRatio,
+        playerDimensions,
+        durationInFrames,
+        fps: FPS,
+        width: getAspectRatioDimensions().width,
+        height: getAspectRatioDimensions().height,
+      };
+
+      const response = await fetch('/api/latest/save-to-user/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          projectName,
+          type: 'project',
+          data: saveData,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        // Also save to autosave system for recovery
+        await saveState();
+        
+        // Trigger a refresh of the saved projects
+        window.dispatchEvent(new CustomEvent('projectSaved', { 
+          detail: { projectName: projectName } 
+        }));
+        
+        setLastSaveTime(Date.now());
+      } else {
+        console.error('Failed to save project to user folder');
+        // Fallback to autosave only
+        await saveState();
+      }
+    } catch (error) {
+      console.error('Error saving project:', error);
+      // Fallback to autosave only
+      await saveState();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
 
@@ -221,7 +296,10 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     } else {
       // Client mode: Save to server
       try {
-        const response = await fetch('/api/latest/templates/save', {
+        const uid = typeof window !== 'undefined' 
+          ? new URLSearchParams(window.location.search).get('uid') || 'default'
+          : 'default';
+        const response = await fetch(`/api/latest/templates/save?uid=${uid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -232,6 +310,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         const result = await response.json();
         
         if (result.success) {
+          // Also save the current project state to user folder
+          await handleManualSave();
+          
           // Trigger a custom event to notify template panel to refresh
           window.dispatchEvent(new CustomEvent('templateUpdated', { 
             detail: { isUpdate: result.isUpdate, templateName: projectName }
@@ -287,6 +368,13 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     if (template.aspectRatio) {
       setAspectRatio(template.aspectRatio);
     }
+
+    // Trigger project saved event to refresh saved projects with new name
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('projectSaved', { 
+        detail: { projectName: template.name } 
+      }));
+    }, 100);
   };
 
   // Set up keyboard shortcut for manual save (Ctrl+S)
@@ -300,7 +388,23 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editorState]);
+  }, [handleManualSave]);
+
+  // Listen for project name changes from saved projects
+  useEffect(() => {
+    const handleProjectNameChanged = (event: CustomEvent) => {
+      const { projectId, oldName, newName } = event.detail;
+      
+      // Check if the current project matches the one being renamed
+      // We can match by name since that's what we're using as the identifier
+      if (projectName === oldName) {
+        setProjectName(newName);
+      }
+    };
+
+    window.addEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
+    return () => window.removeEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
+  }, [projectName]);
 
   // Combine all editor context values
   const editorContextValue = {
@@ -340,8 +444,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
     // Add renderType to the context
     renderType: RENDER_TYPE,
-    renderMedia,
-    renderAudio,
+    renderMedia: enhancedRenderMedia,
+    renderAudio: enhancedRenderAudio,
     state,
 
     deleteOverlaysByRow,

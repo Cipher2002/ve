@@ -289,7 +289,7 @@ export const VideoOverlayPanel: React.FC = () => {
                 className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
                 rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
               >
-                <span className="flex items-center gap-2 text-xs">Generated in Zanopy</span>
+                <span className="flex items-center gap-2 text-xs">Generated on Zanopy</span>
               </TabsTrigger>
               <TabsTrigger
                 value="rendered-video"

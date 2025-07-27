@@ -6,6 +6,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const templateId = searchParams.get('id');
+    const uid = searchParams.get('uid') || 'default';
     
     if (!templateId) {
       return NextResponse.json(
@@ -14,33 +15,25 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const templatesPath = path.join(
-      process.cwd(),
-      "src",
-      "app", 
-      "versions",
-      "7.0.0",
-      "templates",
-      "full-templates",
-      "client-templates"
-    );
-    
-    // Find and delete the template file - try both by ID and by filename
-    const files = fs.readdirSync(templatesPath).filter(file => file.endsWith('.json'));
+    // Extract project name from templateId (format: uid-projectName)
+    const projectName = templateId.replace(`${uid}-`, '');
+    const projectPath = path.join(process.cwd(), 'users', uid, projectName);
 
-    for (const file of files) {
-    const filePath = path.join(templatesPath, file);
-    const content = fs.readFileSync(filePath, 'utf8');
-    const template = JSON.parse(content);
-    
-    // Check both the internal ID and if the filename matches the pattern
-    const filenameId = file.replace('.json', '');
-    
-    if (template.id === templateId || filenameId === templateId) {
-        fs.unlinkSync(filePath);
-        return NextResponse.json({ success: true, message: "Template deleted successfully" });
+    // Check if project exists
+    if (!fs.existsSync(projectPath)) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      );
     }
-    }
+
+    // Delete the entire project folder
+    fs.rmSync(projectPath, { recursive: true, force: true });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "Template deleted successfully" 
+    });
   } catch (error) {
     console.error("Error deleting template:", error);
     return NextResponse.json(

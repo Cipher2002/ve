@@ -51,10 +51,14 @@ export function EditorHeader() {
           type="text"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
-          onBlur={() => {
+          onBlur={async () => {
             // Save the name when focus is lost
             if (saveProject) {
-              saveProject();
+              await saveProject();
+              // Trigger a refresh of the saved projects
+              window.dispatchEvent(new CustomEvent('projectSaved', { 
+                detail: { projectName: projectName } 
+              }));
             }
           }}
           className="w-60 px-3 py-1.5 text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
