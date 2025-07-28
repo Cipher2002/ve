@@ -219,7 +219,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     <Button
       variant="ghost"
       size="sm"
-      className="relative text-white"
+      className="relative text-white select-none"
       style={{ backgroundColor: '#490972' }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = '#490972';
@@ -250,12 +250,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     >
       {isSaving ? (
         <>
-          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+          <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin select-none" />
           Saving...
         </>
       ) : (
         <>
-          <Save className="w-3.5 h-3.5 mr-1.5" />
+          <Save className="w-3.5 h-3.5 mr-1.5 select-none" />
           Save Project
         </>
       )}
@@ -354,7 +354,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           size="sm"
           variant="outline"
           disabled={state.status === "rendering" || state.status === "invoking"}
-          className="text-white border-gray-700"
+          className="text-white border-gray-700 select-none"
           style={{ backgroundColor: '#490972' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#490972';
@@ -411,12 +411,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
               Render in MKV
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleRender('gif', 'gif')}
-              disabled={state.status === "rendering" || state.status === "invoking"}
-            >
-              Render in GIF
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('webm', 'vp8')}

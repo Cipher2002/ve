@@ -428,9 +428,42 @@ export default function SavedProjects() {
   };
 
   // Pagination logic
-  const filteredProjects = userProjects.filter(project => 
-    activeFilter === 'All' || project.status === 'active'
-  );
+  // const filteredProjects = userProjects.filter(project => 
+  //   activeFilter === 'All' || project.status === 'active'
+  // );
+  const filteredProjects = userProjects.filter(project => {
+    // Status filter
+    const statusMatch = activeFilter === 'All' || project.status === 'active';
+    
+    // Search filter
+    const searchMatch = searchValue === '' || 
+      project.name.toLowerCase().includes(searchValue.toLowerCase());
+    
+    // Date filter
+    let dateMatch = true;
+    if (dateFilter === 'month') {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const projectDate = new Date(project.lastSaved || project.createdAt);
+      dateMatch = projectDate >= startOfMonth && projectDate <= endOfMonth;
+    } else if (dateFilter === 'custom') {
+      const projectDate = new Date(project.lastSaved || project.createdAt);
+      dateMatch = projectDate >= customDateRange.start && projectDate <= customDateRange.end;
+    }
+    // For 'all', dateMatch remains true
+    
+    return statusMatch && searchMatch && dateMatch;
+  });
+  // Add this debugging code temporarily
+  console.log('Debug info:', {
+    searchValue,
+    dateFilter,
+    customDateRange,
+    totalProjects: userProjects.length,
+    filteredProjects: filteredProjects.length,
+    sampleProject: userProjects[0] // to see the data structure
+  });
   
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -513,25 +546,26 @@ export default function SavedProjects() {
               </Button>
             ) : (
               /* Filter Buttons when viewing projects list */
-              <div className="flex gap-2">
+              <div className="flex border rounded-lg overflow-hidden">
                 <Button
-                  variant={activeFilter === 'Active' ? 'default' : 'outline'}
+                  variant="ghost"
                   onClick={() => setActiveFilter('Active')}
-                  className={`px-6 py-2 rounded-lg font-medium ${
+                  className={`px-4 py-[10px] rounded-l-lg rounded-r-none font-medium ${
                     activeFilter === 'Active'
-                      ? 'bg-purple-600 text-white hover:bg-purple-700'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                      : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
                   }`}
                 >
-                  Active
+                  Active View
                 </Button>
+                {/* <div className="w-px bg-[rgb(41,0,156)]"></div> */}
                 <Button
-                  variant={activeFilter === 'All' ? 'default' : 'outline'}
+                  variant="ghost"
                   onClick={() => setActiveFilter('All')}
-                  className={`px-6 py-2 rounded-lg font-medium ${
+                  className={`px-4 py-[10px] rounded-l-none rounded-r-lg font-medium  ${
                     activeFilter === 'All'
-                      ? 'bg-purple-600 text-white hover:bg-purple-700'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                      : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
                   }`}
                 >
                   All
@@ -542,12 +576,12 @@ export default function SavedProjects() {
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 mb-6">
-            <span className="text-purple-600 font-medium cursor-pointer hover:text-purple-700">
+            <span className="text-[#490972] font-semibold font-medium cursor-pointer hover:text-[#3d075f]">
               Your Saved Projects
             </span>
             {selectedProject && (
               <>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-[#490972]" />
                 <span className="text-gray-900 font-medium">
                   {selectedProject.name}
                 </span>
@@ -555,15 +589,15 @@ export default function SavedProjects() {
             )}
           </div>
 
-          {/* Controls Row - Only show when viewing projects list and there are projects to filter */}
-          {!selectedProject && !loading && filteredProjects.length > 0 && (
+          {/* Controls Row - Only show when viewing projects list */}
+          {!selectedProject && !loading && userProjects.length > 0 && (
             <div className="flex items-center justify-between gap-4">
               {/* Date Selector */}
               <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-48 bg-white border-gray-300 justify-between text-left font-normal"
+                    className="min-w-52 max-w-80  bg-white border-gray-300 justify-between text-left font-normal text-gray-900"
                   >
                     <span className="truncate">
                       {getDateFilterDisplay()}
@@ -636,8 +670,9 @@ export default function SavedProjects() {
                   type="text"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-80 bg-white border-gray-300"
+                  className="w-80 bg-white border-gray-300 text-gray-900"
                   placeholder=""
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -713,9 +748,9 @@ export default function SavedProjects() {
                             link.download = file.fileName;
                             link.click();
                           }}
-                          className="w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
+                          className="w-6 h-6 flex items-center justify-center"
                         >
-                          <Download className="w-3 h-3 text-gray-600" />
+                          <Download className="w-5 h-5 text-gray-600" />
                         </button>
                         <div className="flex items-center gap-1 text-yellow-600">
                           <span className="text-xs">💰</span>
@@ -736,18 +771,39 @@ export default function SavedProjects() {
               </div>
             </div>
           ) : (
-            /* Projects List View */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
-              {/* Show "Start Generating" card when no projects to display */}
-              {currentProjects.length === 0 && (
-                <div className="bg-white rounded-xl shadow-sm border cursor-pointer hover:shadow-md transition-shadow relative"
-                  style={{ width: '280px', height: '320px' }}
+            <>
+              {currentProjects.length === 0 && userProjects.length > 0 && (searchValue !== '' || dateFilter !== 'all') && (
+                <div className="w-full flex items-center justify-center py-12 select-none items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-gray-500 text-lg mb-2">No projects found</div>
+                    <div className="text-gray-400 text-sm">
+                      {searchValue !== '' && `No projects match "${searchValue}"`}
+                      {searchValue !== '' && dateFilter !== 'all' && ' with the selected date range'}
+                      {searchValue === '' && dateFilter !== 'all' && 'No projects found in the selected date range'}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl items-center justify-center">
+              {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
+              {currentProjects.length === 0 && userProjects.length === 0 && searchValue === '' && dateFilter === 'all' && (
+                <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
+                  style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                 >
-                  <div className="flex flex-col items-center justify-center text-center h-full border-2 border-dashed border-gray-400 hover:border-purple-500 transition-colors rounded-xl p-8">
-                    <Plus className="w-12 h-12 text-purple-600 mb-3 hover:text-purple-700 transition-colors" strokeWidth={2} />
-                    <h3 className="text-purple-600 font-semibold text-lg hover:text-purple-700 transition-colors">
+                  <div className="flex flex-col gap-[10px] m-2 py-[90px] px-0 rounded-xl border-dashed border border-[#29009c]"
+                    style={{ outlineOffset: '-1px' }}
+                  >
+                    <div className="flex justify-center items-center text-[#490972] text-center"
+                      style={{ font: '50 64px / 0.69 Poppins, Helvetica, Arial, serif' }}
+                    >
+                      +
+                    </div>
+                    <div className="flex justify-center items-center text-[#490972] text-center"
+                      style={{ font: '600 16px / 1.5 Poppins, Helvetica, Arial, serif' }}
+                    >
                       Start Generating
-                    </h3>
+                    </div>
                   </div>
                 </div>
               )}
@@ -823,9 +879,9 @@ export default function SavedProjects() {
                           e.stopPropagation();
                           handleDownloadProject(project);
                         }}
-                        className="w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
+                        className="w-6 h-6 flex items-center justify-center"
                       >
-                        <Download className="w-3 h-3 text-gray-600" />
+                        <Download className="w-5 h-5 text-gray-600" />
                       </button>
                       
                       <div className="flex items-center gap-2">
@@ -869,11 +925,12 @@ export default function SavedProjects() {
                 </div>
               ))}
             </div>
+            </>
           )}
         </div>
 
         {/* Footer - Always show when viewing projects list */}
-        {!selectedProject && (
+        {!selectedProject && !loading && (
           <div className="flex items-center justify-between">
             {/* Showing entries text */}
             <p className="text-gray-600">
@@ -881,11 +938,11 @@ export default function SavedProjects() {
             </p>
 
             {/* Pagination */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={handlePrevious}
-                className="px-4 py-2 text-gray-600 border-gray-300 hover:bg-gray-50"
+                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
               >
                 Previous
               </Button>
@@ -894,12 +951,12 @@ export default function SavedProjects() {
               {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((page) => (
                 <Button
                   key={page}
-                  variant={currentPage === page ? "default" : "outline"}
+                  variant="outline"
                   onClick={() => handlePageChange(page)}
-                  className={`px-4 py-2 ${
+                  className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
                     currentPage === page
-                      ? 'bg-purple-600 text-white hover:bg-purple-700'
-                      : 'text-gray-600 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {page}
@@ -907,9 +964,9 @@ export default function SavedProjects() {
               ))}
               
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={handleNext}
-                className="px-4 py-2 text-gray-600 border-gray-300 hover:bg-gray-50"
+                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
               >
                 Next
               </Button>

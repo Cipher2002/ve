@@ -67,7 +67,7 @@ export function EditorHeader() {
         
         <button
           onClick={newProject}
-          className="flex-shrink-0 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md transition-colors whitespace-nowrap"
+          className="flex-shrink-0 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md transition-colors whitespace-nowrap select-none"
         >
           New Project
         </button>
@@ -78,7 +78,7 @@ export function EditorHeader() {
 
       {/* Aspect Ratio */}
       <div className="flex items-center gap-3">
-        <Label className="text-sm text-gray-700 dark:text-zinc-300 font-medium whitespace-nowrap">
+        <Label className="text-sm text-gray-700 dark:text-zinc-300 font-medium whitespace-nowrap select-none">
           Aspect Ratio
         </Label>
         <div className="flex gap-1">
@@ -88,7 +88,7 @@ export function EditorHeader() {
               onClick={() => handleAspectRatioChange(ratio)}
               size="sm"
               variant={aspectRatio === ratio ? "default" : "outline"}
-              className={`h-8 px-3 min-w-[3rem] text-xs transition-colors ${
+              className={`h-8 px-3 min-w-[3rem] text-xs transition-colors select-none ${
                 aspectRatio === ratio
                   ? "text-white border-0"
                   : "bg-white hover:bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-zinc-300"

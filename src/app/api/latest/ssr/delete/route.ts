@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const renderedVideosDir = path.join(process.cwd(), 'public', 'rendered-videos');
     
     // Try to find the file with different extensions
-    const possibleExtensions = ['mp4', 'mov', 'mkv', 'gif', 'webm'];
+    const possibleExtensions = ['mp4', 'mov', 'mkv', 'webm'];
     let videoPath: string | null = null;
 
     // Find the actual file

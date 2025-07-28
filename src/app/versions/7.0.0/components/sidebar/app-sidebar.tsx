@@ -210,24 +210,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }
                       }}
                       size="lg"
-                      className={`flex flex-col items-center gap-2 px-1.5 py-2 ${
+                      className={`flex flex-col items-center gap-1.5 px-2 py-3 ${
                         activePanel === item.panel
                           ? "bg-primary/10 text-primary hover:bg-white"
-                          : "text-muted-foreground hover:bg-white hover:text-black"
+                          : "text-gray-800 hover:bg-white hover:text-black"
                       }`}
                     >
                       <item.icon
-                        className="h-4 w-4 text-gray-700 dark:text-white font-light"
+                        className="h-4 w-4 text-gray-900 dark:text-white font-light"
                         strokeWidth={1.25}
                       />
-                      <span className="text-[8px] font-medium leading-none">
+                      <span className="text-[10px] font-medium leading-none select-none text-gray-900">
                         {item.title}
                       </span>
                     </SidebarMenuButton>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="border bg-white text-foreground"
+                    className="border bg-white text-foreground select-none"
                   >
                     {item.title}
                   </TooltipContent>

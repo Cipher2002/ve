@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     const files: any[] = [];
     
     // Define supported media file extensions
-    const videoExtensions = ['.mp4', '.mov', '.mkv', '.webm', '.avi', '.gif'];
-    const audioExtensions = ['.mp3', '.wav', '.aac', '.m4a', '.ogg'];
+    const videoExtensions = ['.mp4', '.mov', '.mkv', '.webm'];
+    const audioExtensions = ['.mp3', '.wav', '.aac'];
     const mediaExtensions = [...videoExtensions, ...audioExtensions];
 
     // Read all files in the project directory
