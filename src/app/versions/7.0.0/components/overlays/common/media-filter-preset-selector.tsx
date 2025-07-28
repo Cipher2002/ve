@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { MEDIA_FILTER_PRESETS } from "../../../templates/common/media-filter-presets";
 import { ClipOverlay, ImageOverlay } from "../../../types";
@@ -24,6 +24,7 @@ export const MediaFilterPresetSelector: React.FC<
   MediaFilterPresetSelectorProps
 > = ({ localOverlay, handleStyleChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
 
   // Determine which preset (if any) is currently active
   const getCurrentPresetId = (): string => {
@@ -86,14 +87,33 @@ export const MediaFilterPresetSelector: React.FC<
     }
   };
 
-  // Get the content to display in the preview (either video src or image src)
+  // Get the content to display in the preview
   const getMediaContent = () => {
     if (localOverlay.type === "video") {
-      return (localOverlay as ClipOverlay).content;
+      const videoOverlay = localOverlay as ClipOverlay;
+      // Use the cached blob URL (src) if available, otherwise use original content
+      return videoOverlay.src || videoOverlay.content;
     } else {
       return (localOverlay as ImageOverlay).src;
     }
   };
+
+  // Handle video loaded event to seek to a preview frame
+  const handleVideoLoaded = (video: HTMLVideoElement, presetId: string) => {
+    if (video && video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+      // Seek to 0.5 seconds or 10% of duration, whichever is smaller
+      const seekTime = Math.min(0.5, video.duration * 0.1);
+      video.currentTime = seekTime;
+      videoRefs.current[presetId] = video;
+    }
+  };
+
+  // Cleanup video refs when component unmounts
+  useEffect(() => {
+    return () => {
+      videoRefs.current = {};
+    };
+  }, []);
 
   return (
     <div className="space-y-2">
@@ -121,6 +141,8 @@ export const MediaFilterPresetSelector: React.FC<
         <div className="mt-2 grid grid-cols-3 gap-2 bg-background p-2 rounded-md border border-input shadow-sm">
           {MEDIA_FILTER_PRESETS.map((preset) => {
             const isActive = getCurrentPresetId() === preset.id;
+            const mediaContent = getMediaContent();
+            
             return (
               <button
                 key={preset.id}
@@ -130,13 +152,65 @@ export const MediaFilterPresetSelector: React.FC<
                 }`}
               >
                 {/* Media thumbnail with filter applied */}
-                <div className="relative h-12 w-full mb-1 rounded overflow-hidden">
-                  <img
-                    src={getMediaContent()}
-                    alt={`${preset.name} preview`}
-                    className="w-full h-full object-cover"
-                    style={{ filter: preset.filter }}
-                  />
+                <div className="relative h-12 w-full mb-1 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  {localOverlay.type === "video" ? (
+                    <video
+                      key={`${preset.id}-${mediaContent}`} // Force re-render when media changes
+                      src={mediaContent}
+                      className="w-full h-full object-cover"
+                      style={{ filter: preset.filter }}
+                      muted
+                      preload="metadata"
+                      playsInline
+                      onLoadedData={(e) => handleVideoLoaded(e.currentTarget, preset.id)}
+                      onLoadedMetadata={(e) => {
+                        // Backup: try to seek to preview frame when metadata loads
+                        const video = e.currentTarget;
+                        if (video.duration > 0) {
+                          const seekTime = Math.min(0.5, video.duration * 0.1);
+                          video.currentTime = seekTime;
+                        }
+                      }}
+                      onError={(e) => {
+                        console.warn(`Failed to load video for filter preview: ${mediaContent}`);
+                        // You could show a fallback image or hide the preview
+                        const container = e.currentTarget.parentElement;
+                        if (container) {
+                          container.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                              Preview unavailable
+                            </div>
+                          `;
+                        }
+                      }}
+                      onCanPlay={(e) => {
+                        // Additional attempt to seek when video can play
+                        const video = e.currentTarget;
+                        if (video.currentTime === 0 && video.duration > 0) {
+                          const seekTime = Math.min(0.5, video.duration * 0.1);
+                          video.currentTime = seekTime;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={mediaContent}
+                      alt={`${preset.name} preview`}
+                      className="w-full h-full object-cover"
+                      style={{ filter: preset.filter }}
+                      onError={(e) => {
+                        console.warn(`Failed to load image for filter preview: ${mediaContent}`);
+                        const container = e.currentTarget.parentElement;
+                        if (container) {
+                          container.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                              Preview unavailable
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  )}
                   {isActive && (
                     <div className="absolute top-1 right-1 bg-primary rounded-full p-0.5">
                       <Check className="h-3 w-3 text-background" />

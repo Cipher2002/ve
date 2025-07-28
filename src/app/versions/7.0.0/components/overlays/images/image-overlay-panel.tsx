@@ -110,7 +110,7 @@ export const ImageOverlayPanel: React.FC = () => {
       return {
         uid: urlParams.get('uid') || '',
         sid: urlParams.get('sid') || '',
-        user_ref: urlParams.get('user_ref') || ''
+        user_ref: urlParams.get('email') || ''
       };
     }
     return { uid: '', sid: '', user_ref: '' };

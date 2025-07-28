@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const max_results = searchParams.get('max_results') || '1000';
     const type = searchParams.get('type') || 'image';
     const image_category = searchParams.get('image_category') || '';
-    const user_ref = searchParams.get('user_ref') || '';
+    const user_ref = searchParams.get('email') || '';
     const user_id = searchParams.get('user_id') || '';
     const tags = searchParams.get('tags') || '';
     const ratio = searchParams.get('ratio') || '';
