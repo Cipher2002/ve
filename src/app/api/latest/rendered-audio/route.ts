@@ -1,47 +1,74 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const renderedAudioDir = path.join(process.cwd(), "public", "rendered-audio");
+    // Get UID from query parameters
+    const { searchParams } = new URL(request.url);
+    const uid = searchParams.get('uid') || 'default-user';
+
+    // Search in user's directory instead of public
+    const userDir = path.join(process.cwd(), "users", uid);
     
-    // Check if directory exists
-    if (!fs.existsSync(renderedAudioDir)) {
+    // Check if user directory exists
+    if (!fs.existsSync(userDir)) {
       return NextResponse.json([]);
     }
 
-    // Read all files in the directory
-    const files = fs.readdirSync(renderedAudioDir);
-    
-    // Define supported audio extensions
-    const audioExtensions = ['.wav', '.mp3', '.aac'];
-    
-    // Filter audio files and get their stats
-    const audioFiles = files
-      .filter(file => audioExtensions.some(ext => file.endsWith(ext)))
-      .map(file => {
-        const filePath = path.join(renderedAudioDir, file);
-        const stats = fs.statSync(filePath);
+    const audioFiles: any[] = [];
+    const supportedExtensions = ['.wav', '.mp3', '.aac'];
+
+    try {
+      // Get all project folders for this user
+      const projectFolders = fs.readdirSync(userDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      // Search through all project folders
+      for (const projectFolder of projectFolders) {
+        const projectPath = path.join(userDir, projectFolder);
         
-        // Extract filename without extension
-        const extension = path.extname(file);
-        const id = file.replace(extension, '');
-        
-        return {
-            id,
-            filename: file,
-            url: `/rendered-audio/${file}`,
+        // Get all files in the project folder
+        const files = fs.readdirSync(projectPath, { withFileTypes: true })
+          .filter(dirent => dirent.isFile())
+          .map(dirent => dirent.name);
+
+        // Filter for supported audio files
+        const audioFilesList = files.filter(file => 
+          supportedExtensions.some(ext => file.toLowerCase().endsWith(ext))
+        );
+
+        // Add each audio file to the audioFiles array
+        for (const filename of audioFilesList) {
+          const filePath = path.join(projectPath, filename);
+          const stats = fs.statSync(filePath);
+          
+          // Extract render ID from filename (remove extension)
+          const renderId = path.parse(filename).name;
+          
+          audioFiles.push({
+            id: renderId,
+            filename: filename,
+            url: `/api/latest/user-files/${uid}/${projectFolder}/${filename}`,
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),
-        };
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort by newest first
+            projectName: projectFolder, // Include project name for reference
+          });
+        }
+      }
 
-    return NextResponse.json(audioFiles);
+      // Sort by creation date (newest first)
+      audioFiles.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      return NextResponse.json(audioFiles);
+    } catch (error) {
+      console.error('Error reading user directories:', error);
+      return NextResponse.json([]);
+    }
   } catch (error) {
-    console.error("Error listing rendered audio:", error);
-    return NextResponse.json({ error: "Failed to list rendered audio" }, { status: 500 });
+    console.error('Error in rendered-audio API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

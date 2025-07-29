@@ -39,6 +39,8 @@ import { useAutosave } from "./hooks/use-autosave";
 import { LocalMediaProvider } from "./contexts/local-media-context";
 import { KeyframeProvider } from "./contexts/keyframe-context";
 import { AssetLoadingProvider } from "./contexts/asset-loading-context";
+import { clearAutosave } from "./utils/indexdb-helper";
+
 
 export default function ReactVideoEditor({ projectId, isAdminMode = false }: { projectId: string; isAdminMode?: boolean }) {
   // Autosave state
@@ -51,6 +53,13 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [dynamicDuration, setDynamicDuration] = useState(30 * FPS);
+  const [hasAutosave, setHasAutosave] = useState(false);
+  const [preservedAutosaveData, setPreservedAutosaveData] = useState<{
+    overlays: Overlay[];
+    aspectRatio: any;
+    playerDimensions: { width: number; height: number };
+    projectName?: string; // Add this line
+  } | null>(null);
   // const [projectName, setProjectName] = useState("Default Project");
   const [projectName, setProjectName] = useState(() => {
   const now = new Date();
@@ -160,6 +169,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     overlays,
     aspectRatio,
     playerDimensions,
+    projectName, // Include project name in autosave data
   };
 
   // Implment load state
@@ -170,22 +180,22 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       setLastSaveTime(Date.now());
     },
     onLoad: (loadedState) => {
-      if (loadedState) {
-        // Apply loaded state to editor
-        setOverlays(loadedState.overlays || []);
-        if (loadedState.aspectRatio) setAspectRatio(loadedState.aspectRatio);
-        if (loadedState.playerDimensions)
-          updatePlayerDimensions(
-            loadedState.playerDimensions.width,
-            loadedState.playerDimensions.height
-          );
-      }
+      // DON'T automatically apply loaded state - let user decide
+      // This prevents auto-loading and maintains current editor state
+      return;
     },
     onAutosaveDetected: (timestamp) => {
       // Only show recovery dialog on initial load, not during an active session
       if (!initialLoadComplete) {
-        setAutosaveTimestamp(timestamp);
-        setShowRecoveryDialog(true);
+        // Load and preserve the autosave data but DON'T apply it automatically
+        loadState().then((loadedState) => {
+          if (loadedState) {
+            setPreservedAutosaveData(loadedState);
+            setAutosaveTimestamp(timestamp);
+            setHasAutosave(true);
+            // Don't apply the state here - let user choose
+          }
+        });
       }
     },
   });
@@ -195,13 +205,42 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     setInitialLoadComplete(true);
   }, []);
 
-  // Handle recovery dialog actions
   const handleRecoverAutosave = async () => {
-    const loadedState = await loadState();
+    // Use the preserved autosave data instead of loading current state
+    if (preservedAutosaveData) {
+      // Apply the preserved state to editor
+      setOverlays(preservedAutosaveData.overlays || []);
+      if (preservedAutosaveData.aspectRatio) setAspectRatio(preservedAutosaveData.aspectRatio);
+      if (preservedAutosaveData.playerDimensions)
+        updatePlayerDimensions(
+          preservedAutosaveData.playerDimensions.width,
+          preservedAutosaveData.playerDimensions.height
+        );
+      
+      // IMPORTANT: Also recover the project name if it was saved in autosave
+      if ('projectName' in preservedAutosaveData && preservedAutosaveData.projectName) {
+        setProjectName(preservedAutosaveData.projectName);
+      }
+    }
+    
+    // Clean up
+    setHasAutosave(false);
+    setAutosaveTimestamp(null);
+    setPreservedAutosaveData(null);
     setShowRecoveryDialog(false);
   };
 
-  const handleDiscardAutosave = () => {
+  const handleDiscardAutosave = async () => {
+    // Clear the autosave data from storage so it won't appear again
+    try {
+      await clearAutosave(projectId);
+    } catch (error) {
+      console.error('Failed to clear autosave:', error);
+    }
+    
+    setHasAutosave(false);
+    setAutosaveTimestamp(null);
+    setPreservedAutosaveData(null);
     setShowRecoveryDialog(false);
   };
 
@@ -473,6 +512,11 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     newProject,
     loadTemplateIntoEditor,
 
+    // Add autosave recovery props
+    autosaveTimestamp,
+    preservedAutosaveData,
+    handleRecoverAutosave,
+    handleDiscardAutosave,
     
   };
 
@@ -502,7 +546,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
                     />
   
                     {/* Autosave Recovery Dialog */}
-                    {showRecoveryDialog && autosaveTimestamp && (
+                    {/* {showRecoveryDialog && autosaveTimestamp && (
                       <AutosaveRecoveryDialog
                         projectId={projectId}
                         timestamp={autosaveTimestamp}
@@ -510,7 +554,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
                         onDiscard={handleDiscardAutosave}
                         onClose={() => setShowRecoveryDialog(false)}
                       />
-                    )}
+                    )} */}
                   </AssetLoadingProvider>
                 </LocalMediaProvider>
               </EditorProvider>

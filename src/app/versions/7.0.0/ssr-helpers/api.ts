@@ -51,9 +51,23 @@ export const renderVideo = async ({
   format?: string;
   codec?: string;
 }) => {
+  const getUidFromUrl = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || 'default-user';
+    }
+    return 'default-user';
+  };
+
   const body: z.infer<typeof RenderRequest> = {
     id,
-    inputProps,
+    inputProps: {
+      ...inputProps,
+      // Only add uid if not already present
+      uid: inputProps.uid || getUidFromUrl(),
+      // Only add projectName if not already present  
+      projectName: inputProps.projectName || 'Untitled Project',
+    },
     format,
     codec,
   };
@@ -76,12 +90,27 @@ export const renderAudio = async ({
   format?: string;
   codec?: string;
 }) => {
+  const getUidFromUrl = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || 'default-user';
+    }
+    return 'default-user';
+  };
+
   const body: z.infer<typeof RenderRequest> = {
     id,
-    inputProps,
+    inputProps: {
+      ...inputProps,
+      // Only add uid if not already present
+      uid: inputProps.uid || getUidFromUrl(),
+      // Only add projectName if not already present
+      projectName: inputProps.projectName || 'Untitled Project',
+    },
     format,
     codec,
   };
+
   const response = await makeRequest<RenderResponse>(
     "/api/latest/ssr/render-audio",
     body

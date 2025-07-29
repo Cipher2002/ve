@@ -49,9 +49,10 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
           </label>
           <select
             value={localOverlay?.styles?.objectFit ?? "cover"}
-            onChange={(e) =>
-              handleStyleChange({ objectFit: e.target.value as any })
-            }
+            onChange={(e) => {
+              const newObjectFit = e.target.value as 'cover' | 'contain' | 'fill';
+              handleStyleChange({ objectFit: newObjectFit });
+            }}
             className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-xs p-2 hover:border-gray-300 dark:hover:border-gray-600 transition-colors text-gray-900 dark:text-gray-100"
           >
             <option value="cover">Cover</option>

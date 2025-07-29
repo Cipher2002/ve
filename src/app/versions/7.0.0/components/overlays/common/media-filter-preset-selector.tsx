@@ -91,8 +91,8 @@ export const MediaFilterPresetSelector: React.FC<
   const getMediaContent = () => {
     if (localOverlay.type === "video") {
       const videoOverlay = localOverlay as ClipOverlay;
-      // Use the cached blob URL (src) if available, otherwise use original content
-      return videoOverlay.src || videoOverlay.content;
+      // Always prioritize the cached blob URL (src) for better performance
+      return videoOverlay.src;
     } else {
       return (localOverlay as ImageOverlay).src;
     }
@@ -155,14 +155,22 @@ export const MediaFilterPresetSelector: React.FC<
                 <div className="relative h-12 w-full mb-1 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
                   {localOverlay.type === "video" ? (
                     <video
-                      key={`${preset.id}-${mediaContent}`} // Force re-render when media changes
+                      key={`${preset.id}-${mediaContent}`}
                       src={mediaContent}
                       className="w-full h-full object-cover"
                       style={{ filter: preset.filter }}
                       muted
-                      preload="metadata"
+                      preload="none"
                       playsInline
-                      onLoadedData={(e) => handleVideoLoaded(e.currentTarget, preset.id)}
+                      onTimeUpdate={(e) => {
+                        // Pause immediately after seeking to prevent playback
+                        e.currentTarget.pause();
+                      }}
+                      onLoadedData={(e) => {
+                        const video = e.currentTarget;
+                        video.pause(); // Ensure video doesn't play
+                        handleVideoLoaded(video, preset.id);
+                      }}
                       onLoadedMetadata={(e) => {
                         // Backup: try to seek to preview frame when metadata loads
                         const video = e.currentTarget;

@@ -210,7 +210,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }
                       }}
                       size="lg"
-                      className={`flex flex-col items-center gap-1.5 px-2 py-3 ${
+                      className={`flex flex-col items-center gap-1.5 px-2 py-3 select-none ${
                         activePanel === item.panel
                           ? "bg-primary/10 text-primary hover:bg-white"
                           : "text-gray-800 hover:bg-white hover:text-black"
@@ -220,14 +220,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="h-4 w-4 text-gray-900 dark:text-white font-light"
                         strokeWidth={1.25}
                       />
-                      <span className="text-[10px] font-medium leading-none select-none text-gray-900">
+                      <span className="text-[10px] font-medium leading-none select-none text-gray-900 select-none">
                         {item.title}
                       </span>
                     </SidebarMenuButton>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="border bg-white text-foreground select-none"
+                    className="border bg-white text-foreground select-none select-none"
                   >
                     {item.title}
                   </TooltipContent>
@@ -257,13 +257,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               )}
-              <div className="text-base font-medium text-foreground">
+              <div className="text-base font-medium text-foreground select-none">
                 {activePanel ? getPanelTitle(activePanel) : ""}
               </div>
             </div>
           </div>
         </SidebarHeader>
-        <SidebarContent className="text-foreground bg-background">
+        <SidebarContent className="text-foreground bg-background select-none">
           {renderActivePanel()}
         </SidebarContent>
       </Sidebar>

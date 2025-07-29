@@ -16,10 +16,50 @@ import {
 } from "./render-state";
 
 // Ensure the videos directory exists
-const VIDEOS_DIR = path.join(process.cwd(), "public", "rendered-videos");
-if (!fs.existsSync(VIDEOS_DIR)) {
-  fs.mkdirSync(VIDEOS_DIR, { recursive: true });
-}
+// Helper function to get user-specific directory
+const getUserVideoDir = (uid?: string, projectName?: string) => {
+  console.log('getUserVideoDir called with:', { uid, projectName });
+  
+  if (!uid || uid.trim() === '') {
+    throw new Error('UID is required for video rendering. Received: ' + JSON.stringify(uid));
+  }
+  
+  if (!projectName || projectName.trim() === '') {
+    throw new Error('Project name is required for video rendering. Received: ' + JSON.stringify(projectName));
+  }
+  
+  const userProjectDir = path.join(process.cwd(), "users", uid.trim(), projectName.trim());
+  console.log('Creating video directory:', userProjectDir);
+  
+  if (!fs.existsSync(userProjectDir)) {
+    fs.mkdirSync(userProjectDir, { recursive: true });
+    console.log('Created directory:', userProjectDir);
+  }
+  
+  return userProjectDir;
+};
+
+const getUserAudioDir = (uid?: string, projectName?: string) => {
+  console.log('getUserAudioDir called with:', { uid, projectName });
+  
+  if (!uid || uid.trim() === '') {
+    throw new Error('UID is required for audio rendering. Received: ' + JSON.stringify(uid));
+  }
+  
+  if (!projectName || projectName.trim() === '') {
+    throw new Error('Project name is required for audio rendering. Received: ' + JSON.stringify(projectName));
+  }
+  
+  const userProjectDir = path.join(process.cwd(), "users", uid.trim(), projectName.trim());
+  console.log('Creating audio directory:', userProjectDir);
+  
+  if (!fs.existsSync(userProjectDir)) {
+    fs.mkdirSync(userProjectDir, { recursive: true });
+    console.log('Created directory:', userProjectDir);
+  }
+  
+  return userProjectDir;
+};
 
 // Track rendering progress
 export const renderProgress = new Map<string, number>();
@@ -37,7 +77,18 @@ export async function startRendering(
   format: string = 'mp4',
   codec: string = 'h264'
 ) {
-  console.log('Video rendering with format:', format, 'codec:', codec); // Add this line
+  console.log('startRendering called with inputProps:', JSON.stringify(inputProps, null, 2));
+  
+  // Validate required inputs
+  if (!inputProps.uid) {
+    throw new Error('inputProps.uid is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
+  }
+  
+  if (!inputProps.projectName) {
+    throw new Error('inputProps.projectName is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
+  }
+  
+  console.log('Video rendering with format:', format, 'codec:', codec);
   const renderId = uuidv4();
 
   // Initialize render state
@@ -109,41 +160,13 @@ export async function startRendering(
         'vp8': 'vp8',
         'gif': 'gif'
       };
+      const outputDir = getUserVideoDir(inputProps.uid as string, inputProps.projectName as string);
+      const outputPath = path.join(outputDir, `${renderId}.${format}`);
 
       const remotionCodec = codecMap[codec] || codec;
       console.log('Video mapped codec:', codec, 'to:', remotionCodec); // Add logging
-      console.log('Rendering video with codec:', remotionCodec, 'to file:', path.join(VIDEOS_DIR, `${renderId}.${format}`)); // Add logging
+      console.log('Rendering video with codec:', remotionCodec, 'to file:', outputPath); // Add logging
 
-      // Render the video using chromium
-      // await renderMedia({
-      //   codec: remotionCodec as any,
-      //   composition: {
-      //     ...composition,
-      //     // Override the duration to use the actual duration from inputProps
-      //     durationInFrames: actualDurationInFrames,
-      //   },
-      //   serveUrl: bundleLocation,
-      //   outputLocation: path.join(VIDEOS_DIR, `${renderId}.${format}`),
-      //   inputProps: {
-      //     ...inputProps,
-      //     baseUrl,
-      //   },
-      //   chromiumOptions: {
-      //     headless: true,
-      //   },
-      //   timeoutInMilliseconds: 300000, // 5 minutes
-      //   onProgress: ((progress) => {
-      //     // Extract just the progress percentage from the detailed progress object
-      //     updateRenderProgress(renderId, progress.progress);
-      //   }) as RenderMediaOnProgress,
-      //   // Highest quality video settings
-      //   crf: 1, // Lowest CRF for near-lossless quality (range 1-51, where 1 is highest quality)
-      //   imageFormat: "png", // Use PNG for highest quality frame captures
-      //   colorSpace: "bt709", // Better color accuracy
-      //   x264Preset: "veryslow", // Highest quality compression
-      //   jpegQuality: 100, // Maximum JPEG quality for any JPEG operations
-      // });
-      // Create base render options
       const baseRenderOptions = {
         codec: remotionCodec as any,
         composition: {
@@ -151,7 +174,7 @@ export async function startRendering(
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: path.join(VIDEOS_DIR, `${renderId}.${format}`),
+        outputLocation: outputPath, // Render directly to user folder
         inputProps: {
           ...inputProps,
           baseUrl,
@@ -184,24 +207,28 @@ export async function startRendering(
       // Render the video using chromium
       await renderMedia(renderOptions);
 
-      // Get file size
-      const stats = fs.statSync(path.join(VIDEOS_DIR, `${renderId}.${format}`));
-      const outputPath = `/rendered-videos/${renderId}.${format}`;
+      // Get file size from the actual output location
+      const stats = fs.statSync(outputPath);
       
-      // Also save to user folder if project info is available
-      if (inputProps.uid && inputProps.projectName) {
-        await saveRenderToUserFolder(
-          inputProps.uid as string,
-          inputProps.projectName as string,
-          renderId,
-          format,
-          stats.size,
-          outputPath,
-          'video'
-        );
-      }
+      const uid = inputProps.uid as string;
+      const projectName = inputProps.projectName as string;
+      const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
       
-      completeRender(renderId, outputPath, stats.size);
+      console.log('Video saved to:', outputPath);
+      console.log('Will be served from:', servingPath);
+      
+      // Save metadata to project index
+      await saveRenderToUserFolder(
+        uid,
+        projectName,
+        renderId,
+        format,
+        stats.size,
+        servingPath,
+        'video'
+      );
+      
+      completeRender(renderId, servingPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);
       console.error(`Render ${renderId} failed:`, error);
@@ -217,14 +244,22 @@ export async function startAudioRendering(
   format: string = 'wav',
   codec: string = 'wav'
 ) {
-  console.log('Audio rendering with format:', format, 'codec:', codec); // Add this line
+  console.log('startAudioRendering called with inputProps:', JSON.stringify(inputProps, null, 2));
+  
+  // Validate required inputs
+  if (!inputProps.uid) {
+    throw new Error('inputProps.uid is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
+  }
+  
+  if (!inputProps.projectName) {
+    throw new Error('inputProps.projectName is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
+  }
+  
+  console.log('Audio rendering with format:', format, 'codec:', codec);
   const renderId = uuidv4();
 
   // Ensure the audio directory exists
-  const AUDIO_DIR = path.join(process.cwd(), "public", "rendered-audio");
-  if (!fs.existsSync(AUDIO_DIR)) {
-    fs.mkdirSync(AUDIO_DIR, { recursive: true });
-  }
+  const outputDir = getUserAudioDir(inputProps.uid as string, inputProps.projectName as string);
 
   // Initialize render state
   saveRenderState(renderId, {
@@ -284,14 +319,16 @@ export async function startAudioRendering(
         (inputProps.durationInFrames as number) || composition.durationInFrames;
 
       // Render audio only
-      console.log('Rendering with codec:', codec, 'to file:', path.join(AUDIO_DIR, `${renderId}.${format}`)); // Add this line
+// Render audio only
+      const outputPath = path.join(outputDir, `${renderId}.${format}`);
+      console.log('Rendering with codec:', codec, 'to file:', outputPath);
       const codecMap: Record<string, string> = {
         'mp3': 'mp3',
         'wav': 'wav', 
         'aac': 'aac',
       };
       const remotionCodec = codecMap[codec] || codec;
-      console.log('Mapped codec:', codec, 'to:', remotionCodec); // Add logging
+      console.log('Mapped codec:', codec, 'to:', remotionCodec);
       await renderMedia({
         codec: remotionCodec as any,
         composition: {
@@ -299,7 +336,7 @@ export async function startAudioRendering(
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: path.join(AUDIO_DIR, `${renderId}.${format}`),
+        outputLocation: outputPath, // Render directly to user folder
         inputProps: {
           ...inputProps,
           baseUrl,
@@ -313,23 +350,27 @@ export async function startAudioRendering(
         }) as RenderMediaOnProgress,
       });
 
-      const stats = fs.statSync(path.join(AUDIO_DIR, `${renderId}.${format}`));
-      const outputPath = `/rendered-audio/${renderId}.${format}`;
+      const stats = fs.statSync(outputPath);
       
-      // Also save to user folder if project info is available
-      if (inputProps.uid && inputProps.projectName) {
-        await saveRenderToUserFolder(
-          inputProps.uid as string,
-          inputProps.projectName as string,
-          renderId,
-          format,
-          stats.size,
-          outputPath,
-          'audio'
-        );
-      }
+      const uid = inputProps.uid as string;
+      const projectName = inputProps.projectName as string;
+      const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
       
-      completeRender(renderId, outputPath, stats.size);
+      console.log('Audio saved to:', outputPath);
+      console.log('Will be served from:', servingPath);
+      
+      // Save metadata to project index
+      await saveRenderToUserFolder(
+        uid,
+        projectName,
+        renderId,
+        format,
+        stats.size,
+        servingPath,
+        'audio'
+      );
+      
+      completeRender(renderId, servingPath, stats.size);
     } catch (error: any) {
       failRender(renderId, error.message);
       console.error(`Audio render ${renderId} failed:`, error);
@@ -365,7 +406,7 @@ export function getRenderProgress(renderId: string) {
   };
 }
 
-// Helper function to save render info to user folder
+// Helper function to save render metadata to user folder
 async function saveRenderToUserFolder(
   uid: string, 
   projectName: string, 
@@ -376,63 +417,35 @@ async function saveRenderToUserFolder(
   mediaType: 'video' | 'audio' = 'video'
 ) {
   try {
-    const userFolderPath = path.join(process.cwd(), 'users', uid);
-    const projectPath = path.join(userFolderPath, projectName);
-    
-    // Ensure directories exist
-    if (!fs.existsSync(projectPath)) {
-      fs.mkdirSync(projectPath, { recursive: true });
-    }
+    const renderData = {
+      status: 'success',
+      url: outputPath,
+      fileSize,
+      renderId,
+      format,
+      mediaType
+    };
 
-    // Copy the rendered file to user folder
-    let sourceFile: string;
-    if (outputPath.startsWith('/rendered-videos/')) {
-      sourceFile = path.join(process.cwd(), 'public', outputPath);
-    } else if (outputPath.startsWith('/rendered-audio/')) {
-      sourceFile = path.join(process.cwd(), 'public', outputPath);
+    const response = await fetch('/api/latest/save-to-user/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uid,
+        projectName,
+        type: 'render',
+        data: renderData,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to update project index via API');
     } else {
-      sourceFile = path.join(process.cwd(), 'public', outputPath);
-    }
-    
-    const targetFile = path.join(projectPath, `${renderId}.${format}`);
-    
-    if (fs.existsSync(sourceFile)) {
-      fs.copyFileSync(sourceFile, targetFile);
-      console.log(`Copied render file from ${sourceFile} to ${targetFile}`);
-      
-      // Also call the save-to-user API to update the project index
-      const renderData = {
-        status: 'success',
-        url: outputPath,
-        fileSize,
-        renderId,
-        format,
-        mediaType
-      };
-
-      const response = await fetch('http://localhost:3000/api/latest/save-to-user/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uid,
-          projectName,
-          type: 'render',
-          data: renderData,
-          timestamp: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to update project index via API');
-      } else {
-        console.log('Successfully updated project index');
-      }
-    } else {
-      console.error(`Source file not found: ${sourceFile}`);
+      console.log('Successfully updated project index');
     }
   } catch (error) {
-    console.error('Error saving render to user folder:', error);
+    console.error('Error saving render metadata to user folder:', error);
   }
 }

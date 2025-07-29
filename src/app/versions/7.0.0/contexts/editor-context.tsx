@@ -83,6 +83,18 @@ interface EditorContextProps {
   newProject: () => void;
   loadTemplateIntoEditor: (template: TemplateOverlay) => void;
 
+  // Autosave properties
+  hasAutosave?: boolean;
+  autosaveTimestamp?: number | null;
+  preservedAutosaveData?: {
+    overlays: Overlay[];
+    aspectRatio: any;
+    playerDimensions: { width: number; height: number };
+    projectName?: string; // Add this line
+  } | null;
+  handleRecoverAutosave?: () => void;
+  handleDiscardAutosave?: () => void;
+
 }
 
 // Create the context with undefined as default value

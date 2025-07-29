@@ -1,48 +1,75 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const renderedVideosDir = path.join(process.cwd(), "public", "rendered-videos");
+    // Get UID from query parameters
+    const { searchParams } = new URL(request.url);
+    const uid = searchParams.get('uid') || 'default-user';
+
+    // Search in user's directory instead of public
+    const userDir = path.join(process.cwd(), "users", uid);
     
-    // Check if directory exists
-    if (!fs.existsSync(renderedVideosDir)) {
+    // Check if user directory exists
+    if (!fs.existsSync(userDir)) {
       return NextResponse.json([]);
     }
 
-    // Read all files in the directory
-    const files = fs.readdirSync(renderedVideosDir);
-    
-    // Define supported video extensions
-    const videoExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm'];
-    
-    // Filter video files and get their stats
-    const videoFiles = files
-      .filter(file => videoExtensions.some(ext => file.endsWith(ext)))
-      .map(file => {
-        const filePath = path.join(renderedVideosDir, file);
-        const stats = fs.statSync(filePath);
+    const videos: any[] = [];
+    const supportedExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm', '.wav', '.mp3', '.aac'];
+
+    try {
+      // Get all project folders for this user
+      const projectFolders = fs.readdirSync(userDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      // Search through all project folders
+      for (const projectFolder of projectFolders) {
+        const projectPath = path.join(userDir, projectFolder);
         
-        // Extract filename without extension
-        const extension = path.extname(file);
-        const id = file.replace(extension, '');
-        
-        return {
-            id,
-            filename: file,
-            url: `/rendered-videos/${file}`,
-            thumbnail: null, // Will be generated client-side
+        // Get all files in the project folder
+        const files = fs.readdirSync(projectPath, { withFileTypes: true })
+          .filter(dirent => dirent.isFile())
+          .map(dirent => dirent.name);
+
+        // Filter for supported video/audio files
+        const mediaFiles = files.filter(file => 
+          supportedExtensions.some(ext => file.toLowerCase().endsWith(ext))
+        );
+
+        // Add each media file to the videos array
+        for (const filename of mediaFiles) {
+          const filePath = path.join(projectPath, filename);
+          const stats = fs.statSync(filePath);
+          
+          // Extract render ID from filename (remove extension)
+          const renderId = path.parse(filename).name;
+          
+          videos.push({
+            id: renderId,
+            filename: filename,
+            url: `/api/latest/user-files/${uid}/${projectFolder}/${filename}`,
+            thumbnail: null, // You can implement thumbnail generation if needed
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),
-        };
-      })
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort by newest first
+            projectName: projectFolder, // Include project name for reference
+          });
+        }
+      }
 
-    return NextResponse.json(videoFiles);
+      // Sort by creation date (newest first)
+      videos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      return NextResponse.json(videos);
+    } catch (error) {
+      console.error('Error reading user directories:', error);
+      return NextResponse.json([]);
+    }
   } catch (error) {
-    console.error("Error listing rendered videos:", error);
-    return NextResponse.json({ error: "Failed to list rendered videos" }, { status: 500 });
+    console.error('Error in list API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

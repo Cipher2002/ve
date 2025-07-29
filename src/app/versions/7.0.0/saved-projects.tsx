@@ -287,19 +287,15 @@ export default function SavedProjects() {
     }
   };
 
-  // Auto-refresh every 5 seconds
   React.useEffect(() => {
     fetchUserProjects();
-    
-    const interval = setInterval(() => {
-      if (!selectedProject) {
-        fetchUserProjects();
-      } else {
-        fetchProjectFiles(selectedProject.id);
-      }
-    }, 5000);
+  }, []);
 
-    return () => clearInterval(interval);
+  // Fetch project files when project is selected
+  React.useEffect(() => {
+    if (selectedProject) {
+    fetchProjectFiles(selectedProject.id);
+  }
   }, [selectedProject]);
 
   // Handle project click
@@ -454,15 +450,6 @@ export default function SavedProjects() {
     // For 'all', dateMatch remains true
     
     return statusMatch && searchMatch && dateMatch;
-  });
-  // Add this debugging code temporarily
-  console.log('Debug info:', {
-    searchValue,
-    dateFilter,
-    customDateRange,
-    totalProjects: userProjects.length,
-    filteredProjects: filteredProjects.length,
-    sampleProject: userProjects[0] // to see the data structure
   });
   
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
@@ -787,7 +774,7 @@ export default function SavedProjects() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl items-center justify-center">
               {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
-              {currentProjects.length === 0 && userProjects.length === 0 && searchValue === '' && dateFilter === 'all' && (
+              {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
                 <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
                   style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                 >
@@ -813,8 +800,9 @@ export default function SavedProjects() {
                 <div 
                   key={project.id} 
                   onClick={() => handleProjectClick(project)}
-                  className="bg-white rounded-xl shadow-sm border cursor-pointer hover:shadow-md transition-shadow relative"
-                  style={{ width: '280px', height: '320px' }}
+                  // className="bg-white rounded-xl shadow-sm border cursor-pointer hover:shadow-md transition-shadow relative"
+                  className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
+                  style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                 >
                   {/* Folder Icon/Thumbnail */}
                   <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl flex items-center justify-center relative overflow-hidden">

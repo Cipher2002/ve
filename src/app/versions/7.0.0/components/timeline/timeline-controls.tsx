@@ -102,6 +102,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     canRedo,
     playbackRate,
     setPlaybackRate,
+    playerRef,
   } = useEditorContext();
 
   const { visibleRows, addRow, removeRow, zoomScale, setZoomScale } =
@@ -136,14 +137,21 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   useEffect(() => {
     // Only run the check if we're actually playing
     if (isPlayingRef.current) {
-      // Detect when frame suddenly drops to 0 from near the end
-      if (prevFrameRef.current > totalDuration - 2 && currentFrame === 0) {
+      // Detect when playback has ended - either frame drops to 0 from near end, or reaches/exceeds total duration
+      if (
+        (prevFrameRef.current > totalDuration - 2 && currentFrame === 0) ||
+        (currentFrame >= totalDuration - 1)
+      ) {
         togglePlayPause();
+        // Reset timeline marker to start position
+        if (playerRef.current) {
+          playerRef.current.seekTo(0);
+        }
       }
     }
 
     prevFrameRef.current = currentFrame;
-  }, [currentFrame, totalDuration, togglePlayPause]); // Removed isPlaying from dependencies
+  }, [currentFrame, totalDuration, togglePlayPause, playerRef]);
 
   // Handlers
   const handlePlayPause = () => {
@@ -259,7 +267,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
         {/* Row Controls */}
         <div className="flex items-center gap-1 ml-3">
-          <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+          <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium select-none">
             Rows
           </span>
           <div className="flex items-center gap-1"></div>
@@ -282,7 +290,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
                 className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
                 align="start"
               >
-                <span className="text-gray-700 dark:text-zinc-200">Remove Row</span>
+                <span className="text-gray-700 dark:text-zinc-200 select-none">Remove Row</span>
               </TooltipContent>
             </Tooltip>
 
@@ -304,7 +312,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
                 className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
                 align="start"
               >
-                <span className="text-gray-700 dark:text-zinc-200">Add Row ({visibleRows}/{MAX_ROWS})</span>
+                <span className="text-gray-700 dark:text-zinc-200 select-none">Add Row ({visibleRows}/{MAX_ROWS})</span>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -320,11 +328,9 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </div>
         )}
       </div>
-    
-
 
       {/* Center section: Play/Pause control and time display */}
-      <div className="flex items-center justify-center gap-2 flex-grow">
+      <div className="flex items-center justify-center gap-2 flex-grow select-none">
         {/* Playback Speed Control */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -337,7 +343,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="min-w-[100px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+            className="min-w-[100px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 se"
             align="center"
           >
             {[0.25, 0.5, 1, 1.5, 2].map((speed) => (
@@ -486,7 +492,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
               className="bg-white dark:bg-gray-900 text-xs px-2 py-1 rounded-md z-[9999] border border-gray-200 dark:border-gray-700"
               align="end"
             >
-              <span className="text-gray-700 dark:text-zinc-200">
+              <span className="text-gray-700 dark:text-zinc-200 select-none">
                 Reset Zoom
               </span>
             </TooltipContent>
@@ -504,7 +510,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             size="sm"
             className="w-full text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200
               bg-white hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-700/80
-              border-gray-200 dark:border-gray-700"
+              border-gray-200 dark:border-gray-700 select-none"
           >
             Reset Timeline
           </Button>

@@ -30,7 +30,25 @@ export function EditorHeader() {
    * - state: Current editor state
    * - renderType: Type of render
    */
-  const { renderMedia, renderAudio, state, saveProject, downloadTemplate, renderType, projectName, aspectRatio, setProjectName,setAspectRatio, newProject } = useEditorContext();
+  const { 
+    renderMedia, 
+    renderAudio, 
+    state, 
+    saveProject, 
+    downloadTemplate, 
+    renderType, 
+    projectName, 
+    aspectRatio, 
+    setProjectName, 
+    setAspectRatio, 
+    newProject,
+    autosaveTimestamp,
+    handleRecoverAutosave,
+    handleDiscardAutosave
+  } = useEditorContext();
+
+// Create hasAutosave based on whether autosaveTimestamp exists
+const hasAutosave = Boolean(autosaveTimestamp);
 
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
@@ -114,6 +132,14 @@ export function EditorHeader() {
       </div>
 
       {/* Media rendering controls */}
+      {/* <RenderControls
+        handleRender={renderMedia}
+        handleRenderAudio={renderAudio}
+        state={state}
+        saveProject={saveProject}
+        downloadTemplate={downloadTemplate}
+        renderType={renderType}
+      /> */}
       <RenderControls
         handleRender={renderMedia}
         handleRenderAudio={renderAudio}
@@ -121,6 +147,10 @@ export function EditorHeader() {
         saveProject={saveProject}
         downloadTemplate={downloadTemplate}
         renderType={renderType}
+        hasAutosave={hasAutosave}
+        autosaveTimestamp={autosaveTimestamp}
+        onRecoverAutosave={handleRecoverAutosave}
+        onDiscardAutosave={handleDiscardAutosave}
       />
     </header>
   );

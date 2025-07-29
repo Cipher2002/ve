@@ -6,7 +6,7 @@ import { TemplateOverlay } from "../../../types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 // import {
 //   AlertDialog,
 //   AlertDialogAction,
@@ -258,7 +258,7 @@ export const TemplateOverlayPanel: React.FC = () => {
           </div>
         )}
 
-<TabsContent value="templates" className="flex-1 min-h-0">
+        <TabsContent value="templates" className="flex-1 min-h-0">
           <div className="h-full overflow-auto">
             <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 p-1">
               {isLoading ? (
@@ -370,7 +370,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                 clientTemplates.map((template) => (
                 <Card
                   key={template.id}
-                  className="cursor-pointer hover:bg-accent transition-colors duration-200"
+                  className="cursor-pointer hover:bg-accent transition-colors duration-200 group"
                 >
                 {deletingTemplateId === template.id ? (
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 rounded-md">
@@ -421,13 +421,13 @@ export const TemplateOverlayPanel: React.FC = () => {
                   </div>
                 ) : (
                   <div onClick={(e) => handleSelectTemplate(template, e)}>
-                    <CardHeader className="p-2 sm:p-3 space-y-2 relative group">
+                    <CardHeader className="p-2 sm:p-3 space-y-2 relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeletingTemplateId(template.id);
                         }}
-                        className="absolute top-2 right-2 z-10 p-1 bg-red-500 hover:bg-red-600 text-white rounded-sm invisible group-hover:visible transition-all"                        
+                        className="absolute top-2 right-2 z-10 p-1 bg-red-500 hover:bg-red-600 text-white rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto"                        
                         title="Delete template"
                       >
                         <Trash2 size={12} />
@@ -440,9 +440,45 @@ export const TemplateOverlayPanel: React.FC = () => {
                         />
                       </div>
                       <div className="space-y-1 sm:space-y-2">
-                        <CardTitle className="text-xs sm:text-sm font-light">
+                        {/* <CardTitle className="text-xs sm:text-sm font-light">
                           {template.name}
-                        </CardTitle>
+                        </CardTitle> */}
+                        <div className="flex items-center gap-2">
+                        {editingTemplateId === template.id ? (
+                          <input
+                            type="text"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            onBlur={handleEditSave}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleEditSave();
+                              } else if (e.key === 'Escape') {
+                                handleEditCancel();
+                              }
+                            }}
+                            className="text-xs sm:text-sm font-light bg-transparent border-b border-gray-300 focus:outline-none focus:border-purple-500 flex-1"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        ) : (
+                          <>
+                            <CardTitle className="text-xs sm:text-sm font-light flex-1">
+                              {template.name}
+                            </CardTitle>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditStart(template);
+                              }}
+                              className="p-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition-all"
+                              title="Edit template name"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                         <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
                           {template.description}
                         </p>

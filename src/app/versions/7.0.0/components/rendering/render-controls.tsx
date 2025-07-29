@@ -17,6 +17,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AutosaveRecoveryDialog } from "../autosave/autosave-recovery-dialog";
 
 /**
  * Interface representing a single video render attempt
@@ -48,13 +49,17 @@ interface RenderControlsProps {
   saveProject?: () => Promise<void>;
   downloadTemplate?: () => void;
   renderType?: "ssr" | "lambda";
+  hasAutosave?: boolean;
+  autosaveTimestamp?: number | null;
+  onRecoverAutosave?: () => void;
+  onDiscardAutosave?: () => void;
 }
 
 /**
  * RenderControls component provides UI controls for video rendering functionality
  *
  * Features:
- * - Render button that shows progress during rendering
+ * - Export button that shows progress during rendering
  * - Notification bell showing render history
  * - Download buttons for completed renders
  * - Error display for failed renders
@@ -69,6 +74,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   saveProject,
   downloadTemplate,
   renderType = "ssr",
+  hasAutosave: propsHasAutosave,
+  autosaveTimestamp,
+  onRecoverAutosave,
+  onDiscardAutosave,
 }) => {
   // Get UID from URL
   const getUidFromUrl = () => {
@@ -76,71 +85,44 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     return urlParams.get('uid') || 'default';
   };
 
-  // Get editor context at component level
-  const { isSaving, projectName } = useEditorContext();
+  const { 
+    isSaving, 
+    projectName,
+    autosaveTimestamp: contextAutosaveTimestamp,
+    handleRecoverAutosave: contextHandleRecoverAutosave,
+    handleDiscardAutosave: contextHandleDiscardAutosave,
+  } = useEditorContext();
+
+  // Use props if provided, otherwise fall back to context
+  const finalAutosaveTimestamp = autosaveTimestamp ?? contextAutosaveTimestamp;
+  const finalHandleRecoverAutosave = onRecoverAutosave ?? contextHandleRecoverAutosave;
+  const finalHandleDiscardAutosave = onDiscardAutosave ?? contextHandleDiscardAutosave;
+
+  // Create hasAutosave based on whether autosaveTimestamp exists
+  const hasAutosave = Boolean(finalAutosaveTimestamp);
   
   // Get project name from context or input field
   const getProjectName = () => {
     return projectName && projectName.trim() !== '' ? projectName : 'Untitled Project';
   };
-  // Store multiple renders
-  const [renders, setRenders] = React.useState<RenderItem[]>([]);
-  // Track if there are new renders
-  const [hasNewRender, setHasNewRender] = React.useState(false);
-
-  // // Add new render to the list when completed
-  // React.useEffect(() => {
-  //   if (state.status === "done") {
-  //     setRenders((prev) => [
-  //       {
-  //         url: state.url,
-  //         timestamp: new Date(),
-  //         id: crypto.randomUUID(),
-  //         status: "success",
-  //       },
-  //       ...prev,
-  //     ]);
-  //     setHasNewRender(true);
-  //   } else if (state.status === "error") {
-  //     setRenders((prev) => [
-  //       {
-  //         timestamp: new Date(),
-  //         id: crypto.randomUUID(),
-  //         status: "error",
-  //         error:
-  //           state.error?.message || "Failed to render video. Please try again.",
-  //       },
-  //       ...prev,
-  //     ]);
-  //     setHasNewRender(true);
-  //   }
-  // }, [state.status, state.url, state.error]);
-
-  // Add new render to the list when completed and save to user folder
   React.useEffect(() => {
     if (state.status === "done") {
-      const newRender: RenderItem = {
+      const newRender = {
         url: state.url,
         timestamp: new Date(),
         id: crypto.randomUUID(),
         status: "success" as const,
       };
       
-      setRenders((prev) => [newRender, ...prev]);
-      setHasNewRender(true);
-      
       // Save render info to user folder
       saveToUserFolder('render', newRender);
     } else if (state.status === "error") {
-      const newRender: RenderItem = {
+      const newRender = {
         timestamp: new Date(),
         id: crypto.randomUUID(),
         status: "error" as const,
         error: state.error?.message || "Failed to render video. Please try again.",
       };
-      
-      setRenders((prev) => [newRender, ...prev]);
-      setHasNewRender(true);
       
       // Save error info to user folder
       saveToUserFolder('render', newRender);
@@ -260,91 +242,69 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         </>
       )}
     </Button>
-      <Popover onOpenChange={() => setHasNewRender(false)}>
+      <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
-            className="relative text-white"
-            style={{ backgroundColor: '#490972' }}
+            className={`relative text-white transition-all duration-300 ${
+              hasAutosave ? 'animate-pulse' : ''
+            }`}
+            style={{ backgroundColor: hasAutosave ? '#ef4444' : '#490972' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#490972';
-              e.currentTarget.style.color = 'white';
+              if (!hasAutosave) {
+                e.currentTarget.style.backgroundColor = '#490972';
+                e.currentTarget.style.color = 'white';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#490972';
+              e.currentTarget.style.backgroundColor = hasAutosave ? '#ef4444' : '#490972';
               e.currentTarget.style.color = 'white';
             }}
           >
             <Bell className="w-3.5 h-3.5" />
-            {hasNewRender && (
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+            {hasAutosave && (
+              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 animate-ping" />
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-60 p-3">
-          {/* ... existing PopoverContent code remains the same ... */}
-          <div className="space-y-1.5">
-            <h4 className="text-sm font-medium">Recent Renders</h4>
-            {renders.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No renders yet</p>
-            ) : (
-              renders.map((render) => (
-                <div
-                  key={render.id}
-                  className={`flex items-center justify-between rounded-md border p-1.5 ${
-                    render.status === "error"
-                      ? "border-destructive/50 bg-destructive/10"
-                      : "border-border"
-                  }`}
+        <PopoverContent className="w-80 p-4">
+          {hasAutosave && finalAutosaveTimestamp ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                <h4 className="text-sm font-semibold">Unsaved Changes Found</h4>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                We found an autosaved version of your project from{" "}
+                <time className="font-medium">
+                  {formatDistanceToNow(new Date(finalAutosaveTimestamp), { addSuffix: true })}
+                </time>{" "}
+                ({new Date(finalAutosaveTimestamp).toLocaleTimeString()})
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={finalHandleDiscardAutosave}
+                  className="flex-1"
                 >
-                  <div className="flex flex-col">
-                    <div className="text-xs text-zinc-200">
-                      {render.status === "error" ? (
-                        <span className="text-red-400 font-medium">
-                          Render Failed
-                        </span>
-                      ) : (
-                        getDisplayFileName(render.url!)
-                      )}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      {formatDistanceToNow(render.timestamp, {
-                        addSuffix: true,
-                      })}
-                      {render.error && (
-                        <div
-                          className="text-red-400 mt-0.5 truncate max-w-[180px]"
-                          title={render.error}
-                        >
-                          {render.error}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {render.status === "success" && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="text-white h-6 w-6"
-                      style={{ backgroundColor: '#490972' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#490972';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#490972';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onClick={() => handleDownload(render.url!)}
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </Button>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                  Discard
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={finalHandleRecoverAutosave}
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Recover Changes
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-muted-foreground">No autosave data found</p>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
 
@@ -377,7 +337,12 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             </>
           ) : (
             <>
-              Render
+              <img 
+                src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+                alt="Export" 
+                className="w-3.5 h-3.5 mr-0.5" 
+              />
+              2<span className="ml-2">Export</span>
               <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
             </>
           )}
@@ -391,32 +356,57 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
           >
             <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
-            Render Video
+            <img 
+              src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+              alt="Export" 
+              className="w-3.5 h-3.5 mr-0.5" 
+            />
+            2<span className="ml-2">Export Video</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuItem 
               onClick={() => handleRender('mp4', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in MP4
+              <img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in MP4</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('mov', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in MOV
+              <img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in MOV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('mkv', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in MKV
+ <img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in MKV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('webm', 'vp8')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in WebM
+<img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in WebM</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -427,26 +417,46 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
           >
             <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
-            Render Audio
+<img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export Audio</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('mp3', 'mp3')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in MP3
+<img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in MP3</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('wav', 'wav')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in WAV
+<img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in WAV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('aac', 'aac')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              Render in AAC
+<img 
+  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+  alt="Export" 
+  className="w-3.5 h-3.5 mr-0.5" 
+/>
+2<span className="ml-2">Export in AAC</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>

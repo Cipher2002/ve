@@ -203,11 +203,11 @@ export const ImageOverlayPanel: React.FC = () => {
         
         // Check if the API returned success and has data
         if (data.RESULT === 'SUCCESS' && data.RESPONSE && Array.isArray(data.RESPONSE)) {
-          rawImages = data.RESPONSE;
+          rawImages = data.RESPONSE.reverse();
         } else if (data.images && Array.isArray(data.images)) {
-          rawImages = data.images;
+          rawImages = data.images.reverse();
         } else if (data.projects && Array.isArray(data.projects)) {
-          rawImages = data.projects;
+          rawImages = data.projects.reverse();
         } else {
           // Handle error cases or no data
           rawImages = [];
@@ -520,13 +520,34 @@ export const ImageOverlayPanel: React.FC = () => {
     }
   }, [selectedOverlayId, overlays]);
 
+  // Helper function to get image's natural dimensions
+  const getImageNaturalDimensions = (imageUrl: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+      };
+      
+      img.onerror = () => {
+        // Fallback to editor dimensions if image can't be loaded
+        resolve({ width: 400, height: 300 }); // Default fallback dimensions
+      };
+      
+      img.src = imageUrl;
+    });
+  };
+
   /**
    * Adds a new image overlay to the editor
    * @param image - The selected Pexels image to add
    * Creates a new overlay with default positioning and animation settings
    */
-  const handleAddImage = (image: ApiImage) => {
-    const { width, height } = getAspectRatioDimensions();
+  const handleAddImage = async (image: ApiImage) => {
+    const { width, height } = await getImageNaturalDimensions(image.url);
     const { from, row } = findNextAvailablePosition(
       overlays,
       visibleRows,
@@ -547,7 +568,7 @@ export const ImageOverlayPanel: React.FC = () => {
       type: OverlayType.IMAGE,
       src: image.url,
       styles: {
-        objectFit: "cover",
+        objectFit: "contain",
         animation: {
           enter: "fadeIn",
           exit: "fadeOut",

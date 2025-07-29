@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 
-export async function POST(request: NextRequest) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { audioId: string } }
+) {
   try {
-    const { videoId, uid } = await request.json();
+    const { audioId } = params;
+    const { uid } = await request.json();
 
-    if (!videoId || !uid) {
-      return NextResponse.json({ error: 'Video ID and UID are required' }, { status: 400 });
+    if (!audioId || !uid) {
+      return NextResponse.json({ error: 'Audio ID and UID are required' }, { status: 400 });
     }
 
     // Search for the file in user's directories
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     let fileDeleted = false;
-    const supportedExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm', '.wav', '.mp3', '.aac'];
+    const supportedExtensions = ['.wav', '.mp3', '.aac'];
 
     try {
       // Get all project folders for this user
@@ -32,11 +36,11 @@ export async function POST(request: NextRequest) {
         
         // Check each possible extension
         for (const ext of supportedExtensions) {
-          const filePath = path.join(projectPath, `${videoId}${ext}`);
+          const filePath = path.join(projectPath, `${audioId}${ext}`);
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
             fileDeleted = true;
-            console.log(`Deleted file: ${filePath}`);
+            console.log(`Deleted audio file: ${filePath}`);
             break;
           }
         }
@@ -45,16 +49,16 @@ export async function POST(request: NextRequest) {
       }
 
       if (fileDeleted) {
-        return NextResponse.json({ success: true, message: 'Video deleted successfully' });
+        return NextResponse.json({ success: true, message: 'Audio deleted successfully' });
       } else {
-        return NextResponse.json({ error: 'Video not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Audio file not found' }, { status: 404 });
       }
     } catch (error) {
-      console.error('Error deleting file:', error);
-      return NextResponse.json({ error: 'Failed to delete video' }, { status: 500 });
+      console.error('Error deleting audio file:', error);
+      return NextResponse.json({ error: 'Failed to delete audio' }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error in delete API:', error);
+    console.error('Error in delete audio API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

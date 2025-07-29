@@ -67,6 +67,25 @@ export const VideoOverlayPanel: React.FC = () => {
     return { uid: '', sid: '', user_ref: '' };
   };
 
+  // Helper function to format date as dd/mm/yyyy
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return 'Unknown date';
+    
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return 'Invalid date';
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('generated-zanopy');
   const [selectedProjectType, setSelectedProjectType] = useState('T2V');
   const [projects, setProjects] = useState<VideoProject[]>([]);
@@ -76,7 +95,7 @@ export const VideoOverlayPanel: React.FC = () => {
 
   const projectTypeOptions = [
     { label: 'T2V', value: 'text-to-video', apiAction: 'GET_TEXT_TO_VIDEO_PROJECT', imageStatus: '1' },
-    { label: 'I2V', value: 'image-to-video', apiAction: 'GET_IMAGE_TO_VIDEO_PROJECT', imageStatus: '' },
+    { label: 'I2V', value: 'image-to-video', apiAction: 'GET_IMAGE_TO_VIDEO_PROJECT', imageStatus: '1' },
     { label: 'Video Effects', value: 'video-effects', apiAction: 'GET_PANOUT_VIDEO_PROJECT', imageStatus: '1' },
     { label: 'Talking Video', value: 'talking-video', apiAction: 'GET_TALKING_IMAGE_PROJECT', imageStatus: '1' }
   ];
@@ -93,7 +112,17 @@ export const VideoOverlayPanel: React.FC = () => {
       
       const response = await fetch(`/api/latest/video/receive?user_id=${uid}&do_action=${projectOption.apiAction}&imageStatus=${projectOption.imageStatus}`);
       const data = await response.json();
-      setProjects(data.projects || []);
+      
+      // Sort projects by created_at in descending order (latest first)
+      const sortedProjects = (data.projects || []).sort((a: VideoProject, b: VideoProject) => {
+        if (!a.created_at && !b.created_at) return 0;
+        if (!a.created_at) return 1;
+        if (!b.created_at) return -1;
+        
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      
+      setProjects(sortedProjects);
     } catch (error) {
       console.error(`Failed to fetch ${projectType} projects:`, error);
     } finally {
@@ -142,6 +171,49 @@ export const VideoOverlayPanel: React.FC = () => {
     changeOverlay(updatedOverlay.id, updatedOverlay);
   };
 
+  const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        const durationInSeconds = video.duration;
+        const durationInFrames = Math.round(durationInSeconds * 30);
+        resolve(durationInFrames);
+      };
+      
+      video.onerror = () => {
+        // Fallback to 300 frames (10 seconds) if duration can't be determined
+        resolve(300);
+      };
+      
+      video.src = videoUrl;
+    });
+  };
+
+  // Helper function to get video's natural dimensions
+  const getVideoNaturalDimensions = (videoUrl: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        resolve({
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+      
+      video.onerror = () => {
+        // Fallback to editor dimensions if video can't be loaded
+        const { getAspectRatioDimensions } = useAspectRatio();
+        resolve(getAspectRatioDimensions());
+      };
+      
+      video.src = videoUrl;
+    });
+  };
+
   const handleGeneratedVideoClick = async (project: VideoProject) => {
     if (project.video_url && !downloadingCards.has(project.id)) {
       // Start download progress tracking
@@ -156,8 +228,8 @@ export const VideoOverlayPanel: React.FC = () => {
         });
 
         if (cachedVideoUrl) {
-          // Only add to timeline after successful download
-          const { width, height } = getAspectRatioDimensions();
+          // Get the video's natural dimensions instead of editor dimensions
+          const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
           const { from, row } = findNextAvailablePosition(
             overlays,
             visibleRows,
@@ -169,7 +241,7 @@ export const VideoOverlayPanel: React.FC = () => {
             top: 0,
             width,
             height,
-            durationInFrames: 300,
+            durationInFrames: await getVideoDurationInFrames(cachedVideoUrl),
             from,
             id: Date.now(),
             rotation: 0,
@@ -183,7 +255,7 @@ export const VideoOverlayPanel: React.FC = () => {
               opacity: 1,
               zIndex: 100,
               transform: "none",
-              objectFit: "cover",
+              objectFit: "contain",
             },
           };
 
@@ -224,8 +296,8 @@ export const VideoOverlayPanel: React.FC = () => {
         });
 
         if (cachedVideoUrl) {
-          // Only add to timeline after successful download
-          const { width, height } = getAspectRatioDimensions();
+          // Get the video's natural dimensions instead of editor dimensions
+          const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
           const { from, row } = findNextAvailablePosition(
             overlays,
             visibleRows,
@@ -251,7 +323,7 @@ export const VideoOverlayPanel: React.FC = () => {
               opacity: 1,
               zIndex: 100,
               transform: "none",
-              objectFit: "cover",
+              objectFit: "contain",
             },
           };
 
@@ -277,6 +349,11 @@ export const VideoOverlayPanel: React.FC = () => {
       }
     }
   };
+
+  // Sort rendered videos by creation date (latest first)
+  const sortedRenderedVideos = [...renderedVideos].sort((a, b) => {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   return (
     <div className="flex flex-col gap-4 p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
@@ -415,7 +492,7 @@ export const VideoOverlayPanel: React.FC = () => {
                               {project.title}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                              {project.ratio || 'Unknown'} • {project.created_at ? new Date(project.created_at).toLocaleDateString() : 'Unknown date'}
+                              {formatDate(project.created_at)}
                             </p>
                           </div>
                         </>
@@ -449,9 +526,9 @@ export const VideoOverlayPanel: React.FC = () => {
                     />
                   ))}
                 </div>
-              ) : renderedVideos.length > 0 ? (
+              ) : sortedRenderedVideos.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 p-2">
-                  {renderedVideos.map((video) => (
+                  {sortedRenderedVideos.map((video) => (
                     <div
                       key={video.id}
                       className={`relative group/item border rounded-md overflow-hidden cursor-pointer transition-all ${
@@ -503,7 +580,7 @@ export const VideoOverlayPanel: React.FC = () => {
                           {video.filename}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {(video.size / (1024 * 1024)).toFixed(1)} MB • {new Date(video.createdAt).toLocaleDateString()}
+                          {(video.size / (1024 * 1024)).toFixed(1)} MB • {formatDate(video.createdAt)}
                         </p>
                       </div>
 

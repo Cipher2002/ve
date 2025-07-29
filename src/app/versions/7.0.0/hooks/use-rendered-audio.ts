@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface RenderedAudio {
   id: string;
@@ -13,10 +13,20 @@ export const useRenderedAudio = () => {
   const [audio, setAudio] = useState<RenderedAudio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAudio = async () => {
+  // Get UID from URL parameters
+  const getUidFromUrl = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || 'default-user';
+    }
+    return 'default-user';
+  }, []);
+
+  const fetchAudio = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/latest/rendered-audio');
+      const uid = getUidFromUrl();
+      const response = await fetch(`/api/latest/rendered-audio?uid=${uid}&t=${Date.now()}`);
       const data = await response.json();
       setAudio(data);
     } catch (error) {
@@ -25,30 +35,35 @@ export const useRenderedAudio = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getUidFromUrl]);
 
-  const deleteAudio = async (audioId: string) => {
+  const deleteAudio = useCallback(async (audioId: string) => {
     // Optimistically remove from UI
     setAudio(prev => prev.filter(a => a.id !== audioId));
     
     try {
+      const uid = getUidFromUrl();
       await fetch(`/api/latest/rendered-audio/${audioId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uid }),
       });
     } catch (error) {
       console.error('Error deleting audio:', error);
       // Refetch to restore state on error
       fetchAudio();
     }
-  };
+  }, [fetchAudio, getUidFromUrl]);
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     fetchAudio();
-  };
+  }, [fetchAudio]);
 
   useEffect(() => {
     fetchAudio();
-  }, []);
+  }, [fetchAudio]);
 
   return {
     audio,

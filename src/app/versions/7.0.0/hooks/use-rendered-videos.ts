@@ -15,12 +15,22 @@ export const useRenderedVideos = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Get UID from URL parameters
+  const getUidFromUrl = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || 'default-user';
+    }
+    return 'default-user';
+  }, []);
+
   const fetchVideos = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/latest/ssr/list?t=${Date.now()}`);
+      const uid = getUidFromUrl();
+      const response = await fetch(`/api/latest/ssr/list?uid=${uid}&t=${Date.now()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch rendered videos');
       }
@@ -32,7 +42,7 @@ export const useRenderedVideos = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getUidFromUrl]);
 
   useEffect(() => {
     fetchVideos();
@@ -40,32 +50,33 @@ export const useRenderedVideos = () => {
 
   const deleteVideo = useCallback(async (videoId: string) => {
     try {
-        const response = await fetch('/api/latest/ssr/delete', {
+      const uid = getUidFromUrl();
+      const response = await fetch('/api/latest/ssr/delete', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ videoId }),
-        });
+        body: JSON.stringify({ videoId, uid }),
+      });
 
-        if (!response.ok) {
+      if (!response.ok) {
         throw new Error('Failed to delete video');
-        }
+      }
 
-        // Refresh the video list after deletion
-        await fetchVideos();
-        return true;
+      // Refresh the video list after deletion
+      await fetchVideos();
+      return true;
     } catch (err) {
-        console.error('Error deleting video:', err);
-        return false;
+      console.error('Error deleting video:', err);
+      return false;
     }
-    }, [fetchVideos]);
+  }, [fetchVideos, getUidFromUrl]);
 
-    return {
-        videos,
-        isLoading,
-        error,
-        refetch: fetchVideos,
-        deleteVideo,
-    };
+  return {
+    videos,
+    isLoading,
+    error,
+    refetch: fetchVideos,
+    deleteVideo,
+  };
 };
