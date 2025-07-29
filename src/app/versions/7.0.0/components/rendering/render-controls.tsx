@@ -356,57 +356,32 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
           >
             <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
-            <img 
-              src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-              alt="Export" 
-              className="w-3.5 h-3.5 mr-0.5" 
-            />
-            2<span className="ml-2">Export Video</span>
+            <span className="ml-2">Export Video</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuItem 
               onClick={() => handleRender('mp4', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              <img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in MP4</span>
+              <span className="ml-2">Export in MP4</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('mov', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-              <img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in MOV</span>
+              <span className="ml-2">Export in MOV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('mkv', 'h264')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
- <img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in MKV</span>
+            <span className="ml-2">Export in MKV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRender('webm', 'vp8')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-<img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in WebM</span>
+              <span className="ml-2">Export in WebM</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -417,46 +392,26 @@ const RenderControls: React.FC<RenderControlsProps> = ({
             className="flex items-center [&>svg:last-child]:hidden px-3 py-2 hover:bg-accent cursor-pointer"
           >
             <ChevronDown className="w-3.5 h-3.5 mr-1.5 rotate-90" />
-<img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export Audio</span>
+            <span className="ml-2">Export Audio</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('mp3', 'mp3')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-<img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in MP3</span>
+              <span className="ml-2">Export in MP3</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('wav', 'wav')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-<img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in WAV</span>
+              <span className="ml-2">Export in WAV</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => handleRenderAudio('aac', 'aac')}
               disabled={state.status === "rendering" || state.status === "invoking"}
             >
-<img 
-  src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
-  alt="Export" 
-  className="w-3.5 h-3.5 mr-0.5" 
-/>
-2<span className="ml-2">Export in AAC</span>
+              <span className="ml-2">Export in AAC</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>

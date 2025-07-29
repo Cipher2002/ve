@@ -433,7 +433,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       itemType={item.type} // Add this
       itemId={item.id}
       isExtractingAudio={isExtractingAudio} // Add this
-
+      audioDetached={item.type === OverlayType.VIDEO ? item.audioDetached : false} // Add this
     >
       <div
         ref={itemRef}

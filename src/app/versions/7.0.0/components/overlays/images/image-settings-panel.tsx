@@ -473,7 +473,14 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                       Generating...
                     </>
                   ) : (
-                    'Generate Audio'
+                    <>
+                      <img 
+                        src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+                        alt="Generate" 
+                        className="w-4 h-4 mr-0.01" 
+                      />
+                      20<span className="ml-1.5">Generate Audio</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -512,7 +519,14 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                       Generating...
                     </>
                   ) : (
-                    'Generate AI Audio'
+                    <>
+                      <img 
+                        src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png" 
+                        alt="Generate" 
+                        className="w-4 h-4 mr-0.01" 
+                      />
+                      20<span className="ml-1.5">Generate AI Audio</span>
+                    </>
                   )}
                 </button>
               </div>

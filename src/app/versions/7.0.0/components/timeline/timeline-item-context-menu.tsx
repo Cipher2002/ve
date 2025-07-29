@@ -24,6 +24,7 @@ interface TimelineItemContextMenuProps {
   onDetachAudio: (id: number) => void;
   itemType: string; // Add this
   isExtractingAudio?: boolean; // Add this
+  audioDetached?: boolean; // Add this
 
   /** ID of the timeline item this menu belongs to */
   itemId: number;
@@ -56,6 +57,7 @@ export const TimelineItemContextMenu: React.FC<
   onSplitItem,
   onDetachAudio, // Add this
   isExtractingAudio, // Add this
+  audioDetached, // Add this
   itemType,
   itemId,
 }) => {
@@ -93,7 +95,7 @@ export const TimelineItemContextMenu: React.FC<
             Detach Audio
           </ContextMenuItem>
         )} */}
-        {itemType === 'video' && (
+        {itemType === 'video' && !audioDetached && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
             onClick={() => onDetachAudio(itemId)}

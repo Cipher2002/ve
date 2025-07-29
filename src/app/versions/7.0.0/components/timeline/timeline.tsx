@@ -168,10 +168,14 @@ const Timeline: React.FC<TimelineProps> = ({
         return overlay;
       });
 
-      // Update the original video overlay to mark audio as detached
+      // Update the original video overlay to mark audio as detached and mute it
       const updatedVideoOverlay = {
         ...videoOverlay,
         audioDetached: true,
+        styles: {
+          ...videoOverlay.styles,
+          volume: 0, // Actually mute the video
+        },
       };
 
       // Update the video overlay in the overlays array
