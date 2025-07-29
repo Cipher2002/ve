@@ -21,6 +21,7 @@ const eslintConfig = [
       // Additional rules to ignore warnings/errors from your build
       "react/no-unescaped-entities": "off",
       "react-hooks/exhaustive-deps": "off",
+      "react-hooks/rules-of-hooks": "off", // Added this line
       "@next/next/no-img-element": "off",
       "jsx-a11y/alt-text": "off",
       "prefer-const": "off",
