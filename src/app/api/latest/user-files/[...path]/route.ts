@@ -4,10 +4,11 @@ import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const [uid, projectName, filename] = params.path;
+    const { path: pathParams } = await params;
+    const [uid, projectName, filename] = pathParams;
     
     if (!uid || !projectName || !filename) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
