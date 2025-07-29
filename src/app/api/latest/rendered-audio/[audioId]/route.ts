@@ -4,10 +4,10 @@ import fs from "fs";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { audioId: string } }
+  { params }: { params: Promise<{ audioId: string }> }
 ) {
   try {
-    const { audioId } = params;
+    const { audioId } = await params;
     const { uid } = await request.json();
 
     if (!audioId || !uid) {
