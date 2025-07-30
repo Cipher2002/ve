@@ -63,33 +63,6 @@ const getUserAudioDir = (uid?: string, projectName?: string) => {
   return userProjectDir;
 };
 
-// ADD THESE FUNCTIONS AFTER getUserAudioDir:
-
-// Function to check GPU availability
-async function checkGPUAvailability(): Promise<void> {
-  return new Promise((resolve) => {
-    ffmpeg()
-      .inputFormat('lavfi')
-      .input('testsrc=duration=1:size=320x240:rate=1')
-      .videoCodec('h264_nvenc')
-      .output('test_gpu.mp4')
-      .on('end', () => {
-        console.log('✅ NVIDIA GPU encoding available');
-        try {
-          fs.unlinkSync('test_gpu.mp4'); // Clean up
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-        resolve();
-      })
-      .on('error', (err: any) => {
-        console.log('❌ NVIDIA GPU encoding not available:', err.message);
-        resolve();
-      })
-      .run();
-  });
-}
-
 // Function to convert video using GPU
 async function convertToGPUEncoded(inputPath: string, outputPath: string, codec: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -156,9 +129,6 @@ export async function startRendering(
   
   console.log('Video rendering with format:', format, 'codec:', codec);
   const renderId = uuidv4();
-
-  await checkGPUAvailability();
-
 
   // Initialize render state
   saveRenderState(renderId, {
