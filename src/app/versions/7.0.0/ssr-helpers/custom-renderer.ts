@@ -225,7 +225,8 @@ export async function startRendering(
         format,
         stats.size,
         servingPath,
-        'video'
+        'video',
+        baseUrl 
       );
       
       completeRender(renderId, servingPath, stats.size);
@@ -367,7 +368,8 @@ export async function startAudioRendering(
         format,
         stats.size,
         servingPath,
-        'audio'
+        'audio',
+        baseUrl 
       );
       
       completeRender(renderId, servingPath, stats.size);
@@ -414,7 +416,8 @@ async function saveRenderToUserFolder(
   format: string, 
   fileSize: number, 
   outputPath: string,
-  mediaType: 'video' | 'audio' = 'video'
+  mediaType: 'video' | 'audio' = 'video',
+  baseUrl: string
 ) {
   try {
     const renderData = {
@@ -426,7 +429,7 @@ async function saveRenderToUserFolder(
       mediaType
     };
 
-    const response = await fetch('/api/latest/save-to-user/save', {
+    const response = await fetch(`${baseUrl}/api/latest/save-to-user/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
