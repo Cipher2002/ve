@@ -248,8 +248,9 @@ export const VideoOverlayPanel: React.FC = () => {
             row,
             isDragging: false,
             type: OverlayType.VIDEO,
-            content: project.video_url,
-            src: cachedVideoUrl,
+            content: project.video_url, // Keep original URL for Remotion
+            src: cachedVideoUrl, // Keep blob URL for preview
+            originalUrl: project.video_url, // Add this new field
             videoStartTime: 0,
             styles: {
               opacity: 1,
@@ -316,8 +317,9 @@ export const VideoOverlayPanel: React.FC = () => {
             row,
             isDragging: false,
             type: OverlayType.VIDEO,
-            content: video.url,
-            src: cachedVideoUrl,
+            content: video.url, // Keep original URL for Remotion
+            src: cachedVideoUrl, // Keep blob URL for preview  
+            originalUrl: video.url, // Add this new field
             videoStartTime: 0,
             styles: {
               opacity: 1,

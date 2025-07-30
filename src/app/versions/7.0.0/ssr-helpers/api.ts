@@ -98,13 +98,25 @@ export const renderAudio = async ({
     return 'default-user';
   };
 
+  // Transform overlays to use original URLs for rendering
+  const transformedOverlays = inputProps.overlays?.map((overlay: any) => {
+    if (overlay.type === 'video' && overlay.originalUrl) {
+      return {
+        ...overlay,
+        src: overlay.originalUrl, // Use original URL for Remotion
+      };
+    }
+    return overlay;
+  }) || [];
+
   const body: z.infer<typeof RenderRequest> = {
     id,
     inputProps: {
       ...inputProps,
+      overlays: transformedOverlays, // Use transformed overlays
       // Only add uid if not already present
       uid: inputProps.uid || getUidFromUrl(),
-      // Only add projectName if not already present
+      // Only add projectName if not already present  
       projectName: inputProps.projectName || 'Untitled Project',
     },
     format,

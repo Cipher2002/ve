@@ -126,6 +126,7 @@ export type ClipOverlay = BaseOverlay & {
   type: OverlayType.VIDEO;
   content: string;
   src: string;
+  originalUrl?: string;
   videoStartTime?: number;
   speed?: number;
   audioDetached?: boolean; // Add this line
