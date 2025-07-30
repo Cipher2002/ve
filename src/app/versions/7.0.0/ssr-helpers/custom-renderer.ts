@@ -14,6 +14,8 @@ import {
   completeRender,
   failRender,
 } from "./render-state";
+import puppeteer from 'puppeteer';
+
 
 // Ensure the videos directory exists
 // Helper function to get user-specific directory
@@ -167,6 +169,24 @@ export async function startRendering(
       console.log('Video mapped codec:', codec, 'to:', remotionCodec); // Add logging
       console.log('Rendering video with codec:', remotionCodec, 'to file:', outputPath); // Add logging
 
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--enable-gpu',
+          '--use-gl=angle',
+          '--enable-webgl',
+          '--enable-accelerated-2d-canvas',
+          '--enable-accelerated-video-decode',
+          '--disable-gpu-sandbox',
+          '--ignore-gpu-blocklist',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--enable-features=VaapiVideoDecoder',
+        ],
+      });
+
+
       const baseRenderOptions = {
         codec: remotionCodec as any,
         composition: {
@@ -179,9 +199,10 @@ export async function startRendering(
           ...inputProps,
           baseUrl,
         },
-        chromiumOptions: {
-          headless: true,
-        },
+        // chromiumOptions: {
+        //   headless: true,
+        // },
+        puppeteerInstance: browser, // Use puppeteer instead of chromiumOptions
         timeoutInMilliseconds: 300000,
         onProgress: ((progress) => {
           updateRenderProgress(renderId, progress.progress);
@@ -206,6 +227,8 @@ export async function startRendering(
 
       // Render the video using chromium
       await renderMedia(renderOptions);
+      await browser.close();
+
 
       // Get file size from the actual output location
       const stats = fs.statSync(outputPath);
@@ -330,6 +353,25 @@ export async function startAudioRendering(
       };
       const remotionCodec = codecMap[codec] || codec;
       console.log('Mapped codec:', codec, 'to:', remotionCodec);
+
+      const audioBrowser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--enable-gpu',
+          '--use-gl=angle',
+          '--enable-webgl',
+          '--enable-accelerated-2d-canvas',
+          '--enable-accelerated-video-decode',
+          '--disable-gpu-sandbox',
+          '--ignore-gpu-blocklist',
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--enable-features=VaapiVideoDecoder',
+        ],
+      });
+
+
       await renderMedia({
         codec: remotionCodec as any,
         composition: {
@@ -342,14 +384,17 @@ export async function startAudioRendering(
           ...inputProps,
           baseUrl,
         },
-        chromiumOptions: {
-          headless: true,
-        },
+        // chromiumOptions: {
+        //   headless: true,
+        // },
+        puppeteerInstance: audioBrowser,
         timeoutInMilliseconds: 300000,
         onProgress: ((progress) => {
           updateRenderProgress(renderId, progress.progress);
         }) as RenderMediaOnProgress,
       });
+
+      await audioBrowser.close();
 
       const stats = fs.statSync(outputPath);
       
