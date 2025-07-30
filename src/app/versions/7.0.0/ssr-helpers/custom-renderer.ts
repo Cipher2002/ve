@@ -14,8 +14,6 @@ import {
   completeRender,
   failRender,
 } from "./render-state";
-import ffmpeg from 'fluent-ffmpeg';
-
 
 // Ensure the videos directory exists
 // Helper function to get user-specific directory
@@ -62,43 +60,6 @@ const getUserAudioDir = (uid?: string, projectName?: string) => {
   
   return userProjectDir;
 };
-
-// Function to convert video using GPU
-async function convertToGPUEncoded(inputPath: string, outputPath: string, codec: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    let ffmpegCommand = ffmpeg(inputPath);
-
-    // Choose GPU encoder based on codec
-    if (codec === 'h264') {
-      // Try NVIDIA first, fallback to Intel, then software
-      ffmpegCommand = ffmpegCommand
-        .videoCodec('h264_nvenc') // NVIDIA GPU encoding
-        .outputOptions([
-          '-preset', 'fast',
-          '-cq', '18',
-          '-pix_fmt', 'yuv420p'
-        ]);
-    }
-
-    ffmpegCommand
-      .output(outputPath)
-      .on('end', () => {
-        console.log('GPU encoding completed');
-        resolve();
-      })
-      .on('error', (err: any) => {
-        console.log('GPU encoding failed, trying software encoding:', err.message);
-        // Fallback to software encoding if GPU fails
-        ffmpeg(inputPath)
-          .videoCodec('libx264')
-          .output(outputPath)
-          .on('end', resolve)
-          .on('error', reject)
-          .run();
-      })
-      .run();
-  });
-}
 
 // Track rendering progress
 export const renderProgress = new Map<string, number>();
@@ -200,12 +161,11 @@ export async function startRendering(
         'gif': 'gif'
       };
       const outputDir = getUserVideoDir(inputProps.uid as string, inputProps.projectName as string);
-      const tempOutputPath = path.join(outputDir, `${renderId}_temp.${format}`);
-      const finalOutputPath = path.join(outputDir, `${renderId}.${format}`);
+      const outputPath = path.join(outputDir, `${renderId}.${format}`);
 
       const remotionCodec = codecMap[codec] || codec;
       console.log('Video mapped codec:', codec, 'to:', remotionCodec); // Add logging
-      console.log('Rendering video with codec:', remotionCodec, 'to file:', tempOutputPath); // Add logging
+      console.log('Rendering video with codec:', remotionCodec, 'to file:', outputPath); // Add logging
 
       const baseRenderOptions = {
         codec: remotionCodec as any,
@@ -214,7 +174,7 @@ export async function startRendering(
           durationInFrames: actualDurationInFrames,
         },
         serveUrl: bundleLocation,
-        outputLocation: tempOutputPath, // CHANGE THIS from outputPath to tempOutputPath
+        outputLocation: outputPath, // Render directly to user folder
         inputProps: {
           ...inputProps,
           baseUrl,
@@ -247,29 +207,14 @@ export async function startRendering(
       // Render the video using chromium
       await renderMedia(renderOptions);
 
-      // ADD GPU encoding step
-      console.log('Starting GPU encoding...');
-      try {
-        await convertToGPUEncoded(tempOutputPath, finalOutputPath, codec);
-        
-        // Clean up temp file
-        fs.unlinkSync(tempOutputPath);
-        
-        console.log('GPU encoding completed successfully');
-      } catch (error) {
-        console.error('GPU encoding failed:', error);
-        // If GPU encoding fails, use the temp file as final
-        fs.renameSync(tempOutputPath, finalOutputPath);
-      }
-
       // Get file size from the actual output location
-      const stats = fs.statSync(finalOutputPath);
-
+      const stats = fs.statSync(outputPath);
+      
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
       const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
-
-      console.log('Video saved to:', finalOutputPath);
+      
+      console.log('Video saved to:', outputPath);
       console.log('Will be served from:', servingPath);
       
       // Save metadata to project index
