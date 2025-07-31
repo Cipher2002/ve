@@ -54,7 +54,7 @@ export const LocalMediaPanel: React.FC = () => {
         isDragging: false,
         type: OverlayType.VIDEO,
         content: file.thumbnail || "",
-        src: file.path,
+        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
         videoStartTime: 0,
         styles: {
           opacity: 1,
@@ -76,7 +76,7 @@ export const LocalMediaPanel: React.FC = () => {
         row,
         isDragging: false,
         type: OverlayType.IMAGE,
-        src: file.path,
+        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
         content: file.path,
         styles: {
           objectFit: "cover",
@@ -100,7 +100,7 @@ export const LocalMediaPanel: React.FC = () => {
         isDragging: false,
         type: OverlayType.SOUND,
         content: file.name,
-        src: file.path,
+        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
         styles: {
           volume: 1,
         },

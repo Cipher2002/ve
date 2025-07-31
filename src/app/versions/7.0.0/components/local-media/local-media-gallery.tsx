@@ -126,7 +126,11 @@ export function LocalMediaGallery({
         return (
           <div className="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-2">
             <img
-              src={selectedFile.path}
+              src={
+                selectedFile.path.startsWith("http")
+                  ? selectedFile.path
+                  : `${window.location.origin}${selectedFile.path}`
+              }
               alt={selectedFile.name}
               className={`${commonClasses} object-contain`}
             />
@@ -136,7 +140,11 @@ export function LocalMediaGallery({
         return (
           <div className="relative bg-gray-50 dark:bg-gray-900 rounded-lg p-2">
             <video
-              src={selectedFile.path}
+              src={
+                selectedFile.path.startsWith("http")
+                  ? selectedFile.path
+                  : `${window.location.origin}${selectedFile.path}`
+              }
               controls
               className={commonClasses}
               controlsList="nodownload"
@@ -226,7 +234,11 @@ export function LocalMediaGallery({
             <div className="aspect-video relative">
               {file.type === "image" && (
                 <img
-                  src={file.thumbnail || file.path}
+                  src={
+                    (file.thumbnail || file.path).startsWith("http")
+                      ? (file.thumbnail || file.path)
+                      : `${window.location.origin}${file.thumbnail || file.path}`
+                  }
                   alt={file.name}
                   className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
                 />
@@ -234,7 +246,11 @@ export function LocalMediaGallery({
               {file.type === "video" && (
                 <>
                   <img
-                    src={file.thumbnail}
+                    src={
+                      file.thumbnail?.startsWith("http")
+                        ? file.thumbnail
+                        : `${window.location.origin}${file.thumbnail}`
+                    }
                     alt={file.name}
                     className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
                   />
