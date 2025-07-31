@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BASE_AUDIO_URL = 'http://localhost:3000/tmp_audio/'; // Make this configurable later
+// const BASE_AUDIO_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net/tmp_audio/'; // Make this configurable later
 
 export async function POST(request: NextRequest) {
   try {

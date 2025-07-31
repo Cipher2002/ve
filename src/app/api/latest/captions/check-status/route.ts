@@ -31,13 +31,26 @@ export async function POST(request: NextRequest) {
     
     // Check if response is a URL (completion) or progress object
     if (typeof result.RESPONSE === 'string' && result.RESPONSE.startsWith('http')) {
-      // Process completed, clean up temp files
-      await cleanupTempAudio();
-      
-      return NextResponse.json({ 
-        completed: true, 
-        subtitlesUrl: result.RESPONSE 
-      });
+      try {
+        // Fetch the subtitles data from the external URL
+        const subtitlesResponse = await fetch(result.RESPONSE);
+        if (!subtitlesResponse.ok) {
+          throw new Error(`Failed to fetch subtitles: ${subtitlesResponse.status}`);
+        }
+        
+        const subtitlesData = await subtitlesResponse.json();
+        
+        // Clean up temp files
+        await cleanupTempAudio();
+        
+        return NextResponse.json({ 
+          completed: true, 
+          subtitlesData: subtitlesData
+        });
+      } catch (error) {
+        console.error('Failed to fetch subtitles:', error);
+        return NextResponse.json({ error: 'Failed to fetch subtitle data' }, { status: 500 });
+      }
     } else {
       // Still in progress
       return NextResponse.json({ 

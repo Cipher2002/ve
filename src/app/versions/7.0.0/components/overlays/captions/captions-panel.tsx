@@ -45,6 +45,7 @@ export const CaptionsPanel: React.FC = () => {
     durationInFrames,
     changeOverlay,
     currentFrame,
+    setOverlays, // Add this
   } = useEditorContext();
 
   const { findNextAvailablePosition } = useTimelinePositioning();
@@ -304,8 +305,8 @@ const handleAutomaticCaptions = async () => {
         const result = await response.json();
         
         if (result.completed) {
-          // Fetch and process the subtitles
-          await processCaptionData(result.subtitlesUrl);
+          // Process the subtitles data directly
+          await processCaptionData(result.subtitlesData);
           return;
         }
         
@@ -326,11 +327,8 @@ const handleAutomaticCaptions = async () => {
     await poll();
   };
 
-  const processCaptionData = async (subtitlesUrl: string) => {
+  const processCaptionData = async (captionData: any) => {
     try {
-      const response = await fetch(subtitlesUrl);
-      const captionData = await response.json();
-      
       // Convert the API response to our caption format
       const processedCaptions: Caption[] = captionData.segments.map((segment: any) => {
         const words = segment.words.map((word: any) => ({
@@ -354,16 +352,34 @@ const handleAutomaticCaptions = async () => {
       const totalDurationMs = Math.max(...processedCaptions.map(cap => cap.endMs));
       const calculatedDurationInFrames = Math.ceil((totalDurationMs / 1000) * 30);
       
-      const position = findNextAvailablePosition(
-        overlays,
-        visibleRows,
-        durationInFrames
+      // Find the topmost row with video or audio content
+      const mediaOverlays = overlays.filter(overlay => 
+        overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.SOUND
       );
+      
+      let targetRow = 0; // Default to top row if no media found
+      let updatedOverlays = [...overlays]; // Initialize with current overlays
+      
+      if (mediaOverlays.length > 0) {
+        // Find the minimum row number (topmost row with media)
+        const minMediaRow = Math.min(...mediaOverlays.map(overlay => overlay.row));
+        
+        // Place captions above the topmost media row
+        targetRow = Math.max(0, minMediaRow - 1);
+        
+        // Shift all overlays at or above the target row down by 1
+        updatedOverlays = overlays.map(overlay => {
+          if (overlay.row >= targetRow) {
+            return { ...overlay, row: overlay.row + 1 };
+          }
+          return overlay;
+        });
+      }
       
       const newCaptionOverlay: CaptionOverlay = {
         id: Date.now(),
         type: OverlayType.CAPTION,
-        from: position.from,
+        from: 0, // Start from beginning
         durationInFrames: calculatedDurationInFrames,
         captions: processedCaptions,
         left: 230,
@@ -372,10 +388,12 @@ const handleAutomaticCaptions = async () => {
         height: 269,
         rotation: 0,
         isDragging: false,
-        row: position.row,
+        row: targetRow,
       };
       
-      addOverlay(newCaptionOverlay);
+      // Add the caption overlay
+      const finalOverlays = [...updatedOverlays, newCaptionOverlay];
+      setOverlays(finalOverlays);
       
     } catch (error) {
       console.error('Failed to process caption data:', error);
