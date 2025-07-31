@@ -133,6 +133,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     return urlParams.get('uid') || 'default';
   };
 
+  // Captions generation state
+  const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
+
   const inputProps = {
     overlays,
     durationInFrames,
@@ -577,6 +580,10 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Template loading state
     isLoadingTemplate,
     templateLoadingProgress,
+
+    // Caption generation state
+    isGeneratingCaptions,
+    setIsGeneratingCaptions,
     
   };
 

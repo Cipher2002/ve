@@ -102,6 +102,11 @@ interface EditorContextProps {
   handleRecoverAutosave?: () => void;
   handleDiscardAutosave?: () => void;
 
+  // Caption generation state
+  isGeneratingCaptions: boolean;
+  setIsGeneratingCaptions: (loading: boolean) => void;
+
+
 }
 
 // Create the context with undefined as default value

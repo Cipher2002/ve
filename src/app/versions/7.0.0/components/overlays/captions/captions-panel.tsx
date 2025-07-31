@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useEditorContext } from "../../../contexts/editor-context";
@@ -46,14 +46,13 @@ export const CaptionsPanel: React.FC = () => {
     changeOverlay,
     currentFrame,
     setOverlays, // Add this
+    isGeneratingCaptions,
+    setIsGeneratingCaptions,
   } = useEditorContext();
 
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
   const [localOverlay, setLocalOverlay] = useState<CaptionOverlay | null>(null);
-
-  const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
-
 
   React.useEffect(() => {
     if (selectedOverlayId === null) {
@@ -283,16 +282,20 @@ const handleAutomaticCaptions = async () => {
     } catch (error) {
       console.error('Auto caption error:', error);
       alert('Failed to generate captions. Please try again.');
-    } finally {
       setIsGeneratingCaptions(false);
     }
+    // Don't reset loading state here - let pollCaptionStatus handle it
   };
 
-  const pollCaptionStatus = async (genaiCode: string) => {
+
+const pollCaptionStatus = async (genaiCode: string) => {
     const maxAttempts = 150; // 5 minutes with 2-second intervals
     let attempts = 0;
     
-    const poll = async (): Promise<void> => {
+    // Wait 3 seconds before starting to poll
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    while (attempts < maxAttempts) {
       try {
         const response = await fetch('/api/latest/captions/check-status', {
           method: 'POST',
@@ -302,7 +305,15 @@ const handleAutomaticCaptions = async () => {
           body: JSON.stringify({ genaiCode }),
         });
         
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const result = await response.json();
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
         
         if (result.completed) {
           // Process the subtitles data directly
@@ -311,23 +322,28 @@ const handleAutomaticCaptions = async () => {
         }
         
         attempts++;
-        if (attempts >= maxAttempts) {
-          throw new Error('Caption generation timed out');
-        }
+        console.log(`Caption generation progress: ${result.progress || 0}% - ${result.message || 'Processing...'}`);
         
-        // Continue polling
-        setTimeout(poll, 2000);
+        // Wait 2 seconds before next poll
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
         
       } catch (error) {
         console.error('Polling error:', error);
+        // Reset loading state on error
+        setIsGeneratingCaptions(false);
         throw error;
       }
-    };
+    }
     
-    await poll();
+    // If we exit the loop, it means we've exceeded maxAttempts
+    setIsGeneratingCaptions(false);
+    throw new Error('Caption generation timed out');
   };
 
-  const processCaptionData = async (captionData: any) => {
+
+const processCaptionData = async (captionData: any) => {
     try {
       // Convert the API response to our caption format
       const processedCaptions: Caption[] = captionData.segments.map((segment: any) => {
@@ -394,11 +410,13 @@ const handleAutomaticCaptions = async () => {
       // Add the caption overlay
       const finalOverlays = [...updatedOverlays, newCaptionOverlay];
       setOverlays(finalOverlays);
+      setIsGeneratingCaptions(false);
       
-    } catch (error) {
-      console.error('Failed to process caption data:', error);
-      alert('Failed to process generated captions');
-    }
+      } catch (error) {
+        console.error('Failed to process caption data:', error);
+        alert('Failed to process generated captions');
+        setIsGeneratingCaptions(false);
+      }
   };
 
   return (
