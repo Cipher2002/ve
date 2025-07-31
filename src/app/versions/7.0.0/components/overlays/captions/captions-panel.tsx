@@ -424,7 +424,7 @@ const processCaptionData = async (captionData: any) => {
 
   return (
     <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
-      {!localOverlay ? (
+      {(!localOverlay || selectedOverlayId === null) ? (
         <>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">

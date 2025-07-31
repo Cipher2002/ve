@@ -251,7 +251,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => setSelectedOverlayId(null)}
+                  onClick={() => { setSelectedOverlayId(null); setTimeout(() => {}, 0);} }
                   aria-label="Back"
                 >
                   <ChevronLeft className="h-4 w-4" />
