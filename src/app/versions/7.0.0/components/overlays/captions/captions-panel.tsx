@@ -56,6 +56,7 @@ export const CaptionsPanel: React.FC = () => {
 
   React.useEffect(() => {
     if (selectedOverlayId === null) {
+      setLocalOverlay(null);
       return;
     }
 
@@ -65,6 +66,8 @@ export const CaptionsPanel: React.FC = () => {
 
     if (selectedOverlay?.type === OverlayType.CAPTION) {
       setLocalOverlay(selectedOverlay as CaptionOverlay);
+    } else {
+      setLocalOverlay(null);
     }
   }, [selectedOverlayId, overlays]);
 
