@@ -235,7 +235,7 @@ export function LocalMediaGallery({
               {file.type === "image" && (
                 <img
                   src={
-                    (file.thumbnail || file.path).startsWith("http")
+                    (file.thumbnail || file.path)
                       ? (file.thumbnail || file.path)
                       : `${window.location.origin}${file.thumbnail || file.path}`
                   }
@@ -246,11 +246,7 @@ export function LocalMediaGallery({
               {file.type === "video" && (
                 <>
                   <img
-                    src={
-                      file.thumbnail?.startsWith("http")
-                        ? file.thumbnail
-                        : `${window.location.origin}${file.thumbnail}`
-                    }
+                    src={file.thumbnail}
                     alt={file.name}
                     className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
                   />

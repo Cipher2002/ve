@@ -234,7 +234,7 @@ export const useKeyframes = ({
           setTimeout(() => {
             cleanup();
             reject(new Error("Timeout while loading video metadata"));
-          }, 10000);
+          }, 200000);
         }
       );
 
@@ -316,8 +316,8 @@ export const useKeyframes = ({
       );
 
       const extractedFrames: FrameInfo[] = [];
-      const FRAME_TIMEOUT = 8000;
-      const SEEK_TIMEOUT = 1000;
+      const FRAME_TIMEOUT = 20000;
+      const SEEK_TIMEOUT = 20000;
       const EXTRACTION_BATCH_SIZE = 5; // Process frames in smaller batches
 
       extractionLoop: for (
@@ -443,7 +443,7 @@ export const useKeyframes = ({
               await new Promise((resolve) =>
                 setTimeout(
                   resolve,
-                  Math.min(100 * Math.pow(2, retryCount), 1000)
+                  Math.min(100 * Math.pow(2, retryCount), 20000)
                 )
               );
             }

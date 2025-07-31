@@ -106,7 +106,7 @@ export const generateThumbnail = async (file: File): Promise<string> => {
         video.currentTime = Math.min(1, video.duration / 2);
       };
 
-      video.onloadeddata = () => {
+      video.onseeked = () => {
         clearTimeout(timeoutId);
         try {
           const canvas = document.createElement("canvas");
