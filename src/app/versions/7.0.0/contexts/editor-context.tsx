@@ -73,6 +73,13 @@ interface EditorContextProps {
   downloadTemplate?: () => void; // Download template function
   isSaving?: boolean;
 
+  // Template loading state
+  isLoadingTemplate?: boolean;
+  templateLoadingProgress?: {
+    current: number;
+    total: number;
+  };
+
 
   // Add renderType to the context
   renderType: "ssr" | "lambda";

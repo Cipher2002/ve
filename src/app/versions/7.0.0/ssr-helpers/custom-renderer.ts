@@ -226,7 +226,7 @@ export async function startRendering(
         stats.size,
         servingPath,
         'video',
-        baseUrl 
+        // baseUrl 
       );
       
       completeRender(renderId, servingPath, stats.size);
@@ -369,7 +369,7 @@ export async function startAudioRendering(
         stats.size,
         servingPath,
         'audio',
-        baseUrl 
+        // baseUrl 
       );
       
       completeRender(renderId, servingPath, stats.size);
@@ -409,6 +409,51 @@ export function getRenderProgress(renderId: string) {
 }
 
 // Helper function to save render metadata to user folder
+// async function saveRenderToUserFolder(
+//   uid: string, 
+//   projectName: string, 
+//   renderId: string, 
+//   format: string, 
+//   fileSize: number, 
+//   outputPath: string,
+//   mediaType: 'video' | 'audio' = 'video',
+//   baseUrl: string
+// ) {
+//   try {
+//     const renderData = {
+//       status: 'success',
+//       url: outputPath,
+//       fileSize,
+//       renderId,
+//       format,
+//       mediaType
+//     };
+
+//     const response = await fetch(`${baseUrl}/api/latest/save-to-user/save`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         uid,
+//         projectName,
+//         type: 'render',
+//         data: renderData,
+//         timestamp: new Date().toISOString(),
+//       }),
+//     });
+
+//     if (!response.ok) {
+//       console.error('Failed to update project index via API');
+//     } else {
+//       console.log('Successfully updated project index');
+//     }
+//   } catch (error) {
+//     console.error('Error saving render metadata to user folder:', error);
+//   }
+// }
+
+// Replace the saveRenderToUserFolder function in custom-renderer.ts
 async function saveRenderToUserFolder(
   uid: string, 
   projectName: string, 
@@ -416,38 +461,57 @@ async function saveRenderToUserFolder(
   format: string, 
   fileSize: number, 
   outputPath: string,
-  mediaType: 'video' | 'audio' = 'video',
-  baseUrl: string
+  mediaType: 'video' | 'audio' = 'video'
 ) {
   try {
-    const renderData = {
+    const userFolderPath = path.join(process.cwd(), 'users', uid, projectName);
+    
+    // Ensure the directory exists
+    if (!fs.existsSync(userFolderPath)) {
+      fs.mkdirSync(userFolderPath, { recursive: true });
+    }
+
+    // Update or create project index file
+    const indexPath = path.join(userFolderPath, 'project-index.json');
+    let projectIndex: any = {};
+
+    if (fs.existsSync(indexPath)) {
+      const indexContent = fs.readFileSync(indexPath, 'utf-8');
+      projectIndex = JSON.parse(indexContent);
+    } else {
+      projectIndex = {
+        uid,
+        projectName,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+        saves: [],
+        renders: [],
+      };
+    }
+
+    const timestamp = new Date().toISOString();
+    const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
+
+    // Add render info to the index
+    projectIndex.renders = projectIndex.renders || [];
+    projectIndex.renders.push({
+      fileName: `${renderId}.${format}`,
+      timestamp,
       status: 'success',
-      url: outputPath,
+      url: servingPath,
       fileSize,
       renderId,
       format,
       mediaType
-    };
-
-    const response = await fetch(`${baseUrl}/api/latest/save-to-user/save`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uid,
-        projectName,
-        type: 'render',
-        data: renderData,
-        timestamp: new Date().toISOString(),
-      }),
     });
 
-    if (!response.ok) {
-      console.error('Failed to update project index via API');
-    } else {
-      console.log('Successfully updated project index');
-    }
+    projectIndex.lastUpdated = timestamp;
+    projectIndex.lastRender = timestamp;
+
+    // Write updated index
+    fs.writeFileSync(indexPath, JSON.stringify(projectIndex, null, 2));
+    
+    console.log('Successfully updated project index directly');
   } catch (error) {
     console.error('Error saving render metadata to user folder:', error);
   }

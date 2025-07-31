@@ -221,7 +221,7 @@ export default function SavedProjects() {
   const [editingName, setEditingName] = useState('');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6); // 6 projects per page (2 rows of 3)
+  const [itemsPerPage] = useState(3); // 3 projects per page (1 row of 3)
   const [dateFilter, setDateFilter] = useState('all');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState(() => {
@@ -310,6 +310,21 @@ export default function SavedProjects() {
     setProjectFiles([]);
     fetchUserProjects();
   };
+
+  React.useEffect(() => {
+    const handleRenderCompleted = (event: CustomEvent) => {
+      // Refresh projects when a render is completed
+      fetchUserProjects();
+      
+      // If we're currently viewing a project, refresh its files too
+      if (selectedProject) {
+        fetchProjectFiles(selectedProject.id);
+      }
+    };
+
+    window.addEventListener('renderCompleted', handleRenderCompleted as EventListener);
+    return () => window.removeEventListener('renderCompleted', handleRenderCompleted as EventListener);
+  }, [selectedProject]);
 
   // Handle saving project name
   const handleSaveProjectName = async (project: UserProject) => {
@@ -504,6 +519,41 @@ export default function SavedProjects() {
     window.addEventListener('projectSaved', handleProjectSaved as EventListener);
     return () => window.removeEventListener('projectSaved', handleProjectSaved as EventListener);
   }, []);
+
+  const handleApplyTemplate = async (project: UserProject) => {
+    const uid = getUidFromUrl();
+    try {
+      // Get the latest save file for this project
+      const response = await fetch(`/api/latest/save-to-user/get-project-data?uid=${uid}&projectName=${project.name}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.projectData) {
+          // Create a template object from the project data
+          const template = {
+            id: `project-template-${Date.now()}`,
+            name: project.name,
+            description: "Template from saved project",
+            createdAt: project.createdAt,
+            updatedAt: project.lastUpdated,
+            createdBy: { id: "user", name: "User" },
+            category: "Custom",
+            tags: ["custom", "saved-project"],
+            duration: data.projectData.durationInFrames || 30 * 30, // Default to 30 seconds at 30fps
+            aspectRatio: data.projectData.aspectRatio || "16:9",
+            overlays: data.projectData.overlays || []
+          };
+          
+          // Dispatch event to load template into editor
+          window.dispatchEvent(new CustomEvent('applyTemplate', { 
+            detail: { template } 
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading project template:', error);
+    }
+  };
+
 
   return (
     <div className="bg-gray-50 p-8">
@@ -862,15 +912,29 @@ export default function SavedProjects() {
 
                     {/* Bottom section */}
                     <div className="flex items-center justify-between mt-auto">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownloadProject(project);
-                        }}
-                        className="w-6 h-6 flex items-center justify-center"
-                      >
-                        <Download className="w-5 h-5 text-gray-600" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadProject(project);
+                          }}
+                          className="w-6 h-6 flex items-center justify-center"
+                          title="Download latest render"
+                        >
+                          <Download className="w-5 h-5 text-gray-600" />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApplyTemplate(project);
+                          }}
+                          className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors"
+                          title="Apply as template"
+                        >
+                          Apply Template
+                        </button>
+                      </div>
                       
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500">

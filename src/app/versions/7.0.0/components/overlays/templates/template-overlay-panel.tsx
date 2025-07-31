@@ -25,7 +25,13 @@ export const TemplateOverlayPanel: React.FC = () => {
     useState<TemplateOverlay | null>(null);
   const [dialogPosition, setDialogPosition] = useState<{x: number, y: number} | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const { loadTemplateIntoEditor, projectName, setProjectName } = useEditorContext();
+  const { 
+    loadTemplateIntoEditor, 
+    projectName, 
+    setProjectName, 
+    isLoadingTemplate = false,
+    templateLoadingProgress = { current: 0, total: 0 }
+  } = useEditorContext();
 
 
   const { templates, isLoading, error } = useTemplates({
@@ -176,9 +182,20 @@ export const TemplateOverlayPanel: React.FC = () => {
     // Search is handled automatically by the useTemplates hook
   };
 
-  const handleApplyTemplate = (template: TemplateOverlay) => {
-    loadTemplateIntoEditor(template);
-    setConfirmDialogOpen(false);
+  // const handleApplyTemplate = (template: TemplateOverlay) => {
+  //   loadTemplateIntoEditor(template);
+  //   setConfirmDialogOpen(false);
+  // };
+
+  const handleApplyTemplate = async (template: TemplateOverlay) => {
+    try {
+      await loadTemplateIntoEditor(template);
+      setConfirmDialogOpen(false);
+      setConfirmingTemplateId(null);
+    } catch (error) {
+      console.error('Failed to apply template:', error);
+      // Keep confirmation dialog open on error
+    }
   };
 
   const handleSelectTemplate = (template: TemplateOverlay, event: React.MouseEvent) => {
@@ -274,7 +291,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                   key={template.id}
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
                 >
-                {confirmingTemplateId === template.id ? (
+                {/* {confirmingTemplateId === template.id ? (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
                     <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
                     <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
@@ -297,6 +314,55 @@ export const TemplateOverlayPanel: React.FC = () => {
                         Apply Template
                       </button>
                     </div>
+                  </div>
+                ) : ( */}
+                {confirmingTemplateId === template.id ? (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
+                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
+                    {isLoadingTemplate ? (
+                      <div className="space-y-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                          Loading template and downloading videos...
+                        </p>
+                        {templateLoadingProgress.total > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                              <span>Videos: {templateLoadingProgress.current}/{templateLoadingProgress.total}</span>
+                              <span>{Math.round((templateLoadingProgress.current / templateLoadingProgress.total) * 100)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                style={{ width: `${(templateLoadingProgress.current / templateLoadingProgress.total) * 100}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
+                          Are you sure you want to add this template to your timeline? It will replace all existing overlays.
+                        </p>
+                        <div className="flex gap-2 justify-end">
+                          <button 
+                            className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                            onClick={() => setConfirmingTemplateId(null)}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                            onClick={() => handleApplyTemplate(template)}
+                          >
+                            Apply Template
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div onClick={(e) => handleSelectTemplate(template, e)}>

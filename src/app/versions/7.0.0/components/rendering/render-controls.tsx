@@ -105,27 +105,49 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const getProjectName = () => {
     return projectName && projectName.trim() !== '' ? projectName : 'Untitled Project';
   };
+  // React.useEffect(() => {
+  //   if (state.status === "done") {
+  //     const newRender = {
+  //       url: state.url,
+  //       timestamp: new Date(),
+  //       id: crypto.randomUUID(),
+  //       status: "success" as const,
+  //     };
+      
+  //     // Save render info to user folder
+  //     // saveToUserFolder('render', newRender);
+  //   } else if (state.status === "error") {
+  //     const newRender = {
+  //       timestamp: new Date(),
+  //       id: crypto.randomUUID(),
+  //       status: "error" as const,
+  //       error: state.error?.message || "Failed to render video. Please try again.",
+  //     };
+      
+  //     // Save error info to user folder
+  //     // saveToUserFolder('render', newRender);
+  //   }
+  // }, [state.status, state.url, state.error]);
+
   React.useEffect(() => {
     if (state.status === "done") {
-      const newRender = {
-        url: state.url,
-        timestamp: new Date(),
-        id: crypto.randomUUID(),
-        status: "success" as const,
-      };
-      
-      // Save render info to user folder
-      saveToUserFolder('render', newRender);
+      // Emit event to notify that rendering is complete
+      window.dispatchEvent(new CustomEvent('renderCompleted', { 
+        detail: { 
+          url: state.url,
+          projectName: getProjectName(),
+          timestamp: new Date().toISOString()
+        } 
+      }));
     } else if (state.status === "error") {
-      const newRender = {
-        timestamp: new Date(),
-        id: crypto.randomUUID(),
-        status: "error" as const,
-        error: state.error?.message || "Failed to render video. Please try again.",
-      };
-      
-      // Save error info to user folder
-      saveToUserFolder('render', newRender);
+      // Optionally emit an error event
+      window.dispatchEvent(new CustomEvent('renderError', { 
+        detail: { 
+          error: state.error?.message || "Failed to render video. Please try again.",
+          projectName: getProjectName(),
+          timestamp: new Date().toISOString()
+        } 
+      }));
     }
   }, [state.status, state.url, state.error]);
 

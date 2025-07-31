@@ -51,6 +51,9 @@ export const CaptionsPanel: React.FC = () => {
   const { visibleRows } = useTimeline();
   const [localOverlay, setLocalOverlay] = useState<CaptionOverlay | null>(null);
 
+  const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
+
+
   React.useEffect(() => {
     if (selectedOverlayId === null) {
       return;
@@ -133,6 +136,253 @@ export const CaptionsPanel: React.FC = () => {
     changeOverlay(updatedOverlay.id, updatedOverlay);
   };
 
+  const extractAndSaveAudio = async (videoSrc: string): Promise<string> => {
+    // Import FFmpeg dynamically for client-side use
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const { fetchFile } = await import('@ffmpeg/util');
+    
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load();
+    
+    // Fetch video file
+    let videoFile: File;
+    if (videoSrc.startsWith('blob:')) {
+      const response = await fetch(videoSrc);
+      const blob = await response.blob();
+      videoFile = new File([blob], 'video.mp4', { type: 'video/mp4' });
+    } else {
+      const response = await fetch(videoSrc);
+      videoFile = new File([await response.blob()], 'video.mp4', { type: 'video/mp4' });
+    }
+    
+    // Extract audio using FFmpeg
+    await ffmpeg.writeFile('input.mp4', await fetchFile(videoFile));
+    await ffmpeg.exec(['-i', 'input.mp4', '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', 'output.wav']);
+    
+    // Get extracted audio
+    const data = await ffmpeg.readFile('output.wav');
+    const audioBlob = new Blob([data], { type: 'audio/wav' });
+    
+    // Clean up FFmpeg files
+    await ffmpeg.deleteFile('input.mp4');
+    await ffmpeg.deleteFile('output.wav');
+    
+    // Upload to server
+    const formData = new FormData();
+    const audioFile = new File([audioBlob], 'extracted_audio.wav', { type: 'audio/wav' });
+    formData.append('audio', audioFile);
+    
+    const uploadResponse = await fetch('/api/latest/captions/save-audio', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    const uploadResult = await uploadResponse.json();
+    
+    if (!uploadResult.success) {
+      throw new Error('Failed to save extracted audio');
+    }
+    
+    return uploadResult.audioUrl;
+  };
+
+  const saveExistingAudio = async (audioSrc: string): Promise<string> => {
+    // Fetch existing audio file
+    const response = await fetch(audioSrc);
+    const audioBlob = await response.blob();
+    
+    // Upload to server
+    const formData = new FormData();
+    const audioFile = new File([audioBlob], 'existing_audio.wav', { type: 'audio/wav' });
+    formData.append('audio', audioFile);
+    
+    const uploadResponse = await fetch('/api/latest/captions/save-audio', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    const uploadResult = await uploadResponse.json();
+    
+    if (!uploadResult.success) {
+      throw new Error('Failed to save existing audio');
+    }
+    
+    return uploadResult.audioUrl;
+  };
+
+const handleAutomaticCaptions = async () => {
+    setIsGeneratingCaptions(true);
+    
+    try {
+      // Get URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const uid = urlParams.get('uid');
+      const email = urlParams.get('email');
+      
+      if (!uid || !email) {
+        alert('Missing user parameters. Please reload the page.');
+        return;
+      }
+      
+      // Find video and audio overlays
+      const videoOverlays = overlays.filter(overlay => overlay.type === OverlayType.VIDEO);
+      const audioOverlays = overlays.filter(overlay => overlay.type === OverlayType.SOUND);
+      
+      if (videoOverlays.length === 0 && audioOverlays.length === 0) {
+        alert('No video or audio found in timeline');
+        return;
+      }
+      
+      // Extract audio from videos using client-side FFmpeg and save to server
+      const audioUrls = [];
+      
+      for (const overlay of videoOverlays) {
+        try {
+          const audioUrl = await extractAndSaveAudio(overlay.src);
+          audioUrls.push(audioUrl);
+        } catch (error) {
+          console.error('Failed to extract audio from video:', error);
+        }
+      }
+      
+      // Process existing audio overlays
+      for (const overlay of audioOverlays) {
+        try {
+          const audioUrl = await saveExistingAudio(overlay.src);
+          audioUrls.push(audioUrl);
+        } catch (error) {
+          console.error('Failed to save audio:', error);
+        }
+      }
+      
+      if (audioUrls.length === 0) {
+        alert('Failed to extract audio from videos');
+        return;
+      }
+      
+      // Start caption generation
+      const response = await fetch(`/api/latest/captions/auto-generate?uid=${uid}&email=${email}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audioUrls }),
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert(result.error || 'Failed to start caption generation');
+        return;
+      }
+      
+      // Start polling for completion
+      await pollCaptionStatus(result.genaiCode);
+      
+    } catch (error) {
+      console.error('Auto caption error:', error);
+      alert('Failed to generate captions. Please try again.');
+    } finally {
+      setIsGeneratingCaptions(false);
+    }
+  };
+
+  const pollCaptionStatus = async (genaiCode: string) => {
+    const maxAttempts = 150; // 5 minutes with 2-second intervals
+    let attempts = 0;
+    
+    const poll = async (): Promise<void> => {
+      try {
+        const response = await fetch('/api/latest/captions/check-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ genaiCode }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.completed) {
+          // Fetch and process the subtitles
+          await processCaptionData(result.subtitlesUrl);
+          return;
+        }
+        
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw new Error('Caption generation timed out');
+        }
+        
+        // Continue polling
+        setTimeout(poll, 2000);
+        
+      } catch (error) {
+        console.error('Polling error:', error);
+        throw error;
+      }
+    };
+    
+    await poll();
+  };
+
+  const processCaptionData = async (subtitlesUrl: string) => {
+    try {
+      const response = await fetch(subtitlesUrl);
+      const captionData = await response.json();
+      
+      // Convert the API response to our caption format
+      const processedCaptions: Caption[] = captionData.segments.map((segment: any) => {
+        const words = segment.words.map((word: any) => ({
+          word: word.word.trim(),
+          startMs: word.start * 1000,
+          endMs: word.end * 1000,
+          confidence: word.probability || 0.99,
+        }));
+        
+        return {
+          text: segment.text.trim(),
+          startMs: segment.start * 1000,
+          endMs: segment.end * 1000,
+          timestampMs: null,
+          confidence: 0.99,
+          words,
+        };
+      });
+      
+      // Calculate duration and position
+      const totalDurationMs = Math.max(...processedCaptions.map(cap => cap.endMs));
+      const calculatedDurationInFrames = Math.ceil((totalDurationMs / 1000) * 30);
+      
+      const position = findNextAvailablePosition(
+        overlays,
+        visibleRows,
+        durationInFrames
+      );
+      
+      const newCaptionOverlay: CaptionOverlay = {
+        id: Date.now(),
+        type: OverlayType.CAPTION,
+        from: position.from,
+        durationInFrames: calculatedDurationInFrames,
+        captions: processedCaptions,
+        left: 230,
+        top: 414,
+        width: 833,
+        height: 269,
+        rotation: 0,
+        isDragging: false,
+        row: position.row,
+      };
+      
+      addOverlay(newCaptionOverlay);
+      
+    } catch (error) {
+      console.error('Failed to process caption data:', error);
+      alert('Failed to process generated captions');
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
       {!localOverlay ? (
@@ -145,11 +395,10 @@ export const CaptionsPanel: React.FC = () => {
                   disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-800 
                   disabled:dark:text-gray-600 disabled:opacity-100 disabled:cursor-not-allowed 
                   transition-colors"
-                  onClick={() => {
-                    // Add your automatic caption generation logic here
-                  }}
+                  onClick={handleAutomaticCaptions}
+                  disabled={isGeneratingCaptions}
                 >
-                  Automatically Add Captions
+                  {isGeneratingCaptions ? 'Generating Captions...' : 'Automatically Add Captions'}
                 </Button>
               </div>
 

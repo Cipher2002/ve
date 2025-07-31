@@ -41,6 +41,9 @@ import { KeyframeProvider } from "./contexts/keyframe-context";
 import { AssetLoadingProvider } from "./contexts/asset-loading-context";
 import { clearAutosave } from "./utils/indexdb-helper";
 
+//Loading templates with downloaded videos
+import { useTemplateLoader } from "./hooks/use-template-loader";
+
 
 export default function ReactVideoEditor({ projectId, isAdminMode = false }: { projectId: string; isAdminMode?: boolean }) {
   // Autosave state
@@ -76,6 +79,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     }).replace(/:/g, '-');
     return `Default_${date}_${time}`;
   });
+  const { loadTemplateWithVideos } = useTemplateLoader();
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  const [templateLoadingProgress, setTemplateLoadingProgress] = useState({ current: 0, total: 0 });
 
 
   // Overlay management hooks
@@ -391,30 +397,68 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   };
 
   // Load template into editor function
-  const loadTemplateIntoEditor = (template: TemplateOverlay) => {
-    // Update project name
-    setProjectName(template.name);
+  // const loadTemplateIntoEditor = (template: TemplateOverlay) => {
+  //   // Update project name
+  //   setProjectName(template.name);
     
-    // Apply template data
-    const newOverlays = template.overlays.map((overlayTemplate, index) => ({
-      ...overlayTemplate,
-      id: Math.floor(Math.random() * 1000000) + index,
-    }));
+  //   // Apply template data
+  //   const newOverlays = template.overlays.map((overlayTemplate, index) => ({
+  //     ...overlayTemplate,
+  //     id: Math.floor(Math.random() * 1000000) + index,
+  //   }));
     
-    setOverlays(newOverlays);
-    setSelectedOverlayId(null);
+  //   setOverlays(newOverlays);
+  //   setSelectedOverlayId(null);
     
-    if (template.aspectRatio) {
-      setAspectRatio(template.aspectRatio);
-    }
+  //   if (template.aspectRatio) {
+  //     setAspectRatio(template.aspectRatio);
+  //   }
 
-    // Trigger project saved event to refresh saved projects with new name
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('projectSaved', { 
-        detail: { projectName: template.name } 
-      }));
-    }, 100);
+  //   // Trigger project saved event to refresh saved projects with new name
+  //   setTimeout(() => {
+  //     window.dispatchEvent(new CustomEvent('projectSaved', { 
+  //       detail: { projectName: template.name } 
+  //     }));
+  //   }, 100);
+  // };
+
+  const loadTemplateIntoEditor = async (template: TemplateOverlay) => {
+    setIsLoadingTemplate(true);
+    setTemplateLoadingProgress({ current: 0, total: 0 });
+    
+    try {
+      // Update project name immediately
+      setProjectName(template.name);
+      
+      // Process template overlays to handle video downloads
+      const processedOverlays = await loadTemplateWithVideos(template, (current, total) => {
+        setTemplateLoadingProgress({ current, total });
+      });
+      
+      // Apply the processed overlays
+      setOverlays(processedOverlays);
+      setSelectedOverlayId(null);
+      
+      if (template.aspectRatio) {
+        setAspectRatio(template.aspectRatio);
+      }
+
+      // Trigger project saved event to refresh saved projects with new name
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('projectSaved', { 
+          detail: { projectName: template.name } 
+        }));
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error loading template:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoadingTemplate(false);
+      setTemplateLoadingProgress({ current: 0, total: 0 });
+    }
   };
+
 
   // Set up keyboard shortcut for manual save (Ctrl+S)
   useEffect(() => {
@@ -444,6 +488,18 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     window.addEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
     return () => window.removeEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
   }, [projectName]);
+
+  useEffect(() => {
+    const handleApplyTemplate = (event: CustomEvent) => {
+      const { template } = event.detail;
+      
+      // Use the existing loadTemplateIntoEditor function
+      loadTemplateIntoEditor(template);
+    };
+
+    window.addEventListener('applyTemplate', handleApplyTemplate as EventListener);
+    return () => window.removeEventListener('applyTemplate', handleApplyTemplate as EventListener);
+  }, [loadTemplateIntoEditor]);
 
   // Combine all editor context values
   const editorContextValue = {
@@ -517,6 +573,10 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     preservedAutosaveData,
     handleRecoverAutosave,
     handleDiscardAutosave,
+
+    // Template loading state
+    isLoadingTemplate,
+    templateLoadingProgress,
     
   };
 
