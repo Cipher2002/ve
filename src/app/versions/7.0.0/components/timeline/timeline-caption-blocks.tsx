@@ -42,10 +42,10 @@ const TimelineCaptionBlocks: React.FC<TimelineCaptionBlocksProps> = ({
 }) => {
   const { zoomScale } = useTimeline();
 
-  // const relativeFrame = currentFrame - startFrame;
+  const relativeFrame = currentFrame - startFrame;
   // const currentMs = (relativeFrame / 30) * 1000; // Assuming 30fps
 
-  const currentMs = (currentFrame / 30) * 1000; // Use absolute timeline time
+  const currentMs = (relativeFrame / 30) * 1000; // Use absolute timeline time
 
   const totalDurationSeconds = totalDuration / 30;
   const shouldShowLabel = zoomScale <= 1 && totalDurationSeconds > 20;
