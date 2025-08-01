@@ -102,8 +102,8 @@ export const generateThumbnail = async (file: File): Promise<string> => {
       }, 5000); // 5 second timeout
 
       video.onloadedmetadata = () => {
-        // Set the time to 1 second or the middle of the video
-        video.currentTime = Math.min(1, video.duration / 2);
+        // Set the time to 2 seconds or the middle of the video
+        video.currentTime = Math.min(2, video.duration / 2);
       };
 
       video.onseeked = () => {
