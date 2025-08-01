@@ -78,7 +78,8 @@ export const useAutosave = (
       // Only save if state has changed since last save
       if (currentStateString !== lastSavedStateRef.current) {
         try {
-          // Get UID from URL
+          // Small delay to ensure state updates are reflected
+          await new Promise(resolve => setTimeout(resolve, 100));
           const getUidFromUrl = () => {
             if (typeof window === 'undefined') return 'default';
             const urlParams = new URLSearchParams(window.location.search);
@@ -168,7 +169,7 @@ export const useAutosave = (
         timerRef.current = null;
       }
     };
-  }, [projectId, state, interval, onSave]);
+  }, [projectId, state, interval, onSave, state.projectName]);
 
 
   // Function to manually save state

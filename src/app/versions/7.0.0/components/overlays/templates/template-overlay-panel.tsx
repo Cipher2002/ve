@@ -80,39 +80,106 @@ export const TemplateOverlayPanel: React.FC = () => {
 };
 
   // Update template name function
+  // const updateTemplateName = async (templateId: string, newName: string) => {
+  //   try {
+  //     const uid = getUidFromUrl();
+  //     const response = await fetch(`/api/latest/templates/update-name?uid=${uid}`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ templateId, newName })
+  //     });
+      
+  //     if (response.ok) {
+  //       const result = await response.json();
+        
+  //       // Update local state
+  //       setClientTemplates(prev => prev.map(template => 
+  //         template.id === templateId 
+  //           ? { ...template, name: newName, updatedAt: result.template.updatedAt }
+  //           : template
+  //       ));
+        
+  //       // Always update the project name in the editor when renaming a template
+  //       setProjectName(newName);
+        
+  //       // Trigger a refresh of the saved projects
+  //       window.dispatchEvent(new CustomEvent('projectSaved', { 
+  //         detail: { projectName: newName } 
+  //       }));
+        
+  //       setEditingTemplateId(null);
+  //       setEditingName("");
+  //     } else {
+  //       console.error('Failed to update template name');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating template name:', error);
+  //   }
+  // };
+
+  // Update template name function
   const updateTemplateName = async (templateId: string, newName: string) => {
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`/api/latest/templates/update-name?uid=${uid}`, {
-        method: 'PUT',
+      
+      // Get the current project name before updating
+      const oldProjectName = projectName;
+      
+      // First update the project name in the editor immediately
+      setProjectName(newName);
+      
+      // Update local state
+      setClientTemplates(prev => prev.map(template => 
+        template.id === templateId 
+          ? { ...template, name: newName, updatedAt: new Date().toISOString() }
+          : template
+      ));
+      
+      // Call the project name update API to handle folder renaming
+      const updateResponse = await fetch('/api/latest/save-to-user/update-name', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ templateId, newName })
+        body: JSON.stringify({
+          uid,
+          oldName: oldProjectName,
+          newName: newName,
+          projectId: `${uid}-${oldProjectName}`,
+        }),
       });
       
-      if (response.ok) {
-        const result = await response.json();
-        
-        // Update local state
-        setClientTemplates(prev => prev.map(template => 
-          template.id === templateId 
-            ? { ...template, name: newName, updatedAt: result.template.updatedAt }
-            : template
-        ));
-        
-        // Always update the project name in the editor when renaming a template
-        setProjectName(newName);
-        
-        // Trigger a refresh of the saved projects
+      if (updateResponse.ok) {
+        // Trigger events to refresh UI components
         window.dispatchEvent(new CustomEvent('projectSaved', { 
           detail: { projectName: newName } 
+        }));
+        
+        window.dispatchEvent(new CustomEvent('templateUpdated', { 
+          detail: { isUpdate: true, templateName: newName }
+        }));
+        
+        window.dispatchEvent(new CustomEvent('projectNameChanged', { 
+          detail: { 
+            projectId: `${uid}-${oldProjectName}`,
+            oldName: oldProjectName,
+            newName: newName 
+          } 
         }));
         
         setEditingTemplateId(null);
         setEditingName("");
       } else {
-        console.error('Failed to update template name');
+        console.error('Failed to update project name');
+        // Revert the project name if API call failed
+        setProjectName(oldProjectName);
+        setClientTemplates(prev => prev.map(template => 
+          template.id === templateId 
+            ? { ...template, name: oldProjectName }
+            : template
+        ));
       }
     } catch (error) {
       console.error('Error updating template name:', error);
