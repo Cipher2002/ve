@@ -432,6 +432,14 @@ export default function SavedProjects() {
         if (selectedProject?.id === project.id) {
           setSelectedProject(prev => prev ? { ...prev, status: newStatus } : null);
         }
+        
+        // Also trigger event to update corresponding template status
+        window.dispatchEvent(new CustomEvent('templateStatusChanged', { 
+          detail: { 
+            templateName: project.name,
+            status: newStatus
+          } 
+        }));
       }
     } catch (error) {
       console.error('Error updating project status:', error);
@@ -518,6 +526,25 @@ export default function SavedProjects() {
 
     window.addEventListener('projectSaved', handleProjectSaved as EventListener);
     return () => window.removeEventListener('projectSaved', handleProjectSaved as EventListener);
+  }, []);
+
+  // Listen for template status changes
+  React.useEffect(() => {
+    const handleProjectStatusChanged = (event: CustomEvent) => {
+      const { projectName, status } = event.detail;
+      
+      // Update the project status in local state
+      setUserProjects(prev => 
+        prev.map(project => 
+          project.name === projectName 
+            ? { ...project, status: status }
+            : project
+        )
+      );
+    };
+
+    window.addEventListener('projectStatusChanged', handleProjectStatusChanged as EventListener);
+    return () => window.removeEventListener('projectStatusChanged', handleProjectStatusChanged as EventListener);
   }, []);
 
   const handleApplyTemplate = async (project: UserProject) => {

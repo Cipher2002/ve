@@ -242,6 +242,25 @@ export const TemplateOverlayPanel: React.FC = () => {
     window.addEventListener('templateUpdated', handleTemplateUpdate);
     return () => window.removeEventListener('templateUpdated', handleTemplateUpdate);
   }, []);
+
+  // Listen for project status changes to sync template status
+  useEffect(() => {
+    const handleTemplateStatusChanged = (event: CustomEvent) => {
+      const { templateName, status } = event.detail;
+      
+      // Update the template status in local state
+      setClientTemplates(prev => 
+        prev.map(template => 
+          template.name === templateName 
+            ? { ...template, status: status }
+            : template
+        )
+      );
+    };
+
+    window.addEventListener('templateStatusChanged', handleTemplateStatusChanged as EventListener);
+    return () => window.removeEventListener('templateStatusChanged', handleTemplateStatusChanged as EventListener);
+  }, []);
   
 
   // Reset filter when switching to created-by-you tab
@@ -292,17 +311,49 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   // Handle toggling template active status (UI only - no API call)
-  const handleToggleTemplateStatus = (templateId: string, currentStatus: string) => {
+  const handleToggleTemplateStatus = async (templateId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const uid = getUidFromUrl();
     
-    // Update the template status in the local state only
+    // Find the template to get its name
+    const template = clientTemplates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    // Update the template status in the local state
     setClientTemplates(prev => 
-      prev.map(template => 
-        template.id === templateId 
-          ? { ...template, status: newStatus }
-          : template
+      prev.map(t => 
+        t.id === templateId 
+          ? { ...t, status: newStatus }
+          : t
       )
     );
+    
+    try {
+      // Also update the corresponding project status
+      const response = await fetch('/api/latest/save-to-user/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          projectId: `${uid}-${template.name}`,
+          status: newStatus,
+        }),
+      });
+      
+      if (response.ok) {
+        // Trigger event to refresh saved projects
+        window.dispatchEvent(new CustomEvent('projectStatusChanged', { 
+          detail: { 
+            projectName: template.name,
+            status: newStatus
+          } 
+        }));
+      }
+    } catch (error) {
+      console.error('Error updating corresponding project status:', error);
+    }
   };
 
   return (
