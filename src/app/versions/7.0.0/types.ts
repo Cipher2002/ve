@@ -198,6 +198,8 @@ export interface CaptionStyles {
   textShadow?: string;
   borderRadius?: string;
   transition?: string;
+  WebkitTextStroke?: string;
+  textStroke?: string;
   highlightStyle?: {
     backgroundColor?: string;
     color?: string;
@@ -210,6 +212,8 @@ export interface CaptionStyles {
     background?: string;
     border?: string;
     backdropFilter?: string;
+    WebkitTextStroke?: string;
+    textStroke?: string;
   };
 }
 

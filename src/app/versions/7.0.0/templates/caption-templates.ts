@@ -243,4 +243,33 @@ export const captionTemplates: Record<
       },
     },
   },
+  bold_outline: {
+    name: "Bold Outline",
+    preview: "Thick Border & Color Pop",
+    isPro: true,
+    styles: {
+      fontFamily: "Nunito, sans-serif",
+      fontSize: "2.4rem",
+      lineHeight: 1.2,
+      textAlign: "center",
+      color: "#FFFFFF",
+      fontWeight: 800,
+      letterSpacing: "-0.01em",
+      textShadow: "none",
+      padding: "8px",
+      WebkitTextStroke: "4px #000000",
+      textStroke: "4px #000000",
+      highlightStyle: {
+        color: "#6366F1", // Indigo color for highlighted words
+        backgroundColor: "transparent",
+        scale: 1.0,
+        fontWeight: 800,
+        textShadow: "none",
+        WebkitTextStroke: "4px #000000",
+        textStroke: "4px #000000",
+        borderRadius: "0px",
+        padding: "0px",
+      },
+    },
+  },
 };
