@@ -62,6 +62,19 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
    */
   const renderWords = (caption: Caption) => {
     return caption?.words?.map((word, index) => {
+      // Temporary debug logging
+      if (caption.words.length > 0) {
+        console.log('Debug timing:', {
+          currentFrame: frame,
+          frameMs,
+          overlayStartMs,
+          absoluteMs,
+          firstWord: caption.words[0],
+          lastWord: caption.words[caption.words.length - 1],
+          captionStart: caption.startMs,
+          captionEnd: caption.endMs
+        });
+      }
       // const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
       // const progress = isHighlighted
       //   ? Math.min((frameMs - word.startMs) / 300, 1)
