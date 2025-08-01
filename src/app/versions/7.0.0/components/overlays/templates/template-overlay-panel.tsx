@@ -6,7 +6,7 @@ import { TemplateOverlay } from "../../../types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
-import { Trash2, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 // import {
 //   AlertDialog,
 //   AlertDialogAction,
@@ -45,39 +45,39 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
-  const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
+  const [activeTemplateFilter, setActiveTemplateFilter] = useState<'active' | 'all'>('active');
 
-  const deleteTemplate = async (templateId: string) => {
-  try {
-    console.log('Attempting to delete template:', templateId);
-    console.log('API URL:', `/api/latest/templates/delete?id=${templateId}`);
+//   const deleteTemplate = async (templateId: string) => {
+//   try {
+//     console.log('Attempting to delete template:', templateId);
+//     console.log('API URL:', `/api/latest/templates/delete?id=${templateId}`);
     
-    const uid = getUidFromUrl();
-    const response = await fetch(`/api/latest/templates/delete?id=${templateId}&uid=${uid}`, {
-      method: 'DELETE',
-    });
+//     const uid = getUidFromUrl();
+//     const response = await fetch(`/api/latest/templates/delete?id=${templateId}&uid=${uid}`, {
+//       method: 'DELETE',
+//     });
     
-    console.log('Response status:', response.status);
-    console.log('Response:', response);
+//     console.log('Response status:', response.status);
+//     console.log('Response:', response);
     
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Delete result:', result);
-      // Clear the deleting state immediately
-      setDeletingTemplateId(null);
-      // Refresh the list after deletion
-      await fetchClientTemplates();
-    } else {
-      console.error('Failed to delete template, status:', response.status);
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      setDeletingTemplateId(null);
-    }
-  } catch (error) {
-    console.error('Error deleting template:', error);
-    setDeletingTemplateId(null);
-  }
-};
+//     if (response.ok) {
+//       const result = await response.json();
+//       console.log('Delete result:', result);
+//       // Clear the deleting state immediately
+//       setDeletingTemplateId(null);
+//       // Refresh the list after deletion
+//       await fetchClientTemplates();
+//     } else {
+//       console.error('Failed to delete template, status:', response.status);
+//       const errorText = await response.text();
+//       console.error('Error response:', errorText);
+//       setDeletingTemplateId(null);
+//     }
+//   } catch (error) {
+//     console.error('Error deleting template:', error);
+//     setDeletingTemplateId(null);
+//   }
+// };
 
   // Update template name function
   // const updateTemplateName = async (templateId: string, newName: string) => {
@@ -120,6 +120,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   // };
 
   // Update template name function
+  
   const updateTemplateName = async (templateId: string, newName: string) => {
     try {
       const uid = getUidFromUrl();
@@ -249,11 +250,6 @@ export const TemplateOverlayPanel: React.FC = () => {
     // Search is handled automatically by the useTemplates hook
   };
 
-  // const handleApplyTemplate = (template: TemplateOverlay) => {
-  //   loadTemplateIntoEditor(template);
-  //   setConfirmDialogOpen(false);
-  // };
-
   const handleApplyTemplate = async (template: TemplateOverlay) => {
     try {
       await loadTemplateIntoEditor(template);
@@ -288,6 +284,41 @@ export const TemplateOverlayPanel: React.FC = () => {
     }
   };
 
+  // Handle toggling template active status
+  const handleToggleTemplateStatus = async (templateId: string, currentStatus: string) => {
+    const uid = getUidFromUrl();
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    
+    try {
+      const response = await fetch(`/api/latest/templates/update-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid,
+          templateId,
+          status: newStatus,
+        }),
+      });
+      
+      if (response.ok) {
+        // Update the template status in the local state
+        setClientTemplates(prev => 
+          prev.map(template => 
+            template.id === templateId 
+              ? { ...template, status: newStatus }
+              : template
+          )
+        );
+      } else {
+        console.error('Failed to update template status');
+      }
+    } catch (error) {
+      console.error('Error updating template status:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
       <Tabs value={activeTab} onValueChange={(value) => {
@@ -312,6 +343,32 @@ export const TemplateOverlayPanel: React.FC = () => {
             <span className="flex items-center gap-2 text-xs">Created By You</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Filter buttons for Created By You tab */}
+        {activeTab === "created-by-you" && (
+          <div className="flex border rounded-lg overflow-hidden mb-2 self-start">
+            <button
+              onClick={() => setActiveTemplateFilter('active')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-l-lg rounded-r-none ${
+                activeTemplateFilter === 'active'
+                  ? 'bg-blue-500/15 text-blue-700 border border-blue-300 hover:bg-blue-500/15'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Active View
+            </button>
+            <button
+              onClick={() => setActiveTemplateFilter('all')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-l-none rounded-r-lg ${
+                activeTemplateFilter === 'all'
+                  ? 'bg-blue-500/15 text-blue-700 border border-blue-300 hover:bg-blue-500/15'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              All
+            </button>
+          </div>
+        )}
         
         <div className="flex gap-2 flex-shrink-0">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
@@ -499,36 +556,17 @@ export const TemplateOverlayPanel: React.FC = () => {
                 <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-red-500 text-xs sm:text-sm">
                   Error loading templates: {clientTemplatesError}
                 </div>
-              ) : clientTemplates.length > 0 ? (
-                clientTemplates.map((template) => (
+              ) : clientTemplates.filter(template => 
+                  activeTemplateFilter === 'all' || (template as any).status === 'active'
+                ).length > 0 ? (
+                clientTemplates.filter(template => 
+                  activeTemplateFilter === 'all' || (template as any).status === 'active'
+                ).map((template) => (
                 <Card
                   key={template.id}
                   className="cursor-pointer hover:bg-accent transition-colors duration-200 group"
                 >
-                {deletingTemplateId === template.id ? (
-                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 rounded-md">
-                    <h3 className="text-sm font-semibold mb-2">Delete Template</h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
-                      Are you sure you want to delete this template? This action cannot be undone.
-                    </p>
-                    <div className="flex gap-2 justify-end">
-                      <button 
-                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                        onClick={() => setDeletingTemplateId(null)}
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        className="px-3 py-1.5 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                        onClick={() => {
-                          deleteTemplate(template.id);
-                        }}
-                      >
-                        Delete Template
-                      </button>
-                    </div>
-                  </div>
-                ) : confirmingTemplateId === template.id ? (
+                {confirmingTemplateId === template.id ? (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
                     <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
                     <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
@@ -555,16 +593,22 @@ export const TemplateOverlayPanel: React.FC = () => {
                 ) : (
                   <div onClick={(e) => handleSelectTemplate(template, e)}>
                     <CardHeader className="p-2 sm:p-3 space-y-2 relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeletingTemplateId(template.id);
-                        }}
-                        className="absolute top-2 right-2 z-10 p-1 bg-red-500 hover:bg-red-600 text-white rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto"                        
-                        title="Delete template"
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleTemplateStatus(template.id, (template as any).status || 'active');
+                          }}
+                          className={`p-1 text-white rounded-sm text-xs px-2 py-1 ${
+                            (template as any).status === 'inactive' 
+                              ? 'bg-green-500 hover:bg-green-600' 
+                              : 'bg-gray-500 hover:bg-gray-600'
+                          }`}
+                          title={(template as any).status === 'inactive' ? 'Show in Active View' : 'Hide from Active View'}
+                        >
+                          {(template as any).status === 'inactive' ? 'Show' : 'Hide'}
+                        </button>
+                      </div>
                       {/* Keep all the existing CardHeader content here */}
                       <div className="aspect-video w-full overflow-hidden rounded-md">
                         <TemplateThumbnail
