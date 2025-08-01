@@ -28,8 +28,10 @@ import { useVideoCache } from "../../hooks/use-video-cache";
  */
 export function LocalMediaGallery({
   onSelectMedia,
+  isLoadingMore,
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
+  isLoadingMore?: boolean;
 }) {
   const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles } =
     useLocalMedia();
@@ -637,6 +639,20 @@ export function LocalMediaGallery({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 ">
               {filteredMedia.map(renderMediaItem)}
+              
+              {/* Loading more indicator */}
+              {isLoadingMore && (
+                <div className="col-span-2 flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                </div>
+              )}
+              
+              {/* No more content indicator */}
+              {!hasMore && !isLoading && !isLoadingMore && filteredMedia.length >= 20 && (
+                <div className="col-span-2 text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                  No more media files to load
+                </div>
+              )}
             </div>
           )}
         </TabsContent>

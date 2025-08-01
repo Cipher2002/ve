@@ -130,14 +130,7 @@ export const LocalMediaPanel: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
       <div className="flex-1 overflow-y-auto" onScroll={handleScroll}>
-        <LocalMediaGallery onSelectMedia={handleAddToTimeline} />
-        
-        {/* Loading more indicator */}
-        {isLoadingMore && (
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          </div>
-        )}
+        <LocalMediaGallery onSelectMedia={handleAddToTimeline} isLoadingMore={isLoadingMore} />
       </div>
     </div>
   );
