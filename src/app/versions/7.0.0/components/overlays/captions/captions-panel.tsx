@@ -6,6 +6,7 @@ import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning"
 import { useTimeline } from "../../../contexts/timeline-context";
 import { CaptionOverlay, OverlayType, Caption } from "../../../types";
 import { CaptionSettings } from "./caption-settings";
+import { captionTemplates } from "../../../templates/caption-templates";
 
 /**
  * CaptionsPanel Component
@@ -128,6 +129,8 @@ export const CaptionsPanel: React.FC = () => {
       rotation: 0,
       isDragging: false,
       row: position.row,
+      template: "default",
+      styles: captionTemplates.default.styles,
     };
 
     addOverlay(newCaptionOverlay);

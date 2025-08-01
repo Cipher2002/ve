@@ -4,6 +4,25 @@ export const captionTemplates: Record<
   string,
   { name: string; styles: CaptionStyles; preview: string; isPro?: boolean }
 > = {
+  default: {
+    name: "Default",
+    preview: "Standard Caption Style",
+    styles: {
+      fontFamily: "Inter, sans-serif",
+      fontSize: "2.5rem",
+      lineHeight: 1.4,
+      textAlign: "center",
+      color: "#FFFFFF",
+      textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+      padding: "24px",
+      highlightStyle: {
+        backgroundColor: "rgba(20, 184, 166, 0.95)",
+        scale: 1.1,
+        fontWeight: 600,
+        textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+      },
+    },
+  },
   classic: {
     name: "Classic",
     preview: "Clean & Professional",
