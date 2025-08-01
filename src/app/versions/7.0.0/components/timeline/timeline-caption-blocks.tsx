@@ -42,8 +42,10 @@ const TimelineCaptionBlocks: React.FC<TimelineCaptionBlocksProps> = ({
 }) => {
   const { zoomScale } = useTimeline();
 
-  const relativeFrame = currentFrame - startFrame;
-  const currentMs = (relativeFrame / 30) * 1000; // Assuming 30fps
+  // const relativeFrame = currentFrame - startFrame;
+  // const currentMs = (relativeFrame / 30) * 1000; // Assuming 30fps
+
+  const currentMs = (currentFrame / 30) * 1000; // Use absolute timeline time
 
   const totalDurationSeconds = totalDuration / 30;
   const shouldShowLabel = zoomScale <= 1 && totalDurationSeconds > 20;
@@ -97,10 +99,17 @@ const TimelineCaptionBlocks: React.FC<TimelineCaptionBlocksProps> = ({
           <div
             key={index}
             className="h-full flex items-center justify-start pointer-events-auto"
+            // style={{
+            //   width: `${captionWidth}%`,
+            //   left: `${
+            //     (caption.startMs / ((durationInFrames / 30) * 1000)) * 100
+            //   }%`,
+            //   position: "absolute",
+            // }}
             style={{
               width: `${captionWidth}%`,
               left: `${
-                (caption.startMs / ((durationInFrames / 30) * 1000)) * 100
+                ((caption.startMs - (startFrame / 30) * 1000) / ((durationInFrames / 30) * 1000)) * 100
               }%`,
               position: "absolute",
             }}
