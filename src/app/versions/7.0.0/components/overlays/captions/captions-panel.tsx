@@ -450,8 +450,8 @@ const handleAutomaticCaptions = async () => {
         });
         
         // Calculate duration for this specific caption overlay
-        const maxEndTime = Math.max(...processedCaptions.map(cap => cap.endMs));
-        const minStartTime = Math.min(...processedCaptions.map(cap => cap.startMs));
+        const maxEndTime = Math.max(...processedCaptions.map((cap: Caption) => cap.endMs));
+        const minStartTime = Math.min(...processedCaptions.map((cap: Caption) => cap.startMs));
         const calculatedDurationInFrames = Math.ceil(((maxEndTime - minStartTime) / 1000) * FPS);
         const newCaptionOverlay: CaptionOverlay = {
           id: Date.now() + overlayId, // Ensure unique IDs
