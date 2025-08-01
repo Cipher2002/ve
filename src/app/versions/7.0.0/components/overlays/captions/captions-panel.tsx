@@ -235,44 +235,6 @@ const handleAutomaticCaptions = async () => {
         alert('No video or audio found in timeline');
         return;
       }
-      
-      // // Extract audio from videos using client-side FFmpeg and save to server
-      // const audioUrls = [];
-      
-      // for (const overlay of videoOverlays) {
-      //   try {
-      //     const audioUrl = await extractAndSaveAudio(overlay.src);
-      //     audioUrls.push(audioUrl);
-      //   } catch (error) {
-      //     console.error('Failed to extract audio from video:', error);
-      //   }
-      // }
-      
-      // // Process existing audio overlays
-      // for (const overlay of audioOverlays) {
-      //   try {
-      //     const audioUrl = await saveExistingAudio(overlay.src);
-      //     audioUrls.push(audioUrl);
-      //   } catch (error) {
-      //     console.error('Failed to save audio:', error);
-      //   }
-      // }
-      
-      // if (audioUrls.length === 0) {
-      //   alert('Failed to extract audio from videos');
-      //   return;
-      // }
-
-
-      
-      // // Start caption generation
-      // const response = await fetch(`/api/latest/captions/auto-generate?uid=${uid}&email=${email}`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ audioUrls }),
-      // });
 
       // Prepare audio data with overlay information
       const audioDataWithOverlays = [];
@@ -330,9 +292,7 @@ const handleAutomaticCaptions = async () => {
         return;
       }
       
-      // // Start polling for completion
-      // await pollCaptionStatus(result.genaiCode);
-      // Start polling for completion of all audio files
+
       await pollMultipleCaptionStatus(result.results);
       
     } catch (error) {
@@ -342,61 +302,6 @@ const handleAutomaticCaptions = async () => {
     }
     // Don't reset loading state here - let pollCaptionStatus handle it
   };
-
-
-// const pollCaptionStatus = async (genaiCode: string) => {
-//     const maxAttempts = 150; // 5 minutes with 2-second intervals
-//     let attempts = 0;
-    
-//     // Wait 3 seconds before starting to poll
-//     await new Promise(resolve => setTimeout(resolve, 3000));
-    
-//     while (attempts < maxAttempts) {
-//       try {
-//         const response = await fetch('/api/latest/captions/check-status', {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//           body: JSON.stringify({ genaiCode }),
-//         });
-        
-//         if (!response.ok) {
-//           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-//         }
-        
-//         const result = await response.json();
-        
-//         if (result.error) {
-//           throw new Error(result.error);
-//         }
-        
-//         if (result.completed) {
-//           // Process the subtitles data directly
-//           await processCaptionData(result.subtitlesData);
-//           return;
-//         }
-        
-//         attempts++;
-//         console.log(`Caption generation progress: ${result.progress || 0}% - ${result.message || 'Processing...'}`);
-        
-//         // Wait 2 seconds before next poll
-//         if (attempts < maxAttempts) {
-//           await new Promise(resolve => setTimeout(resolve, 2000));
-//         }
-        
-//       } catch (error) {
-//         console.error('Polling error:', error);
-//         // Reset loading state on error
-//         setIsGeneratingCaptions(false);
-//         throw error;
-//       }
-//     }
-    
-//     // If we exit the loop, it means we've exceeded maxAttempts
-//     setIsGeneratingCaptions(false);
-//     throw new Error('Caption generation timed out');
-//   };
 
   const pollMultipleCaptionStatus = async (results: any[]) => {
     const maxAttempts = 150; // 5 minutes with 2-second intervals
@@ -494,83 +399,6 @@ const handleAutomaticCaptions = async () => {
     }
   };
 
-
-// const processCaptionData = async (captionData: any) => {
-//     try {
-//       // Convert the API response to our caption format
-//       const processedCaptions: Caption[] = captionData.segments.map((segment: any) => {
-//         const words = segment.words.map((word: any) => ({
-//           word: word.word.trim(),
-//           startMs: word.start * 1000,
-//           endMs: word.end * 1000,
-//           confidence: word.probability || 0.99,
-//         }));
-        
-//         return {
-//           text: segment.text.trim(),
-//           startMs: segment.start * 1000,
-//           endMs: segment.end * 1000,
-//           timestampMs: null,
-//           confidence: 0.99,
-//           words,
-//         };
-//       });
-      
-//       // Calculate duration and position
-//       const totalDurationMs = Math.max(...processedCaptions.map(cap => cap.endMs));
-//       const calculatedDurationInFrames = Math.ceil((totalDurationMs / 1000) * 30);
-      
-//       // Find the topmost row with video or audio content
-//       const mediaOverlays = overlays.filter(overlay => 
-//         overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.SOUND
-//       );
-      
-//       let targetRow = 0; // Default to top row if no media found
-//       let updatedOverlays = [...overlays]; // Initialize with current overlays
-      
-//       if (mediaOverlays.length > 0) {
-//         // Find the minimum row number (topmost row with media)
-//         const minMediaRow = Math.min(...mediaOverlays.map(overlay => overlay.row));
-        
-//         // Place captions above the topmost media row
-//         targetRow = Math.max(0, minMediaRow - 1);
-        
-//         // Shift all overlays at or above the target row down by 1
-//         updatedOverlays = overlays.map(overlay => {
-//           if (overlay.row >= targetRow) {
-//             return { ...overlay, row: overlay.row + 1 };
-//           }
-//           return overlay;
-//         });
-//       }
-      
-//       const newCaptionOverlay: CaptionOverlay = {
-//         id: Date.now(),
-//         type: OverlayType.CAPTION,
-//         from: 0, // Start from beginning
-//         durationInFrames: calculatedDurationInFrames,
-//         captions: processedCaptions,
-//         left: 230,
-//         top: 414,
-//         width: 833,
-//         height: 269,
-//         rotation: 0,
-//         isDragging: false,
-//         row: targetRow,
-//       };
-      
-//       // Add the caption overlay
-//       const finalOverlays = [...updatedOverlays, newCaptionOverlay];
-//       setOverlays(finalOverlays);
-//       setIsGeneratingCaptions(false);
-      
-//       } catch (error) {
-//         console.error('Failed to process caption data:', error);
-//         alert('Failed to process generated captions');
-//         setIsGeneratingCaptions(false);
-//       }
-//   };
-
   const processMultipleCaptionData = async (completedCaptions: any[]) => {
     try {
       const FPS = 30; // Assuming 30 FPS
@@ -602,25 +430,6 @@ const handleAutomaticCaptions = async () => {
         
         // Convert frame start time to milliseconds
         const overlayStartTimeMs = (fromFrame / FPS) * 1000;
-        
-        // Convert the API response to our caption format with adjusted timing
-        // const processedCaptions = subtitlesData.segments.map((segment: any) => {
-        //   const words = segment.words.map((word: any) => ({
-        //     word: word.word.trim(),
-        //     startMs: (segment.start * 1000) + overlayStartTimeMs,
-        //     endMs: (segment.end * 1000) + overlayStartTimeMs,
-        //     confidence: word.probability || 0.99,
-        //   }));
-          
-        //   return {
-        //     text: segment.text.trim(),
-        //     startMs: (segment.start * 1000) + overlayStartTimeMs,
-        //     endMs: (segment.end * 1000) + overlayStartTimeMs,
-        //     timestampMs: null,
-        //     confidence: 0.99,
-        //     words,
-        //   };
-        // });
 
         // Convert the API response to our caption format with relative timing
         const processedCaptions = subtitlesData.segments.map((segment: any) => {
@@ -645,21 +454,6 @@ const handleAutomaticCaptions = async () => {
         const maxEndTime = Math.max(...processedCaptions.map(cap => cap.endMs));
         const minStartTime = Math.min(...processedCaptions.map(cap => cap.startMs));
         const calculatedDurationInFrames = Math.ceil(((maxEndTime - minStartTime) / 1000) * FPS);
-        
-        // const newCaptionOverlay = {
-        //   id: Date.now() + overlayId, // Ensure unique IDs
-        //   type: OverlayType.CAPTION,
-        //   from: fromFrame, // Start from the same frame as the original overlay
-        //   durationInFrames: calculatedDurationInFrames,
-        //   captions: processedCaptions,
-        //   left: 230,
-        //   top: 414,
-        //   width: 833,
-        //   height: 269,
-        //   rotation: 0,
-        //   isDragging: false,
-        //   row: targetRow,
-        // };
         const newCaptionOverlay: CaptionOverlay = {
           id: Date.now() + overlayId, // Ensure unique IDs
           type: OverlayType.CAPTION,

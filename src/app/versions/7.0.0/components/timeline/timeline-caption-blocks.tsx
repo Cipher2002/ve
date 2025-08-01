@@ -99,13 +99,6 @@ const TimelineCaptionBlocks: React.FC<TimelineCaptionBlocksProps> = ({
           <div
             key={index}
             className="h-full flex items-center justify-start pointer-events-auto"
-            // style={{
-            //   width: `${captionWidth}%`,
-            //   left: `${
-            //     (caption.startMs / ((durationInFrames / 30) * 1000)) * 100
-            //   }%`,
-            //   position: "absolute",
-            // }}
             style={{
               width: `${captionWidth}%`,
               left: `${

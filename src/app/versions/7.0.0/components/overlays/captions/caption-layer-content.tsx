@@ -42,7 +42,7 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
   overlay,
 }) => {
   const frame = useCurrentFrame();
-  const frameMs = (frame / 30) * 1000; // This is now relative time, which matches our caption timing
+  const frameMs = (frame / 30) * 1000;
   const styles = overlay.styles || defaultCaptionStyles;
 
   /**
@@ -52,6 +52,20 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
     (caption) => frameMs >= caption.startMs && frameMs <= caption.endMs
   );
 
+  // Debug: Check word timing gaps
+  if (currentCaption) {
+    const words = currentCaption.words;
+    for (let i = 0; i < words.length - 1; i++) {
+      const gap = words[i + 1].startMs - words[i].endMs;
+      if (gap > 100) { // Gap larger than 100ms
+        console.warn(`Large gap between "${words[i].word}" and "${words[i + 1].word}": ${gap}ms`);
+      }
+      if (gap < 0) { // Overlapping words
+        console.warn(`Overlapping words: "${words[i].word}" and "${words[i + 1].word}": ${gap}ms`);
+      }
+    }
+  }
+
   if (!currentCaption) return null;
 
   /**
@@ -59,24 +73,13 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
    * @param caption - The current caption object containing words and timing
    */
   const renderWords = (caption: Caption) => {
+
+    const highlightedWords = caption?.words?.filter(word => frameMs >= word.startMs && frameMs <= word.endMs);
+    if (highlightedWords.length > 0) {
+      console.log('Highlighted words:', highlightedWords.map(w => w.word).join(' '), 'at', frameMs);
+    }
+
     return caption?.words?.map((word, index) => {
-      // Temporary debug logging
-      // if (caption.words.length > 0) {
-      //   console.log('Debug timing:', {
-      //     currentFrame: frame,
-      //     frameMs,
-      //     overlayStartMs,
-      //     absoluteMs,
-      //     firstWord: caption.words[0],
-      //     lastWord: caption.words[caption.words.length - 1],
-      //     captionStart: caption.startMs,
-      //     captionEnd: caption.endMs
-      //   });
-      // }
-      // const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
-      // const progress = isHighlighted
-      //   ? Math.min((frameMs - word.startMs) / 300, 1)
-      //   : 0;
       const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
       const progress = isHighlighted
         ? Math.min((frameMs - word.startMs) / 300, 1)
