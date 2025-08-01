@@ -64,7 +64,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const { uid, user_ref } = getUrlParams();
 
   // Define BASE_URL at the top where API calls are made
-  const BASE_URL = window.location.origin; // You can change this to your desired base URL
+  const BASE_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net/'; // You can change this to your desired base URL
 
   // Load media files from API on component mount
   useEffect(() => {
