@@ -69,14 +69,61 @@ const hasAutosave = Boolean(autosaveTimestamp);
           type="text"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
-          onBlur={async () => {
-            // Save the name when focus is lost
-            if (saveProject) {
-              await saveProject();
-              // Trigger a refresh of the saved projects
-              window.dispatchEvent(new CustomEvent('projectSaved', { 
-                detail: { projectName: projectName } 
-              }));
+          onBlur={async (e) => {
+            const newName = e.target.value.trim();
+            const oldName = projectName;
+            
+            // Only proceed if name actually changed and is not empty
+            if (newName && newName !== oldName) {
+              try {
+                const uid = typeof window !== 'undefined' 
+                  ? new URLSearchParams(window.location.search).get('uid') || 'default'
+                  : 'default';
+                
+                // Call the project name update API to handle folder renaming
+                const updateResponse = await fetch('/api/latest/save-to-user/update-name', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    uid,
+                    oldName: oldName,
+                    newName: newName,
+                    projectId: `${uid}-${oldName}`,
+                  }),
+                });
+                
+                if (updateResponse.ok) {
+                  // Trigger events to refresh UI components
+                  window.dispatchEvent(new CustomEvent('projectSaved', { 
+                    detail: { projectName: newName } 
+                  }));
+                  
+                  window.dispatchEvent(new CustomEvent('templateUpdated', { 
+                    detail: { isUpdate: true, templateName: newName }
+                  }));
+                  
+                  window.dispatchEvent(new CustomEvent('projectNameChanged', { 
+                    detail: { 
+                      projectId: `${uid}-${oldName}`,
+                      oldName: oldName,
+                      newName: newName 
+                    } 
+                  }));
+                } else {
+                  console.error('Failed to update project name');
+                  // Revert the name if API call failed
+                  setProjectName(oldName);
+                }
+              } catch (error) {
+                console.error('Error updating project name:', error);
+                // Revert the name if there was an error
+                setProjectName(oldName);
+              }
+            } else if (!newName) {
+              // Revert to old name if new name is empty
+              setProjectName(oldName);
             }
           }}
           className="w-60 px-3 py-1.5 text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
