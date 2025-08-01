@@ -204,7 +204,12 @@ export const TemplateOverlayPanel: React.FC = () => {
         throw new Error('Failed to fetch templates');
       }
       const data = await response.json();
-      setClientTemplates(data);
+      // Add default status 'active' to templates that don't have status
+      const templatesWithStatus = data.map((template: any) => ({
+        ...template,
+        status: template.status || 'active'
+      }));
+      setClientTemplates(templatesWithStatus);
     } catch (error) {
       setClientTemplatesError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
@@ -238,9 +243,11 @@ export const TemplateOverlayPanel: React.FC = () => {
     return () => window.removeEventListener('templateUpdated', handleTemplateUpdate);
   }, []);
   
-  // Fetch client templates when "Created By You" tab is active
+
+  // Reset filter when switching to created-by-you tab
   useEffect(() => {
     if (activeTab === "created-by-you") {
+      setActiveTemplateFilter('active');
       fetchClientTemplates();
     }
   }, [activeTab]);
@@ -284,39 +291,18 @@ export const TemplateOverlayPanel: React.FC = () => {
     }
   };
 
-  // Handle toggling template active status
-  const handleToggleTemplateStatus = async (templateId: string, currentStatus: string) => {
-    const uid = getUidFromUrl();
+  // Handle toggling template active status (UI only - no API call)
+  const handleToggleTemplateStatus = (templateId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     
-    try {
-      const response = await fetch(`/api/latest/templates/update-status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uid,
-          templateId,
-          status: newStatus,
-        }),
-      });
-      
-      if (response.ok) {
-        // Update the template status in the local state
-        setClientTemplates(prev => 
-          prev.map(template => 
-            template.id === templateId 
-              ? { ...template, status: newStatus }
-              : template
-          )
-        );
-      } else {
-        console.error('Failed to update template status');
-      }
-    } catch (error) {
-      console.error('Error updating template status:', error);
-    }
+    // Update the template status in the local state only
+    setClientTemplates(prev => 
+      prev.map(template => 
+        template.id === templateId 
+          ? { ...template, status: newStatus }
+          : template
+      )
+    );
   };
 
   return (
