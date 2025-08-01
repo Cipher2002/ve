@@ -31,6 +31,11 @@ interface AutosaveOptions {
    * Whether autosave is currently paused
    */
   isPaused?: boolean;
+
+  /**
+   * Whether autosave should be enabled (starts the timer)
+   */
+  isEnabled?: boolean;
 }
 
 /**
@@ -46,37 +51,15 @@ export const useAutosave = (
   state: any,
   options: AutosaveOptions = {}
 ) => {
-  const { interval = 5000, onLoad, onSave, onAutosaveDetected, isPaused = false } = options;
-
+  const { interval = 5000, onLoad, onSave, onAutosaveDetected, isPaused = false, isEnabled = true } = options;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const saveInProgressRef = useRef<boolean>(false);
   const lastSavedStateRef = useRef<string>("");
-  // const [hasCheckedForAutosave, setHasCheckedForAutosave] = useState(false);
-
-  // Check for existing autosave on mount, but only once
-  // useEffect(() => {
-  //   const checkForAutosave = async () => {
-  //     if (hasCheckedForAutosave) return;
-
-  //     try {
-  //       const timestamp = await hasAutosave(projectId);
-  //       if (timestamp && onAutosaveDetected) {
-  //         onAutosaveDetected(timestamp);
-  //       }
-  //       setHasCheckedForAutosave(true);
-  //     } catch (error) {
-  //       console.error("Failed to check for autosave:", error);
-  //       setHasCheckedForAutosave(true);
-  //     }
-  //   };
-
-  //   checkForAutosave();
-  // }, [projectId, onAutosaveDetected, hasCheckedForAutosave]);
 
   // Set up autosave timer
   useEffect(() => {
-    // Don't start autosave if projectId is not valid
-    if (!projectId || !state.projectName) return;
+    // Don't start autosave if projectId is not valid, not enabled, or no project name
+    if (!projectId || !state.projectName || !isEnabled) return;
 
     const saveIfChanged = async () => {
       // Skip autosave if paused or already saving
@@ -184,7 +167,7 @@ export const useAutosave = (
         timerRef.current = null;
       }
     };
-  }, [projectId, state, interval, onSave, state.projectName]);
+  }, [projectId, state, interval, onSave, state.projectName, isEnabled]);
 
 
   // Function to manually save state

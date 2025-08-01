@@ -127,6 +127,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   // Rename project state
   const [isRenamingProject, setIsRenamingProject] = useState(false);
 
+  const [hasTimelineContent, setHasTimelineContent] = useState(false);
+
   const inputProps = {
     overlays,
     durationInFrames,
@@ -179,6 +181,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const { saveState, loadState } = useAutosave(projectId, editorState, {
     interval: AUTO_SAVE_INTERVAL,
     isPaused: isRenamingProject,
+    isEnabled: hasTimelineContent, // Only enable autosave when timeline has content
     onSave: () => {
       setIsSaving(false);
       setLastSaveTime(Date.now());
@@ -423,6 +426,14 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     window.addEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
     return () => window.removeEventListener('projectNameChanged', handleProjectNameChanged as EventListener);
   }, [projectName]);
+
+  // Monitor when user first adds content to timeline (once enabled, stays enabled)
+  useEffect(() => {
+    if (!hasTimelineContent && overlays.length > 0) {
+      setHasTimelineContent(true);
+    }
+    // Once user has added content once, autosave remains active
+  }, [overlays.length, hasTimelineContent]);
 
   useEffect(() => {
     const handleApplyTemplate = (event: CustomEvent) => {
