@@ -466,6 +466,8 @@ const handleAutomaticCaptions = async () => {
           rotation: 0,
           isDragging: false,
           row: targetRow,
+          template: "default",
+          styles: captionTemplates.default.styles,
         };
         
         newCaptionOverlays.push(newCaptionOverlay);
