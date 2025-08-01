@@ -604,18 +604,37 @@ const handleAutomaticCaptions = async () => {
         const overlayStartTimeMs = (fromFrame / FPS) * 1000;
         
         // Convert the API response to our caption format with adjusted timing
+        // const processedCaptions = subtitlesData.segments.map((segment: any) => {
+        //   const words = segment.words.map((word: any) => ({
+        //     word: word.word.trim(),
+        //     startMs: (segment.start * 1000) + overlayStartTimeMs,
+        //     endMs: (segment.end * 1000) + overlayStartTimeMs,
+        //     confidence: word.probability || 0.99,
+        //   }));
+          
+        //   return {
+        //     text: segment.text.trim(),
+        //     startMs: (segment.start * 1000) + overlayStartTimeMs,
+        //     endMs: (segment.end * 1000) + overlayStartTimeMs,
+        //     timestampMs: null,
+        //     confidence: 0.99,
+        //     words,
+        //   };
+        // });
+
+        // Convert the API response to our caption format with relative timing
         const processedCaptions = subtitlesData.segments.map((segment: any) => {
           const words = segment.words.map((word: any) => ({
             word: word.word.trim(),
-            startMs: (segment.start * 1000) + overlayStartTimeMs,
-            endMs: (segment.end * 1000) + overlayStartTimeMs,
+            startMs: word.start * 1000, // Keep relative to overlay start
+            endMs: word.end * 1000,     // Keep relative to overlay start
             confidence: word.probability || 0.99,
           }));
           
           return {
             text: segment.text.trim(),
-            startMs: (segment.start * 1000) + overlayStartTimeMs,
-            endMs: (segment.end * 1000) + overlayStartTimeMs,
+            startMs: segment.start * 1000, // Keep relative to overlay start
+            endMs: segment.end * 1000,     // Keep relative to overlay start
             timestampMs: null,
             confidence: 0.99,
             words,

@@ -42,16 +42,14 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
   overlay,
 }) => {
   const frame = useCurrentFrame();
-  const frameMs = (frame / 30) * 1000;
-  const overlayStartMs = (overlay.from / 30) * 1000;
-  const absoluteMs = frameMs + overlayStartMs; // Convert relative frame to absolute timeline time
+  const frameMs = (frame / 30) * 1000; // This is now relative time, which matches our caption timing
   const styles = overlay.styles || defaultCaptionStyles;
 
   /**
    * Finds the current caption based on the frame timestamp
    */
   const currentCaption = overlay.captions.find(
-    (caption) => absoluteMs >= caption.startMs && absoluteMs <= caption.endMs
+    (caption) => frameMs >= caption.startMs && frameMs <= caption.endMs
   );
 
   if (!currentCaption) return null;
@@ -63,25 +61,25 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
   const renderWords = (caption: Caption) => {
     return caption?.words?.map((word, index) => {
       // Temporary debug logging
-      if (caption.words.length > 0) {
-        console.log('Debug timing:', {
-          currentFrame: frame,
-          frameMs,
-          overlayStartMs,
-          absoluteMs,
-          firstWord: caption.words[0],
-          lastWord: caption.words[caption.words.length - 1],
-          captionStart: caption.startMs,
-          captionEnd: caption.endMs
-        });
-      }
+      // if (caption.words.length > 0) {
+      //   console.log('Debug timing:', {
+      //     currentFrame: frame,
+      //     frameMs,
+      //     overlayStartMs,
+      //     absoluteMs,
+      //     firstWord: caption.words[0],
+      //     lastWord: caption.words[caption.words.length - 1],
+      //     captionStart: caption.startMs,
+      //     captionEnd: caption.endMs
+      //   });
+      // }
       // const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
       // const progress = isHighlighted
       //   ? Math.min((frameMs - word.startMs) / 300, 1)
       //   : 0;
-      const isHighlighted = absoluteMs >= word.startMs && absoluteMs <= word.endMs;
+      const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
       const progress = isHighlighted
-        ? Math.min((absoluteMs - word.startMs) / 300, 1)
+        ? Math.min((frameMs - word.startMs) / 300, 1)
         : 0;
 
       const highlightStyle =
