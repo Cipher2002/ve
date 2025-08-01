@@ -18,6 +18,7 @@ interface LocalMediaContextType {
   isLoading: boolean;
   loadMoreMedia: () => Promise<void>;
   hasMore: boolean;
+  loadInitialMedia: () => Promise<void>;
 }
 
 const LocalMediaContext = createContext<LocalMediaContextType | undefined>(
@@ -66,53 +67,49 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   // Define BASE_URL at the top where API calls are made
   const BASE_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net/'; // You can change this to your desired base URL
 
-  // Load media files from API on component mount
-  useEffect(() => {
-    const loadMediaFiles = async () => {
-      if (!uid || !user_ref) return;
+  // Function to load media files (call this when panel opens)
+  const loadInitialMedia = useCallback(async () => {
+    if (!uid || !user_ref || localMediaFiles.length > 0) return; // Don't reload if already loaded
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/latest/media/get', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: uid,
+          user_ref: user_ref,
+          start_from: '0',
+          max_results: '20',
+        }),
+      });
+
+      const data = await response.json();
       
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/latest/media/get', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: uid,
-            user_ref: user_ref,
-            start_from: '0',
-            max_results: '20',
-          }),
-        });
+      if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
+        const files: LocalMediaFile[] = data.RESPONSE.map((item: any) => ({
+          id: item.file_id,
+          name: item.file_url.split('/').pop() || 'Unknown',
+          type: item.file_type,
+          path: item.file_url,
+          size: 0, // Not available from API
+          lastModified: new Date(item.file_timestamp).getTime(),
+          thumbnail: item.file_thumbnail_url || null, // Handle empty strings
+          duration: 0, // Not available from API
+        }));
 
-        const data = await response.json();
-        
-        if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
-          const files: LocalMediaFile[] = data.RESPONSE.map((item: any) => ({
-            id: item.file_id,
-            name: item.file_url.split('/').pop() || 'Unknown',
-            type: item.file_type,
-            path: item.file_url,
-            size: 0, // Will be calculated during upload
-            lastModified: new Date(item.file_timestamp).getTime(),
-            thumbnail: item.file_thumbnail_url,
-            duration: 0, // Will be calculated during upload for videos
-          }));
-
-          setLocalMediaFiles(files);
-          setHasMore(data.RESPONSE.length >= 20);
-          setCurrentPage(1);
-        }
-      } catch (error) {
-        console.error("Error loading media files from API:", error);
-      } finally {
-        setIsLoading(false);
+        setLocalMediaFiles(files);
+        setHasMore(data.RESPONSE.length >= 20);
+        setCurrentPage(1);
       }
-    };
-
-    loadMediaFiles();
-  }, [uid, user_ref]);
+    } catch (error) {
+      console.error("Error loading media files from API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [uid, user_ref, localMediaFiles.length]);
 
   const loadMoreMedia = useCallback(async (): Promise<void> => {
     if (!uid || !user_ref || isLoadingMore || !hasMore) return;
@@ -300,6 +297,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
     isLoading,
     loadMoreMedia,
     hasMore,
+    loadInitialMedia,
   };
 
   return (

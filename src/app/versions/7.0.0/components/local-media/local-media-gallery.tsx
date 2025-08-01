@@ -30,7 +30,7 @@ export function LocalMediaGallery({
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
 }) {
-  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore } =
+  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadInitialMedia } =
     useLocalMedia();
   const [activeTab, setActiveTab] = useState("all");
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);
@@ -55,6 +55,11 @@ export function LocalMediaGallery({
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [confirmingMediaId]);
+
+  // Load data when component first mounts
+  useEffect(() => {
+    loadInitialMedia();
+  }, [loadInitialMedia]);
 
 
   // Filter media files based on active tab
@@ -243,26 +248,37 @@ export function LocalMediaGallery({
             {/* Thumbnail */}
             <div className="aspect-video relative">
               {file.type === "image" && (
-                <img
-                  src={
-                    (file.thumbnail || file.path)
-                      ? (file.thumbnail || file.path)
-                      : `${window.location.origin}${file.thumbnail || file.path}`
-                  }
-                  alt={file.name}
-                  className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
-                />
-              )}
-              {file.type === "video" && (
                 <>
-                  <img
-                    src={file.thumbnail}
-                    alt={file.name}
-                    className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
-                  />
-                  <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
-                    {formatDuration(file.duration)}
-                  </div>
+                  {file.thumbnail && file.thumbnail.trim() !== '' ? (
+                    <img
+                      src={file.thumbnail}
+                      alt={file.name}
+                      className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                    />
+                  ) : (
+                    <img
+                      src={file.path}
+                      alt={file.name}
+                      className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                    />
+                  )}
+                </>
+              )}
+              {file.type === "image" && (
+                <>
+                  {file.thumbnail && file.thumbnail.trim() !== '' ? (
+                    <img
+                      src={file.thumbnail}
+                      alt={file.name}
+                      className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                    />
+                  ) : (
+                    <img
+                      src={file.path}
+                      alt={file.name}
+                      className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                    />
+                  )}
                 </>
               )}
               {file.type === "audio" && (
@@ -278,14 +294,14 @@ export function LocalMediaGallery({
                 {file.name}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {formatBytes(file.size)}
+                {file.type.charAt(0).toUpperCase() + file.type.slice(1)}
               </p>
             </div>
           </div>
         )}
 
         {/* Delete button - only show when not in confirm mode */}
-        {confirmingMediaId !== file.id && (
+        {/* {confirmingMediaId !== file.id && (
           <button
             className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
               text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
@@ -301,7 +317,7 @@ export function LocalMediaGallery({
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
-        )}
+        )} */}
       </div>
     );
   };

@@ -487,6 +487,6 @@ export interface LocalMediaFile {
   path: string;
   size: number;
   lastModified: number;
-  thumbnail?: string;
+  thumbnail?: string | null; // Allow null for empty thumbnails
   duration?: number;
 }
