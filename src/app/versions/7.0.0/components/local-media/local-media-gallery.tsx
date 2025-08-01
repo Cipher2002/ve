@@ -29,9 +29,11 @@ import { useVideoCache } from "../../hooks/use-video-cache";
 export function LocalMediaGallery({
   onSelectMedia,
   isLoadingMore,
+  autoAddToTimeline = false,
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
   isLoadingMore?: boolean;
+  autoAddToTimeline?: boolean;
 }) {
   const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles } =
     useLocalMedia();
@@ -86,7 +88,20 @@ export function LocalMediaGallery({
     if (files && files.length > 0) {
       try {
         setUploadError(null);
-        await addMediaFile(files[0]);
+        const uploadedFile = await addMediaFile(files[0]);
+        
+        // Auto-add to timeline if enabled and callback exists
+        if (autoAddToTimeline && onSelectMedia && uploadedFile) {
+          // For videos, we need to handle the download process
+          if (uploadedFile.type === 'video') {
+            await handleVideoClick(uploadedFile);
+          } else if (uploadedFile.type === 'image') {
+            await handleImageClick(uploadedFile);
+          } else if (uploadedFile.type === 'audio') {
+            handleAudioClick(uploadedFile);
+          }
+        }
+        
         // Reset the input value to allow uploading the same file again
         event.target.value = "";
       } catch (error) {
