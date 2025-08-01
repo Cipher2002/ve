@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useLocalMedia } from "../../contexts/local-media-context";
 import { formatBytes, formatDuration } from "../../utils/format-utils";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ export function LocalMediaGallery({
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
 }) {
-  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading } =
+  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore } =
     useLocalMedia();
   const [activeTab, setActiveTab] = useState("all");
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);
@@ -38,6 +38,7 @@ export function LocalMediaGallery({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   
 
   useEffect(() => {
@@ -113,6 +114,15 @@ export function LocalMediaGallery({
       setPreviewOpen(false);
     }
   };
+
+  // Handle infinite scroll
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !isLoadingMore && !isLoading) {
+      setIsLoadingMore(true);
+      loadMoreMedia().finally(() => setIsLoadingMore(false));
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
 
   // Render preview content based on file type
   const renderPreviewContent = () => {
@@ -282,9 +292,12 @@ export function LocalMediaGallery({
               shadow-sm hover:shadow-md transform hover:scale-105"
             onClick={(e) => {
               e.stopPropagation();
-              removeMediaFile(file.id);
+              // Show warning since delete is not supported by API
+              if (confirm("Note: This will only remove the file from your current view. The file will remain on the server.")) {
+                removeMediaFile(file.id);
+              }
             }}
-            title="Delete media"
+            title="Remove from view (file remains on server)"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -375,7 +388,7 @@ export function LocalMediaGallery({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0">
+        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0" onScroll={handleScroll}>
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-sm text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -404,6 +417,20 @@ export function LocalMediaGallery({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 ">
               {filteredMedia.map(renderMediaItem)}
+              
+              {/* Loading more indicator */}
+              {isLoadingMore && (
+                <div className="col-span-2 flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                </div>
+              )}
+              
+              {/* No more content indicator */}
+              {!hasMore && !isLoading && !isLoadingMore && filteredMedia.length >= 20 && (
+                <div className="col-span-2 text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                  No more media files to load
+                </div>
+              )}
             </div>
           )}
         </TabsContent>

@@ -45,27 +45,27 @@ export const useAutosave = (
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedStateRef = useRef<string>("");
-  const [hasCheckedForAutosave, setHasCheckedForAutosave] = useState(false);
+  // const [hasCheckedForAutosave, setHasCheckedForAutosave] = useState(false);
 
   // Check for existing autosave on mount, but only once
-  useEffect(() => {
-    const checkForAutosave = async () => {
-      if (hasCheckedForAutosave) return;
+  // useEffect(() => {
+  //   const checkForAutosave = async () => {
+  //     if (hasCheckedForAutosave) return;
 
-      try {
-        const timestamp = await hasAutosave(projectId);
-        if (timestamp && onAutosaveDetected) {
-          onAutosaveDetected(timestamp);
-        }
-        setHasCheckedForAutosave(true);
-      } catch (error) {
-        console.error("Failed to check for autosave:", error);
-        setHasCheckedForAutosave(true);
-      }
-    };
+  //     try {
+  //       const timestamp = await hasAutosave(projectId);
+  //       if (timestamp && onAutosaveDetected) {
+  //         onAutosaveDetected(timestamp);
+  //       }
+  //       setHasCheckedForAutosave(true);
+  //     } catch (error) {
+  //       console.error("Failed to check for autosave:", error);
+  //       setHasCheckedForAutosave(true);
+  //     }
+  //   };
 
-    checkForAutosave();
-  }, [projectId, onAutosaveDetected, hasCheckedForAutosave]);
+  //   checkForAutosave();
+  // }, [projectId, onAutosaveDetected, hasCheckedForAutosave]);
 
   // Set up autosave timer
   useEffect(() => {

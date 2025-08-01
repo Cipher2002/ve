@@ -9,12 +9,6 @@ import React, {
 } from "react";
 import { LocalMediaFile } from "../types";
 import { getUserId } from "../utils/user-id";
-import {
-  getUserMediaItems,
-  deleteMediaItem as deleteFromIndexDB,
-  clearUserMedia,
-} from "../utils/indexdb";
-import { uploadMediaFile, deleteMediaFile } from "../utils/media-upload";
 
 interface LocalMediaContextType {
   localMediaFiles: LocalMediaFile[];
@@ -22,11 +16,32 @@ interface LocalMediaContextType {
   removeMediaFile: (id: string) => Promise<void>;
   clearMediaFiles: () => Promise<void>;
   isLoading: boolean;
+  loadMoreMedia: () => Promise<void>;
+  hasMore: boolean;
 }
 
 const LocalMediaContext = createContext<LocalMediaContextType | undefined>(
   undefined
 );
+
+// Add this function to get URL parameters
+const getUrlParams = () => {
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      uid: urlParams.get('uid') || '',
+      sid: urlParams.get('sid') || '',
+      user_ref: urlParams.get('email') || ''
+    };
+  }
+  return { uid: '', sid: '', user_ref: '' };
+};
+
+// Add this function to get user IP (you can implement this later)
+const getUserIP = async (): Promise<string> => {
+  // For now, return empty string as specified
+  return '';
+};
 
 /**
  * LocalMediaProvider Component
@@ -43,73 +58,206 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [localMediaFiles, setLocalMediaFiles] = useState<LocalMediaFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [userId] = useState(() => getUserId());
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const { uid, user_ref } = getUrlParams();
 
-  // Load saved media files from IndexedDB on component mount
+  // Define BASE_URL at the top where API calls are made
+  const BASE_URL = window.location.origin; // You can change this to your desired base URL
+
+  // Load media files from API on component mount
   useEffect(() => {
     const loadMediaFiles = async () => {
+      if (!uid || !user_ref) return;
+      
       try {
         setIsLoading(true);
-        const mediaItems = await getUserMediaItems(userId);
+        const response = await fetch('/api/latest/media/get', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: uid,
+            user_ref: user_ref,
+            start_from: '0',
+            max_results: '20',
+          }),
+        });
 
-        // Convert IndexedDB items to LocalMediaFile format
-        const files: LocalMediaFile[] = mediaItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          type: item.type,
-          path: item.serverPath,
-          size: item.size,
-          lastModified: item.lastModified,
-          thumbnail: item.thumbnail,
-          duration: item.duration,
-        }));
+        const data = await response.json();
+        
+        if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
+          const files: LocalMediaFile[] = data.RESPONSE.map((item: any) => ({
+            id: item.file_id,
+            name: item.file_url.split('/').pop() || 'Unknown',
+            type: item.file_type,
+            path: item.file_url,
+            size: 0, // Will be calculated during upload
+            lastModified: new Date(item.file_timestamp).getTime(),
+            thumbnail: item.file_thumbnail_url,
+            duration: 0, // Will be calculated during upload for videos
+          }));
 
-        setLocalMediaFiles(files);
+          setLocalMediaFiles(files);
+          setHasMore(data.RESPONSE.length >= 20);
+          setCurrentPage(1);
+        }
       } catch (error) {
-        console.error("Error loading media files from IndexedDB:", error);
+        console.error("Error loading media files from API:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadMediaFiles();
-  }, [userId]);
+  }, [uid, user_ref]);
+
+  const loadMoreMedia = useCallback(async (): Promise<void> => {
+    if (!uid || !user_ref || isLoadingMore || !hasMore) return;
+    
+    try {
+      setIsLoadingMore(true);
+      const response = await fetch('/api/latest/media/get', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: uid,
+          user_ref: user_ref,
+          start_from: (currentPage * 20).toString(),
+          max_results: '20',
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
+        const newFiles: LocalMediaFile[] = data.RESPONSE.map((item: any) => ({
+          id: item.file_id,
+          name: item.file_url.split('/').pop() || 'Unknown',
+          type: item.file_type,
+          path: item.file_url,
+          size: 0,
+          lastModified: new Date(item.file_timestamp).getTime(),
+          thumbnail: item.file_thumbnail_url,
+          duration: 0,
+        }));
+
+        setLocalMediaFiles(prev => [...prev, ...newFiles]);
+        setHasMore(newFiles.length >= 20);
+        setCurrentPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error loading more media files:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [uid, user_ref, currentPage, isLoadingMore, hasMore]);
 
   /**
    * Add a new media file to the collection
    */
   const addMediaFile = useCallback(
     async (file: File): Promise<LocalMediaFile | void> => {
+      if (!uid || !user_ref) {
+        throw new Error("User ID or User Ref not available");
+      }
+
       setIsLoading(true);
       try {
-        // Upload file to server and store in IndexedDB
-        const mediaItem = await uploadMediaFile(file);
+        // Upload file to server using existing API
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('userId', uid);
 
-        // Convert to LocalMediaFile format
+        const uploadResponse = await fetch('/api/latest/local-media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        
+        // Get file metadata
+        const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : 
+                                                      file.type.startsWith('video/') ? 'video' : 
+                                                      'audio'; // Default to audio if not image or video
+        
+        // Generate thumbnail for videos and get duration
+        let thumbnail = '';
+        let duration = 0;
+        let size = file.size;
+        
+        if (fileType === 'video') {
+          const video = document.createElement('video');
+          video.src = URL.createObjectURL(file);
+          
+          await new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+              duration = video.duration;
+              
+              // Generate thumbnail
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(video, 0, 0);
+              thumbnail = canvas.toDataURL('image/jpeg', 0.7);
+              
+              URL.revokeObjectURL(video.src);
+              resolve(void 0);
+            };
+          });
+        }
+        
+        // Construct file URLs using the serverPath from your API
+        const fileUrl = `${BASE_URL}${uploadResult.serverPath}`;
+        const fileCdnUrl = fileUrl;
+        const fileThumbnailUrl = thumbnail || fileUrl;
+        
+        // Call the Zanopy API to register the file
+        const apiResponse = await fetch('/api/latest/media/upload-register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file_url: fileUrl,
+            file_cdn_url: fileCdnUrl,
+            file_thumbnail_url: fileThumbnailUrl,
+            file_category: 'edit_video',
+            file_type: fileType,
+            user_id: uid,
+            user_ref: user_ref,
+          }),
+        });
+
+        const apiData = await apiResponse.json();
+        
+        if (apiData.RESULT !== 'SUCCESS') {
+          throw new Error('API registration failed');
+        }
+
+        // Create LocalMediaFile object
         const newMediaFile: LocalMediaFile = {
-          id: mediaItem.id,
-          name: mediaItem.name,
-          type: mediaItem.type,
-          path: mediaItem.serverPath,
-          size: mediaItem.size,
-          lastModified: mediaItem.lastModified,
-          thumbnail: mediaItem.thumbnail || "",
-          duration: mediaItem.duration,
+          id: apiData.RESPONSE.file_id,
+          name: uploadResult.fileName,
+          type: fileType,
+          path: fileUrl,
+          size: uploadResult.size,
+          lastModified: Date.now(),
+          thumbnail: fileThumbnailUrl,
+          duration: duration,
         };
 
-        // Update state with the new media file
-        setLocalMediaFiles((prev) => {
-          // Check if file with same ID already exists
-          const exists = prev.some((item) => item.id === newMediaFile.id);
-          if (exists) {
-            // Replace existing file
-            return prev.map((item) =>
-              item.id === newMediaFile.id ? newMediaFile : item
-            );
-          }
-          // Add new file
-          return [...prev, newMediaFile];
-        });
+        // Update state with the new media file (add to beginning)
+        setLocalMediaFiles((prev) => [newMediaFile, ...prev]);
 
         return newMediaFile;
       } catch (error) {
@@ -119,53 +267,30 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(false);
       }
     },
+    [uid, user_ref]
+  );
+
+  /**
+   * Remove a media file by ID (Note: No delete API available)
+   */
+  const removeMediaFile = useCallback(
+    async (id: string): Promise<void> => {
+      // Since there's no delete API, we'll just remove from local state
+      // The file will remain on the server
+      console.warn("Delete functionality not available - removing from local view only");
+      setLocalMediaFiles((prev) => prev.filter((file) => file.id !== id));
+    },
     []
   );
 
   /**
-   * Remove a media file by ID
-   */
-  const removeMediaFile = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        const fileToRemove = localMediaFiles.find((file) => file.id === id);
-
-        if (fileToRemove) {
-          // Delete from server
-          await deleteMediaFile(userId, fileToRemove.path);
-
-          // Delete from IndexedDB
-          await deleteFromIndexDB(id);
-
-          // Update state
-          setLocalMediaFiles((prev) => prev.filter((file) => file.id !== id));
-        }
-      } catch (error) {
-        console.error("Error removing media file:", error);
-      }
-    },
-    [localMediaFiles, userId]
-  );
-
-  /**
-   * Clear all media files
+   * Clear all media files (Note: No delete API available)
    */
   const clearMediaFiles = useCallback(async (): Promise<void> => {
-    try {
-      // Delete all files from server
-      for (const file of localMediaFiles) {
-        await deleteMediaFile(userId, file.path);
-      }
-
-      // Clear IndexedDB
-      await clearUserMedia(userId);
-
-      // Update state
-      setLocalMediaFiles([]);
-    } catch (error) {
-      console.error("Error clearing media files:", error);
-    }
-  }, [localMediaFiles, userId]);
+    // Since there's no delete API, we'll just clear local state
+    console.warn("Delete functionality not available - clearing local view only");
+    setLocalMediaFiles([]);
+  }, []);
 
   const value = {
     localMediaFiles,
@@ -173,6 +298,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
     removeMediaFile,
     clearMediaFiles,
     isLoading,
+    loadMoreMedia,
+    hasMore,
   };
 
   return (
