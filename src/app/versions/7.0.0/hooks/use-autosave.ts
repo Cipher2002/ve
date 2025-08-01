@@ -49,6 +49,7 @@ export const useAutosave = (
   const { interval = 5000, onLoad, onSave, onAutosaveDetected, isPaused = false } = options;
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const saveInProgressRef = useRef<boolean>(false);
   const lastSavedStateRef = useRef<string>("");
   // const [hasCheckedForAutosave, setHasCheckedForAutosave] = useState(false);
 
@@ -78,13 +79,16 @@ export const useAutosave = (
     if (!projectId || !state.projectName) return;
 
     const saveIfChanged = async () => {
-      // Skip autosave if paused
-      if (isPaused) return;
+      // Skip autosave if paused or already saving
+      if (isPaused || saveInProgressRef.current) return;
       
       const currentStateString = JSON.stringify(state);
 
       // Only save if state has changed since last save
       if (currentStateString !== lastSavedStateRef.current) {
+        // Set save in progress flag
+        saveInProgressRef.current = true;
+        
         try {
           // Small delay to ensure state updates are reflected
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -158,14 +162,17 @@ export const useAutosave = (
               detail: { isUpdate: true, templateName: state.projectName }
             }));
           } else {
-            console.error("Autosave failed: API responses not OK");
-          }
-
-        } catch (error) {
-          console.error("Autosave failed:", error);
+          console.error("Autosave failed: API responses not OK");
         }
+
+      } catch (error) {
+        console.error("Autosave failed:", error);
+      } finally {
+        // Clear save in progress flag
+        saveInProgressRef.current = false;
       }
-    };
+    }
+  };
 
     // Set up interval for autosave
     timerRef.current = setInterval(saveIfChanged, interval);
