@@ -70,7 +70,7 @@ export const useAutosave = (
   // Set up autosave timer
   useEffect(() => {
     // Don't start autosave if projectId is not valid
-    if (!projectId) return;
+    if (!projectId || !state.projectName) return;
 
     const saveIfChanged = async () => {
       const currentStateString = JSON.stringify(state);
@@ -78,9 +78,80 @@ export const useAutosave = (
       // Only save if state has changed since last save
       if (currentStateString !== lastSavedStateRef.current) {
         try {
-          await saveEditorState(projectId, state);
-          lastSavedStateRef.current = currentStateString;
-          if (onSave) onSave();
+          // Get UID from URL
+          const getUidFromUrl = () => {
+            if (typeof window === 'undefined') return 'default';
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('uid') || 'default';
+          };
+
+          const uid = getUidFromUrl();
+
+          // Prepare project save data
+          const projectSaveData = {
+            overlays: state.overlays,
+            aspectRatio: state.aspectRatio,
+            playerDimensions: state.playerDimensions,
+            durationInFrames: state.durationInFrames || 30 * 30,
+            fps: 30,
+            width: state.playerDimensions?.width || 1920,
+            height: state.playerDimensions?.height || 1080,
+          };
+
+          // Prepare template data
+          const templateData = {
+            id: `template-${Date.now()}`,
+            name: state.projectName,
+            description: "Template created from editor",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: { id: "user", name: "User" },
+            category: "Custom",
+            tags: ["custom", "user-created"],
+            duration: state.durationInFrames || 30 * 30,
+            aspectRatio: state.aspectRatio || "16:9",
+            overlays: state.overlays || []
+          };
+
+          // Save both project and template in parallel
+          const [projectResponse, templateResponse] = await Promise.all([
+            fetch('/api/latest/save-to-user/save', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uid,
+                projectName: state.projectName,
+                type: 'project',
+                data: projectSaveData,
+                timestamp: new Date().toISOString(),
+              }),
+            }),
+            fetch(`/api/latest/templates/save?uid=${uid}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(templateData)
+            })
+          ]);
+
+          if (projectResponse.ok && templateResponse.ok) {
+            lastSavedStateRef.current = currentStateString;
+            if (onSave) onSave();
+
+            // Trigger events to refresh UI
+            window.dispatchEvent(new CustomEvent('projectSaved', { 
+              detail: { projectName: state.projectName } 
+            }));
+            window.dispatchEvent(new CustomEvent('templateUpdated', { 
+              detail: { isUpdate: true, templateName: state.projectName }
+            }));
+          } else {
+            console.error("Autosave failed: API responses not OK");
+          }
+
         } catch (error) {
           console.error("Autosave failed:", error);
         }
@@ -98,6 +169,7 @@ export const useAutosave = (
       }
     };
   }, [projectId, state, interval, onSave]);
+
 
   // Function to manually save state
   const saveState = async () => {

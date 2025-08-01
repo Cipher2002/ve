@@ -46,23 +46,11 @@ import { useTemplateLoader } from "./hooks/use-template-loader";
 
 
 export default function ReactVideoEditor({ projectId, isAdminMode = false }: { projectId: string; isAdminMode?: boolean }) {
-  // Autosave state
-  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
-  const [autosaveTimestamp, setAutosaveTimestamp] = useState<number | null>(
-    null
-  );
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState<number | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [dynamicDuration, setDynamicDuration] = useState(30 * FPS);
-  const [hasAutosave, setHasAutosave] = useState(false);
-  const [preservedAutosaveData, setPreservedAutosaveData] = useState<{
-    overlays: Overlay[];
-    aspectRatio: any;
-    playerDimensions: { width: number; height: number };
-    projectName?: string; // Add this line
-  } | null>(null);
   // const [projectName, setProjectName] = useState("Default Project");
   const [projectName, setProjectName] = useState(() => {
   const now = new Date();
@@ -178,80 +166,20 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     overlays,
     aspectRatio,
     playerDimensions,
-    projectName, // Include project name in autosave data
+    projectName,
+    durationInFrames,
+    fps: FPS,
+    width: getAspectRatioDimensions().width,
+    height: getAspectRatioDimensions().height,
   };
 
-  // Implment load state
   const { saveState, loadState } = useAutosave(projectId, editorState, {
     interval: AUTO_SAVE_INTERVAL,
     onSave: () => {
       setIsSaving(false);
       setLastSaveTime(Date.now());
     },
-    onLoad: (loadedState) => {
-      // DON'T automatically apply loaded state - let user decide
-      // This prevents auto-loading and maintains current editor state
-      return;
-    },
-    onAutosaveDetected: (timestamp) => {
-      // Only show recovery dialog on initial load, not during an active session
-      if (!initialLoadComplete) {
-        // Load and preserve the autosave data but DON'T apply it automatically
-        loadState().then((loadedState) => {
-          if (loadedState) {
-            setPreservedAutosaveData(loadedState);
-            setAutosaveTimestamp(timestamp);
-            setHasAutosave(true);
-            // Don't apply the state here - let user choose
-          }
-        });
-      }
-    },
   });
-
-  // Mark initial load as complete after component mounts
-  useEffect(() => {
-    setInitialLoadComplete(true);
-  }, []);
-
-  const handleRecoverAutosave = async () => {
-    // Use the preserved autosave data instead of loading current state
-    if (preservedAutosaveData) {
-      // Apply the preserved state to editor
-      setOverlays(preservedAutosaveData.overlays || []);
-      if (preservedAutosaveData.aspectRatio) setAspectRatio(preservedAutosaveData.aspectRatio);
-      if (preservedAutosaveData.playerDimensions)
-        updatePlayerDimensions(
-          preservedAutosaveData.playerDimensions.width,
-          preservedAutosaveData.playerDimensions.height
-        );
-      
-      // IMPORTANT: Also recover the project name if it was saved in autosave
-      if ('projectName' in preservedAutosaveData && preservedAutosaveData.projectName) {
-        setProjectName(preservedAutosaveData.projectName);
-      }
-    }
-    
-    // Clean up
-    setHasAutosave(false);
-    setAutosaveTimestamp(null);
-    setPreservedAutosaveData(null);
-    setShowRecoveryDialog(false);
-  };
-
-  const handleDiscardAutosave = async () => {
-    // Clear the autosave data from storage so it won't appear again
-    try {
-      await clearAutosave(projectId);
-    } catch (error) {
-      console.error('Failed to clear autosave:', error);
-    }
-    
-    setHasAutosave(false);
-    setAutosaveTimestamp(null);
-    setPreservedAutosaveData(null);
-    setShowRecoveryDialog(false);
-  };
 
   // Manual save function for use in keyboard shortcuts or save button
   const handleManualSave = async () => {
@@ -571,12 +499,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     newProject,
     loadTemplateIntoEditor,
 
-    // Add autosave recovery props
-    autosaveTimestamp,
-    preservedAutosaveData,
-    handleRecoverAutosave,
-    handleDiscardAutosave,
-
     // Template loading state
     isLoadingTemplate,
     templateLoadingProgress,
@@ -611,17 +533,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
                       isSaving={isSaving}
                       lastSaveTime={lastSaveTime}
                     />
-  
-                    {/* Autosave Recovery Dialog */}
-                    {/* {showRecoveryDialog && autosaveTimestamp && (
-                      <AutosaveRecoveryDialog
-                        projectId={projectId}
-                        timestamp={autosaveTimestamp}
-                        onRecover={handleRecoverAutosave}
-                        onDiscard={handleDiscardAutosave}
-                        onClose={() => setShowRecoveryDialog(false)}
-                      />
-                    )} */}
                   </AssetLoadingProvider>
                 </LocalMediaProvider>
               </EditorProvider>
