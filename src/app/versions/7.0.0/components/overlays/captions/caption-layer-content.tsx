@@ -81,9 +81,12 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
 
     return caption?.words?.map((word, index) => {
       const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
+      const wasRecentlyHighlighted = frameMs <= (word.endMs + 100); // Keep glow for 100ms after
+      const showHighlight = isHighlighted || (frameMs > word.endMs && wasRecentlyHighlighted);
+
       const progress = isHighlighted
         ? Math.min((frameMs - word.startMs) / 300, 1)
-        : 0;
+        : Math.max(0, 1 - ((frameMs - word.endMs) / 100)); // Fade out over 100ms
 
       const highlightStyle =
         styles.highlightStyle || defaultCaptionStyles.highlightStyle;
@@ -93,12 +96,12 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
           key={`${word.word}-${index}`}
           className="inline-block transition-all duration-200"
           style={{
-            color: isHighlighted ? highlightStyle?.color : styles.color,
-            backgroundColor: isHighlighted
+            color: showHighlight ? highlightStyle?.color : styles.color,
+            backgroundColor: showHighlight
               ? highlightStyle?.backgroundColor
               : "transparent",
-            opacity: isHighlighted ? 1 : 0.85,
-            transform: isHighlighted
+            opacity: showHighlight ? 1 : 0.85,
+            transform: showHighlight
               ? `scale(${
                   1 +
                   (highlightStyle?.scale
