@@ -52,20 +52,6 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
     (caption) => frameMs >= caption.startMs && frameMs <= caption.endMs
   );
 
-  // Debug: Check word timing gaps
-  if (currentCaption) {
-    const words = currentCaption.words;
-    for (let i = 0; i < words.length - 1; i++) {
-      const gap = words[i + 1].startMs - words[i].endMs;
-      if (gap > 100) { // Gap larger than 100ms
-        console.warn(`Large gap between "${words[i].word}" and "${words[i + 1].word}": ${gap}ms`);
-      }
-      if (gap < 0) { // Overlapping words
-        console.warn(`Overlapping words: "${words[i].word}" and "${words[i + 1].word}": ${gap}ms`);
-      }
-    }
-  }
-
   if (!currentCaption) return null;
 
   /**
@@ -73,20 +59,11 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
    * @param caption - The current caption object containing words and timing
    */
   const renderWords = (caption: Caption) => {
-
-    const highlightedWords = caption?.words?.filter(word => frameMs >= word.startMs && frameMs <= word.endMs);
-    if (highlightedWords.length > 0) {
-      console.log('Highlighted words:', highlightedWords.map(w => w.word).join(' '), 'at', frameMs);
-    }
-
     return caption?.words?.map((word, index) => {
       const isHighlighted = frameMs >= word.startMs && frameMs <= word.endMs;
-      const wasRecentlyHighlighted = frameMs <= (word.endMs + 100); // Keep glow for 100ms after
-      const showHighlight = isHighlighted || (frameMs > word.endMs && wasRecentlyHighlighted);
-
       const progress = isHighlighted
         ? Math.min((frameMs - word.startMs) / 300, 1)
-        : Math.max(0, 1 - ((frameMs - word.endMs) / 100)); // Fade out over 100ms
+        : 0;
 
       const highlightStyle =
         styles.highlightStyle || defaultCaptionStyles.highlightStyle;
@@ -96,12 +73,12 @@ export const CaptionLayerContent: React.FC<CaptionLayerContentProps> = ({
           key={`${word.word}-${index}`}
           className="inline-block transition-all duration-200"
           style={{
-            color: showHighlight ? highlightStyle?.color : styles.color,
-            backgroundColor: showHighlight
+            color: isHighlighted ? highlightStyle?.color : styles.color,
+            backgroundColor: isHighlighted
               ? highlightStyle?.backgroundColor
               : "transparent",
-            opacity: showHighlight ? 1 : 0.85,
-            transform: showHighlight
+            opacity: isHighlighted ? 1 : 0.85,
+            transform: isHighlighted
               ? `scale(${
                   1 +
                   (highlightStyle?.scale

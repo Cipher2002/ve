@@ -296,7 +296,6 @@ const handleAutomaticCaptions = async () => {
       await pollMultipleCaptionStatus(result.results);
       
     } catch (error) {
-      console.error('Auto caption error:', error);
       alert('Failed to generate captions. Please try again.');
       setIsGeneratingCaptions(false);
     }
@@ -366,9 +365,6 @@ const handleAutomaticCaptions = async () => {
             // Remove from pending
             pendingResults.splice(i, 1);
             
-            console.log(`Caption generation completed for overlay ${originalResult.overlayId}`);
-          } else {
-            console.log(`Caption generation progress for overlay ${originalResult.overlayId}: ${statusResult.progress || 0}% - ${statusResult.message || 'Processing...'}`);
           }
         }
         
@@ -478,7 +474,6 @@ const handleAutomaticCaptions = async () => {
       setIsGeneratingCaptions(false);
       
     } catch (error) {
-      console.error('Failed to process multiple caption data:', error);
       alert('Failed to process generated captions');
       setIsGeneratingCaptions(false);
     }
