@@ -39,7 +39,7 @@ export function LocalMediaGallery({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  // const [isLoadingMore, setIsLoadingMore] = useState(false);
   const hasInitialized = useRef(false);
   // Add these state variables at the top
   const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
@@ -138,8 +138,9 @@ export function LocalMediaGallery({
         
         const videoFile = {
           ...file,
-          path: cachedVideoUrl, // Use cached URL
-          duration: durationInFrames / 30, // Convert back to seconds for the interface
+          path: file.path, // Keep original URL for Remotion
+          cachedPath: cachedVideoUrl, // Store cached URL separately
+          duration: durationInFrames / 30,
           width,
           height,
         };
@@ -260,15 +261,15 @@ export function LocalMediaGallery({
   };
 
   // Handle infinite scroll
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 100) {
-      if (hasMore && !isLoadingMore && !isLoading) {
-        setIsLoadingMore(true);
-        loadMoreMedia().finally(() => setIsLoadingMore(false));
-      }
-    }
-  }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
+  // const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  //   if (scrollHeight - scrollTop <= clientHeight + 100) {
+  //     if (hasMore && !isLoadingMore && !isLoading) {
+  //       setIsLoadingMore(true);
+  //       loadMoreMedia().finally(() => setIsLoadingMore(false));
+  //     }
+  //   }
+  // }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
 
   // Render preview content based on file type
   const renderPreviewContent = () => {
@@ -607,7 +608,7 @@ export function LocalMediaGallery({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0" onScroll={handleScroll}>
+        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0">
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-sm text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -636,20 +637,6 @@ export function LocalMediaGallery({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 ">
               {filteredMedia.map(renderMediaItem)}
-              
-              {/* Loading more indicator */}
-              {isLoadingMore && (
-                <div className="col-span-2 flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
-                </div>
-              )}
-              
-              {/* No more content indicator */}
-              {!hasMore && !isLoading && !isLoadingMore && filteredMedia.length >= 20 && (
-                <div className="col-span-2 text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                  No more media files to load
-                </div>
-              )}
             </div>
           )}
         </TabsContent>

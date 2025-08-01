@@ -6,6 +6,8 @@ import { useAspectRatio } from "../../../hooks/use-aspect-ratio";
 import { useTimeline } from "../../../contexts/timeline-context";
 import { Overlay, OverlayType } from "../../../types";
 import { LocalMediaGallery } from "../../local-media/local-media-gallery";
+import { useCallback, useState } from "react";
+import { useLocalMedia } from "../../../contexts/local-media-context";
 
 /**
  * LocalMediaPanel Component
@@ -20,6 +22,8 @@ export const LocalMediaPanel: React.FC = () => {
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const { hasMore, isLoading, loadMoreMedia } = useLocalMedia();  
 
   /**
    * Add a media file to the timeline
@@ -112,9 +116,29 @@ export const LocalMediaPanel: React.FC = () => {
     addOverlay(newOverlay);
   };
 
+  // Handle infinite scroll
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 100) {
+      if (hasMore && !isLoadingMore && !isLoading) {
+        setIsLoadingMore(true);
+        loadMoreMedia().finally(() => setIsLoadingMore(false));
+      }
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
+
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
-      <LocalMediaGallery onSelectMedia={handleAddToTimeline} />
+      <div className="flex-1 overflow-y-auto" onScroll={handleScroll}>
+        <LocalMediaGallery onSelectMedia={handleAddToTimeline} />
+        
+        {/* Loading more indicator */}
+        {isLoadingMore && (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

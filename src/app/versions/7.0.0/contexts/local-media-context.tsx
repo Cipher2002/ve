@@ -65,7 +65,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const { uid, user_ref } = getUrlParams();
 
   // Define BASE_URL at the top where API calls are made
-  const BASE_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net/'; // You can change this to your desired base URL
+  const BASE_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net'; // You can change this to your desired base URL
 
   // Function to load media files (call this when panel opens)
   const loadMediaFiles = useCallback(async (isInitial = true) => {
@@ -167,16 +167,16 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                                                       'audio'; // Default to audio if not image or video
         
         // Generate thumbnail for videos and get duration
-        let thumbnail = '';
+        let thumbnailFileName = '';
         let duration = 0;
         let size = file.size;
-        
+
         if (fileType === 'video') {
           const video = document.createElement('video');
           video.src = URL.createObjectURL(file);
           
-          await new Promise((resolve) => {
-            video.onloadedmetadata = () => {
+          await new Promise(async (resolve) => {
+            video.onloadedmetadata = async () => {
               duration = video.duration;
               
               // Generate thumbnail
@@ -184,19 +184,51 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
               const ctx = canvas.getContext('2d');
-              ctx?.drawImage(video, 0, 0);
-              thumbnail = canvas.toDataURL('image/jpeg', 0.7);
-              
-              URL.revokeObjectURL(video.src);
-              resolve(void 0);
+              if (ctx) {
+                ctx.drawImage(video, 0, 0);
+                
+                // Convert canvas to blob
+                canvas.toBlob(async (blob) => {
+                  if (blob) {
+                    // Upload thumbnail as a separate file
+                    const thumbnailFormData = new FormData();
+                    const thumbnailName = `${uploadResult.fileName.split('.')[0]}_thumbnail.jpg`;
+                    thumbnailFormData.append('file', blob, thumbnailName);
+                    thumbnailFormData.append('userId', uid);
+                    
+                    try {
+                      const thumbResponse = await fetch('/api/latest/local-media/upload', {
+                        method: 'POST',
+                        body: thumbnailFormData,
+                      });
+                      
+                      if (thumbResponse.ok) {
+                        const thumbResult = await thumbResponse.json();
+                        thumbnailFileName = thumbResult.fileName;
+                      }
+                    } catch (error) {
+                      console.error('Failed to upload thumbnail:', error);
+                    }
+                  }
+                  
+                  URL.revokeObjectURL(video.src);
+                  resolve(void 0);
+                }, 'image/jpeg', 0.7);
+              } else {
+                URL.revokeObjectURL(video.src);
+                resolve(void 0);
+              }
             };
           });
         }
         
-        // Construct file URLs using the serverPath from your API
+        // Construct file URLs
+        const fileName = uploadResult.fileName || file.name;
         const fileUrl = `${BASE_URL}${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
-        const fileThumbnailUrl = thumbnail || fileUrl;
+        const fileThumbnailUrl = thumbnailFileName ? 
+          `${BASE_URL}/users/${uid}/${thumbnailFileName}` : 
+          fileUrl; // Fallback to original file for non-videos
         
         // Call the Zanopy API to register the file
         const apiResponse = await fetch('/api/latest/media/upload-register', {
