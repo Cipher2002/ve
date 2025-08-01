@@ -489,4 +489,6 @@ export interface LocalMediaFile {
   lastModified: number;
   thumbnail?: string | null; // Allow null for empty thumbnails
   duration?: number;
+  width?: number; // Add width for dimensions
+  height?: number; // Add height for dimensions
 }

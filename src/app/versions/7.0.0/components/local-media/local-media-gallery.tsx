@@ -5,7 +5,7 @@ import { useLocalMedia } from "../../contexts/local-media-context";
 import { formatBytes, formatDuration } from "../../utils/format-utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Upload, Trash2, Image, Video, Music } from "lucide-react";
+import { Loader2, Upload, Trash2, Image as ImageIcon, Video, Music } from "lucide-react";
 import { LocalMediaFile } from "../../types";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useVideoCache } from "../../hooks/use-video-cache";
 
 /**
  * User Media Gallery Component
@@ -30,7 +31,7 @@ export function LocalMediaGallery({
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
 }) {
-  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadInitialMedia } =
+  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles } =
     useLocalMedia();
   const [activeTab, setActiveTab] = useState("all");
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);
@@ -39,7 +40,11 @@ export function LocalMediaGallery({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  
+  const hasInitialized = useRef(false);
+  // Add these state variables at the top
+  const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
+  const [downloadProgress, setDownloadProgress] = useState<Map<string, number>>(new Map());
+  const { downloadVideo } = useVideoCache();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,10 +61,13 @@ export function LocalMediaGallery({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [confirmingMediaId]);
 
-  // Load data when component first mounts
+  // Load data only when component first becomes visible (like image-overlay-panel pattern)
   useEffect(() => {
-    loadInitialMedia();
-  }, [loadInitialMedia]);
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      loadMediaFiles(true); // Load initial data
+    }
+  }, [loadMediaFiles]);
 
 
   // Filter media files based on active tab
@@ -112,10 +120,141 @@ export function LocalMediaGallery({
     }
   };
 
-  // Add media to timeline
-  const handleAddToTimeline = () => {
-    if (selectedFile && onSelectMedia) {
-      onSelectMedia(selectedFile);
+  // Handle video click (download then add)
+  const handleVideoClick = async (file: LocalMediaFile) => {
+    if (downloadingCards.has(file.id)) return;
+
+    setDownloadingCards(prev => new Set(prev).add(file.id));
+    setDownloadProgress(prev => new Map(prev).set(file.id, 0));
+
+    try {
+      const cachedVideoUrl = await downloadVideo(file.path, (progress) => {
+        setDownloadProgress(prev => new Map(prev).set(file.id, progress));
+      });
+
+      if (cachedVideoUrl && onSelectMedia) {
+        const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
+        const durationInFrames = await getVideoDurationInFrames(cachedVideoUrl);
+        
+        const videoFile = {
+          ...file,
+          path: cachedVideoUrl, // Use cached URL
+          duration: durationInFrames / 30, // Convert back to seconds for the interface
+          width,
+          height,
+        };
+        
+        onSelectMedia(videoFile);
+      }
+    } catch (error) {
+      console.error('Failed to download video:', error);
+    } finally {
+      setDownloadingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
+      setDownloadProgress(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(file.id);
+        return newMap;
+      });
+    }
+  };
+
+  // Handle image click (get dimensions then add)
+  const handleImageClick = async (file: LocalMediaFile) => {
+    if (onSelectMedia) {
+      const { width, height } = await getImageNaturalDimensions(file.path);
+      
+      const imageFile = {
+        ...file,
+        width,
+        height,
+      };
+      
+      onSelectMedia(imageFile);
+    }
+  };
+
+  // Handle audio click (add directly)
+  const handleAudioClick = (file: LocalMediaFile) => {
+    if (onSelectMedia) {
+      onSelectMedia(file);
+    }
+  };
+
+  // Helper function to get video duration
+  const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        const durationInSeconds = video.duration;
+        const durationInFrames = Math.round(durationInSeconds * 30);
+        resolve(durationInFrames);
+      };
+      
+      video.onerror = () => {
+        resolve(300); // Fallback to 300 frames (10 seconds)
+      };
+      
+      video.src = videoUrl;
+    });
+  };
+
+  // Helper function to get video natural dimensions
+  const getVideoNaturalDimensions = (videoUrl: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        resolve({
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+      
+      video.onerror = () => {
+        resolve({ width: 400, height: 300 }); // Fallback dimensions
+      };
+      
+      video.src = videoUrl;
+    });
+  };
+
+  // Helper function for image dimensions
+  const getImageNaturalDimensions = (imageUrl: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+      };
+      
+      img.onerror = () => {
+        resolve({ width: 400, height: 300 });
+      };
+      
+      img.src = imageUrl;
+    });
+  };
+
+  // Add to timeline (for dialog)
+  const handleAddToTimeline = async () => {
+    if (selectedFile) {
+      if (selectedFile.type === 'video') {
+        await handleVideoClick(selectedFile);
+      } else if (selectedFile.type === 'image') {
+        await handleImageClick(selectedFile);
+      } else {
+        handleAudioClick(selectedFile);
+      }
       setPreviewOpen(false);
     }
   };
@@ -123,9 +262,11 @@ export function LocalMediaGallery({
   // Handle infinite scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !isLoadingMore && !isLoading) {
-      setIsLoadingMore(true);
-      loadMoreMedia().finally(() => setIsLoadingMore(false));
+    if (scrollHeight - scrollTop <= clientHeight + 100) {
+      if (hasMore && !isLoadingMore && !isLoading) {
+        setIsLoadingMore(true);
+        loadMoreMedia().finally(() => setIsLoadingMore(false));
+      }
     }
   }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
 
@@ -232,9 +373,15 @@ export function LocalMediaGallery({
               </button>
               <button 
                 className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  handleAddToTimeline();
+                  if (file.type === 'video') {
+                    await handleVideoClick(file);
+                  } else if (file.type === 'image') {
+                    await handleImageClick(file);
+                  } else {
+                    handleAudioClick(file);
+                  }
                   setConfirmingMediaId(null);
                 }}
               >
@@ -254,30 +401,86 @@ export function LocalMediaGallery({
                       src={file.thumbnail}
                       alt={file.name}
                       className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                      onError={(e) => {
+                        // Fallback to file path if thumbnail fails
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== file.path) {
+                          target.src = file.path;
+                        } else {
+                          // If both fail, hide the image
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800"><span class="text-gray-400 text-sm">Image unavailable</span></div>';
+                          }
+                        }
+                      }}
                     />
                   ) : (
                     <img
                       src={file.path}
                       alt={file.name}
                       className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                      onError={(e) => {
+                        // If image fails to load, show error state
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800"><span class="text-gray-400 text-sm">Image unavailable</span></div>';
+                        }
+                      }}
                     />
                   )}
                 </>
               )}
-              {file.type === "image" && (
+              {file.type === "video" && (
                 <>
+                  {/* Video thumbnail or fallback */}
                   {file.thumbnail && file.thumbnail.trim() !== '' ? (
                     <img
                       src={file.thumbnail}
                       alt={file.name}
                       className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
+                      onError={(e) => {
+                        // If thumbnail fails, show video icon
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.video-fallback')) {
+                          const fallback = document.createElement('div');
+                          fallback.className = 'video-fallback w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800';
+                          fallback.innerHTML = '<div class="w-8 h-8 text-gray-400"><svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg></div>';
+                          parent.appendChild(fallback);
+                        }
+                      }}
                     />
                   ) : (
-                    <img
-                      src={file.path}
-                      alt={file.name}
-                      className="w-full h-full object-cover bg-gray-50 dark:bg-gray-900"
-                    />
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                      <Video className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  {/* Video label */}
+                  <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
+                    Video
+                  </div>
+                  
+                  {/* Download Progress Overlay */}
+                  {downloadingCards.has(file.id) && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
+                        <p className="text-xs font-medium">Downloading...</p>
+                        <p className="text-xs">{downloadProgress.get(file.id) || 0}%</p>
+                        <div className="w-16 h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
+                          <div 
+                            className="h-full bg-white transition-all duration-300"
+                            style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </>
               )}
@@ -378,7 +581,7 @@ export function LocalMediaGallery({
             rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           >
             <span className="flex items-center gap-2 text-xs">
-              <Image className="w-3 h-3" />
+              <ImageIcon className="w-3 h-3" />
               Images
             </span>
           </TabsTrigger>
