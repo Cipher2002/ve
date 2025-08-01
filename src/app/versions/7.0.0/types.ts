@@ -439,6 +439,7 @@ export interface EditorContextType {
   // ... existing context properties ...
   rows: TimelineRow[];
   addRow: () => void;
+  
 }
 
 // Update ImageStyles interface to match ClipOverlay style pattern

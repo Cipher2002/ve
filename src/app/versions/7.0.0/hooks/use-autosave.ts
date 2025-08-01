@@ -26,6 +26,11 @@ interface AutosaveOptions {
    * Function to call when an autosave is detected on initial load
    */
   onAutosaveDetected?: (timestamp: number) => void;
+
+  /**
+   * Whether autosave is currently paused
+   */
+  isPaused?: boolean;
 }
 
 /**
@@ -41,7 +46,7 @@ export const useAutosave = (
   state: any,
   options: AutosaveOptions = {}
 ) => {
-  const { interval = 5000, onLoad, onSave, onAutosaveDetected } = options;
+  const { interval = 5000, onLoad, onSave, onAutosaveDetected, isPaused = false } = options;
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedStateRef = useRef<string>("");
@@ -73,6 +78,9 @@ export const useAutosave = (
     if (!projectId || !state.projectName) return;
 
     const saveIfChanged = async () => {
+      // Skip autosave if paused
+      if (isPaused) return;
+      
       const currentStateString = JSON.stringify(state);
 
       // Only save if state has changed since last save

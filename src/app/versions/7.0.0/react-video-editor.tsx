@@ -124,6 +124,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   // Captions generation state
   const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
 
+  // Rename project state
+  const [isRenamingProject, setIsRenamingProject] = useState(false);
+
   const inputProps = {
     overlays,
     durationInFrames,
@@ -175,6 +178,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   const { saveState, loadState } = useAutosave(projectId, editorState, {
     interval: AUTO_SAVE_INTERVAL,
+    isPaused: isRenamingProject,
     onSave: () => {
       setIsSaving(false);
       setLastSaveTime(Date.now());
@@ -498,6 +502,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     setProjectName,
     newProject,
     loadTemplateIntoEditor,
+    setIsRenamingProject,
 
     // Template loading state
     isLoadingTemplate,

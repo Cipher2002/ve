@@ -89,6 +89,8 @@ interface EditorContextProps {
   setProjectName: (name: string) => void;
   newProject: () => void;
   loadTemplateIntoEditor: (template: TemplateOverlay) => void;
+  setIsRenamingProject: (isRenaming: boolean) => void;
+
 
   // Autosave properties
   hasAutosave?: boolean;

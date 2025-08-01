@@ -44,7 +44,8 @@ export function EditorHeader() {
     newProject,
     autosaveTimestamp,
     handleRecoverAutosave,
-    handleDiscardAutosave
+    handleDiscardAutosave,
+    setIsRenamingProject
   } = useEditorContext();
 
 // Create hasAutosave based on whether autosaveTimestamp exists
@@ -75,6 +76,9 @@ const hasAutosave = Boolean(autosaveTimestamp);
             
             // Only proceed if name actually changed and is not empty
             if (newName && newName !== oldName) {
+              // Pause autosave during rename operation
+              setIsRenamingProject(true);
+              
               try {
                 const uid = typeof window !== 'undefined' 
                   ? new URLSearchParams(window.location.search).get('uid') || 'default'
@@ -120,6 +124,9 @@ const hasAutosave = Boolean(autosaveTimestamp);
                 console.error('Error updating project name:', error);
                 // Revert the name if there was an error
                 setProjectName(oldName);
+              } finally {
+                // Resume autosave after rename operation completes
+                setIsRenamingProject(false);
               }
             } else if (!newName) {
               // Revert to old name if new name is empty
