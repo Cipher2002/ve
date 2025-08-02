@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
-const BASE_AUDIO_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net/tmp_audio/'; // Make this configurable later
+// const BASE_AUDIO_URL = '/api/latest/files/tmp_audio/'; // Make this configurable later
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
     // Save the file
     const arrayBuffer = await audioFile.arrayBuffer();
     await fs.writeFile(audioPath, Buffer.from(arrayBuffer));
-    
-    const audioUrl = BASE_AUDIO_URL + audioFileName;
-    
-    return NextResponse.json({ 
-      success: true, 
-      audioUrl 
+
+    const audioUrl = `https://7fi0l9jsbeg17t-3000.proxy.runpod.net/api/latest/files/tmp_audio/${audioFileName}`;
+
+    return NextResponse.json({
+      success: true,
+      audioUrl
     });
 
   } catch (error) {
