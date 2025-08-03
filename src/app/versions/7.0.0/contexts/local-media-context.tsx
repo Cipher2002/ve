@@ -227,7 +227,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const fileUrl = `${BASE_URL}${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
         const fileThumbnailUrl = thumbnailFileName ? 
-          `${BASE_URL}/users/${uid}/${thumbnailFileName}` : 
+          `${BASE_URL}/api/latest/files/users/${uid}/${thumbnailFileName}` : 
           fileUrl; // Fallback to original file for non-videos
         
         // Call the Zanopy API to register the file
