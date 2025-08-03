@@ -162,10 +162,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const uploadResult = await uploadResponse.json();
         
         // Get file metadata
-        const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : 
-                                                      file.type.startsWith('video/') ? 'video' : 
-                                                      'audio'; // Default to audio if not image or video
-        
+        const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio'; // Default to audio if not image or video
+
         // Generate thumbnail for videos and get duration
         let thumbnailFileName = '';
         let duration = 0;
@@ -187,7 +185,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
               if (ctx) {
                 ctx.drawImage(video, 0, 0);
                 
-                // Convert canvas to blob and upload - make this synchronous
+                // Convert canvas to blob - use Promise.resolve to make it properly async
                 canvas.toBlob(async (blob) => {
                   if (blob) {
                     // Upload thumbnail as a separate file
@@ -197,6 +195,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                     thumbnailFormData.append('userId', uid);
                     
                     try {
+                      console.log('Starting thumbnail upload...');
                       const thumbResponse = await fetch('/api/latest/local-media/upload', {
                         method: 'POST',
                         body: thumbnailFormData,
@@ -206,8 +205,9 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                         const thumbResult = await thumbResponse.json();
                         thumbnailFileName = thumbResult.fileName;
                         console.log('Thumbnail uploaded successfully:', thumbnailFileName);
+                        console.log('Thumbnail response:', thumbResult);
                       } else {
-                        console.error('Thumbnail upload failed:', thumbResponse.status);
+                        console.error('Thumbnail upload failed:', thumbResponse.status, await thumbResponse.text());
                       }
                     } catch (error) {
                       console.error('Failed to upload thumbnail:', error);
@@ -215,7 +215,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                   }
                   
                   URL.revokeObjectURL(video.src);
-                  resolve(void 0);
+                  resolve(void 0); // This resolves AFTER thumbnail upload completes
                 }, 'image/jpeg', 0.7);
               } else {
                 URL.revokeObjectURL(video.src);
