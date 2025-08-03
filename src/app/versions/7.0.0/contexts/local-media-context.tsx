@@ -175,8 +175,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
           const video = document.createElement('video');
           video.src = URL.createObjectURL(file);
           
-          await new Promise(async (resolve) => {
-            video.onloadedmetadata = async () => {
+          await new Promise((resolve) => {
+            video.onloadedmetadata = () => {
               duration = video.duration;
               
               // Generate thumbnail
@@ -187,7 +187,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
               if (ctx) {
                 ctx.drawImage(video, 0, 0);
                 
-                // Convert canvas to blob
+                // Convert canvas to blob and upload - make this synchronous
                 canvas.toBlob(async (blob) => {
                   if (blob) {
                     // Upload thumbnail as a separate file
@@ -205,6 +205,9 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                       if (thumbResponse.ok) {
                         const thumbResult = await thumbResponse.json();
                         thumbnailFileName = thumbResult.fileName;
+                        console.log('Thumbnail uploaded successfully:', thumbnailFileName);
+                      } else {
+                        console.error('Thumbnail upload failed:', thumbResponse.status);
                       }
                     } catch (error) {
                       console.error('Failed to upload thumbnail:', error);
