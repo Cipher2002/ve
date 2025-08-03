@@ -8,6 +8,7 @@ import { Overlay, OverlayType } from "../../../types";
 import { LocalMediaGallery } from "../../local-media/local-media-gallery";
 import { useCallback, useState } from "react";
 import { useLocalMedia } from "../../../contexts/local-media-context";
+import { useVideoCache } from "../../../hooks/use-video-cache";
 
 /**
  * LocalMediaPanel Component
@@ -23,50 +24,126 @@ export const LocalMediaPanel: React.FC = () => {
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const { hasMore, isLoading, loadMoreMedia } = useLocalMedia();  
+  const { hasMore, isLoading, loadMoreMedia } = useLocalMedia();
+  const { downloadVideo } = useVideoCache();
+
+  const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        const durationInSeconds = video.duration;
+        const durationInFrames = Math.round(durationInSeconds * 30);
+        resolve(durationInFrames);
+      };
+      
+      video.onerror = () => {
+        resolve(300); // Fallback to 300 frames (10 seconds)
+      };
+      
+      video.src = videoUrl;
+    });
+  };
+
+  const getVideoNaturalDimensions = (videoUrl: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        resolve({
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+      };
+      
+      video.onerror = () => {
+        resolve(getAspectRatioDimensions());
+      };
+      
+      video.src = videoUrl;
+    });
+  };
 
   /**
    * Add a media file to the timeline
    */
-  const handleAddToTimeline = (file: any) => {
+  const handleAddToTimeline = async (file: any) => {
     const { width, height } = getAspectRatioDimensions();
     const { from, row } = findNextAvailablePosition(
       overlays,
       visibleRows,
       durationInFrames
-      /**
-       * Pass the current playhead position.
-       * This way, we can place the new overlay next to the playhead
-       * instead of always placing it at the start of the timeline
-       * and having to drag it to the playhead.
-       */
     );
 
     let newOverlay: Overlay;
 
     if (file.type === "video") {
-      newOverlay = {
-        left: 0,
-        top: 0,
-        width,
-        height,
-        durationInFrames: file.duration ? Math.round(file.duration * 30) : 200, // Convert seconds to frames (assuming 30fps)
-        from,
-        id: Date.now(),
-        rotation: 0,
-        row,
-        isDragging: false,
-        type: OverlayType.VIDEO,
-        content: file.thumbnail || "",
-        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
-        videoStartTime: 0,
-        styles: {
-          opacity: 1,
-          zIndex: 100,
-          transform: "none",
-          objectFit: "cover",
-        },
-      };
+      // For external URLs, download first like video-overlay-panel does
+      if (file.path && file.path.startsWith("http")) {
+        try {
+          const cachedVideoUrl = await downloadVideo(file.path);
+          if (cachedVideoUrl) {
+            const videoDuration = await getVideoDurationInFrames(cachedVideoUrl);
+            const { width: videoWidth, height: videoHeight } = await getVideoNaturalDimensions(cachedVideoUrl);
+            
+            newOverlay = {
+              left: 0,
+              top: 0,
+              width: videoWidth,
+              height: videoHeight,
+              durationInFrames: videoDuration,
+              from,
+              id: Date.now(),
+              rotation: 0,
+              row,
+              isDragging: false,
+              type: OverlayType.VIDEO,
+              content: file.path, // Keep original URL for Remotion
+              src: cachedVideoUrl, // Use cached URL (now guaranteed to be string)
+              originalUrl: file.path, // Add this new field
+              videoStartTime: 0,
+              styles: {
+                opacity: 1,
+                zIndex: 100,
+                transform: "none",
+                objectFit: "cover",
+              },
+            };
+          } else {
+            console.error('Failed to download video: cachedVideoUrl is null');
+            return; // Don't add overlay if download fails
+          }
+        } catch (error) {
+          console.error('Failed to download video:', error);
+          return; // Don't add overlay if download fails
+        }
+      } else {
+        // For local files, use existing logic
+        newOverlay = {
+          left: 0,
+          top: 0,
+          width,
+          height,
+          durationInFrames: file.duration ? Math.round(file.duration * 30) : 200,
+          from,
+          id: Date.now(),
+          rotation: 0,
+          row,
+          isDragging: false,
+          type: OverlayType.VIDEO,
+          content: file.thumbnail || "",
+          src: file.path ? (file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`) : "",
+          videoStartTime: 0,
+          styles: {
+            opacity: 1,
+            zIndex: 100,
+            transform: "none",
+            objectFit: "cover",
+          },
+        };
+      }
     } else if (file.type === "image") {
       newOverlay = {
         left: 0,
@@ -80,7 +157,7 @@ export const LocalMediaPanel: React.FC = () => {
         row,
         isDragging: false,
         type: OverlayType.IMAGE,
-        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
+        src: file.path && file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
         content: file.path,
         styles: {
           objectFit: "cover",
@@ -104,7 +181,7 @@ export const LocalMediaPanel: React.FC = () => {
         isDragging: false,
         type: OverlayType.SOUND,
         content: file.name,
-        src: file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
+        src: file.path && file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
         styles: {
           volume: 1,
         },
