@@ -175,7 +175,12 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
             video.onloadedmetadata = () => {
               duration = video.duration;
               
-              // Generate thumbnail
+              // Seek to a specific time (e.g., 1 second) for better thumbnail
+              video.currentTime = Math.min(1, duration / 4); // Seek to 1 second or 1/4 of video duration
+            };
+
+            video.onseeked = () => {
+              // Generate thumbnail after seeking is complete
               const canvas = document.createElement('canvas');
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
