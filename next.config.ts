@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
-// const nextConfig: NextConfig = {
-//   /* config options here */
-// };
-
 const nextConfig: NextConfig = {
   basePath: '/vedit',
   assetPrefix: '/vedit',
-  trailingSlash: false,
+  trailingSlash: true,         // required for next export
+
+  output: 'export',            // this enables static HTML export
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -26,13 +24,14 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+
   experimental: {
     serverComponentsExternalPackages: [
       '@remotion/bundler', 
       'esbuild', 
       'puppeteer-core',
       'bufferutil',
-      'utf-8-validate'
+      'utf-8-validate',
     ],
   },
 };
