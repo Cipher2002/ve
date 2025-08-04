@@ -5,9 +5,9 @@ import type { NextConfig } from "next";
 // };
 
 const nextConfig: NextConfig = {
-  basePath: '/video_editor',
-  assetPrefix: '/video_editor',
-  trailingSlash: false,
+  // basePath: '/video_editor',
+  // assetPrefix: '/video_editor',
+  // trailingSlash: false,
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || 'image';
     const image_category = searchParams.get('image_category') || '';
     const user_ref = searchParams.get('email') || '';
-    const user_id = searchParams.get('user_id') || '';
+    const user_id = searchParams.get('uid') || '';
     const tags = searchParams.get('tags') || '';
     const ratio = searchParams.get('ratio') || '';
     const imageStatus = searchParams.get('imageStatus') || '';
@@ -34,10 +34,11 @@ export async function GET(request: NextRequest) {
     // Build query parameters
     const queryParams = new URLSearchParams();
     queryParams.append('do_action', do_action);
+    queryParams.append('user_id', user_id);
     
     if (do_action === 'GET_AI_AMBASSADOR_IMAGE_PROJECT') {
       // Product Influencer specific parameters
-      if (user_id) queryParams.append('user_id', user_id);
+      // if (user_id) queryParams.append('user_id', user_id);
       if (imageStatus) queryParams.append('imageStatus', imageStatus);
     } else {
       // Other image types parameters
