@@ -107,10 +107,12 @@ export const ImageOverlayPanel: React.FC = () => {
   const getUrlParams = () => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get('email') || '';
+      
       return {
         uid: urlParams.get('uid') || '',
         sid: urlParams.get('sid') || '',
-        user_ref: urlParams.get('email') || ''
+        user_ref: email ? encodeURIComponent(email) : '' // URL encode the email
       };
     }
     return { uid: '', sid: '', user_ref: '' };
