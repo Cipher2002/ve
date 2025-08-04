@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
+// const nextConfig: NextConfig = {
+//   /* config options here */
+// };
+
 const nextConfig: NextConfig = {
-  assetPrefix: 'https://zanopy.ai/vedit/video_editor',
+  basePath: '/vedit',
+  assetPrefix: '/vedit',
   trailingSlash: false,
-  
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
