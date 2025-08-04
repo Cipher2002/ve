@@ -63,7 +63,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const { uid, user_ref } = getUrlParams();
 
   // Define BASE_URL at the top where API calls are made
-  const BASE_URL = 'https://7fi0l9jsbeg17t-3000.proxy.runpod.net'; // You can change this to your desired base URL
+  const BASE_URL = 'http://zanopy.ai:3001'; // You can change this to your desired base URL
 
   // Function to load media files (call this when panel opens)
   const loadMediaFiles = useCallback(async (isInitial = true) => {
