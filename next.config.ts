@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/vedit',
-  assetPrefix: '/vedit',
-  trailingSlash: true,         // required for next export
-
-  output: 'export',            // this enables static HTML export
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
