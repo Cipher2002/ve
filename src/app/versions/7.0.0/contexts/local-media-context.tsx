@@ -8,8 +8,6 @@ import React, {
   useCallback,
 } from "react";
 import { LocalMediaFile } from "../types";
-import { getUserId } from "../utils/user-id";
-
 interface LocalMediaContextType {
   localMediaFiles: LocalMediaFile[];
   addMediaFile: (file: File) => Promise<LocalMediaFile | void>;
@@ -165,7 +163,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio'; // Default to audio if not image or video
 
         // Generate thumbnail for videos and get duration
-        let thumbnailFileName = '';
+        let thumbnailServerPath = '';
         let duration = 0;
         let size = file.size;
 
@@ -203,8 +201,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                       
                       if (thumbResponse.ok) {
                         const thumbResult = await thumbResponse.json();
-                        thumbnailFileName = thumbResult.fileName;
-                        console.log('Thumbnail uploaded successfully:', thumbnailFileName);
+                        thumbnailServerPath = thumbResult.serverPath;
+                        console.log('Thumbnail uploaded successfully:', thumbnailServerPath);
                         console.log('Thumbnail response:', thumbResult);
                       } else {
                         console.error('Thumbnail upload failed:', thumbResponse.status, await thumbResponse.text());
@@ -229,9 +227,9 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const fileName = uploadResult.fileName || file.name;
         const fileUrl = `${BASE_URL}${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
-        const fileThumbnailUrl = thumbnailFileName ? 
-          `${BASE_URL}/api/latest/files/users/${uid}/${thumbnailFileName}` : 
-          fileUrl; // Fallback to original file for non-videos
+        const fileThumbnailUrl = thumbnailServerPath ? 
+                                `${BASE_URL}${thumbnailServerPath}` : 
+                                fileUrl; // Fallback to original file for non-videos
         
         // Call the Zanopy API to register the file
         const apiResponse = await fetch('/api/latest/media/upload-register', {
