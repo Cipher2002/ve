@@ -54,7 +54,7 @@ export const CaptionsPanel: React.FC = () => {
     isGeneratingCaptions,
     setIsGeneratingCaptions,
   } = useEditorContext();
-  const { setActivePanel, setIsOpen } = useSidebar();
+  const { activePanel, setActivePanel, setIsOpen } = useSidebar();
 
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
@@ -486,14 +486,18 @@ const handleAutomaticCaptions = async () => {
       // Force open the style panel with the first caption overlay
       if (newCaptionOverlays.length > 0) {
         const firstCaptionOverlay = newCaptionOverlays[0];
+        
+        // Always set the overlay first
         setLocalOverlay(firstCaptionOverlay);
-        // Force open the captions panel and set it as active
-        setActivePanel(OverlayType.CAPTION);
-        setIsOpen(true);
-        // Force the panel to show by ensuring we override the current state
-        setTimeout(() => {
-          setLocalOverlay(firstCaptionOverlay);
-        }, 100);
+        
+        // Check if captions panel is currently active
+        const isCaptionsPanelOpen = activePanel === OverlayType.CAPTION;
+        
+        if (!isCaptionsPanelOpen) {
+          // Panel is not open, open it 
+          setActivePanel(OverlayType.CAPTION);
+          setIsOpen(true);
+        }
       }
       
     } catch (error) {
@@ -573,7 +577,7 @@ const handleAutomaticCaptions = async () => {
             </div>
           </div>
         </>
-      ) : localOverlay ? (
+      ) : (
         <CaptionSettings
           currentFrame={currentFrame}
           localOverlay={localOverlay}
@@ -582,7 +586,7 @@ const handleAutomaticCaptions = async () => {
           captions={localOverlay.captions}
           defaultTab="display"
         />
-      ) : null}
+      )}
 
     </div>
   );
