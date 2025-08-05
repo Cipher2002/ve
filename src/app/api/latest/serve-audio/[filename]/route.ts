@@ -1,34 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { filename: string } }
+  { params }: { params: { filename: string } }
 ) {
   try {
-    const filename = context.params.filename;
+    const filename = params.filename;
+
     const filePath = path.join(process.cwd(), 'tmp_audio', filename);
 
-    // Check if file exists
-    try {
-      await fs.access(filePath);
-    } catch {
+    if (!fs.existsSync(filePath)) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
 
-    // Read the file
-    const fileBuffer = await fs.readFile(filePath);
+    const fileBuffer = fs.readFileSync(filePath);
+    const fileExtension = path.extname(filename).toLowerCase();
 
-    // Return the file with proper headers
+    let contentType = 'application/octet-stream';
+    if (fileExtension === '.mp3') contentType = 'audio/mpeg';
+    else if (fileExtension === '.wav') contentType = 'audio/wav';
+    else if (fileExtension === '.aac') contentType = 'audio/aac';
+
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Type': 'audio/wav',
-        'Content-Length': fileBuffer.length.toString(),
+        'Content-Type': contentType,
+        'Content-Disposition': `inline; filename="${filename}"`,
       },
     });
   } catch (error) {
-    console.error('Serve audio error:', error);
+    console.error('Serve file error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
