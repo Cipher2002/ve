@@ -481,14 +481,10 @@ const handleAutomaticCaptions = async () => {
       // Add all caption overlays
       const finalOverlays = [...updatedOverlays, ...newCaptionOverlays];
       setOverlays(finalOverlays);
-      setIsGeneratingCaptions(false);
       
       // Force open the style panel with the first caption overlay
       if (newCaptionOverlays.length > 0) {
         const firstCaptionOverlay = newCaptionOverlays[0];
-        
-        // Always set the overlay first
-        setLocalOverlay(firstCaptionOverlay);
         
         // Check if captions panel is currently active
         const isCaptionsPanelOpen = activePanel === OverlayType.CAPTION;
@@ -498,6 +494,14 @@ const handleAutomaticCaptions = async () => {
           setActivePanel(OverlayType.CAPTION);
           setIsOpen(true);
         }
+        
+        // Set generation to false and overlay after a small delay to ensure state updates
+        setTimeout(() => {
+          setIsGeneratingCaptions(false);
+          setLocalOverlay(firstCaptionOverlay);
+        }, 50);
+      } else {
+        setIsGeneratingCaptions(false);
       }
       
     } catch (error) {
