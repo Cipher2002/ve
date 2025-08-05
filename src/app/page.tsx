@@ -79,8 +79,7 @@ function App() {
       </div> */}
 
       {/* Centered content container */}
-      <div className="w-full flex-1 flex flex-col">
-        {/* Video Editor Card */}
+      {/* <div className="w-full flex-1 flex flex-col">
         <div className="bg-white border-b border-gray-200 mb-8 overflow-hidden">
           <div className={styles.generateVideoSection}>
             <div 
@@ -90,15 +89,15 @@ function App() {
                 maxWidth: '100%'
               }}
             >
-              {/* <ReactVideoEditor projectId="default-project" isAdminMode={isAdminMode} /> */}
+              <ReactVideoEditor projectId="default-project" isAdminMode={isAdminMode} />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Replaced Projects Section Card with SavedProjects Component */}
         <SavedProjects />
       </div>
-    </div>
+    // </div>
   );
 }
 
