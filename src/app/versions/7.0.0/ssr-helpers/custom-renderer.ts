@@ -212,7 +212,7 @@ export async function startRendering(
       
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
-      const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
+      const servingPath = `api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
       
       console.log('Video saved to:', outputPath);
       console.log('Will be served from:', servingPath);
@@ -355,7 +355,7 @@ export async function startAudioRendering(
       
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
-      const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
+      const servingPath = `api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
       
       console.log('Audio saved to:', outputPath);
       console.log('Will be served from:', servingPath);
@@ -408,51 +408,6 @@ export function getRenderProgress(renderId: string) {
   };
 }
 
-// Helper function to save render metadata to user folder
-// async function saveRenderToUserFolder(
-//   uid: string, 
-//   projectName: string, 
-//   renderId: string, 
-//   format: string, 
-//   fileSize: number, 
-//   outputPath: string,
-//   mediaType: 'video' | 'audio' = 'video',
-//   baseUrl: string
-// ) {
-//   try {
-//     const renderData = {
-//       status: 'success',
-//       url: outputPath,
-//       fileSize,
-//       renderId,
-//       format,
-//       mediaType
-//     };
-
-//     const response = await fetch(`${baseUrl}/api/latest/save-to-user/save`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         uid,
-//         projectName,
-//         type: 'render',
-//         data: renderData,
-//         timestamp: new Date().toISOString(),
-//       }),
-//     });
-
-//     if (!response.ok) {
-//       console.error('Failed to update project index via API');
-//     } else {
-//       console.log('Successfully updated project index');
-//     }
-//   } catch (error) {
-//     console.error('Error saving render metadata to user folder:', error);
-//   }
-// }
-
 // Replace the saveRenderToUserFolder function in custom-renderer.ts
 async function saveRenderToUserFolder(
   uid: string, 
@@ -490,7 +445,7 @@ async function saveRenderToUserFolder(
     }
 
     const timestamp = new Date().toISOString();
-    const servingPath = `/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
+    const servingPath = `api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
 
     // Add render info to the index
     projectIndex.renders = projectIndex.renders || [];

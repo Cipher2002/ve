@@ -79,7 +79,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const startFrom = isInitial ? 0 : currentPage * 20;
       
-      const response = await fetch('/api/latest/media/get', {
+      const response = await fetch('api/latest/media/get', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         formData.append('file', file);
         formData.append('userId', uid);
 
-        const uploadResponse = await fetch('/api/latest/local-media/upload', {
+        const uploadResponse = await fetch('api/latest/local-media/upload', {
           method: 'POST',
           body: formData,
         });
@@ -199,7 +199,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                     
                     try {
                       console.log('Starting thumbnail upload...');
-                      const thumbResponse = await fetch('/api/latest/local-media/upload', {
+                      const thumbResponse = await fetch('api/latest/local-media/upload', {
                         method: 'POST',
                         body: thumbnailFormData,
                       });
@@ -237,7 +237,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                                 fileUrl; // Fallback to original file for non-videos
         
         // Call the Zanopy API to register the file
-        const apiResponse = await fetch('/api/latest/media/upload-register', {
+        const apiResponse = await fetch('api/latest/media/upload-register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

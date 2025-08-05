@@ -104,7 +104,7 @@ export const renderVideo = async ({
   };
 
   const response = await makeRequest<RenderResponse>(
-    "/api/latest/ssr/render",
+    "api/latest/ssr/render",
     body
   );
   return response;
@@ -173,7 +173,7 @@ export const renderAudio = async ({
   };
 
   const response = await makeRequest<RenderResponse>(
-    "/api/latest/ssr/render-audio",
+    "api/latest/ssr/render-audio",
     body
   );
   return response;
@@ -192,7 +192,7 @@ export const getProgress = async ({
   };
 
   const response = await makeRequest<ProgressResponse>(
-    "/api/latest/ssr/progress",
+    "api/latest/ssr/progress",
     body
   );
   return response;

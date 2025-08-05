@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
           audioFiles.push({
             id: renderId,
             filename: filename,
-            url: `/api/latest/user-files/${uid}/${projectFolder}/${filename}`,
+            url: `api/latest/user-files/${uid}/${projectFolder}/${filename}`,
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),

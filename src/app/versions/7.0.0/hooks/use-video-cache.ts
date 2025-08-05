@@ -76,7 +76,7 @@ export const useVideoCache = () => {
       console.log('Downloading video for cache:', url);
       
       // Use your proxy endpoint to download the video
-      const proxyUrl = `/api/latest/video/download?url=${encodeURIComponent(url)}`;
+      const proxyUrl = `api/latest/video/download?url=${encodeURIComponent(url)}`;
       const response = await fetch(proxyUrl);
       
       if (!response.ok) {

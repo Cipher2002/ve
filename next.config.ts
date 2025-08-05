@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // basePath: '/video_editor',
-  // assetPrefix: '/video_editor',
-  // trailingSlash: false,
+  // basePath: '/vedit',
+  // assetPrefix: '/vedit',
+  trailingSlash: false,
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
