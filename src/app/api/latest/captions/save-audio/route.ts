@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     await fs.writeFile(audioPath, Buffer.from(arrayBuffer));
 
-    const audioUrl = `/vedit/tmp_audio/${audioFileName}`;
+    const audioUrl = `https://zanopy.ai/vedit/tmp_audio/${audioFileName}`;
 
     return NextResponse.json({
       success: true,
