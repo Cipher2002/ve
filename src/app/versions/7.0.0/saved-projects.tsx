@@ -5,13 +5,6 @@ import { ChevronRight, Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -403,7 +396,7 @@ export default function SavedProjects() {
     }
   };
 
-  
+
 
   // Handle toggling active status
   const handleToggleActiveStatus = async (project: UserProject) => {
@@ -813,7 +806,7 @@ export default function SavedProjects() {
                         <button 
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = `/vedit/api/latest/download-file?filePath=${encodeURIComponent(file.filePath)}`;
+                            link.href = `${apiBaseUrl}/download-file?filePath=${encodeURIComponent(file.filePath)}`;
                             link.download = file.fileName;
                             link.click();
                           }}

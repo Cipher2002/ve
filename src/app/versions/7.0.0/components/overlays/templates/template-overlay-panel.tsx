@@ -7,16 +7,9 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { Pencil } from "lucide-react";
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-// } from "@/components/ui/alert-dialog";
+
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 export const TemplateOverlayPanel: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,7 +59,7 @@ export const TemplateOverlayPanel: React.FC = () => {
       ));
       
       // Call the project name update API to handle folder renaming
-      const updateResponse = await fetch('/vedit/api/latest/save-to-user/update-name', {
+      const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +119,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     setClientTemplatesError(null);
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`/vedit/api/latest/templates/client?uid=${uid}`);
+      const response = await fetch(`${apiBaseUrl}/templates/client?uid=${uid}`);
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
@@ -257,7 +250,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     
     try {
       // Also update the corresponding project status
-      const response = await fetch('/vedit/api/latest/save-to-user/update-status', {
+      const response = await fetch(`${apiBaseUrl}/save-to-user/update-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

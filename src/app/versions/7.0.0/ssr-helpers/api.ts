@@ -40,6 +40,9 @@ export interface RenderResponse {
   renderId: string;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 export const renderVideo = async ({
   id,
   inputProps,
@@ -104,7 +107,7 @@ export const renderVideo = async ({
   };
 
   const response = await makeRequest<RenderResponse>(
-    "/vedit/api/latest/ssr/render",
+    `${apiBaseUrl}/ssr/render`,
     body
   );
   return response;
@@ -173,7 +176,7 @@ export const renderAudio = async ({
   };
 
   const response = await makeRequest<RenderResponse>(
-    "/vedit/api/latest/ssr/render-audio",
+    `${apiBaseUrl}/ssr/render-audio`,
     body
   );
   return response;
@@ -192,7 +195,7 @@ export const getProgress = async ({
   };
 
   const response = await makeRequest<ProgressResponse>(
-    "/vedit/api/latest/ssr/progress",
+    `${apiBaseUrl}/ssr/progress`,
     body
   );
   return response;

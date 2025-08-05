@@ -9,6 +9,9 @@ interface RenderedAudio {
   modifiedAt: string;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 export const useRenderedAudio = () => {
   const [audio, setAudio] = useState<RenderedAudio[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +29,7 @@ export const useRenderedAudio = () => {
     try {
       setIsLoading(true);
       const uid = getUidFromUrl();
-      const response = await fetch(`/vedit/api/latest/rendered-audio?uid=${uid}&t=${Date.now()}`);
+      const response = await fetch(`${apiBaseUrl}/rendered-audio?uid=${uid}&t=${Date.now()}`);
       const data = await response.json();
       setAudio(data);
     } catch (error) {
@@ -43,7 +46,7 @@ export const useRenderedAudio = () => {
     
     try {
       const uid = getUidFromUrl();
-      await fetch(`/vedit/api/latest/rendered-audio/${audioId}`, {
+      await fetch(`${apiBaseUrl}/rendered-audio/${audioId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

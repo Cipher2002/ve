@@ -25,6 +25,9 @@ interface VideoProject {
   user_prompt?: string;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * VideoOverlayPanel is a component that provides video search and management functionality.
  * It allows users to:
@@ -109,8 +112,8 @@ export const VideoOverlayPanel: React.FC = () => {
       const { uid } = getUrlParams();
       const projectOption = projectTypeOptions.find(option => option.value === projectType);
       if (!projectOption) return;
-      
-      const response = await fetch(`/vedit/api/latest/video/receive?user_id=${uid}&do_action=${projectOption.apiAction}&imageStatus=${projectOption.imageStatus}`);
+
+      const response = await fetch(`${apiBaseUrl}/video/receive?user_id=${uid}&do_action=${projectOption.apiAction}&imageStatus=${projectOption.imageStatus}`);
       const data = await response.json();
       
       // Sort projects by created_at in descending order (latest first)

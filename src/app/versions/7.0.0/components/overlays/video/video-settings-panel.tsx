@@ -27,6 +27,9 @@ const SPEED_OPTIONS = [
   { value: 4, label: "4x" },
 ];
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * Props for the VideoSettingsPanel component
  * @interface VideoSettingsPanelProps
@@ -238,7 +241,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       }
 
       // Use different proxy API for prompt-based generation
-      const apiResponse = await fetch('/vedit/api/latest/audio/generate-prompt', {
+      const apiResponse = await fetch(`${apiBaseUrl}/audio/generate-prompt`, {
         method: 'POST',
         body: formData,
       });
@@ -310,7 +313,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       }
 
       // Use your proxy API instead of direct call
-      const apiResponse = await fetch('/vedit/api/latest/audio/generate', {
+      const apiResponse = await fetch(`${apiBaseUrl}/audio/generate`, {
         method: 'POST',
         body: formData,
       });
@@ -381,7 +384,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         formData.append('request_type', '');
         formData.append('genai_code', genaiCode);
 
-        const response = await fetch('/vedit/api/latest/audio/generate', {
+        const response = await fetch(`${apiBaseUrl}/audio/generate`, {
           method: 'POST',
           body: formData,
         });
@@ -409,7 +412,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
           
           try {            
             // Download the video file using your proxy to avoid CORS
-            const videoResponse = await fetch('/vedit/api/latest/images/proxy', {
+            const videoResponse = await fetch(`${apiBaseUrl}/images/proxy`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

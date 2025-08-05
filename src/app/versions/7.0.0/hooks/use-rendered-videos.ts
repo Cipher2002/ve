@@ -10,6 +10,9 @@ interface RenderedVideo {
   modifiedAt: string;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 export const useRenderedVideos = () => {
   const [videos, setVideos] = useState<RenderedVideo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +33,7 @@ export const useRenderedVideos = () => {
     
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`/vedit/api/latest/ssr/list?uid=${uid}&t=${Date.now()}`);
+      const response = await fetch(`${apiBaseUrl}/ssr/list?uid=${uid}&t=${Date.now()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch rendered videos');
       }
@@ -51,7 +54,7 @@ export const useRenderedVideos = () => {
   const deleteVideo = useCallback(async (videoId: string) => {
     try {
       const uid = getUidFromUrl();
-      const response = await fetch('/vedit/api/latest/ssr/delete', {
+      const response = await fetch(`${apiBaseUrl}/ssr/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

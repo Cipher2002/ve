@@ -39,6 +39,9 @@ const getUserVideoDir = (uid?: string, projectName?: string) => {
   return userProjectDir;
 };
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 const getUserAudioDir = (uid?: string, projectName?: string) => {
   console.log('getUserAudioDir called with:', { uid, projectName });
   
@@ -212,8 +215,8 @@ export async function startRendering(
       
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
-      const servingPath = `/vedit/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
-      
+      const servingPath = `${apiBaseUrl}/user-files/${uid}/${projectName}/${renderId}.${format}`;
+
       console.log('Video saved to:', outputPath);
       console.log('Will be served from:', servingPath);
       
@@ -355,8 +358,8 @@ export async function startAudioRendering(
       
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
-      const servingPath = `/vedit/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
-      
+      const servingPath = `${apiBaseUrl}/user-files/${uid}/${projectName}/${renderId}.${format}`;
+
       console.log('Audio saved to:', outputPath);
       console.log('Will be served from:', servingPath);
       
@@ -445,7 +448,7 @@ async function saveRenderToUserFolder(
     }
 
     const timestamp = new Date().toISOString();
-    const servingPath = `/vedit/api/latest/user-files/${uid}/${projectName}/${renderId}.${format}`;
+    const servingPath = `${apiBaseUrl}/user-files/${uid}/${projectName}/${renderId}.${format}`;
 
     // Add render info to the index
     projectIndex.renders = projectIndex.renders || [];

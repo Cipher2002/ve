@@ -6,6 +6,9 @@ import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimeline } from "../../../contexts/timeline-context";
 import { useFFmpeg } from "../../../hooks/use-ffmpeg";
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * Props for the ImageSettingsPanel component
  */
@@ -128,7 +131,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       }
 
       // Use different proxy API for prompt-based generation
-      const apiResponse = await fetch('/vedit/api/latest/audio/generate-prompt', {
+      const apiResponse = await fetch(`${apiBaseUrl}/audio/generate-prompt`, {
         method: 'POST',
         body: formData,
       });
@@ -200,7 +203,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       }
 
       // Use your proxy API instead of direct call
-      const apiResponse = await fetch('/vedit/api/latest/audio/generate', {
+      const apiResponse = await fetch(`${apiBaseUrl}/audio/generate`, {
         method: 'POST',
         body: formData,
       });
@@ -271,7 +274,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         formData.append('request_type', '');
         formData.append('genai_code', genaiCode);
 
-        const response = await fetch('/vedit/api/latest/audio/generate', {
+        const response = await fetch(`${apiBaseUrl}/audio/generate`, {
           method: 'POST',
           body: formData,
         });
@@ -299,7 +302,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
           
           try {            
             // Download the video file using your proxy to avoid CORS
-            const videoResponse = await fetch('/vedit/api/latest/images/proxy', {
+            const videoResponse = await fetch(`${apiBaseUrl}/images/proxy`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

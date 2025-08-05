@@ -13,6 +13,9 @@ import {
   clearAllCachedVideos 
 } from '../utils/indexdb-helper';
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 export const useVideoCache = () => {
   const downloadingVideos = useRef<Set<string>>(new Set());
   const cleanupIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,7 +79,7 @@ export const useVideoCache = () => {
       console.log('Downloading video for cache:', url);
       
       // Use your proxy endpoint to download the video
-      const proxyUrl = `/vedit/api/latest/video/download?url=${encodeURIComponent(url)}`;
+      const proxyUrl = `${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`;
       const response = await fetch(proxyUrl);
       
       if (!response.ok) {

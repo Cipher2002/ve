@@ -4,6 +4,10 @@ import path from 'path';
 
 // const BASE_AUDIO_URL = '/api/latest/files/tmp_audio/'; // Make this configurable later
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     await fs.writeFile(audioPath, Buffer.from(arrayBuffer));
 
-    const audioUrl = `/vedit/api/latest/tmp_audio/${audioFileName}`;
+    const audioUrl = `${apiBaseUrl}/tmp_audio/${audioFileName}`;
 
     return NextResponse.json({
       success: true,

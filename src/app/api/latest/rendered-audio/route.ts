@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 export async function GET(request: NextRequest) {
   try {
     // Get UID from query parameters
@@ -50,7 +53,7 @@ export async function GET(request: NextRequest) {
           audioFiles.push({
             id: renderId,
             filename: filename,
-            url: `api/latest/user-files/${uid}/${projectFolder}/${filename}`,
+            url: `${apiBaseUrl}/user-files/${uid}/${projectFolder}/${filename}`,
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),

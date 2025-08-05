@@ -44,6 +44,9 @@ import { clearAutosave } from "./utils/indexdb-helper";
 //Loading templates with downloaded videos
 import { useTemplateLoader } from "./hooks/use-template-loader";
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 
 export default function ReactVideoEditor({ projectId, isAdminMode = false }: { projectId: string; isAdminMode?: boolean }) {
   const [isSaving, setIsSaving] = useState(false);
@@ -205,7 +208,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         height: getAspectRatioDimensions().height,
       };
 
-      const response = await fetch('/vedit/api/latest/save-to-user/save', {
+      const response = await fetch(`${apiBaseUrl}/save-to-user/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -282,7 +285,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         const uid = typeof window !== 'undefined' 
           ? new URLSearchParams(window.location.search).get('uid') || 'default'
           : 'default';
-        const response = await fetch(`/vedit/api/latest/templates/save?uid=${uid}`, {
+        const response = await fetch(`${apiBaseUrl}/templates/save?uid=${uid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

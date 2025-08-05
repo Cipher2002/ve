@@ -4,6 +4,9 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * Handles media file uploads
  * 
@@ -43,8 +46,8 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, buffer);
     
     // Return the file information
-    const publicPath = `/vedit/api/latest/files/users/${userId}/${fileName}`;
-    
+    const publicPath = `${apiBaseUrl}/files/users/${userId}/${fileName}`;
+
     return NextResponse.json({
       success: true,
       id: fileId,

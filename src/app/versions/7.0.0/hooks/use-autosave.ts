@@ -38,6 +38,9 @@ interface AutosaveOptions {
   isEnabled?: boolean;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * Hook for automatically saving editor state to IndexedDB
  *
@@ -111,7 +114,7 @@ export const useAutosave = (
 
           // Save both project and template in parallel
           const [projectResponse, templateResponse] = await Promise.all([
-            fetch('/vedit/api/latest/save-to-user/save', {
+            fetch(`${apiBaseUrl}/save-to-user/save`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +127,7 @@ export const useAutosave = (
                 timestamp: new Date().toISOString(),
               }),
             }),
-            fetch(`/vedit/api/latest/templates/save?uid=${uid}`, {
+            fetch(`${apiBaseUrl}/templates/save?uid=${uid}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

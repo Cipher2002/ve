@@ -55,6 +55,9 @@ interface RenderControlsProps {
   onDiscardAutosave?: () => void;
 }
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * RenderControls component provides UI controls for video rendering functionality
  *
@@ -105,29 +108,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const getProjectName = () => {
     return projectName && projectName.trim() !== '' ? projectName : 'Untitled Project';
   };
-  // React.useEffect(() => {
-  //   if (state.status === "done") {
-  //     const newRender = {
-  //       url: state.url,
-  //       timestamp: new Date(),
-  //       id: crypto.randomUUID(),
-  //       status: "success" as const,
-  //     };
-      
-  //     // Save render info to user folder
-  //     // saveToUserFolder('render', newRender);
-  //   } else if (state.status === "error") {
-  //     const newRender = {
-  //       timestamp: new Date(),
-  //       id: crypto.randomUUID(),
-  //       status: "error" as const,
-  //       error: state.error?.message || "Failed to render video. Please try again.",
-  //     };
-      
-  //     // Save error info to user folder
-  //     // saveToUserFolder('render', newRender);
-  //   }
-  // }, [state.status, state.url, state.error]);
 
   React.useEffect(() => {
     if (state.status === "done") {
@@ -157,7 +137,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     const projectName = getProjectName();
     
     try {
-      const response = await fetch('/vedit/api/latest/save-to-user/save', {
+      const response = await fetch(`${apiBaseUrl}/save-to-user/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +170,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       
       // Convert the video URL to a download URL for SSR
       downloadUrl = url
-        .replace("/rendered-videos/", "/vedit/api/latest/ssr/download/")
+        .replace("/rendered-videos/", `${apiBaseUrl}/ssr/download/`)
         .replace(`.${fileExtension}`, "");
     }
     // Lambda URLs are already in the correct format for download

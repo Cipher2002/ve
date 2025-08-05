@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 // Types
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
 /**
  * EditorHeader component renders the top navigation bar of the editor interface.
  *
@@ -85,7 +88,7 @@ const hasAutosave = Boolean(autosaveTimestamp);
                   : 'default';
                 
                 // Call the project name update API to handle folder renaming
-                const updateResponse = await fetch('/vedit/api/latest/save-to-user/update-name', {
+                const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
