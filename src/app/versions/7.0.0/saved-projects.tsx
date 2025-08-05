@@ -403,6 +403,8 @@ export default function SavedProjects() {
     }
   };
 
+  
+
   // Handle toggling active status
   const handleToggleActiveStatus = async (project: UserProject) => {
     const uid = getUidFromUrl();

@@ -8,7 +8,7 @@ import 'normalize.css/normalize.css';
 import Image from 'next/image';
 
 // Import the video editor component
-import ReactVideoEditor from './versions/7.0.0/react-video-editor';
+// import ReactVideoEditor from './versions/7.0.0/react-video-editor';
 // Import the SavedProjects component
 import SavedProjects from './versions/7.0.0/saved-projects'; // Adjust path as needed
 
@@ -90,7 +90,7 @@ function App() {
                 maxWidth: '100%'
               }}
             >
-              <ReactVideoEditor projectId="default-project" isAdminMode={isAdminMode} />
+              {/* <ReactVideoEditor projectId="default-project" isAdminMode={isAdminMode} /> */}
             </div>
           </div>
         </div>
