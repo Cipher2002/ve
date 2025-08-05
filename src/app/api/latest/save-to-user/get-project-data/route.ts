@@ -1,5 +1,3 @@
-// Create this new API endpoint: /api/latest/save-to-user/get-project-data/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';

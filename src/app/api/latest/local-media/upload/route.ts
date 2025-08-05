@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, buffer);
     
     // Return the file information
-    const publicPath = `api/latest/files/users/${userId}/${fileName}`;
+    const publicPath = `/vedit/api/latest/files/users/${userId}/${fileName}`;
     
     return NextResponse.json({
       success: true,

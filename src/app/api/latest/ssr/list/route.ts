@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
           videos.push({
             id: renderId,
             filename: filename,
-            url: `api/latest/user-files/${uid}/${projectFolder}/${filename}`,
+            url: `/vedit/api/latest/user-files/${uid}/${projectFolder}/${filename}`,
             thumbnail: null, // You can implement thumbnail generation if needed
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),

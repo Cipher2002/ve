@@ -261,7 +261,7 @@ export default function SavedProjects() {
   const fetchUserProjects = async () => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`api/latest/save-to-user/get?uid=${uid}`);
+      const response = await fetch(`/vedit/api/latest/save-to-user/get?uid=${uid}`);
       if (response.ok) {
         const data = await response.json();
         setUserProjects(data.projects || []);
@@ -277,7 +277,7 @@ export default function SavedProjects() {
   const fetchProjectFiles = async (projectId: string) => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`api/latest/save-to-user/get-files?uid=${uid}&projectId=${projectId}`);
+      const response = await fetch(`/vedit/api/latest/save-to-user/get-files?uid=${uid}&projectId=${projectId}`);
       if (response.ok) {
         const data = await response.json();
         setProjectFiles(data.files || []);
@@ -331,7 +331,7 @@ export default function SavedProjects() {
     if (editingName.trim() && editingName !== project.name) {
       const uid = getUidFromUrl();
       try {
-        const response = await fetch('api/latest/save-to-user/update-name', {
+        const response = await fetch('/vedit/api/latest/save-to-user/update-name', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -381,7 +381,7 @@ export default function SavedProjects() {
   const handleDownloadProject = async (project: UserProject) => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`api/latest/save-to-user/get-files?uid=${uid}&projectId=${project.id}`);
+      const response = await fetch(`/vedit/api/latest/save-to-user/get-files?uid=${uid}&projectId=${project.id}`);
       if (response.ok) {
         const data = await response.json();
         const files = data.files || [];
@@ -390,7 +390,7 @@ export default function SavedProjects() {
           // Download the most recent file
           const latestFile = files[0];
           const link = document.createElement('a');
-          link.href = `api/latest/download-file?filePath=${encodeURIComponent(latestFile.filePath)}`;
+          link.href = `/vedit/api/latest/download-file?filePath=${encodeURIComponent(latestFile.filePath)}`;
           link.download = latestFile.fileName;
           link.click();
         }
@@ -406,7 +406,7 @@ export default function SavedProjects() {
     const newStatus = project.status === 'active' ? 'inactive' : 'active';
     
     try {
-      const response = await fetch('api/latest/save-to-user/update-status', {
+      const response = await fetch('/vedit/api/latest/save-to-user/update-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -551,7 +551,7 @@ export default function SavedProjects() {
     const uid = getUidFromUrl();
     try {
       // Get the latest save file for this project
-      const response = await fetch(`api/latest/save-to-user/get-project-data?uid=${uid}&projectName=${project.name}`);
+      const response = await fetch(`/vedit/api/latest/save-to-user/get-project-data?uid=${uid}&projectName=${project.name}`);
       if (response.ok) {
         const data = await response.json();
         if (data.projectData) {
@@ -808,7 +808,7 @@ export default function SavedProjects() {
                         <button 
                           onClick={() => {
                             const link = document.createElement('a');
-                            link.href = `api/latest/download-file?filePath=${encodeURIComponent(file.filePath)}`;
+                            link.href = `/vedit/api/latest/download-file?filePath=${encodeURIComponent(file.filePath)}`;
                             link.download = file.fileName;
                             link.click();
                           }}

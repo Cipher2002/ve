@@ -157,7 +157,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     const projectName = getProjectName();
     
     try {
-      const response = await fetch('api/latest/save-to-user/save', {
+      const response = await fetch('/vedit/api/latest/save-to-user/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       
       // Convert the video URL to a download URL for SSR
       downloadUrl = url
-        .replace("/rendered-videos/", "api/latest/ssr/download/")
+        .replace("/rendered-videos/", "/vedit/api/latest/ssr/download/")
         .replace(`.${fileExtension}`, "");
     }
     // Lambda URLs are already in the correct format for download

@@ -205,7 +205,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         height: getAspectRatioDimensions().height,
       };
 
-      const response = await fetch('api/latest/save-to-user/save', {
+      const response = await fetch('/vedit/api/latest/save-to-user/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -282,7 +282,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         const uid = typeof window !== 'undefined' 
           ? new URLSearchParams(window.location.search).get('uid') || 'default'
           : 'default';
-        const response = await fetch(`api/latest/templates/save?uid=${uid}`, {
+        const response = await fetch(`/vedit/api/latest/templates/save?uid=${uid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

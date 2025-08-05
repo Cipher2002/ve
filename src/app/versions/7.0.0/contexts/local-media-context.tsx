@@ -63,7 +63,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const { uid, user_ref } = getUrlParams();
 
   // Define BASE_URL at the top where API calls are made
-  const BASE_URL = 'http://zanopy.ai:3001'; // You can change this to your desired base URL
+  const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
 
   // Function to load media files (call this when panel opens)
   const loadMediaFiles = useCallback(async (isInitial = true) => {
@@ -79,7 +79,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const startFrom = isInitial ? 0 : currentPage * 20;
       
-      const response = await fetch('api/latest/media/get', {
+      const response = await fetch('/vedit/api/latest/media/get', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         formData.append('file', file);
         formData.append('userId', uid);
 
-        const uploadResponse = await fetch('api/latest/local-media/upload', {
+        const uploadResponse = await fetch('/vedit/api/latest/local-media/upload', {
           method: 'POST',
           body: formData,
         });
@@ -199,7 +199,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                     
                     try {
                       console.log('Starting thumbnail upload...');
-                      const thumbResponse = await fetch('api/latest/local-media/upload', {
+                      const thumbResponse = await fetch('/vedit/api/latest/local-media/upload', {
                         method: 'POST',
                         body: thumbnailFormData,
                       });
@@ -237,7 +237,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                                 fileUrl; // Fallback to original file for non-videos
         
         // Call the Zanopy API to register the file
-        const apiResponse = await fetch('api/latest/media/upload-register', {
+        const apiResponse = await fetch('/vedit/api/latest/media/upload-register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

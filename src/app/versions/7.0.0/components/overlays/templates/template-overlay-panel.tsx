@@ -66,7 +66,7 @@ export const TemplateOverlayPanel: React.FC = () => {
       ));
       
       // Call the project name update API to handle folder renaming
-      const updateResponse = await fetch('api/latest/save-to-user/update-name', {
+      const updateResponse = await fetch('/vedit/api/latest/save-to-user/update-name', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     setClientTemplatesError(null);
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`api/latest/templates/client?uid=${uid}`);
+      const response = await fetch(`/vedit/api/latest/templates/client?uid=${uid}`);
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
@@ -257,7 +257,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     
     try {
       // Also update the corresponding project status
-      const response = await fetch('api/latest/save-to-user/update-status', {
+      const response = await fetch('/vedit/api/latest/save-to-user/update-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

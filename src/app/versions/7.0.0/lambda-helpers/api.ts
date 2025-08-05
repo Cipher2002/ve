@@ -51,7 +51,7 @@ export const renderVideo = async ({
   };
 
   const response = await makeRequest<RenderMediaOnLambdaOutput>(
-    "api/latest/lambda/render",
+    "/vedit/api/latest/lambda/render",
     body
   );
   return response;
@@ -70,7 +70,7 @@ export const getProgress = async ({
   };
 
   const response = await makeRequest<ProgressResponse>(
-    "api/latest/lambda/progress",
+    "/vedit/api/latest/lambda/progress",
     body
   );
   return response;

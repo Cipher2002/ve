@@ -111,7 +111,7 @@ export const useAutosave = (
 
           // Save both project and template in parallel
           const [projectResponse, templateResponse] = await Promise.all([
-            fetch('api/latest/save-to-user/save', {
+            fetch('/vedit/api/latest/save-to-user/save', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ export const useAutosave = (
                 timestamp: new Date().toISOString(),
               }),
             }),
-            fetch(`api/latest/templates/save?uid=${uid}`, {
+            fetch(`/vedit/api/latest/templates/save?uid=${uid}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

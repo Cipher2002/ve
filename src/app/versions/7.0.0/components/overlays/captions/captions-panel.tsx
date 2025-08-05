@@ -178,7 +178,7 @@ export const CaptionsPanel: React.FC = () => {
     const audioFile = new File([audioBlob], 'extracted_audio.wav', { type: 'audio/wav' });
     formData.append('audio', audioFile);
     
-    const uploadResponse = await fetch('api/latest/captions/save-audio', {
+    const uploadResponse = await fetch('/vedit/api/latest/captions/save-audio', {
       method: 'POST',
       body: formData,
     });
@@ -202,7 +202,7 @@ export const CaptionsPanel: React.FC = () => {
     const audioFile = new File([audioBlob], 'existing_audio.wav', { type: 'audio/wav' });
     formData.append('audio', audioFile);
     
-    const uploadResponse = await fetch('api/latest/captions/save-audio', {
+    const uploadResponse = await fetch('/vedit/api/latest/captions/save-audio', {
       method: 'POST',
       body: formData,
     });
@@ -280,7 +280,7 @@ const handleAutomaticCaptions = async () => {
       }
 
       // Send request to Zanopy API
-      const response = await fetch(`api/latest/captions/auto-generate?uid=${uid}&email=${email}`, {
+      const response = await fetch(`/vedit/api/latest/captions/auto-generate?uid=${uid}&email=${email}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -328,7 +328,7 @@ const handleAutomaticCaptions = async () => {
       try {
         // Check status for all pending results
         const statusPromises = pendingResults.map(async (result) => {
-          const response = await fetch('api/latest/captions/check-status', {
+          const response = await fetch('/vedit/api/latest/captions/check-status', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

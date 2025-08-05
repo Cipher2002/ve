@@ -40,7 +40,7 @@ export const uploadMediaFile = async (file: File): Promise<UserMediaItem> => {
     formData.append("userId", userId);
 
     // Upload file to server
-    const response = await fetch("api/latest/local-media/upload", {
+    const response = await fetch("/vedit/api/latest/local-media/upload", {
       method: "POST",
       body: formData,
     });
@@ -184,7 +184,7 @@ export const deleteMediaFile = async (
   filePath: string
 ): Promise<boolean> => {
   try {
-    const response = await fetch("api/latest/local-media/delete", {
+    const response = await fetch("/vedit/api/latest/local-media/delete", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

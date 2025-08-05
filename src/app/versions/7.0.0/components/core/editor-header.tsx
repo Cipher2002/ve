@@ -85,7 +85,7 @@ const hasAutosave = Boolean(autosaveTimestamp);
                   : 'default';
                 
                 // Call the project name update API to handle folder renaming
-                const updateResponse = await fetch('api/latest/save-to-user/update-name', {
+                const updateResponse = await fetch('/vedit/api/latest/save-to-user/update-name', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
