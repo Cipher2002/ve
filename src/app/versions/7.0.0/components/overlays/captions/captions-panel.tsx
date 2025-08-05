@@ -481,11 +481,14 @@ const handleAutomaticCaptions = async () => {
       setOverlays(finalOverlays);
       setIsGeneratingCaptions(false);
       
-      // Auto-select the first caption overlay and set it as local overlay
+      // Force open the style panel with the first caption overlay
       if (newCaptionOverlays.length > 0) {
         const firstCaptionOverlay = newCaptionOverlays[0];
         setLocalOverlay(firstCaptionOverlay);
-        // Note: We don't set selectedOverlayId here to avoid the normal selection logic
+        // Force the panel to show by ensuring we override the current state
+        setTimeout(() => {
+          setLocalOverlay(firstCaptionOverlay);
+        }, 100);
       }
       
     } catch (error) {
@@ -496,7 +499,7 @@ const handleAutomaticCaptions = async () => {
 
   return (
     <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
-      {(!localOverlay) ? (
+      {(!localOverlay && !isGeneratingCaptions) ? (
         <>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">
@@ -565,7 +568,7 @@ const handleAutomaticCaptions = async () => {
             </div>
           </div>
         </>
-      ) : (
+      ) : localOverlay ? (
         <CaptionSettings
           currentFrame={currentFrame}
           localOverlay={localOverlay}
@@ -574,7 +577,8 @@ const handleAutomaticCaptions = async () => {
           captions={localOverlay.captions}
           defaultTab="display"
         />
-      )}
+      ) : null}
+
     </div>
   );
 };
