@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
 async function cleanupTempAudio() {
   try {
-    const tmpDir = path.join(process.cwd(), 'public', 'tmp_audio');
+    const tmpDir = path.join(process.cwd(), 'tmp_audio');
     const files = await fs.readdir(tmpDir);
     
     for (const file of files) {

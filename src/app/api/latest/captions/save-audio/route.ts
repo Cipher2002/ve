@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create tmp_audio directory if it doesn't exist
-    const tmpDir = path.join(process.cwd(), 'public', 'tmp_audio');
+    const tmpDir = path.join(process.cwd(), 'tmp_audio');
     await fs.mkdir(tmpDir, { recursive: true });
     
     // Generate unique filename
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await audioFile.arrayBuffer();
     await fs.writeFile(audioPath, Buffer.from(arrayBuffer));
 
-    const audioUrl = `https://zanopy.ai/vedit/tmp_audio/${audioFileName}`;
+    const audioUrl = `https://zanopy.ai/vedit/api/latest/serve-audio/${audioFileName}`;
 
     return NextResponse.json({
       success: true,
