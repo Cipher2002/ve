@@ -86,15 +86,6 @@ export const TimelineItemContextMenu: React.FC<
           <Scissors className="mr-4 h-4 w-4" />
           Split
         </ContextMenuItem>
-        {/* {itemType === 'video' && (
-          <ContextMenuItem
-            className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onDetachAudio(itemId)}
-          >
-            <Volume2 className="mr-4 h-4 w-4" />
-            Detach Audio
-          </ContextMenuItem>
-        )} */}
         {itemType === 'video' && !audioDetached && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"

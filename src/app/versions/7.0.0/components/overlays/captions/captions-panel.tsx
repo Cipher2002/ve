@@ -7,6 +7,8 @@ import { useTimeline } from "../../../contexts/timeline-context";
 import { CaptionOverlay, OverlayType, Caption } from "../../../types";
 import { CaptionSettings } from "./caption-settings";
 import { captionTemplates } from "../../../templates/caption-templates";
+import { useSidebar } from "../../../contexts/sidebar-context";
+import { Overlay } from "../../../types";
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -39,6 +41,7 @@ const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
  * <CaptionsPanel />
  * ```
  */
+
 export const CaptionsPanel: React.FC = () => {
   const [script, setScript] = useState("");
   const [isBannerVisible, setIsBannerVisible] = useState(true);
@@ -46,13 +49,15 @@ export const CaptionsPanel: React.FC = () => {
     addOverlay,
     overlays,
     selectedOverlayId,
+    setSelectedOverlayId,
     durationInFrames,
     changeOverlay,
     currentFrame,
-    setOverlays, // Add this
+    setOverlays,
     isGeneratingCaptions,
     setIsGeneratingCaptions,
   } = useEditorContext();
+  const { setActivePanel } = useSidebar();
 
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
@@ -219,6 +224,7 @@ export const CaptionsPanel: React.FC = () => {
     return uploadResult.audioUrl;
   };
 
+
 const handleAutomaticCaptions = async () => {
     setIsGeneratingCaptions(true);
     
@@ -230,6 +236,7 @@ const handleAutomaticCaptions = async () => {
       
       if (!uid || !email) {
         alert('Missing user parameters. Please reload the page.');
+        setIsGeneratingCaptions(false);
         return;
       }
       
@@ -239,16 +246,76 @@ const handleAutomaticCaptions = async () => {
       
       if (videoOverlays.length === 0 && audioOverlays.length === 0) {
         alert('No video or audio found in timeline');
+        setIsGeneratingCaptions(false);
         return;
       }
+
+      // Create temp caption overlays for each media overlay
+      const tempCaptionOverlays: any[] = [];
+      let updatedOverlays = [...overlays];
+      
+      // Find the topmost row for positioning
+      const mediaOverlays = [...videoOverlays, ...audioOverlays];
+      let targetRow = 0;
+      if (mediaOverlays.length > 0) {
+        const minMediaRow = Math.min(...mediaOverlays.map(overlay => overlay.row));
+        targetRow = Math.max(0, minMediaRow - 1);
+        
+        // Shift all overlays at or above the target row down
+        updatedOverlays = updatedOverlays.map(overlay => {
+          if (overlay.row >= targetRow) {
+            return { ...overlay, row: overlay.row + mediaOverlays.length };
+          }
+          return overlay;
+        });
+      }
+
+      // Create temp overlays for each media item
+      [...videoOverlays, ...audioOverlays].forEach((overlay, index) => {
+        const tempCaptionOverlay = {
+          id: Date.now() + overlay.id + index,
+          type: OverlayType.CAPTION,
+          from: overlay.from,
+          durationInFrames: overlay.durationInFrames,
+          captions: [],
+          left: 230,
+          top: 414,
+          width: 833,
+          height: 269,
+          rotation: 0,
+          isDragging: false,
+          row: targetRow + index,
+          template: "default",
+          styles: captionTemplates.default.styles,
+          isLoading: true,
+          loadingStage: 'extracting', // 'extracting' -> 'generating' -> 'complete'
+          sourceOverlayId: overlay.id,
+          sourceType: overlay.type === OverlayType.VIDEO ? 'video' : 'audio'
+        };
+        tempCaptionOverlays.push(tempCaptionOverlay);
+      });
+
+      // Add temp overlays to timeline
+      const overlaysWithTemp = [...updatedOverlays, ...tempCaptionOverlays];
+      setOverlays(overlaysWithTemp);
 
       // Prepare audio data with overlay information
       const audioDataWithOverlays = [];
 
-      // Process video overlays
-      for (const overlay of videoOverlays) {
+      // Process video overlays (update loading stage to 'generating' after extraction)
+      for (let i = 0; i < videoOverlays.length; i++) {
+        const overlay = videoOverlays[i];
         try {
           const audioUrl = await extractAndSaveAudio(overlay.src);
+          
+          // Update temp overlay to 'generating' stage
+          const updatedOverlays = overlays.map((o: any) => 
+            o.sourceOverlayId === overlay.id && o.isLoading 
+              ? { ...o, loadingStage: 'generating' }
+              : o
+          ) as Overlay[];
+          setOverlays(updatedOverlays);
+          
           audioDataWithOverlays.push({
             audioUrl,
             overlayId: overlay.id,
@@ -258,13 +325,26 @@ const handleAutomaticCaptions = async () => {
           });
         } catch (error) {
           console.error('Failed to extract audio from video:', error);
+          // Remove failed temp overlay
+          const filteredOverlays = overlays.filter((o: any) => !(o.sourceOverlayId === overlay.id && o.isLoading)) as Overlay[];
+          setOverlays(filteredOverlays);
         }
       }
 
-      // Process audio overlays
-      for (const overlay of audioOverlays) {
+      // Process audio overlays (update loading stage to 'generating' after saving)
+      for (let i = 0; i < audioOverlays.length; i++) {
+        const overlay = audioOverlays[i];
         try {
           const audioUrl = await saveExistingAudio(overlay.src);
+          
+          // Update temp overlay to 'generating' stage
+          const updatedOverlays = overlays.map((o: any) => 
+            o.sourceOverlayId === overlay.id && o.isLoading 
+              ? { ...o, loadingStage: 'generating' }
+              : o
+          ) as Overlay[];
+          setOverlays(updatedOverlays);
+          
           audioDataWithOverlays.push({
             audioUrl,
             overlayId: overlay.id,
@@ -274,11 +354,18 @@ const handleAutomaticCaptions = async () => {
           });
         } catch (error) {
           console.error('Failed to save audio:', error);
+          // Remove failed temp overlay
+          const filteredOverlays = overlays.filter((o: any) => !(o.sourceOverlayId === overlay.id && o.isLoading)) as Overlay[];
+          setOverlays(filteredOverlays);
         }
       }
 
       if (audioDataWithOverlays.length === 0) {
         alert('Failed to extract audio from videos');
+        setIsGeneratingCaptions(false);
+        // Remove all temp overlays
+        const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+        setOverlays(filteredOverlays);
         return;
       }
 
@@ -295,18 +382,26 @@ const handleAutomaticCaptions = async () => {
       
       if (!result.success) {
         alert(result.error || 'Failed to start caption generation');
+        setIsGeneratingCaptions(false);
+        // Remove all temp overlays
+        const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+        setOverlays(filteredOverlays);
         return;
       }
       
-
       await pollMultipleCaptionStatus(result.results);
       
     } catch (error) {
+      console.error('Caption generation error:', error);
       alert('Failed to generate captions. Please try again.');
       setIsGeneratingCaptions(false);
+      // Remove all temp overlays
+      const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+      setOverlays(filteredOverlays);
     }
-    // Don't reset loading state here - let pollCaptionStatus handle it
   };
+
+  
 
   const pollMultipleCaptionStatus = async (results: any[]) => {
     const maxAttempts = 150; // 5 minutes with 2-second intervals
@@ -404,34 +499,11 @@ const handleAutomaticCaptions = async () => {
   const processMultipleCaptionData = async (completedCaptions: any[]) => {
     try {
       const FPS = 30; // Assuming 30 FPS
-      let updatedOverlays = [...overlays];
-      const newCaptionOverlays = [];
-      
-      // Find the topmost row with media content for positioning
-      const mediaOverlays = overlays.filter(overlay => 
-        overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.SOUND
-      );
-      
-      let targetRow = 0;
-      if (mediaOverlays.length > 0) {
-        const minMediaRow = Math.min(...mediaOverlays.map(overlay => overlay.row));
-        targetRow = Math.max(0, minMediaRow - 1);
-        
-        // Shift all overlays at or above the target row down by 1
-        updatedOverlays = updatedOverlays.map(overlay => {
-          if (overlay.row >= targetRow) {
-            return { ...overlay, row: overlay.row + 1 };
-          }
-          return overlay;
-        });
-      }
+      const newCaptionOverlays: any[] = [];
       
       // Process each completed caption
       for (const captionData of completedCaptions) {
         const { subtitlesData, fromFrame, overlayId } = captionData;
-        
-        // Convert frame start time to milliseconds
-        const overlayStartTimeMs = (fromFrame / FPS) * 1000;
 
         // Convert the API response to our caption format with relative timing
         const processedCaptions = subtitlesData.segments.map((segment: any) => {
@@ -456,34 +528,64 @@ const handleAutomaticCaptions = async () => {
         const maxEndTime = Math.max(...processedCaptions.map((cap: Caption) => cap.endMs));
         const minStartTime = Math.min(...processedCaptions.map((cap: Caption) => cap.startMs));
         const calculatedDurationInFrames = Math.ceil(((maxEndTime - minStartTime) / 1000) * FPS);
-        const newCaptionOverlay: CaptionOverlay = {
-          id: Date.now() + overlayId, // Ensure unique IDs
+        
+        newCaptionOverlays.push({
+          overlayId,
+          fromFrame,
+          processedCaptions,
+          calculatedDurationInFrames
+        });
+      }
+      
+      // Replace temp overlays with real caption overlays
+      let updatedOverlays = overlays.filter((overlay: any) => !overlay.isLoading);
+      
+      newCaptionOverlays.forEach((captionData) => {
+        const finalCaptionOverlay: CaptionOverlay = {
+          id: Date.now() + captionData.overlayId + Math.random(),
           type: OverlayType.CAPTION,
-          from: fromFrame, // Start from the same frame as the original overlay
-          durationInFrames: calculatedDurationInFrames,
-          captions: processedCaptions,
+          from: captionData.fromFrame,
+          durationInFrames: captionData.calculatedDurationInFrames,
+          captions: captionData.processedCaptions,
           left: 230,
           top: 414,
           width: 833,
           height: 269,
           rotation: 0,
           isDragging: false,
-          row: targetRow,
+          row: updatedOverlays.find((o: any) => o.id === captionData.overlayId)?.row || 0,
           template: "default",
           styles: captionTemplates.default.styles,
         };
         
-        newCaptionOverlays.push(newCaptionOverlay);
-      }
+        updatedOverlays.push(finalCaptionOverlay as Overlay);
+      });
       
-      // Add all caption overlays
-      const finalOverlays = [...updatedOverlays, ...newCaptionOverlays];
-      setOverlays(finalOverlays);
+      setOverlays(updatedOverlays as Overlay[]);
+      
       setIsGeneratingCaptions(false);
+      
+      // Navigate to caption settings for the first caption
+      setTimeout(() => {
+        const firstCaptionOverlay = newCaptionOverlays[0];
+        if (firstCaptionOverlay) {
+          // Find the actual overlay ID after it's been added
+          setTimeout(() => {
+            const captionOverlays = overlays.filter((o: any) => o.type === OverlayType.CAPTION && !o.isLoading);
+            if (captionOverlays.length > 0) {
+              setSelectedOverlayId(captionOverlays[0].id);
+            }
+          }, 200);
+        }
+      }, 100);
       
     } catch (error) {
+      console.error('Failed to process generated captions:', error);
       alert('Failed to process generated captions');
       setIsGeneratingCaptions(false);
+      // Remove all temp overlays on error
+      const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+      setOverlays(filteredOverlays);
     }
   };
 
