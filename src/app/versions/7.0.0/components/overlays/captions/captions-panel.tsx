@@ -412,6 +412,9 @@ const handleAutomaticCaptions = async () => {
     
     if (activeResults.length === 0) {
       setIsGeneratingCaptions(false);
+      // Remove all temp overlays
+      const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+      setOverlays(filteredOverlays);
       alert('Failed to start caption generation for any audio files');
       return;
     }
@@ -419,11 +422,13 @@ const handleAutomaticCaptions = async () => {
     // Wait 3 seconds before starting to poll
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    const completedCaptions = [];
+    const completedCaptions: any[] = [];
     const pendingResults = [...activeResults];
     
     while (attempts < maxAttempts && pendingResults.length > 0) {
       try {
+        console.log(`Polling attempt ${attempts + 1}, pending results: ${pendingResults.length}`);
+        
         // Check status for all pending results
         const statusPromises = pendingResults.map(async (result) => {
           const response = await fetch(`${apiBaseUrl}/captions/check-status`, {
@@ -435,14 +440,15 @@ const handleAutomaticCaptions = async () => {
           });
           
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            console.error(`HTTP ${response.status}: ${response.statusText}`);
+            return {
+              ...result,
+              statusResult: { completed: false, error: `HTTP ${response.status}` }
+            };
           }
           
           const statusResult = await response.json();
-          
-          if (statusResult.error) {
-            throw new Error(statusResult.error);
-          }
+          console.log(`Status for ${result.genaiCode}:`, statusResult);
           
           return {
             ...result,
@@ -457,6 +463,7 @@ const handleAutomaticCaptions = async () => {
           const { statusResult, ...originalResult } = statusResults[i];
           
           if (statusResult.completed) {
+            console.log('Caption completed for:', originalResult.overlayId);
             // Move to completed array
             completedCaptions.push({
               ...originalResult,
@@ -465,7 +472,10 @@ const handleAutomaticCaptions = async () => {
             
             // Remove from pending
             pendingResults.splice(i, 1);
-            
+          } else if (statusResult.error) {
+            console.error('Caption generation failed for:', originalResult.overlayId, statusResult.error);
+            // Remove failed result from pending
+            pendingResults.splice(i, 1);
           }
         }
         
@@ -478,8 +488,11 @@ const handleAutomaticCaptions = async () => {
         
       } catch (error) {
         console.error('Polling error:', error);
-        setIsGeneratingCaptions(false);
-        throw error;
+        // Don't throw error, just continue polling
+        attempts++;
+        if (attempts < maxAttempts && pendingResults.length > 0) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
     }
     
@@ -488,10 +501,14 @@ const handleAutomaticCaptions = async () => {
     }
     
     if (completedCaptions.length > 0) {
+      console.log('Processing completed captions:', completedCaptions.length);
       // Process all completed captions
       await processMultipleCaptionData(completedCaptions);
     } else {
       setIsGeneratingCaptions(false);
+      // Remove all temp overlays
+      const filteredOverlays = overlays.filter((o: any) => !o.isLoading) as Overlay[];
+      setOverlays(filteredOverlays);
       alert('No captions were successfully generated');
     }
   };
@@ -538,11 +555,23 @@ const handleAutomaticCaptions = async () => {
       }
       
       // Replace temp overlays with real caption overlays
-      let updatedOverlays = overlays.filter((overlay: any) => !overlay.isLoading);
+      console.log('Current overlays before replacement:', overlays.length);
+      console.log('Temp overlays to replace:', overlays.filter((o: any) => o.isLoading).length);
       
-      newCaptionOverlays.forEach((captionData) => {
+      // First, get current overlays state
+      const currentOverlays = [...overlays];
+      let updatedOverlays = currentOverlays.filter((overlay: any) => !overlay.isLoading);
+      
+      console.log('Overlays after filtering loading ones:', updatedOverlays.length);
+      
+      newCaptionOverlays.forEach((captionData, index) => {
+        // Find the temp overlay that corresponds to this caption data
+        const tempOverlay = currentOverlays.find((o: any) => 
+          o.isLoading && o.sourceOverlayId === captionData.overlayId
+        );
+        
         const finalCaptionOverlay: CaptionOverlay = {
-          id: Date.now() + captionData.overlayId + Math.random(),
+          id: Date.now() + captionData.overlayId + index,
           type: OverlayType.CAPTION,
           from: captionData.fromFrame,
           durationInFrames: captionData.calculatedDurationInFrames,
@@ -553,14 +582,16 @@ const handleAutomaticCaptions = async () => {
           height: 269,
           rotation: 0,
           isDragging: false,
-          row: updatedOverlays.find((o: any) => o.id === captionData.overlayId)?.row || 0,
+          row: tempOverlay ? tempOverlay.row : 0, // Use the temp overlay's row
           template: "default",
           styles: captionTemplates.default.styles,
         };
         
+        console.log('Adding caption overlay:', finalCaptionOverlay);
         updatedOverlays.push(finalCaptionOverlay as Overlay);
       });
       
+      console.log('Final overlays count:', updatedOverlays.length);
       setOverlays(updatedOverlays as Overlay[]);
       
       setIsGeneratingCaptions(false);
@@ -569,13 +600,14 @@ const handleAutomaticCaptions = async () => {
       setTimeout(() => {
         const firstCaptionOverlay = newCaptionOverlays[0];
         if (firstCaptionOverlay) {
-          // Find the actual overlay ID after it's been added
+          // Navigate to caption settings for the first caption
           setTimeout(() => {
             const captionOverlays = overlays.filter((o: any) => o.type === OverlayType.CAPTION && !o.isLoading);
             if (captionOverlays.length > 0) {
+              console.log('Selecting first caption overlay:', captionOverlays[0].id);
               setSelectedOverlayId(captionOverlays[0].id);
             }
-          }, 200);
+          }, 500);
         }
       }, 100);
       
