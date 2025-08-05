@@ -27,6 +27,7 @@ interface CaptionSettingsProps {
   currentFrame: number;
   startFrame: number;
   captions: Caption[];
+  defaultTab?: string;
 }
 
 /**
@@ -77,11 +78,12 @@ export const CaptionSettings: React.FC<CaptionSettingsProps> = ({
   localOverlay,
   setLocalOverlay,
   currentFrame,
+  defaultTab = "captions",
 }) => {
   const currentMs = (currentFrame / 30) * 1000;
 
   return (
-    <Tabs defaultValue="captions" className="w-full">
+    <Tabs defaultValue={defaultTab} className="w-full">
       {/* Tab Navigation */}
       <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1">
         {/* Captions Tab */}

@@ -481,6 +481,13 @@ const handleAutomaticCaptions = async () => {
       setOverlays(finalOverlays);
       setIsGeneratingCaptions(false);
       
+      // Auto-select the first caption overlay and set it as local overlay
+      if (newCaptionOverlays.length > 0) {
+        const firstCaptionOverlay = newCaptionOverlays[0];
+        setLocalOverlay(firstCaptionOverlay);
+        // Note: We don't set selectedOverlayId here to avoid the normal selection logic
+      }
+      
     } catch (error) {
       alert('Failed to process generated captions');
       setIsGeneratingCaptions(false);
@@ -489,7 +496,7 @@ const handleAutomaticCaptions = async () => {
 
   return (
     <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
-      {(!localOverlay || selectedOverlayId === null) ? (
+      {(!localOverlay) ? (
         <>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">
@@ -565,6 +572,7 @@ const handleAutomaticCaptions = async () => {
           setLocalOverlay={handleUpdateOverlay}
           startFrame={localOverlay.from}
           captions={localOverlay.captions}
+          defaultTab="display"
         />
       )}
     </div>
