@@ -7,6 +7,7 @@ import { useTimeline } from "../../../contexts/timeline-context";
 import { CaptionOverlay, OverlayType, Caption } from "../../../types";
 import { CaptionSettings } from "./caption-settings";
 import { captionTemplates } from "../../../templates/caption-templates";
+import { useSidebar } from "../../../contexts/sidebar-context";
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -53,6 +54,7 @@ export const CaptionsPanel: React.FC = () => {
     isGeneratingCaptions,
     setIsGeneratingCaptions,
   } = useEditorContext();
+  const { setActivePanel, setIsOpen } = useSidebar();
 
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
@@ -485,6 +487,9 @@ const handleAutomaticCaptions = async () => {
       if (newCaptionOverlays.length > 0) {
         const firstCaptionOverlay = newCaptionOverlays[0];
         setLocalOverlay(firstCaptionOverlay);
+        // Force open the captions panel and set it as active
+        setActivePanel(OverlayType.CAPTION);
+        setIsOpen(true);
         // Force the panel to show by ensuring we override the current state
         setTimeout(() => {
           setLocalOverlay(firstCaptionOverlay);
@@ -499,7 +504,7 @@ const handleAutomaticCaptions = async () => {
 
   return (
     <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
-      {(!localOverlay && !isGeneratingCaptions) ? (
+      {(!localOverlay) ? (
         <>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">
