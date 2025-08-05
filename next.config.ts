@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/video-editor',
-  assetPrefix: '/video-editor/.next',
+  basePath: '/video_editor',
+  // assetPrefix: '/video_editor/.next',
   trailingSlash: false,
 
   webpack: (config, { isServer }) => {
