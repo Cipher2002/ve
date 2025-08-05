@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: '/video-editor/',
+  basePath: '/video-editor',
   assetPrefix: '/video-editor/.next',
   trailingSlash: false,
 
