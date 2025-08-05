@@ -49,6 +49,7 @@ export function LocalMediaGallery({
   const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
   const [downloadProgress, setDownloadProgress] = useState<Map<string, number>>(new Map());
   const { downloadVideo } = useVideoCache();
+  const [addingToTimeline, setAddingToTimeline] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -183,22 +184,46 @@ export function LocalMediaGallery({
   // Handle image click (get dimensions then add)
   const handleImageClick = async (file: LocalMediaFile) => {
     if (onSelectMedia) {
-      const { width, height } = await getImageNaturalDimensions(file.path);
+      setAddingToTimeline(prev => new Set(prev).add(file.id));
       
-      const imageFile = {
-        ...file,
-        width,
-        height,
-      };
-      
-      onSelectMedia(imageFile);
+      try {
+        const { width, height } = await getImageNaturalDimensions(file.path);
+        
+        const imageFile = {
+          ...file,
+          width,
+          height,
+        };
+        
+        onSelectMedia(imageFile);
+      } catch (error) {
+        console.error('Failed to add image to timeline:', error);
+      } finally {
+        setAddingToTimeline(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(file.id);
+          return newSet;
+        });
+      }
     }
   };
 
   // Handle audio click (add directly)
-  const handleAudioClick = (file: LocalMediaFile) => {
+  const handleAudioClick = async (file: LocalMediaFile) => {
     if (onSelectMedia) {
-      onSelectMedia(file);
+      setAddingToTimeline(prev => new Set(prev).add(file.id));
+      
+      try {
+        onSelectMedia(file);
+      } catch (error) {
+        console.error('Failed to add audio to timeline:', error);
+      } finally {
+        setAddingToTimeline(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(file.id);
+          return newSet;
+        });
+      }
     }
   };
 
@@ -271,7 +296,7 @@ export function LocalMediaGallery({
       } else if (selectedFile.type === 'image') {
         await handleImageClick(selectedFile);
       } else {
-        handleAudioClick(selectedFile);
+        await handleAudioClick(selectedFile);
       }
       setPreviewOpen(false);
     }
@@ -358,11 +383,14 @@ export function LocalMediaGallery({
     return (
         <div
           key={file.id}
-          className="relative group/item border dark:border-gray-700 border-gray-200 rounded-md overflow-hidden cursor-pointer 
-            hover:border-blue-500 dark:hover:border-blue-400 transition-all 
-            bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md flex flex-col"
+          className={`relative group/item border rounded-md overflow-hidden cursor-pointer transition-all flex flex-col ${
+            addingToTimeline.has(file.id)
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              : 'dark:border-gray-700 border-gray-200 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
+          }`}
           onClick={(e) => {
             e.stopPropagation();
+            if (addingToTimeline.has(file.id)) return; // Prevent clicks when adding to timeline
             if (confirmingMediaId === file.id) {
               setConfirmingMediaId(null);
             } else {
@@ -370,7 +398,12 @@ export function LocalMediaGallery({
             }
           }}
         >
-        {confirmingMediaId === file.id ? (
+        {addingToTimeline.has(file.id) ? (
+          <div className="h-full flex flex-col items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Adding to Timeline...</p>
+          </div>
+        ) : confirmingMediaId === file.id ? (
         <div 
           className="flex-1 flex flex-col justify-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md"
         >
@@ -393,14 +426,14 @@ export function LocalMediaGallery({
                 className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                 onClick={async (e) => {
                   e.stopPropagation();
+                  setConfirmingMediaId(null); // Clear confirmation immediately
                   if (file.type === 'video') {
                     await handleVideoClick(file);
                   } else if (file.type === 'image') {
                     await handleImageClick(file);
                   } else {
-                    handleAudioClick(file);
+                    await handleAudioClick(file);
                   }
-                  setConfirmingMediaId(null);
                 }}
               >
                 Add to Timeline

@@ -9,6 +9,7 @@ import { LocalMediaGallery } from "../../local-media/local-media-gallery";
 import { useCallback, useState } from "react";
 import { useLocalMedia } from "../../../contexts/local-media-context";
 import { useVideoCache } from "../../../hooks/use-video-cache";
+import { useSidebar } from "../../../contexts/sidebar-context";
 
 /**
  * LocalMediaPanel Component
@@ -18,8 +19,9 @@ import { useVideoCache } from "../../../hooks/use-video-cache";
  * 2. View and manage uploaded media files
  * 3. Add uploaded media to the timeline
  */
-export const LocalMediaPanel: React.FC = () => {
+const LocalMediaPanel: React.FC = () => {
   const { addOverlay, overlays, durationInFrames } = useEditorContext();
+  const { setIsOpen } = useSidebar();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
@@ -191,6 +193,9 @@ export const LocalMediaPanel: React.FC = () => {
     }
 
     addOverlay(newOverlay);
+
+    // Close sidebar after successfully adding to timeline
+    setIsOpen(false);
   };
 
   // Handle infinite scroll

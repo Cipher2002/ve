@@ -33,7 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ImageOverlayPanel } from "../overlays/images/image-overlay-panel";
-import { LocalMediaPanel } from "../overlays/local-media/local-media-panel";
+import LocalMediaPanel from "../overlays/local-media/local-media-panel";
 import { StickersPanel } from "../overlays/stickers/stickers-panel";
 import { TemplateOverlayPanel } from "../overlays/templates/template-overlay-panel";
 import { useEditorContext } from "../../contexts/editor-context";

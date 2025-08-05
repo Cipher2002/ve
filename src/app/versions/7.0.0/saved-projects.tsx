@@ -214,7 +214,7 @@ export default function SavedProjects() {
   const [editingName, setEditingName] = useState('');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(3); // 3 projects per page (1 row of 3)
+  const [itemsPerPage] = useState(4); // 3 projects per page (1 row of 3)
   const [dateFilter, setDateFilter] = useState('all');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState(() => {
@@ -847,7 +847,7 @@ export default function SavedProjects() {
                 </div>
               )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl items-center justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
               {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
               {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
                 <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
