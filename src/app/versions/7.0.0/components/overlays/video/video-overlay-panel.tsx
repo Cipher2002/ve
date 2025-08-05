@@ -110,7 +110,7 @@ export const VideoOverlayPanel: React.FC = () => {
       const projectOption = projectTypeOptions.find(option => option.value === projectType);
       if (!projectOption) return;
       
-      const response = await fetch(`/api/latest/video/receive?user_id=${uid}&do_action=${projectOption.apiAction}&imageStatus=${projectOption.imageStatus}`);
+      const response = await fetch(`api/latest/video/receive?user_id=${uid}&do_action=${projectOption.apiAction}&imageStatus=${projectOption.imageStatus}`);
       const data = await response.json();
       
       // Sort projects by created_at in descending order (latest first)

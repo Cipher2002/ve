@@ -46,79 +46,6 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [editingName, setEditingName] = useState("");
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
   const [activeTemplateFilter, setActiveTemplateFilter] = useState<'active' | 'all'>('active');
-
-//   const deleteTemplate = async (templateId: string) => {
-//   try {
-//     console.log('Attempting to delete template:', templateId);
-//     console.log('API URL:', `/api/latest/templates/delete?id=${templateId}`);
-    
-//     const uid = getUidFromUrl();
-//     const response = await fetch(`/api/latest/templates/delete?id=${templateId}&uid=${uid}`, {
-//       method: 'DELETE',
-//     });
-    
-//     console.log('Response status:', response.status);
-//     console.log('Response:', response);
-    
-//     if (response.ok) {
-//       const result = await response.json();
-//       console.log('Delete result:', result);
-//       // Clear the deleting state immediately
-//       setDeletingTemplateId(null);
-//       // Refresh the list after deletion
-//       await fetchClientTemplates();
-//     } else {
-//       console.error('Failed to delete template, status:', response.status);
-//       const errorText = await response.text();
-//       console.error('Error response:', errorText);
-//       setDeletingTemplateId(null);
-//     }
-//   } catch (error) {
-//     console.error('Error deleting template:', error);
-//     setDeletingTemplateId(null);
-//   }
-// };
-
-  // Update template name function
-  // const updateTemplateName = async (templateId: string, newName: string) => {
-  //   try {
-  //     const uid = getUidFromUrl();
-  //     const response = await fetch(`/api/latest/templates/update-name?uid=${uid}`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ templateId, newName })
-  //     });
-      
-  //     if (response.ok) {
-  //       const result = await response.json();
-        
-  //       // Update local state
-  //       setClientTemplates(prev => prev.map(template => 
-  //         template.id === templateId 
-  //           ? { ...template, name: newName, updatedAt: result.template.updatedAt }
-  //           : template
-  //       ));
-        
-  //       // Always update the project name in the editor when renaming a template
-  //       setProjectName(newName);
-        
-  //       // Trigger a refresh of the saved projects
-  //       window.dispatchEvent(new CustomEvent('projectSaved', { 
-  //         detail: { projectName: newName } 
-  //       }));
-        
-  //       setEditingTemplateId(null);
-  //       setEditingName("");
-  //     } else {
-  //       console.error('Failed to update template name');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error updating template name:', error);
-  //   }
-  // };
-
   // Update template name function
   
   const updateTemplateName = async (templateId: string, newName: string) => {
@@ -139,7 +66,7 @@ export const TemplateOverlayPanel: React.FC = () => {
       ));
       
       // Call the project name update API to handle folder renaming
-      const updateResponse = await fetch('/api/latest/save-to-user/update-name', {
+      const updateResponse = await fetch('api/latest/save-to-user/update-name', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +126,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     setClientTemplatesError(null);
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`/api/latest/templates/client?uid=${uid}`);
+      const response = await fetch(`api/latest/templates/client?uid=${uid}`);
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
@@ -330,7 +257,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     
     try {
       // Also update the corresponding project status
-      const response = await fetch('/api/latest/save-to-user/update-status', {
+      const response = await fetch('api/latest/save-to-user/update-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
