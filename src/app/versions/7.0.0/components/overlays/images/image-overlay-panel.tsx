@@ -118,6 +118,9 @@ export const ImageOverlayPanel: React.FC = () => {
     return { uid: '', sid: '', user_ref: '' };
   };
 
+  //SETTING THE API BASE URL
+  const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
   const fetchSharedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string) => {
     if (append) {
       setIsLoadingMoreShared(true);
@@ -129,7 +132,7 @@ export const ImageOverlayPanel: React.FC = () => {
       const currentRatio = ratio || aspectRatioShared;
       const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
       const tagsParam = tags ? encodeURIComponent(tags) : '';
-      const response = await fetch(`/vedit/api/latest/images/receive?start_from=${startFrom}&max_results=20&ratio=${ratioParam}&tags=${tagsParam}`);
+      const response = await fetch(`${apiBaseUrl}/images/receive?start_from=${startFrom}&max_results=20&ratio=${ratioParam}&tags=${tagsParam}`);
       const data = await response.json();
       
       const newImages = data.images || [];
@@ -183,7 +186,7 @@ export const ImageOverlayPanel: React.FC = () => {
         let apiUrl = '';
         if (imageOption.label === 'Product Influencer') {
           const { uid } = getUrlParams();
-          apiUrl = `/vedit/api/latest/images/user?do_action=${imageOption.action}&user_id=${uid}&imageStatus=1&start_from=${startFrom}&max_results=20`;
+          apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&user_id=${uid}&imageStatus=1&start_from=${startFrom}&max_results=20`;
         } else {
           const { uid } = getUrlParams();
           const currentRatio = ratio || aspectRatioGenerated;
@@ -191,9 +194,9 @@ export const ImageOverlayPanel: React.FC = () => {
           const tagsParam = tags ? encodeURIComponent(tags) : '';
           
           if (imageOption.label === 'Text to Logo') {
-            apiUrl = `/vedit/api/latest/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
+            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
           } else {
-            apiUrl = `/vedit/api/latest/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
+            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
           }
         }
 
@@ -278,7 +281,7 @@ export const ImageOverlayPanel: React.FC = () => {
       const currentRatio = ratio || aspectRatioGenerated;
       const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
       const tagsParam = tags ? encodeURIComponent(tags) : '';
-      const response = await fetch(`/vedit/api/latest/images/receive?start_from=${startFrom}&max_results=20&ratio=${ratioParam}&tags=${tagsParam}`);
+      const response = await fetch(`${apiBaseUrl}/images/receive?start_from=${startFrom}&max_results=20&ratio=${ratioParam}&tags=${tagsParam}`);
       const data = await response.json();
       
       const newImages = data.images || [];
