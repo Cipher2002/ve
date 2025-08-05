@@ -34,7 +34,7 @@ import SoundsPanel from "../overlays/sounds/sounds-panel";
 import { CaptionsPanel } from "../overlays/captions/captions-panel";
 import { ImageOverlayPanel } from "../overlays/images/image-overlay-panel";
 import { StickersPanel } from "../overlays/stickers/stickers-panel";
-import { LocalMediaPanel } from "../overlays/local-media/local-media-panel";
+import LocalMediaPanel from "../overlays/local-media/local-media-panel";
 import { TemplateOverlayPanel } from "../overlays/templates/template-overlay-panel";
 
 /**
