@@ -398,19 +398,7 @@ export function LocalMediaGallery({
             }
           }}
         >
-        {downloadingCards.has(file.id) ? (
-          <div className="h-full flex flex-col items-center justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Downloading...</p>
-            <p className="text-xs text-blue-500 dark:text-blue-300">{downloadProgress.get(file.id) || 0}%</p>
-            <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 transition-all duration-300"
-                style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
-              ></div>
-            </div>
-          </div>
-        ) : addingToTimeline.has(file.id) ? (
+        {addingToTimeline.has(file.id) ? (
           <div className="h-full flex flex-col items-center justify-center p-4">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
             <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Adding to Timeline...</p>
@@ -530,7 +518,7 @@ export function LocalMediaGallery({
                   </div>
                   
                   {/* Download Progress Overlay */}
-                  {/* {downloadingCards.has(file.id) && (
+                  {downloadingCards.has(file.id) && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                       <div className="text-white text-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
@@ -544,7 +532,7 @@ export function LocalMediaGallery({
                         </div>
                       </div>
                     </div>
-                  )} */}
+                  )}
                 </>
               )}
               {file.type === "audio" && (

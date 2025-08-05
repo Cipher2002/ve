@@ -217,20 +217,11 @@ export interface CaptionStyles {
   };
 }
 
-// export interface CaptionOverlay extends BaseOverlay {
-//   type: OverlayType.CAPTION;
-//   captions: Caption[];
-//   styles?: CaptionStyles;
-//   template?: string;
-// }
 export interface CaptionOverlay extends BaseOverlay {
   type: OverlayType.CAPTION;
   captions: Caption[];
   styles?: CaptionStyles;
   template?: string;
-  loadingStage?: 'extracting' | 'generating' | 'complete';
-  sourceOverlayId?: number;
-  sourceType?: 'video' | 'audio';
 }
 
 export type StickerCategory =
