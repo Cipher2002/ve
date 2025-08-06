@@ -518,10 +518,10 @@ const handleAutomaticCaptions = async () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Button
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white 
-                  disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-800 
-                  disabled:dark:text-gray-600 disabled:opacity-100 disabled:cursor-not-allowed 
-                  transition-colors"
+                  className="w-full bg-[#490972] hover:bg-[#3a0759] text-white 
+                    disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-800 
+                    disabled:dark:text-gray-600 disabled:opacity-100 disabled:cursor-not-allowed 
+                    transition-colors"
                   onClick={handleAutomaticCaptions}
                   disabled={isGeneratingCaptions}
                 >

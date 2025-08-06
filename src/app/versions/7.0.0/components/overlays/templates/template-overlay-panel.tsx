@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { Pencil } from "lucide-react";
+import { Button } from '@/components/ui/button';
+
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -304,14 +306,14 @@ export const TemplateOverlayPanel: React.FC = () => {
         <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
+            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
             rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           >
             <span className="flex items-center gap-2 text-xs">System Templates</span>
           </TabsTrigger>
           <TabsTrigger
             value="created-by-you"
-            className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white 
+            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
             rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           >
             <span className="flex items-center gap-2 text-xs">Created By You</span>
@@ -321,7 +323,7 @@ export const TemplateOverlayPanel: React.FC = () => {
         {/* Filter buttons for Created By You tab */}
         {activeTab === "created-by-you" && (
           <div className="flex border rounded-lg overflow-hidden mb-2 self-start">
-            <button
+            {/* <button
               onClick={() => setActiveTemplateFilter('active')}
               className={`px-3 py-1.5 text-xs font-medium rounded-l-lg rounded-r-none ${
                 activeTemplateFilter === 'active'
@@ -340,7 +342,30 @@ export const TemplateOverlayPanel: React.FC = () => {
               }`}
             >
               All
-            </button>
+            </button> */}
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTemplateFilter('active')}
+              className={`px-4 py-[10px] rounded-l-lg rounded-r-none font-medium ${
+                activeTemplateFilter === 'active'
+                  ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                  : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
+              }`}
+            >
+              Active View
+            </Button>
+            {/* <div className="w-px bg-[rgb(41,0,156)]"></div> */}
+            <Button
+              variant="ghost"
+              onClick={() => setActiveTemplateFilter('all')}
+              className={`px-4 py-[10px] rounded-l-none rounded-r-lg font-medium  ${
+                activeTemplateFilter === 'all'
+                  ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                  : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
+              }`}
+            >
+              All
+            </Button>
           </div>
         )}
         
