@@ -585,7 +585,7 @@ const Timeline: React.FC<TimelineProps> = ({
             onMouseUp={handleDragEnd}
             onTouchEnd={handleDragEnd}
             onMouseLeave={handleTimelineMouseLeave}
-onClick={(e) => {
+            onClick={(e) => {
               // Check if the click came from a context menu action that shouldn't move timeline
               const target = e.target as HTMLElement;
               if (target.closest('[data-no-timeline-seek="true"]')) {

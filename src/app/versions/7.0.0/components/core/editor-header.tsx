@@ -3,6 +3,7 @@ import RenderControls from "../rendering/render-controls";
 import { useEditorContext } from "../../contexts/editor-context";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 // Types
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
@@ -54,8 +55,81 @@ export function EditorHeader() {
 // Create hasAutosave based on whether autosaveTimestamp exists
 const hasAutosave = Boolean(autosaveTimestamp);
 
+const [isInputFocused, setIsInputFocused] = useState(false);
+const [originalName, setOriginalName] = useState(projectName);
+
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
+  };
+
+  const handleRenameProject = async () => {
+    const newName = projectName.trim();
+    const oldName = originalName;
+    
+    // Only proceed if name actually changed and is not empty
+    if (newName && newName !== oldName) {
+      // Pause autosave during rename operation
+      setIsRenamingProject(true);
+      
+      try {
+        const uid = typeof window !== 'undefined' 
+          ? new URLSearchParams(window.location.search).get('uid') || 'default'
+          : 'default';
+        
+        // Call the project name update API to handle folder renaming
+        const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid,
+            oldName: oldName,
+            newName: newName,
+            projectId: `${uid}-${oldName}`,
+          }),
+        });
+        
+        if (updateResponse.ok) {
+          // Update original name to new name
+          setOriginalName(newName);
+          
+          // Trigger events to refresh UI components
+          window.dispatchEvent(new CustomEvent('projectSaved', { 
+            detail: { projectName: newName } 
+          }));
+          
+          window.dispatchEvent(new CustomEvent('templateUpdated', { 
+            detail: { isUpdate: true, templateName: newName }
+          }));
+          
+          window.dispatchEvent(new CustomEvent('projectNameChanged', { 
+            detail: { 
+              projectId: `${uid}-${oldName}`,
+              oldName: oldName,
+              newName: newName 
+            } 
+          }));
+        } else {
+          console.error('Failed to update project name');
+          // Revert the name if API call failed
+          setProjectName(oldName);
+        }
+      } catch (error) {
+        console.error('Error updating project name:', error);
+        // Revert the name if there was an error
+        setProjectName(oldName);
+      } finally {
+        // Resume autosave after rename operation completes
+        setIsRenamingProject(false);
+        // Remove focus to hide the button
+        setIsInputFocused(false);
+      }
+    } else if (!newName) {
+      // Revert to old name if new name is empty
+      setProjectName(oldName);
+      setIsInputFocused(false);
+    }
   };
 
   return (
@@ -73,72 +147,29 @@ const hasAutosave = Boolean(autosaveTimestamp);
           type="text"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
-          onBlur={async (e) => {
-            const newName = e.target.value.trim();
-            const oldName = projectName;
-            
-            // Only proceed if name actually changed and is not empty
-            if (newName && newName !== oldName) {
-              // Pause autosave during rename operation
-              setIsRenamingProject(true);
-              
-              try {
-                const uid = typeof window !== 'undefined' 
-                  ? new URLSearchParams(window.location.search).get('uid') || 'default'
-                  : 'default';
-                
-                // Call the project name update API to handle folder renaming
-                const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    uid,
-                    oldName: oldName,
-                    newName: newName,
-                    projectId: `${uid}-${oldName}`,
-                  }),
-                });
-                
-                if (updateResponse.ok) {
-                  // Trigger events to refresh UI components
-                  window.dispatchEvent(new CustomEvent('projectSaved', { 
-                    detail: { projectName: newName } 
-                  }));
-                  
-                  window.dispatchEvent(new CustomEvent('templateUpdated', { 
-                    detail: { isUpdate: true, templateName: newName }
-                  }));
-                  
-                  window.dispatchEvent(new CustomEvent('projectNameChanged', { 
-                    detail: { 
-                      projectId: `${uid}-${oldName}`,
-                      oldName: oldName,
-                      newName: newName 
-                    } 
-                  }));
-                } else {
-                  console.error('Failed to update project name');
-                  // Revert the name if API call failed
-                  setProjectName(oldName);
-                }
-              } catch (error) {
-                console.error('Error updating project name:', error);
-                // Revert the name if there was an error
-                setProjectName(oldName);
-              } finally {
-                // Resume autosave after rename operation completes
-                setIsRenamingProject(false);
-              }
-            } else if (!newName) {
-              // Revert to old name if new name is empty
-              setProjectName(oldName);
+          onFocus={() => {
+            setIsInputFocused(true);
+            setOriginalName(projectName);
+          }}
+          onBlur={(e) => {
+            // Only validate empty name, don't trigger rename
+            if (!e.target.value.trim()) {
+              setProjectName(originalName);
             }
+            // Don't set isInputFocused to false here, let the rename button handle it
           }}
           className="w-60 px-3 py-1.5 text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
           placeholder="Project name"
         />
+
+        {isInputFocused && (
+          <button
+            onClick={handleRenameProject}
+            className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md transition-colors whitespace-nowrap select-none"
+          >
+            Rename Project
+          </button>
+        )}
         
         <button
           onClick={newProject}
@@ -157,7 +188,7 @@ const hasAutosave = Boolean(autosaveTimestamp);
           Aspect Ratio
         </Label>
         <div className="flex gap-1">
-          {["16:9", "9:16", "4:5"].map((ratio) => (
+          {["16:9", "9:16", "1:1"].map((ratio) => (
             <Button
               key={ratio}
               onClick={() => handleAspectRatioChange(ratio)}
