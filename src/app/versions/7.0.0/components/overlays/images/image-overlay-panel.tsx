@@ -112,7 +112,7 @@ export const ImageOverlayPanel: React.FC = () => {
       return {
         uid: urlParams.get('uid') || '',
         sid: urlParams.get('sid') || '',
-        user_ref: email ? encodeURIComponent(email) : '' // URL encode the email
+        user_ref: email // Don't encode here - let URLSearchParams handle it
       };
     }
     return { uid: '', sid: '', user_ref: '' };
@@ -241,8 +241,8 @@ export const ImageOverlayPanel: React.FC = () => {
           if (tags) queryParams.append('tags', tags);
           if (ratio || aspectRatioGenerated) {
             const currentRatio = ratio || aspectRatioGenerated;
-            const decodedRatio = decodeURIComponent(aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1").replace('%3A', ':');
-            queryParams.append('ratio', decodedRatio);
+            const ratioValue = aspectRatioOptions.find(option => option.label === currentRatio)?.label || "1:1";
+            queryParams.append('ratio', ratioValue); // Use the label (1:1) instead of pre-encoded value
           }
         } else {
           baseUrl = 'https://zanopy.ai/ai-images/process_request.php';
