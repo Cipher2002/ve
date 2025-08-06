@@ -57,6 +57,7 @@ const hasAutosave = Boolean(autosaveTimestamp);
 
 const [isInputFocused, setIsInputFocused] = useState(false);
 const [originalName, setOriginalName] = useState(projectName);
+const [isRenaming, setIsRenaming] = useState(false);
 
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
@@ -68,7 +69,7 @@ const [originalName, setOriginalName] = useState(projectName);
     
     // Only proceed if name actually changed and is not empty
     if (newName && newName !== oldName) {
-      // Pause autosave during rename operation
+      setIsRenaming(true);
       setIsRenamingProject(true);
       
       try {
@@ -110,6 +111,9 @@ const [originalName, setOriginalName] = useState(projectName);
               newName: newName 
             } 
           }));
+
+          // Wait a bit for all UI components to update
+          await new Promise(resolve => setTimeout(resolve, 500));
         } else {
           console.error('Failed to update project name');
           // Revert the name if API call failed
@@ -120,9 +124,8 @@ const [originalName, setOriginalName] = useState(projectName);
         // Revert the name if there was an error
         setProjectName(oldName);
       } finally {
-        // Resume autosave after rename operation completes
+        setIsRenaming(false);
         setIsRenamingProject(false);
-        // Remove focus to hide the button
         setIsInputFocused(false);
       }
     } else if (!newName) {
@@ -166,9 +169,13 @@ const [originalName, setOriginalName] = useState(projectName);
         {isInputFocused && (
           <button
             onClick={handleRenameProject}
-            className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md transition-colors whitespace-nowrap select-none"
+            disabled={isRenaming}
+            className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md transition-colors whitespace-nowrap select-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Rename Project
+            {isRenaming && (
+              <div className="animate-spin rounded-full h-3 w-3 border border-blue-900 dark:border-blue-100 border-t-transparent"></div>
+            )}
+            {isRenaming ? 'Renaming...' : 'Rename Project'}
           </button>
         )}
         
