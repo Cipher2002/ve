@@ -34,11 +34,11 @@ export async function GET(request: NextRequest) {
     // Build query parameters
     const queryParams = new URLSearchParams();
     queryParams.append('do_action', do_action);
-    queryParams.append('user_id', user_id);
+    // queryParams.append('user_id', user_id);
     
     if (do_action === 'GET_AI_AMBASSADOR_IMAGE_PROJECT') {
       // Product Influencer specific parameters
-      // if (user_id) queryParams.append('user_id', user_id);
+      if (user_id) queryParams.append('user_id', user_id);
       if (imageStatus) queryParams.append('imageStatus', imageStatus);
     } else {
       // Other image types parameters
