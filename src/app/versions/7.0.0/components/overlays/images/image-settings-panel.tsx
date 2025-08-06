@@ -494,7 +494,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
           <div>
             <button
               onClick={() => setAiAudioSection(aiAudioSection === 'ai-decide' ? null : 'ai-decide')}
-              className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
+              className="flex items-center justify-between w-full p-2 text-left text-xs bg-gray-50 dark:bg-gray-700/50 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <span className="text-gray-700 dark:text-gray-300">Let AI Decide</span>
               <svg
