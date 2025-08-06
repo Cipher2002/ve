@@ -96,6 +96,7 @@ export const Editor: React.FC = () => {
     togglePlayPause, // Function to toggle play/pause
     formatTime, // Function to format time display
     handleOverlayChange, // Function to handle overlay modifications
+    handleMuteVideo, // Add this line - Function to mute/unmute video
     handleTimelineClick, // Function to handle timeline interaction
     deleteOverlay, // Function to remove an overlay
     duplicateOverlay, // Function to clone an overlay
@@ -162,6 +163,7 @@ export const Editor: React.FC = () => {
             playerRef.current.detachAudio();
           }
         }}
+        onMuteVideo={handleMuteVideo} // Add this line
       />
     </div>
   );

@@ -25,6 +25,7 @@ interface TimelineItemContextMenuProps {
   itemType: string; // Add this
   isExtractingAudio?: boolean; // Add this
   audioDetached?: boolean; // Add this
+  onMuteVideo: (id: number) => void;
 
   /** ID of the timeline item this menu belongs to */
   itemId: number;
@@ -58,6 +59,7 @@ export const TimelineItemContextMenu: React.FC<
   onDetachAudio, // Add this
   isExtractingAudio, // Add this
   audioDetached, // Add this
+  onMuteVideo, // Add this
   itemType,
   itemId,
 }) => {
@@ -86,15 +88,22 @@ export const TimelineItemContextMenu: React.FC<
           <Scissors className="mr-4 h-4 w-4" />
           Split
         </ContextMenuItem>
-        {/* {itemType === 'video' && (
+        <ContextMenuItem
+          className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
+          onClick={() => onSplitItem(itemId)}
+        >
+          <Scissors className="mr-4 h-4 w-4" />
+          Split
+        </ContextMenuItem>
+        {itemType === 'video' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onDetachAudio(itemId)}
+            onClick={() => onMuteVideo(itemId)}
           >
             <Volume2 className="mr-4 h-4 w-4" />
-            Detach Audio
+            {audioDetached ? 'Muted (Audio Detached)' : 'Mute Video'}
           </ContextMenuItem>
-        )} */}
+        )}
         {itemType === 'video' && !audioDetached && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"

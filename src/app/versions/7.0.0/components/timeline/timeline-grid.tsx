@@ -70,6 +70,7 @@ interface TimelineGridProps {
   onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
   onDetachAudio: (id: number) => void; // Add this
   isExtractingAudio?: boolean;
+  onMuteVideo: (id: number) => void; // Add this
   /** Array of calculated frame positions for alignment lines */
   alignmentLines: number[];
 }
@@ -101,6 +102,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   onDetachAudio,
   alignmentLines,
   isExtractingAudio, // Add this
+  onMuteVideo,
 
 }) => {
   const { visibleRows } = useTimeline();
@@ -250,6 +252,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                     onAssetLoadingChange={onAssetLoadingChange}
                     livePushOffsetPercent={livePushOffsetPercent}
                     onDetachAudio={onDetachAudio}
+                    onMuteVideo={onMuteVideo} // Add this line
                     isExtractingAudio={isExtractingAudio} // Add this
 
                   />

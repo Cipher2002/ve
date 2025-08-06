@@ -111,6 +111,21 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const handleOverlayChange = (updatedOverlay: Overlay) => {
     changeOverlay(updatedOverlay.id, () => updatedOverlay);
   };
+  const handleMuteVideo = (id: number) => {
+    const videoOverlay = overlays.find(overlay => overlay.id === id);
+    if (!videoOverlay || videoOverlay.type !== 'video') return;
+    
+    // Toggle mute state - if currently muted (volume 0), unmute to 1, otherwise mute to 0
+    const newVolume = (videoOverlay.styles?.volume ?? 1) === 0 ? 1 : 0;
+    
+    changeOverlay(id, {
+      ...videoOverlay,
+      styles: {
+        ...videoOverlay.styles,
+        volume: newVolume,
+      },
+    });
+  };
 
   const { width: compositionWidth, height: compositionHeight } =
     getAspectRatioDimensions();
@@ -461,6 +476,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     setDynamicDuration,
     changeOverlay,
     handleOverlayChange,
+    handleMuteVideo,
     addOverlay,
     deleteOverlay,
     duplicateOverlay,

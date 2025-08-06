@@ -85,6 +85,7 @@ export interface TimelineItemProps {
   /** Live push offset percentage during drag */
   livePushOffsetPercent?: number;
   isExtractingAudio?: boolean; // Add this
+  onMuteVideo: (id: number) => void;
 
 }
 
@@ -110,6 +111,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onAssetLoadingChange,
   onDetachAudio,
   isExtractingAudio, // Add this
+  onMuteVideo,
   livePushOffsetPercent = 0, // Default to 0 if not provided
 }) => {
   const waveformData = useWaveformProcessor(
@@ -430,6 +432,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       onDuplicateItem={onDuplicateItem}
       onSplitItem={onSplitItem}
       onDetachAudio={onDetachAudio} // Add this
+      onMuteVideo={onMuteVideo} // Add this line
       itemType={item.type} // Add this
       itemId={item.id}
       isExtractingAudio={isExtractingAudio} // Add this
