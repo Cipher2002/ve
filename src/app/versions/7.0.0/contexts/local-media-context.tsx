@@ -235,8 +235,10 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const fileName = uploadResult.fileName || file.name;
         const fileUrl = `${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
-        const fileThumbnailUrl = thumbnailServerPath;
-        
+        const fileThumbnailUrl = thumbnailServerPath ? 
+                                fileUrl : // Fallback to original file for non-videos
+                                fileUrl;
+
         // Call the Zanopy API to register the file
         const apiResponse = await fetch(`${apiBaseUrl}/media/upload-register`, {
           method: 'POST',
