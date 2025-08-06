@@ -39,6 +39,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   const [editingName, setEditingName] = useState("");
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
   const [activeTemplateFilter, setActiveTemplateFilter] = useState<'active' | 'all'>('active');
+  const [hidingTemplateId, setHidingTemplateId] = useState<string | null>(null);
   // Update template name function
   
   const updateTemplateName = async (templateId: string, newName: string) => {
@@ -239,6 +240,11 @@ export const TemplateOverlayPanel: React.FC = () => {
     const template = clientTemplates.find(t => t.id === templateId);
     if (!template) return;
     
+    // Show loading indicator when hiding (going from active to inactive)
+    if (currentStatus === 'active' && activeTemplateFilter === 'active') {
+      setHidingTemplateId(templateId);
+    }
+    
     // Update the template status in the local state
     setClientTemplates(prev => 
       prev.map(t => 
@@ -274,6 +280,11 @@ export const TemplateOverlayPanel: React.FC = () => {
     } catch (error) {
       console.error('Error updating corresponding project status:', error);
     }
+    
+    // Hide loading indicator after a delay to show the action completed
+    setTimeout(() => {
+      setHidingTemplateId(null);
+    }, 300);
   };
 
   return (
@@ -556,14 +567,21 @@ export const TemplateOverlayPanel: React.FC = () => {
                             e.stopPropagation();
                             handleToggleTemplateStatus(template.id, (template as any).status || 'active');
                           }}
-                          className={`p-1 text-white rounded-sm text-xs px-2 py-1 ${
+                          className={`p-1 text-white rounded-sm text-xs px-2 py-1 flex items-center gap-1 ${
                             (template as any).status === 'inactive' 
                               ? 'bg-green-500 hover:bg-green-600' 
                               : 'bg-gray-500 hover:bg-gray-600'
                           }`}
                           title={(template as any).status === 'inactive' ? 'Show in Active View' : 'Hide from Active View'}
                         >
-                          {(template as any).status === 'inactive' ? 'Show' : 'Hide'}
+                          {hidingTemplateId === template.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent" />
+                              <span>Hiding</span>
+                            </>
+                          ) : (
+                            <span>{(template as any).status === 'inactive' ? 'Show' : 'Hide'}</span>
+                          )}
                         </button>
                       </div>
                       {/* Keep all the existing CardHeader content here */}

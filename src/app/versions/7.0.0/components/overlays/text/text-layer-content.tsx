@@ -47,8 +47,8 @@ interface TextLayerContentProps {
 
 const getFontFamily = (fontClass: string) => {
   switch (fontClass) {
-    // case "font-sans":
-    //   return interFontFamily;
+    case "font-sans":
+      return interFontFamily;
     // case "font-serif":
     //   return merriweatherFontFamily;
     // case "font-mono":
