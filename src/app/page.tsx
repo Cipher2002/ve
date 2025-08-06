@@ -17,29 +17,32 @@ import { useEffect } from 'react';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isAccessBlocked, setIsAccessBlocked] = useState(false);
+  const [isAccessBlocked, setIsAccessBlocked] = useState(true); // Start as blocked
+  const [isCheckComplete, setIsCheckComplete] = useState(false);
 
   // Allowed domains for iframe embedding
   const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
     function checkAccess() {
-    // Check if required parameters exist
-    const urlParams = new URLSearchParams(window.location.search);
-    const sid = urlParams.get('sid');
-    const uid = urlParams.get('uid');
-    const email = urlParams.get('email');
-    const pid = urlParams.get('pid');
+      // Check if required parameters exist
+      const urlParams = new URLSearchParams(window.location.search);
+      const sid = urlParams.get('sid');
+      const uid = urlParams.get('uid');
+      const email = urlParams.get('email');
+      const pid = urlParams.get('pid');
 
-    if (!sid || !uid || !email || !pid) {
-      setIsAccessBlocked(true);
-      return;
-    }
+      if (!sid || !uid || !email || !pid) {
+        setIsAccessBlocked(true);
+        setIsCheckComplete(true);
+        return;
+      }
 
       // Check if in iframe and from allowed domain
       if (window.top === window.self) {
         // Not in iframe - block access
         setIsAccessBlocked(true);
+        setIsCheckComplete(true);
         return;
       }
 
@@ -47,6 +50,7 @@ function App() {
       const referrer = document.referrer;
       if (!referrer) {
         setIsAccessBlocked(true);
+        setIsCheckComplete(true);
         return;
       }
 
@@ -58,15 +62,18 @@ function App() {
         
         if (!isAllowedDomain) {
           setIsAccessBlocked(true);
+          setIsCheckComplete(true);
           return;
         }
       } catch (e) {
         setIsAccessBlocked(true);
+        setIsCheckComplete(true);
         return;
       }
 
       // All checks passed
       setIsAccessBlocked(false);
+      setIsCheckComplete(true);
     }
 
     function sendHeight() {
@@ -94,8 +101,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
-      {/* Access Blocked Overlay */}
-      {isAccessBlocked && (
+      {/* Show content only after check is complete */}
+      {!isCheckComplete ? (
+        // Loading state - minimal to avoid flash
+        <div className="min-h-screen bg-white"></div>
+      ) : isAccessBlocked ? (
+        // Access Blocked
         <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
           <div className="text-center p-8">
             <div className="mb-6">
@@ -107,7 +118,9 @@ function App() {
             <p className="text-gray-600">This content is not available in the current context.</p>
           </div>
         </div>
-      )}
+      ) : (
+      // Normal content
+      <>
       {/* Admin/Client Mode Toggle - Keep at top, centered */}
       {/* <div className="flex items-center justify-center py-6">
         <div className="relative flex items-center rounded-lg p-1" style={{ backgroundColor: 'rgb(73, 9, 114)' }}>
@@ -164,7 +177,9 @@ function App() {
 
         {/* Replaced Projects Section Card with SavedProjects Component */}
         <SavedProjects />
-      </div>
+        </div>
+      </>
+      )}
     </div>
   );
 }
