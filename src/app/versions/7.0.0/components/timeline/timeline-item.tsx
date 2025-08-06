@@ -86,6 +86,7 @@ export interface TimelineItemProps {
   livePushOffsetPercent?: number;
   isExtractingAudio?: boolean; // Add this
   onMuteVideo: (id: number) => void;
+  onMuteAudio: (id: number) => void;
 
 }
 
@@ -112,6 +113,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onDetachAudio,
   isExtractingAudio, // Add this
   onMuteVideo,
+  onMuteAudio,
   livePushOffsetPercent = 0, // Default to 0 if not provided
 }) => {
   const waveformData = useWaveformProcessor(
@@ -433,6 +435,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       onSplitItem={onSplitItem}
       onDetachAudio={onDetachAudio} // Add this
       onMuteVideo={onMuteVideo} // Add this line
+      onMuteAudio={onMuteAudio} // Add this line
       itemType={item.type} // Add this
       itemId={item.id}
       isExtractingAudio={isExtractingAudio} // Add this

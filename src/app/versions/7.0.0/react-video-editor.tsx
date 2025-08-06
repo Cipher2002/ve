@@ -126,6 +126,21 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       },
     });
   };
+  const handleMuteAudio = (id: number) => {
+    const audioOverlay = overlays.find(overlay => overlay.id === id);
+    if (!audioOverlay || audioOverlay.type !== 'sound') return;
+    
+    // Toggle mute state - if currently muted (volume 0), unmute to 1, otherwise mute to 0
+    const newVolume = (audioOverlay.styles?.volume ?? 1) === 0 ? 1 : 0;
+    
+    changeOverlay(id, {
+      ...audioOverlay,
+      styles: {
+        ...audioOverlay.styles,
+        volume: newVolume,
+      },
+    });
+  };
 
   const { width: compositionWidth, height: compositionHeight } =
     getAspectRatioDimensions();
@@ -477,6 +492,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     changeOverlay,
     handleOverlayChange,
     handleMuteVideo,
+    handleMuteAudio,
     addOverlay,
     deleteOverlay,
     duplicateOverlay,

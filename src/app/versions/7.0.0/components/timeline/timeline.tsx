@@ -57,6 +57,7 @@ interface TimelineProps {
   setOverlays: (overlays: Overlay[]) => void;
   onDetachAudio: (id: number) => void;
   onMuteVideo: (id: number) => void;
+  onMuteAudio: (id: number) => void;
   isExtractingAudio?: boolean;
 }
 
@@ -75,6 +76,7 @@ const Timeline: React.FC<TimelineProps> = ({
   setOverlays,
   onDetachAudio,
   onMuteVideo,
+  onMuteAudio,
   isExtractingAudio, // Add this
 
 }) => {
@@ -283,6 +285,27 @@ const Timeline: React.FC<TimelineProps> = ({
         ...videoOverlay,
         styles: {
           ...videoOverlay.styles,
+          volume: newVolume,
+        },
+      };
+      
+      onOverlayChange(updatedOverlay);
+    },
+    [overlays, onOverlayChange]
+  );
+
+  const handleMuteAudio = useCallback(
+    (id: number) => {
+      const audioOverlay = overlays.find(overlay => overlay.id === id);
+      if (!audioOverlay || audioOverlay.type !== OverlayType.SOUND) return;
+      
+      // Toggle mute state - if currently muted (volume 0), unmute to 1, otherwise mute to 0
+      const newVolume = (audioOverlay.styles?.volume ?? 1) === 0 ? 1 : 0;
+      
+      const updatedOverlay = {
+        ...audioOverlay,
+        styles: {
+          ...audioOverlay.styles,
           volume: newVolume,
         },
       };
@@ -613,6 +636,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 onDetachAudio={handleDetachAudio}
                 isExtractingAudio={isExtractingAudio} // Add this
                 onMuteVideo={handleMuteVideo} // Add this line
+                onMuteAudio={handleMuteAudio} // Add this line
 
               />
 

@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Trash2, Copy, Scissors, Volume2 } from "lucide-react";
+import { Trash2, Copy, Scissors, Volume2, VolumeX, ScanEye } from "lucide-react";
 
 /**
  * Props for the TimelineItemContextMenu component
@@ -26,10 +26,12 @@ interface TimelineItemContextMenuProps {
   isExtractingAudio?: boolean; // Add this
   audioDetached?: boolean; // Add this
   onMuteVideo: (id: number) => void;
+  onMuteAudio: (id: number) => void;
 
   /** ID of the timeline item this menu belongs to */
   itemId: number;
 }
+
 
 /**
  * A context menu component for timeline items that provides delete, duplicate and split actions.
@@ -60,6 +62,7 @@ export const TimelineItemContextMenu: React.FC<
   isExtractingAudio, // Add this
   audioDetached, // Add this
   onMuteVideo, // Add this
+  onMuteAudio, // Add this
   itemType,
   itemId,
 }) => {
@@ -88,19 +91,12 @@ export const TimelineItemContextMenu: React.FC<
           <Scissors className="mr-4 h-4 w-4" />
           Split
         </ContextMenuItem>
-        <ContextMenuItem
-          className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={() => onSplitItem(itemId)}
-        >
-          <Scissors className="mr-4 h-4 w-4" />
-          Split
-        </ContextMenuItem>
         {itemType === 'video' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
             onClick={() => onMuteVideo(itemId)}
           >
-            <Volume2 className="mr-4 h-4 w-4" />
+            <VolumeX className="mr-4 h-4 w-4" />
             {audioDetached ? 'Muted (Audio Detached)' : 'Mute Video'}
           </ContextMenuItem>
         )}
@@ -110,8 +106,17 @@ export const TimelineItemContextMenu: React.FC<
             onClick={() => onDetachAudio(itemId)}
             disabled={isExtractingAudio}
           >
-            <Volume2 className="mr-4 h-4 w-4" />
+            <ScanEye className="mr-4 h-4 w-4" />
             {isExtractingAudio ? 'Extracting...' : 'Detach Audio'}
+          </ContextMenuItem>
+        )}
+        {itemType === 'sound' && (
+          <ContextMenuItem
+            className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
+            onClick={() => onMuteAudio(itemId)}
+          >
+            <VolumeX className="mr-4 h-4 w-4" />
+            Mute Audio
           </ContextMenuItem>
         )}
       </ContextMenuContent>

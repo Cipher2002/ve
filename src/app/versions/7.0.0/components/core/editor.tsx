@@ -97,6 +97,7 @@ export const Editor: React.FC = () => {
     formatTime, // Function to format time display
     handleOverlayChange, // Function to handle overlay modifications
     handleMuteVideo, // Add this line - Function to mute/unmute video
+    handleMuteAudio, // Add this line - Function to mute/unmute audio
     handleTimelineClick, // Function to handle timeline interaction
     deleteOverlay, // Function to remove an overlay
     duplicateOverlay, // Function to clone an overlay
@@ -164,6 +165,7 @@ export const Editor: React.FC = () => {
           }
         }}
         onMuteVideo={handleMuteVideo} // Add this line
+        onMuteAudio={handleMuteAudio} // Add this line
       />
     </div>
   );

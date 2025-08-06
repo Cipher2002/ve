@@ -32,6 +32,7 @@ interface EditorContextProps {
   // Overlay Operations
   handleOverlayChange: (updatedOverlay: Overlay) => void; // Handle changes to overlay properties
   handleMuteVideo: (id: number) => void; // Handle video muting/unmuting
+  handleMuteAudio: (id: number) => void; // Handle audio muting/unmuting
   addOverlay: (overlay: Overlay) => void; // Add new overlay
   deleteOverlay: (id: number) => void; // Remove overlay
   duplicateOverlay: (id: number) => void; // Clone existing overlay
