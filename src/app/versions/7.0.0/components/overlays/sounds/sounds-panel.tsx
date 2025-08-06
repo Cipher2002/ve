@@ -347,36 +347,6 @@ const SoundsPanel: React.FC = () => {
           )}
         </TabsContent>
 
-        {/* <TabsContent value="rendered-audio" className="flex-1 min-h-0">
-          {!localOverlay && (
-            <div className="flex gap-2 flex-shrink-0">
-              <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    placeholder="Search sounds..."
-                    value={searchQuery}
-                    className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ fontSize: "16px" }}
-                  />
-                </div>
-              </form>
-            </div>
-          )}
-          <div className="h-full flex flex-col items-center justify-center text-center space-y-3 p-4">
-            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Radio className="w-4 h-4 text-gray-400" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">No rendered audio</p>
-              <p className="text-xs text-gray-500">
-                Rendered audio will appear here after you render audio
-              </p>
-            </div>
-          </div>
-        </TabsContent> */}
-
         <TabsContent value="rendered-audio" className="flex-1 min-h-0 flex flex-col">
           {!localOverlay && (
             <div className="flex gap-2 flex-shrink-0">
