@@ -160,6 +160,48 @@ export const ImageOverlayPanel: React.FC = () => {
     }
   };
 
+  // const fetchGeneratedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string, imageType?: string) => {
+  //   if (append) {
+  //     setIsLoadingMoreGenerated(true);
+  //   } else {
+  //     setIsLoadingGenerated(true);
+  //   }
+    
+  //   try {
+  //     const { user_ref } = getUrlParams();
+      
+  //     // If user_ref exists and we're on zanopy tab, handle Zanopy logic inline
+  //     if (user_ref && activeTab === "generated-zanopy") {
+  //       if (append) {
+  //         setIsLoadingMoreZanopy(true);
+  //       } else {
+  //         setIsLoadingZanopyGenerated(true);
+  //       }
+        
+  //       // Use the most recent selectedImageType value
+  //       const currentImageType = imageType || selectedImageType;
+  //       const imageOption = imageTypeOptions.find(option => option.label === currentImageType);
+  //       if (!imageOption) return;
+
+  //       let apiUrl = '';
+  //       if (imageOption.label === 'Product Influencer') {
+  //         const { uid } = getUrlParams();
+  //         apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&user_id=${uid}&imageStatus=1&start_from=${startFrom}&max_results=20`;
+  //       } else {
+  //         const { uid } = getUrlParams();
+  //         const currentRatio = ratio || aspectRatioGenerated;
+  //         const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
+  //         const tagsParam = tags ? encodeURIComponent(tags) : '';
+          
+  //         if (imageOption.label === 'Text to Logo') {
+  //           apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
+  //         } else {
+  //           apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
+  //         }
+  //       }
+
+  //       const response = await fetch(apiUrl);
+  //       const data = await response.json();
   const fetchGeneratedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string, imageType?: string) => {
     if (append) {
       setIsLoadingMoreGenerated(true);
@@ -168,7 +210,7 @@ export const ImageOverlayPanel: React.FC = () => {
     }
     
     try {
-      const { user_ref } = getUrlParams();
+      const { user_ref, uid } = getUrlParams();
       
       // If user_ref exists and we're on zanopy tab, handle Zanopy logic inline
       if (user_ref && activeTab === "generated-zanopy") {
@@ -183,25 +225,64 @@ export const ImageOverlayPanel: React.FC = () => {
         const imageOption = imageTypeOptions.find(option => option.label === currentImageType);
         if (!imageOption) return;
 
-        let apiUrl = '';
+        let baseUrl = '';
+        const queryParams = new URLSearchParams();
+        queryParams.append('do_action', imageOption.action);
+
         if (imageOption.label === 'Product Influencer') {
-          const { uid } = getUrlParams();
-          apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&user_id=${uid}&imageStatus=1&start_from=${startFrom}&max_results=20`;
+          baseUrl = 'https://zanopy.ai/process_request.php';
+          queryParams.append('user_id', uid);
+          queryParams.append('imageStatus', '1');
+        } else if (imageOption.label === 'Text to Logo') {
+          baseUrl = 'https://zanopy.ai/ai-images/process_request.php';
+          queryParams.append('start_from', startFrom.toString());
+          queryParams.append('max_results', '20');
+          if (user_ref) queryParams.append('user_ref', decodeURIComponent(user_ref));
+          if (tags) queryParams.append('tags', tags);
+          if (ratio || aspectRatioGenerated) {
+            const currentRatio = ratio || aspectRatioGenerated;
+            const decodedRatio = decodeURIComponent(aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1").replace('%3A', ':');
+            queryParams.append('ratio', decodedRatio);
+          }
         } else {
-          const { uid } = getUrlParams();
-          const currentRatio = ratio || aspectRatioGenerated;
-          const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
-          const tagsParam = tags ? encodeURIComponent(tags) : '';
-          
-          if (imageOption.label === 'Text to Logo') {
-            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
-          } else {
-            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
+          baseUrl = 'https://zanopy.ai/ai-images/process_request.php';
+          queryParams.append('user_id', uid);
+          queryParams.append('start_from', startFrom.toString());
+          queryParams.append('max_results', '20');
+          queryParams.append('type', 'image');
+          queryParams.append('image_category', '');
+          if (user_ref) queryParams.append('user_ref', user_ref);
+          if (tags) queryParams.append('tags', tags);
+          if (ratio || aspectRatioGenerated) {
+            const currentRatio = ratio || aspectRatioGenerated;
+            const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
+            queryParams.append('ratio', ratioParam);
           }
         }
 
-        const response = await fetch(apiUrl);
+        const apiUrl = `${baseUrl}?${queryParams.toString()}`;
+        console.log('Fetching from Zanopy:', apiUrl);
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+        });
+
+        if (!response.ok) {
+          console.error('Zanopy API error:', response.status, response.statusText);
+          throw new Error(`Zanopy API error: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
+        console.log('Zanopy response:', {
+          action: imageOption.action,
+          dataKeys: Object.keys(data),
+          itemCount: data.images?.length || data.projects?.length || 0
+        });
                 
         
         // Handle the Zanopy API response structure
@@ -257,8 +338,6 @@ export const ImageOverlayPanel: React.FC = () => {
           }
         });
         
-
-        
         if (append) {
           setGeneratedZanopyImages(prev => {
             const newArray = [...prev, ...transformedImages];
@@ -299,6 +378,7 @@ export const ImageOverlayPanel: React.FC = () => {
       setHasMoreGenerated(newImages.length === 20);
       
     } catch (error) {
+      console.error('Error fetching Zanopy images:', error);
     } finally {
       const { user_ref } = getUrlParams();
       
