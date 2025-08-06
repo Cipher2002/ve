@@ -525,7 +525,19 @@ const handleAutomaticCaptions = async () => {
                   onClick={handleAutomaticCaptions}
                   disabled={isGeneratingCaptions}
                 >
-                  {isGeneratingCaptions ? 'Generating Captions...' : 'Automatically Add Captions'}
+                  {isGeneratingCaptions ? (
+                    'Generating Captions...'
+                  ) : (
+                    <>
+                      <img
+                        src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png"
+                        alt="Export"
+                        className="w-3.5 h-3.5 mr-0.5"
+                      />
+                      20
+                      <span className="ml-2">Automatically Add Captions</span>
+                    </>
+                  )}
                 </Button>
               </div>
 
