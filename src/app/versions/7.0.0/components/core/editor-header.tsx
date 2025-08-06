@@ -156,7 +156,8 @@ const [originalName, setOriginalName] = useState(projectName);
             if (!e.target.value.trim()) {
               setProjectName(originalName);
             }
-            // Don't set isInputFocused to false here, let the rename button handle it
+            // Hide the rename button when input loses focus
+            setIsInputFocused(false);
           }}
           className="w-60 px-3 py-1.5 text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
           placeholder="Project name"
