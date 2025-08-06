@@ -585,8 +585,14 @@ const Timeline: React.FC<TimelineProps> = ({
             onMouseUp={handleDragEnd}
             onTouchEnd={handleDragEnd}
             onMouseLeave={handleTimelineMouseLeave}
-            onClick={onTimelineClick}
-          >
+onClick={(e) => {
+              // Check if the click came from a context menu action that shouldn't move timeline
+              const target = e.target as HTMLElement;
+              if (target.closest('[data-no-timeline-seek="true"]')) {
+                return; // Don't handle timeline click for these actions
+              }
+              onTimelineClick(e);
+            }}          >
             <div className="relative h-full">
               {/* Timeline header with frame markers */}
               <div className="h-[1.3rem]">

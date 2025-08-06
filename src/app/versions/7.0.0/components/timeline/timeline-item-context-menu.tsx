@@ -76,24 +76,15 @@ export const TimelineItemContextMenu: React.FC<
       <ContextMenuContent className="dark:bg-slate-900 dark:border-slate-800">
         <ContextMenuItem
           className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDeleteItem(itemId);
-            setTimeout(() => onOpenChange(false), 0);
-          }}
+          onClick={() => onDeleteItem(itemId)}
         >
           <Trash2 className="mr-4 h-4 w-4" />
           Delete
         </ContextMenuItem>
         <ContextMenuItem
           className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onDuplicateItem(itemId);
-            setTimeout(() => onOpenChange(false), 0);
-          }}
+          onClick={() => onDuplicateItem(itemId)}
+          data-no-timeline-seek="true"
         >
           <Copy className="mr-4 h-4 w-4" />
           Duplicate
@@ -108,12 +99,8 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'video' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onMuteVideo(itemId);
-              setTimeout(() => onOpenChange(false), 0);
-            }}
+            onClick={() => onMuteVideo(itemId)}
+            data-no-timeline-seek="true"
           >
             <VolumeX className="mr-4 h-4 w-4" />
             {audioDetached ? 'Muted (Audio Detached)' : isVideoMuted ? 'Unmute Video' : 'Mute Video'}
@@ -122,13 +109,9 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'video' && !audioDetached && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onDetachAudio(itemId);
-              setTimeout(() => onOpenChange(false), 0);
-            }}
+            onClick={() => onDetachAudio(itemId)}
             disabled={isExtractingAudio}
+            data-no-timeline-seek="true"
           >
             <Volume2 className="mr-4 h-4 w-4" />
             {isExtractingAudio ? 'Extracting...' : 'Detach Audio'}
@@ -137,12 +120,8 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'sound' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onMuteAudio(itemId);
-              setTimeout(() => onOpenChange(false), 0);
-            }}
+            onClick={() => onMuteAudio(itemId)}
+            data-no-timeline-seek="true"
           >
             <VolumeX className="mr-4 h-4 w-4" />
             {isAudioMuted ? 'Unmute Audio' : 'Mute Audio'}
