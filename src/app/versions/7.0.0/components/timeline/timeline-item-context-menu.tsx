@@ -80,7 +80,7 @@ export const TimelineItemContextMenu: React.FC<
             e.preventDefault();
             e.stopPropagation();
             onDeleteItem(itemId);
-            onOpenChange(false);
+            setTimeout(() => onOpenChange(false), 0);
           }}
         >
           <Trash2 className="mr-4 h-4 w-4" />
@@ -92,7 +92,7 @@ export const TimelineItemContextMenu: React.FC<
             e.preventDefault();
             e.stopPropagation();
             onDuplicateItem(itemId);
-            onOpenChange(false);
+            setTimeout(() => onOpenChange(false), 0);
           }}
         >
           <Copy className="mr-4 h-4 w-4" />
@@ -112,7 +112,7 @@ export const TimelineItemContextMenu: React.FC<
               e.preventDefault();
               e.stopPropagation();
               onMuteVideo(itemId);
-              onOpenChange(false);
+              setTimeout(() => onOpenChange(false), 0);
             }}
           >
             <VolumeX className="mr-4 h-4 w-4" />
@@ -126,7 +126,7 @@ export const TimelineItemContextMenu: React.FC<
               e.preventDefault();
               e.stopPropagation();
               onDetachAudio(itemId);
-              onOpenChange(false);
+              setTimeout(() => onOpenChange(false), 0);
             }}
             disabled={isExtractingAudio}
           >
@@ -141,7 +141,7 @@ export const TimelineItemContextMenu: React.FC<
               e.preventDefault();
               e.stopPropagation();
               onMuteAudio(itemId);
-              onOpenChange(false);
+              setTimeout(() => onOpenChange(false), 0);
             }}
           >
             <VolumeX className="mr-4 h-4 w-4" />
