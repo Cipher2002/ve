@@ -6,7 +6,7 @@ export const localSounds: LocalSound[] = [
     title: "Take Care Of Yourself Full Version",
     artist: "Local",
     duration: 154,
-    file: "https://zanopy.ai/https://zanopy.ai/vedit/sounds/01_Take_Care_of_Yourself_full_version.mp3",
+    file: "https://zanopy.ai/vedit/sounds/01_Take_Care_of_Yourself_full_version.mp3",
   },
   {
     id: "local-2",

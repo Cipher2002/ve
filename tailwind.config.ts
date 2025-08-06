@@ -13,22 +13,22 @@ const config: Config = {
     extend: {
 
       fontFamily: {
-  // Existing fonts
-  sans: ["Inter", ...fontFamily.fontFamily.sans],
-  serif: ["Merriweather", ...fontFamily.fontFamily.serif],
-  mono: ["Roboto Mono", ...fontFamily.fontFamily.mono],
-  display: ["Playfair Display", ...fontFamily.fontFamily.serif],
-  handwriting: ["Caveat", ...fontFamily.fontFamily.sans],
-  futuristic: ["Orbitron", ...fontFamily.fontFamily.sans],
-  retro: ["VT323", ...fontFamily.fontFamily.mono],
-  elegant: ["Cormorant Garamond", ...fontFamily.fontFamily.serif],
-  quirky: ["Fredoka One", ...fontFamily.fontFamily.sans],
-  geometric: ["Montserrat", ...fontFamily.fontFamily.sans],
+  // // Existing fonts
+  // sans: ["Inter", ...fontFamily.fontFamily.sans],
+  // serif: ["Merriweather", ...fontFamily.fontFamily.serif],
+  // mono: ["Roboto Mono", ...fontFamily.fontFamily.mono],
+  // display: ["Playfair Display", ...fontFamily.fontFamily.serif],
+  // handwriting: ["Caveat", ...fontFamily.fontFamily.sans],
+  // futuristic: ["Orbitron", ...fontFamily.fontFamily.sans],
+  // retro: ["VT323", ...fontFamily.fontFamily.mono],
+  // elegant: ["Cormorant Garamond", ...fontFamily.fontFamily.serif],
+  // quirky: ["Fredoka One", ...fontFamily.fontFamily.sans],
+  // geometric: ["Montserrat", ...fontFamily.fontFamily.sans],
   
-  // Your new custom fonts
-  fenix: ["Fenix", ...fontFamily.fontFamily.serif],
-  butcherman: ["Butcherman", ...fontFamily.fontFamily.serif],
-  fruktur: ["Fruktur", ...fontFamily.fontFamily.serif],
+  // // Your new custom fonts
+  // fenix: ["Fenix", ...fontFamily.fontFamily.serif],
+  // butcherman: ["Butcherman", ...fontFamily.fontFamily.serif],
+  // fruktur: ["Fruktur", ...fontFamily.fontFamily.serif],
 
   // Custom fonts from public/fonts - Updated to match actual font families
   "custom-alexbrush-regular": ["Alex Brush", ...fontFamily.fontFamily.serif],

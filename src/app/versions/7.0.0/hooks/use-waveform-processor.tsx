@@ -52,8 +52,17 @@ export function useWaveformProcessor(
 
     const processAudio = async () => {
       try {
-        const response = await fetch(src);
-        const arrayBuffer = await response.arrayBuffer();
+        let arrayBuffer: ArrayBuffer;
+        
+        if (src.startsWith('blob:')) {
+          // If it's already a blob URL, fetch directly
+          const response = await fetch(src);
+          arrayBuffer = await response.arrayBuffer();
+        } else {
+          // For regular URLs, fetch normally
+          const response = await fetch(src);
+          arrayBuffer = await response.arrayBuffer();
+        }
         const audioContext = new AudioContext();
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
