@@ -47,166 +47,166 @@ interface TextLayerContentProps {
 
 const getFontFamily = (fontClass: string) => {
   switch (fontClass) {
-    case "font-sans":
-      return interFontFamily;
-    case "font-serif":
-      return merriweatherFontFamily;
-    case "font-mono":
-      return robotoMonoFontFamily;
-    case "font-retro":
-      return vt323FontFamily;
-    case "font-league-spartan":
-      return leagueSpartanFontFamily;
-    case "font-bungee-inline":
-      return bungeeInlineFontFamily;
+    // case "font-sans":
+    //   return interFontFamily;
+    // case "font-serif":
+    //   return merriweatherFontFamily;
+    // case "font-mono":
+    //   return robotoMonoFontFamily;
+    // case "font-retro":
+    //   return vt323FontFamily;
+    // case "font-league-spartan":
+    //   return leagueSpartanFontFamily;
+    // case "font-bungee-inline":
+    //   return bungeeInlineFontFamily;
     
-    // Custom fonts - return the CSS font family name
+    // Custom fonts - match the exact font-family names from globals.css
     case "font-custom-alexbrush-regular":
-      return "AlexBrush";
+      return "Alex Brush, cursive";
     case "font-custom-allertastencil-regular":
-      return "AllertaStencil";
+      return "Allerta Stencil, sans-serif";
     case "font-custom-allison-regular":
-      return "Allison";
+      return "Allison, cursive";
     case "font-custom-allura-regular":
-      return "Allura";
+      return "Allura, cursive";
     case "font-custom-alumnisans-variablefont-wght":
-      return "Alumni Sans";
+      return "Alumni Sans Variable Font, sans-serif";
     case "font-custom-berkshireswash-regular":
-      return "Berkshire Swash";
+      return "Berkshire Swash, cursive";
     case "font-custom-bitcountpropsingle-variablefont-crsv-elsh-elxp-slnt-wght":
-      return "Bitcount Prop Single";
+      return "Bitcount Prop Single Variable Font ,,,,, monospace";
     case "font-custom-bitcountpropsingle-cursive-regular":
-      return "Bitcount Prop Single";
+      return "Bitcount Prop Single Cursive, cursive";
     case "font-custom-bodonimoda-variablefont-opsz-wght":
-      return "Bodoni Moda";
+      return "Bodoni Moda Variable Font ,, serif";
     case "font-custom-bungeeinline-regular":
-      return "Bungee Inline";
+      return "Bungee Inline, display";
     case "font-custom-bungeetint-regular":
-      return "Bungee Tint";
+      return "Bungee Tint, display";
     case "font-custom-caesardressing-regular":
-      return "Caesar Dressing";
+      return "Caesar Dressing, cursive";
     case "font-custom-caveat-variablefont-wght":
-      return "Caveat";
+      return "Caveat Variable Font, cursive";
     case "font-custom-cinzel-variablefont-wght":
-      return "Cinzel";
+      return "Cinzel Variable Font, serif";
     case "font-custom-courgette-regular":
-      return "Courgette";
+      return "Courgette, cursive";
     case "font-custom-creepster-regular":
-      return "Creepster";
+      return "Creepster, cursive";
     case "font-custom-damion-regular":
-      return "Damion";
+      return "Damion, cursive";
     case "font-custom-dancingscript-variablefont-wght":
-      return "Dancing Script";
+      return "Dancing Script Variable Font, cursive";
     case "font-custom-eduqldhand-variablefont-wght":
-      return "Edu QLD Hand";
+      return "Edu Qldhand Variable Font, cursive";
     case "font-custom-eduvicwanthand-variablefont-wght":
-      return "Edu VIC WA NT Hand";
+      return "Edu Vicwanthand Variable Font, cursive";
     case "font-custom-exile-regular":
-      return "Exile";
+      return "Exile, sans-serif";
     case "font-custom-exo-variablefont-wght":
-      return "Exo";
+      return "Exo Variable Font, sans-serif";
     case "font-custom-frederickathegreat-regular":
-      return "Fredericka the Great";
+      return "Frederickathe Great, cursive";
     case "font-custom-gloriahallelujah-regular":
-      return "Gloria Hallelujah";
+      return "Gloria Hallelujah, cursive";
     case "font-custom-goldman-bold":
-      return "Goldman";
+      return "Goldman Bold, sans-serif";
     case "font-custom-goldman-regular":
-      return "Goldman";
+      return "Goldman, sans-serif";
     case "font-custom-gravitasone-regular":
-      return "Gravitas One";
+      return "Gravitas One, display";
     case "font-custom-greatvibes-regular":
-      return "Great Vibes";
+      return "Great Vibes, cursive";
     case "font-custom-homemadeapple-regular":
-      return "Homemade Apple";
+      return "Homemade Apple, cursive";
     case "font-custom-indieflower-regular":
-      return "Indie Flower";
+      return "Indie Flower, cursive";
     case "font-custom-justanotherhand-regular":
-      return "Just Another Hand";
+      return "Just Another Hand, cursive";
     case "font-custom-lato-regular":
-      return "Lato";
+      return "Lato, sans-serif";
     case "font-custom-lato-thin":
-      return "Lato";
+      return "Lato Thin, sans-serif";
     case "font-custom-leckerlione-regular":
-      return "Leckerli One";
+      return "Leckerli One, cursive";
     case "font-custom-libertinusmono-regular":
-      return "Libertinus Mono";
+      return "Libertinus Mono, monospace";
     case "font-custom-lobstertwo-regular":
-      return "Lobster Two";
+      return "Lobster Two, cursive";
     case "font-custom-manufacturingconsent-regular":
-      return "Manufacturing Consent";
+      return "Manufacturing Consent, sans-serif";
     case "font-custom-marcellus-regular":
-      return "Marcellus";
+      return "Marcellus, serif";
     case "font-custom-marckscript-regular":
-      return "Marck Script";
+      return "Marck Script, cursive";
     case "font-custom-michroma-regular":
-      return "Michroma";
+      return "Michroma, sans-serif";
     case "font-custom-monoton-regular":
-      return "Monoton";
+      return "Monoton, cursive";
     case "font-custom-montserrat-italic-variablefont-wght":
-      return "Montserrat";
+      return "Montserrat Italic Variable Font, sans-serif";
     case "font-custom-mrdafoe-regular":
-      return "Mr Dafoe";
+      return "Mr Dafoe, cursive";
     case "font-custom-mrssaintdelafield-regular":
-      return "Mrs Saint Delafield";
+      return "Mrs Saint Delafield, cursive";
     case "font-custom-mysoul-regular":
-      return "My Soul";
+      return "My Soul, cursive";
     case "font-custom-nothingyoucoulddo-regular":
-      return "Nothing You Could Do";
+      return "Nothing You Could Do, cursive";
     case "font-custom-orbitron-variablefont-wght":
-      return "Orbitron";
+      return "Orbitron Variable Font, sans-serif";
     case "font-custom-pacifico-regular":
-      return "Pacifico";
+      return "Pacifico, cursive";
     case "font-custom-parisienne-regular":
-      return "Parisienne";
+      return "Parisienne, cursive";
     case "font-custom-permanentmarker-regular":
-      return "Permanent Marker";
+      return "Permanent Marker, cursive";
     case "font-custom-pinyonscript-regular":
-      return "Pinyon Script";
+      return "Pinyon Script, cursive";
     case "font-custom-protestrevolution-regular":
-      return "Protest Revolution";
+      return "Protest Revolution, display";
     case "font-custom-reeniebeanie-regular":
-      return "Reenie Beanie";
+      return "Reenie Beanie, cursive";
     case "font-custom-robotocondensed-italic-variablefont-wght":
-      return "Roboto Condensed";
+      return "Roboto Condensed Italic Variable Font, sans-serif";
     case "font-custom-robotocondensed-variablefont-wght":
-      return "Roboto Condensed";
+      return "Roboto Condensed Variable Font, sans-serif";
     case "font-custom-rocksalt-regular":
-      return "Rock Salt";
+      return "Rock Salt, cursive";
     case "font-custom-rubikmonoone-regular":
-      return "Rubik Mono One";
+      return "Rubik Mono One, monospace";
     case "font-custom-rubikmoonrocks-regular":
-      return "Rubik Moonrocks";
+      return "Rubik Moonrocks, display";
     case "font-custom-rye-regular":
-      return "Rye";
+      return "Rye, display";
     case "font-custom-sacramento-regular":
-      return "Sacramento";
+      return "Sacramento, cursive";
     case "font-custom-satisfy-regular":
-      return "Satisfy";
+      return "Satisfy, cursive";
     case "font-custom-savate-variablefont-wght":
-      return "Savate";
+      return "Savate Variable Font, sans-serif";
     case "font-custom-shadowsintolight-regular":
-      return "Shadows Into Light";
+      return "Shadows Into Light, cursive";
     case "font-custom-smoochsans-variablefont-wght":
-      return "Smooch Sans";
+      return "Smooch Sans Variable Font, sans-serif";
     case "font-custom-sourceserif4-variablefont-opsz-wght":
-      return "Source Serif 4";
+      return "Source Serif4 Variable Font ,, serif";
     case "font-custom-specialgothicexpandedone-regular":
-      return "Special Gothic Expanded One";
+      return "Special Gothic Expanded One, display";
     case "font-custom-squadaone-regular":
-      return "Squada One";
+      return "Squada One, display";
     case "font-custom-tangerine-bold":
-      return "Tangerine";
+      return "Tangerine Bold, cursive";
     case "font-custom-titilliumweb-extralightitalic":
-      return "Titillium Web";
+      return "Titillium Web Extra Light Italic, sans-serif";
     case "font-custom-titilliumweb-regular":
-      return "Titillium Web";
+      return "Titillium Web, sans-serif";
     case "font-custom-winkyrough-variablefont-wght":
-      return "Winky Rough";
+      return "Winky Rough Variable Font, display";
     case "font-custom-zeyada-regular":
-      return "Zeyada";
+      return "Zeyada, cursive";
     case "font-custom-zillaslab-medium":
-      return "Zilla Slab";
+      return "Zilla Slab Medium, serif";
     
     default:
       return interFontFamily;
