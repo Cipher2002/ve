@@ -52,12 +52,12 @@ export function EditorHeader() {
     setIsRenamingProject
   } = useEditorContext();
 
-// Create hasAutosave based on whether autosaveTimestamp exists
-const hasAutosave = Boolean(autosaveTimestamp);
+  // Create hasAutosave based on whether autosaveTimestamp exists
+  const hasAutosave = Boolean(autosaveTimestamp);
 
-const [isInputFocused, setIsInputFocused] = useState(false);
-const [originalName, setOriginalName] = useState(projectName);
-const [isRenaming, setIsRenaming] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [originalName, setOriginalName] = useState(projectName);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
@@ -77,52 +77,66 @@ const [isRenaming, setIsRenaming] = useState(false);
           ? new URLSearchParams(window.location.search).get('uid') || 'default'
           : 'default';
         
-        // Call the project name update API to handle folder renaming
-        const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uid,
-            oldName: oldName,
-            newName: newName,
-            projectId: `${uid}-${oldName}`,
-          }),
-        });
+        // Check if project exists (has been saved before)
+        const checkResponse = await fetch(`${apiBaseUrl}/save-to-user/get-project-data?uid=${uid}&projectName=${oldName}`);
         
-        if (updateResponse.ok) {
-          // Update original name to new name
-          setOriginalName(newName);
-          
-          // Trigger events to refresh UI components
-          window.dispatchEvent(new CustomEvent('projectSaved', { 
-            detail: { projectName: newName } 
-          }));
-          
-          window.dispatchEvent(new CustomEvent('templateUpdated', { 
-            detail: { isUpdate: true, templateName: newName }
-          }));
-          
-          window.dispatchEvent(new CustomEvent('projectNameChanged', { 
-            detail: { 
-              projectId: `${uid}-${oldName}`,
+        if (checkResponse.ok) {
+          // Project exists, rename it
+          const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uid,
               oldName: oldName,
-              newName: newName 
-            } 
-          }));
+              newName: newName,
+              projectId: `${uid}-${oldName}`,
+            }),
+          });
+          
+          if (updateResponse.ok) {
+            // Update original name to new name
+            setOriginalName(newName);
+            
+            // Trigger events to refresh UI components
+            window.dispatchEvent(new CustomEvent('projectSaved', { 
+              detail: { projectName: newName } 
+            }));
+            
+            window.dispatchEvent(new CustomEvent('templateUpdated', { 
+              detail: { isUpdate: true, templateName: newName }
+            }));
+            
+            window.dispatchEvent(new CustomEvent('projectNameChanged', { 
+              detail: { 
+                projectId: `${uid}-${oldName}`,
+                oldName: oldName,
+                newName: newName 
+              } 
+            }));
 
-          // Wait a bit for all UI components to update
-          await new Promise(resolve => setTimeout(resolve, 500));
+            // Wait a bit for all UI components to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } else {
+            console.error('Failed to update project name');
+            setProjectName(oldName);
+          }
         } else {
-          console.error('Failed to update project name');
-          // Revert the name if API call failed
-          setProjectName(oldName);
+          // Project doesn't exist yet (hasn't been saved), just update the name locally
+          setOriginalName(newName);
+          console.log('Project name updated locally (not saved yet)');
         }
       } catch (error) {
         console.error('Error updating project name:', error);
-        // Revert the name if there was an error
-        setProjectName(oldName);
+        // For unsaved projects, still allow the name change
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          // Network error - might be unsaved project, allow local rename
+          setOriginalName(newName);
+          console.log('Project name updated locally due to network error');
+        } else {
+          setProjectName(oldName);
+        }
       } finally {
         setIsRenaming(false);
         setIsRenamingProject(false);
@@ -159,8 +173,7 @@ const [isRenaming, setIsRenaming] = useState(false);
             if (!e.target.value.trim()) {
               setProjectName(originalName);
             }
-            // Hide the rename button when input loses focus
-            setIsInputFocused(false);
+            // Don't hide the button immediately - let the rename button handle it
           }}
           className="w-60 px-3 py-1.5 text-sm bg-transparent border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
           placeholder="Project name"
@@ -169,6 +182,7 @@ const [isRenaming, setIsRenaming] = useState(false);
         {isInputFocused && (
           <button
             onClick={handleRenameProject}
+            onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
             disabled={isRenaming}
             className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md transition-colors whitespace-nowrap select-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
