@@ -21,7 +21,7 @@ import { useSidebar } from "../../../contexts/sidebar-context";
  */
 const LocalMediaPanel: React.FC = () => {
   const { addOverlay, overlays, durationInFrames } = useEditorContext();
-  const { setIsOpen } = useSidebar();
+  const { setIsOpen, setActivePanel } = useSidebar();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
@@ -194,7 +194,8 @@ const LocalMediaPanel: React.FC = () => {
 
     addOverlay(newOverlay);
 
-    // Close sidebar after successfully adding to timeline
+    // Close sidebar and reset active panel after successfully adding to timeline
+    setActivePanel(OverlayType.NONE);
     setIsOpen(false);
   };
 
