@@ -34,14 +34,25 @@ export async function GET(request: NextRequest) {
     // Build query parameters
     const queryParams = new URLSearchParams();
     queryParams.append('do_action', do_action);
-    // queryParams.append('user_id', user_id);
     
     if (do_action === 'GET_AI_AMBASSADOR_IMAGE_PROJECT') {
       // Product Influencer specific parameters
-      if (user_id) queryParams.append('user_id', user_id);
+      queryParams.append('user_id', user_id);
       if (imageStatus) queryParams.append('imageStatus', imageStatus);
+    } else if (do_action === 'BLYNKK_AI_PUBLIC_LOGO_LIBRARY') {
+      // Text to Logo specific parameters - NO user_id
+      queryParams.append('start_from', start_from);
+      queryParams.append('max_results', max_results);
+      if (user_ref) queryParams.append('user_ref', decodeURIComponent(user_ref));
+      if (tags) queryParams.append('tags', tags);
+      if (ratio) {
+        // Convert URL encoded ratio back to normal format
+        const decodedRatio = decodeURIComponent(ratio).replace('%3A', ':');
+        queryParams.append('ratio', decodedRatio);
+      }
     } else {
       // Other image types parameters
+      queryParams.append('user_id', user_id);
       queryParams.append('start_from', start_from);
       queryParams.append('max_results', max_results);
       queryParams.append('type', type);
