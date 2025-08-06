@@ -28,7 +28,9 @@ const SPEED_OPTIONS = [
 ];
 
 //SETTING THE API BASE URL
-const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
+  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
+  : 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * Props for the VideoSettingsPanel component

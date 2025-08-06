@@ -26,7 +26,9 @@ interface VideoProject {
 }
 
 //SETTING THE API BASE URL
-const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
+  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
+  : 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * VideoOverlayPanel is a component that provides video search and management functionality.

@@ -9,7 +9,9 @@ import { TemplateThumbnail } from "./template-thumbnail";
 import { Pencil } from "lucide-react";
 
 //SETTING THE API BASE URL
-const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
+  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
+  : 'https://zanopy.ai/vedit/api/latest';
 
 export const TemplateOverlayPanel: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
