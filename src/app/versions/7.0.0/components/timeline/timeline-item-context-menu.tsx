@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Trash2, Copy, Scissors, Volume2, VolumeX, ScanEye } from "lucide-react";
+import { Trash2, Copy, Scissors, Volume2, VolumeX } from "lucide-react";
 
 /**
  * Props for the TimelineItemContextMenu component
@@ -25,6 +25,8 @@ interface TimelineItemContextMenuProps {
   itemType: string; // Add this
   isExtractingAudio?: boolean; // Add this
   audioDetached?: boolean; // Add this
+  isVideoMuted?: boolean; // Add this
+  isAudioMuted?: boolean; // Add this
   onMuteVideo: (id: number) => void;
   onMuteAudio: (id: number) => void;
 
@@ -61,6 +63,8 @@ export const TimelineItemContextMenu: React.FC<
   onDetachAudio, // Add this
   isExtractingAudio, // Add this
   audioDetached, // Add this
+  isVideoMuted, // Add this
+  isAudioMuted, // Add this
   onMuteVideo, // Add this
   onMuteAudio, // Add this
   itemType,
@@ -97,7 +101,7 @@ export const TimelineItemContextMenu: React.FC<
             onClick={() => onMuteVideo(itemId)}
           >
             <VolumeX className="mr-4 h-4 w-4" />
-            {audioDetached ? 'Muted (Audio Detached)' : 'Mute Video'}
+            {audioDetached ? 'Muted (Audio Detached)' : isVideoMuted ? 'Unmute Video' : 'Mute Video'}
           </ContextMenuItem>
         )}
         {itemType === 'video' && !audioDetached && (
@@ -106,7 +110,7 @@ export const TimelineItemContextMenu: React.FC<
             onClick={() => onDetachAudio(itemId)}
             disabled={isExtractingAudio}
           >
-            <ScanEye className="mr-4 h-4 w-4" />
+            <Volume2 className="mr-4 h-4 w-4" />
             {isExtractingAudio ? 'Extracting...' : 'Detach Audio'}
           </ContextMenuItem>
         )}
@@ -116,7 +120,7 @@ export const TimelineItemContextMenu: React.FC<
             onClick={() => onMuteAudio(itemId)}
           >
             <VolumeX className="mr-4 h-4 w-4" />
-            Mute Audio
+            {isAudioMuted ? 'Unmute Audio' : 'Mute Audio'}
           </ContextMenuItem>
         )}
       </ContextMenuContent>

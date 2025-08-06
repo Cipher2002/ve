@@ -436,6 +436,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       onDetachAudio={onDetachAudio} // Add this
       onMuteVideo={onMuteVideo} // Add this line
       onMuteAudio={onMuteAudio} // Add this line
+      isVideoMuted={item.type === 'video' ? (item.styles?.volume ?? 1) === 0 : false}
+      isAudioMuted={item.type === 'sound' ? (item.styles?.volume ?? 1) === 0 : false}
       itemType={item.type} // Add this
       itemId={item.id}
       isExtractingAudio={isExtractingAudio} // Add this
