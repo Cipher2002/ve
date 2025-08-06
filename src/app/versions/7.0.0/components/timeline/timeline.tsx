@@ -601,6 +601,7 @@ const Timeline: React.FC<TimelineProps> = ({
               <TimelineMarker
                 currentFrame={currentFrame}
                 totalDuration={durationInFrames}
+                onSeek={setCurrentFrame}
               />
 
               {/* Drag operation visual feedback */}

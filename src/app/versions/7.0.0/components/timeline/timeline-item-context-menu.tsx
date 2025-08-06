@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Trash2, Copy, Scissors, Volume2, VolumeX } from "lucide-react";
+import { Trash2, Copy, Scissors, Volume2, VolumeX, Volume } from "lucide-react";
 
 /**
  * Props for the TimelineItemContextMenu component
@@ -76,14 +76,22 @@ export const TimelineItemContextMenu: React.FC<
       <ContextMenuContent className="dark:bg-slate-900 dark:border-slate-800">
         <ContextMenuItem
           className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={() => onDeleteItem(itemId)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDeleteItem(itemId);
+          }}
         >
           <Trash2 className="mr-4 h-4 w-4" />
           Delete
         </ContextMenuItem>
         <ContextMenuItem
           className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={() => onDuplicateItem(itemId)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDuplicateItem(itemId);
+          }}
         >
           <Copy className="mr-4 h-4 w-4" />
           Duplicate
@@ -98,7 +106,11 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'video' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onMuteVideo(itemId)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMuteVideo(itemId);
+            }}
           >
             <VolumeX className="mr-4 h-4 w-4" />
             {audioDetached ? 'Muted (Audio Detached)' : isVideoMuted ? 'Unmute Video' : 'Mute Video'}
@@ -107,7 +119,11 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'video' && !audioDetached && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onDetachAudio(itemId)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDetachAudio(itemId);
+            }}
             disabled={isExtractingAudio}
           >
             <Volume2 className="mr-4 h-4 w-4" />
@@ -117,7 +133,11 @@ export const TimelineItemContextMenu: React.FC<
         {itemType === 'sound' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onMuteAudio(itemId)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMuteAudio(itemId);
+            }}
           >
             <VolumeX className="mr-4 h-4 w-4" />
             {isAudioMuted ? 'Unmute Audio' : 'Mute Audio'}
