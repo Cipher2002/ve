@@ -24,15 +24,17 @@ interface TimelineMarkerProps {
 const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
   ({ currentFrame, totalDuration, onSeek }) => {
     const [isDragging, setIsDragging] = useState(false);
+    const [dragPosition, setDragPosition] = useState<number | null>(null);
     const timelineContainerRef = useRef<HTMLElement | null>(null);
-    const dragStartX = useRef<number>(0);
-    const dragStartFrame = useRef<number>(0);
 
-    // Calculate the marker's position - always use currentFrame, no drag state interference
+    // Use drag position if dragging, otherwise use currentFrame
+    const displayFrame = isDragging && dragPosition !== null ? dragPosition : currentFrame;
+
+    // Calculate the marker's position with higher precision
     const markerPosition = useMemo(() => {
-      const position = (currentFrame / totalDuration) * 100;
-      return `${Math.round(position * 10000) / 10000}%`;
-    }, [currentFrame, totalDuration]);
+      const position = (displayFrame / totalDuration) * 100;
+      return Math.max(0, Math.min(100, position));
+    }, [displayFrame, totalDuration]);
 
     const findTimelineContainer = useCallback(() => {
       // Look for the timeline container
@@ -51,47 +53,57 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
         return;
       }
 
-      // Store initial drag position and frame
-      dragStartX.current = e.clientX;
-      dragStartFrame.current = currentFrame;
-      
       setIsDragging(true);
+      setDragPosition(currentFrame);
     }, [currentFrame, findTimelineContainer]);
 
     const handleMouseMove = useCallback(
       (e: MouseEvent) => {
-        if (!isDragging || !timelineContainerRef.current || !onSeek) return;
+        if (!isDragging || !timelineContainerRef.current) return;
 
-        // Calculate new position based on mouse movement
         const rect = timelineContainerRef.current.getBoundingClientRect();
         const relativeX = e.clientX - rect.left;
         const percentage = Math.max(0, Math.min(1, relativeX / rect.width));
         const newFrame = Math.round(percentage * totalDuration);
         
-        // Throttle the updates to reduce jank
-        requestAnimationFrame(() => {
+        // Update drag position immediately for visual feedback
+        setDragPosition(newFrame);
+        
+        // Also call onSeek for actual seeking
+        if (onSeek) {
           onSeek(newFrame);
-        });
+        }
       },
       [isDragging, onSeek, totalDuration]
     );
 
     const handleMouseUp = useCallback(() => {
       setIsDragging(false);
+      setDragPosition(null);
       timelineContainerRef.current = null;
     }, []);
 
     // Add global mouse event listeners when dragging
     React.useEffect(() => {
       if (isDragging) {
-        document.addEventListener('mousemove', handleMouseMove, { passive: false });
-        document.addEventListener('mouseup', handleMouseUp);
+        const handleMove = (e: MouseEvent) => {
+          e.preventDefault();
+          handleMouseMove(e);
+        };
+        
+        const handleUp = (e: MouseEvent) => {
+          e.preventDefault();
+          handleMouseUp();
+        };
+
+        document.addEventListener('mousemove', handleMove, { passive: false });
+        document.addEventListener('mouseup', handleUp, { passive: false });
         document.body.style.cursor = 'grabbing';
         document.body.style.userSelect = 'none';
         
         return () => {
-          document.removeEventListener('mousemove', handleMouseMove);
-          document.removeEventListener('mouseup', handleMouseUp);
+          document.removeEventListener('mousemove', handleMove);
+          document.removeEventListener('mouseup', handleUp);
           document.body.style.cursor = '';
           document.body.style.userSelect = '';
         };
@@ -102,10 +114,11 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
       <div
         className="absolute top-0 w-[2px] bg-red-500/90 dark:bg-red-500 pointer-events-none z-50"
         style={{
-          left: markerPosition,
+          left: `${markerPosition}%`,
           transform: "translateX(-50%)",
           height: "calc(100% + 0px)",
           top: "0px",
+          transition: isDragging ? 'none' : 'left 0.1s ease-out',
         }}
       >
         {/* Draggable triangle pointer at the top of the marker */}
