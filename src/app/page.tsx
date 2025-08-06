@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import cn from 'classnames';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -14,28 +14,27 @@ import SavedProjects from './versions/7.0.0/saved-projects'; // Adjust path as n
 
 import styles from './page.module.scss';
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAccessBlocked, setIsAccessBlocked] = useState(false);
-  const searchParams = useSearchParams();
 
   // Allowed domains for iframe embedding
   const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
     function checkAccess() {
-      // Check if required parameters exist
-      const sid = searchParams.get('sid');
-      const uid = searchParams.get('uid');
-      const email = searchParams.get('email');
-      const pid = searchParams.get('pid');
+    // Check if required parameters exist
+    const urlParams = new URLSearchParams(window.location.search);
+    const sid = urlParams.get('sid');
+    const uid = urlParams.get('uid');
+    const email = urlParams.get('email');
+    const pid = urlParams.get('pid');
 
-      if (!sid || !uid || !email || !pid) {
-        setIsAccessBlocked(true);
-        return;
-      }
+    if (!sid || !uid || !email || !pid) {
+      setIsAccessBlocked(true);
+      return;
+    }
 
       // Check if in iframe and from allowed domain
       if (window.top === window.self) {
@@ -91,7 +90,7 @@ function App() {
       window.removeEventListener('resize', sendHeight);
       observer.disconnect();
     };
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
