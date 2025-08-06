@@ -14,15 +14,69 @@ import SavedProjects from './versions/7.0.0/saved-projects'; // Adjust path as n
 
 import styles from './page.module.scss';
 import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isAccessBlocked, setIsAccessBlocked] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Allowed domains for iframe embedding
+  const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
+    function checkAccess() {
+      // Check if required parameters exist
+      const sid = searchParams.get('sid');
+      const uid = searchParams.get('uid');
+      const email = searchParams.get('email');
+      const pid = searchParams.get('pid');
+
+      if (!sid || !uid || !email || !pid) {
+        setIsAccessBlocked(true);
+        return;
+      }
+
+      // Check if in iframe and from allowed domain
+      if (window.top === window.self) {
+        // Not in iframe - block access
+        setIsAccessBlocked(true);
+        return;
+      }
+
+      // Check referrer domain
+      const referrer = document.referrer;
+      if (!referrer) {
+        setIsAccessBlocked(true);
+        return;
+      }
+
+      try {
+        const referrerDomain = new URL(referrer).hostname;
+        const isAllowedDomain = allowedDomains.some(domain => 
+          referrerDomain === domain || referrerDomain.endsWith('.' + domain)
+        );
+        
+        if (!isAllowedDomain) {
+          setIsAccessBlocked(true);
+          return;
+        }
+      } catch (e) {
+        setIsAccessBlocked(true);
+        return;
+      }
+
+      // All checks passed
+      setIsAccessBlocked(false);
+    }
+
     function sendHeight() {
       const height = document.documentElement.scrollHeight;
       window.parent.postMessage({ type: 'setIframeHeight', height }, '*');
     }
+
+    // Check access first
+    checkAccess();
 
     // Send height initially and on resize
     window.addEventListener('load', sendHeight);
@@ -37,10 +91,24 @@ function App() {
       window.removeEventListener('resize', sendHeight);
       observer.disconnect();
     };
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
+      {/* Access Blocked Overlay */}
+      {isAccessBlocked && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <div className="text-center p-8">
+            <div className="mb-6">
+              <svg className="w-16 h-16 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Access Restricted</h1>
+            <p className="text-gray-600">This content is not available in the current context.</p>
+          </div>
+        </div>
+      )}
       {/* Admin/Client Mode Toggle - Keep at top, centered */}
       {/* <div className="flex items-center justify-center py-6">
         <div className="relative flex items-center rounded-lg p-1" style={{ backgroundColor: 'rgb(73, 9, 114)' }}>
