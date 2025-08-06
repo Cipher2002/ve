@@ -241,7 +241,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     if (!template) return;
     
     // Show loading indicator when hiding (going from active to inactive)
-    if (currentStatus === 'active' && activeTemplateFilter === 'active') {
+    if (currentStatus === 'active') {
       setHidingTemplateId(templateId);
     }
     
@@ -284,7 +284,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     // Hide loading indicator after a delay to show the action completed
     setTimeout(() => {
       setHidingTemplateId(null);
-    }, 3000);
+    }, 1500); // Reduced from 3000ms to 1500ms for better UX
   };
 
   return (
@@ -383,31 +383,6 @@ export const TemplateOverlayPanel: React.FC = () => {
                   key={template.id}
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
                 >
-                {/* {confirmingTemplateId === template.id ? (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
-                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
-                      Are you sure you want to add this template to your timeline? It will replace all existing overlays.
-                    </p>
-                    <div className="flex gap-2 justify-end">
-                      <button 
-                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                        onClick={() => setConfirmingTemplateId(null)}
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-                        onClick={() => {
-                          handleApplyTemplate(template);
-                          setConfirmingTemplateId(null);
-                        }}
-                      >
-                        Apply Template
-                      </button>
-                    </div>
-                  </div>
-                ) : ( */}
                 {confirmingTemplateId === template.id ? (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
                     <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
