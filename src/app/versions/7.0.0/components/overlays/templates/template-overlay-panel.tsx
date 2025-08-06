@@ -231,7 +231,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     }
   };
 
-  // Handle toggling template active status (UI only - no API call)
+  // Handle toggling template active status
   const handleToggleTemplateStatus = async (templateId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const uid = getUidFromUrl();
@@ -245,17 +245,8 @@ export const TemplateOverlayPanel: React.FC = () => {
       setHidingTemplateId(templateId);
     }
     
-    // Update the template status in the local state
-    setClientTemplates(prev => 
-      prev.map(t => 
-        t.id === templateId 
-          ? { ...t, status: newStatus }
-          : t
-      )
-    );
-    
     try {
-      // Also update the corresponding project status
+      // Update the corresponding project status via API first
       const response = await fetch(`${apiBaseUrl}/save-to-user/update-status`, {
         method: 'POST',
         headers: {
@@ -269,6 +260,15 @@ export const TemplateOverlayPanel: React.FC = () => {
       });
       
       if (response.ok) {
+        // Only update the template status in local state after successful API call
+        setClientTemplates(prev => 
+          prev.map(t => 
+            t.id === templateId 
+              ? { ...t, status: newStatus }
+              : t
+          )
+        );
+        
         // Trigger event to refresh saved projects
         window.dispatchEvent(new CustomEvent('projectStatusChanged', { 
           detail: { 
@@ -276,15 +276,21 @@ export const TemplateOverlayPanel: React.FC = () => {
             status: newStatus
           } 
         }));
+        
+        // Hide loading indicator after a short delay to show the action completed
+        setTimeout(() => {
+          setHidingTemplateId(null);
+        }, 500);
+      } else {
+        // Hide loading indicator on error
+        setHidingTemplateId(null);
+        console.error('Failed to update project status');
       }
     } catch (error) {
+      // Hide loading indicator on error
+      setHidingTemplateId(null);
       console.error('Error updating corresponding project status:', error);
     }
-    
-    // Hide loading indicator after a delay to show the action completed
-    setTimeout(() => {
-      setHidingTemplateId(null);
-    }, 1500); // Reduced from 3000ms to 1500ms for better UX
   };
 
   return (
