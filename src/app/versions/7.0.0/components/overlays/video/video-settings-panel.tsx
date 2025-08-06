@@ -679,7 +679,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
           <div>
             <button
               onClick={() => setAiAudioSection(aiAudioSection === 'ai-decide' ? null : 'ai-decide')}
-              className="flex items-center justify-between w-full p-2 text-left text-xs bg-gray-50 dark:bg-gray-700/50 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
               <span className="text-gray-700 dark:text-gray-300">Let AI Decide</span>
               <svg
@@ -699,7 +699,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
                 <button
                   onClick={() => generateAudio('', true)}
                   disabled={isGeneratingAudio}
-                  className="w-full px-3 py-2 text-xs bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
                 >
                   {isGeneratingAudio ? (
                     <>

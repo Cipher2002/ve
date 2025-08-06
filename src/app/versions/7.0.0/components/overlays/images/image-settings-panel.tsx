@@ -494,16 +494,11 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
           <div>
             <button
               onClick={() => setAiAudioSection(aiAudioSection === 'ai-decide' ? null : 'ai-decide')}
-              className="flex items-center justify-between w-full p-2 text-left text-xs rounded-md transition-colors"
-              style={{ 
-                backgroundColor: '#490972'
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#3a0759'}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#490972'}
+              className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
             >
-              <span className="text-white">Let AI Decide</span>
+              <span className="text-gray-700 dark:text-gray-300">Let AI Decide</span>
               <svg
-                className={`w-4 h-4 text-white transform transition-transform ${
+                className={`w-4 h-4 text-gray-500 transform transition-transform ${
                   aiAudioSection === 'ai-decide' ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -519,12 +514,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                 <button
                   onClick={() => generateAudio('', true)}
                   disabled={isGeneratingAudio}
-                  className="w-full px-3 py-2 text-xs disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
-                  style={{ 
-                    backgroundColor: '#490972'
-                  }}
-                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#3a0759'}
-                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#490972'}
+                  className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
                 >
                   {isGeneratingAudio ? (
                     <>
