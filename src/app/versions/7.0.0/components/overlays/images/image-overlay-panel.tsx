@@ -246,7 +246,6 @@ export const ImageOverlayPanel: React.FC = () => {
           }
         } else {
           baseUrl = 'https://zanopy.ai/ai-images/process_request.php';
-          queryParams.append('user_id', uid);
           queryParams.append('start_from', startFrom.toString());
           queryParams.append('max_results', '20');
           queryParams.append('type', 'image');
