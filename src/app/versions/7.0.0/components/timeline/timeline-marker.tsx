@@ -24,43 +24,63 @@ interface TimelineMarkerProps {
 const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
   ({ currentFrame, totalDuration, onSeek }) => {
     const [isDragging, setIsDragging] = useState(false);
-    const markerRef = useRef<HTMLDivElement>(null);
-    const timelineRef = useRef<HTMLDivElement>(null);
+    const [dragFrame, setDragFrame] = useState<number | null>(null);
+    const timelineContainerRef = useRef<HTMLElement | null>(null);
+
+    // Use dragFrame if dragging, otherwise use currentFrame
+    const displayFrame = isDragging && dragFrame !== null ? dragFrame : currentFrame;
 
     // Calculate the marker's position with higher precision
     const markerPosition = useMemo(() => {
-      // Ensure we're using the same calculation method as timeline items
-      const position = (currentFrame / totalDuration) * 100;
-      // Round to 4 decimal places for smoother animation
+      const position = (displayFrame / totalDuration) * 100;
       return `${Math.round(position * 10000) / 10000}%`;
-    }, [currentFrame, totalDuration]);
+    }, [displayFrame, totalDuration]);
+
+    const findTimelineContainer = useCallback(() => {
+      // Look for the timeline container - it should be the div with timeline markers
+      const markers = document.querySelector('[data-timeline-marker="root"]');
+      return markers?.parentElement || null;
+    }, []);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      
+      // Find and cache the timeline container
+      timelineContainerRef.current = findTimelineContainer();
+      if (!timelineContainerRef.current) {
+        console.warn('Timeline container not found');
+        return;
+      }
+
       setIsDragging(true);
-    }, []);
+      setDragFrame(currentFrame); // Start with current frame
+    }, [currentFrame, findTimelineContainer]);
 
     const handleMouseMove = useCallback(
       (e: MouseEvent) => {
-        if (!isDragging || !onSeek) return;
+        if (!isDragging || !timelineContainerRef.current) return;
 
-        // Find the timeline container
-        const timelineContainer = document.querySelector('[data-timeline-marker="root"]')?.parentElement;
-        if (!timelineContainer) return;
-
-        const rect = timelineContainer.getBoundingClientRect();
+        const rect = timelineContainerRef.current.getBoundingClientRect();
         const relativeX = e.clientX - rect.left;
         const percentage = Math.max(0, Math.min(1, relativeX / rect.width));
         const newFrame = Math.round(percentage * totalDuration);
         
-        onSeek(newFrame);
+        // Update the drag frame for visual feedback
+        setDragFrame(newFrame);
+        
+        // Call onSeek immediately for real-time feedback
+        if (onSeek) {
+          onSeek(newFrame);
+        }
       },
       [isDragging, onSeek, totalDuration]
     );
 
     const handleMouseUp = useCallback(() => {
       setIsDragging(false);
+      setDragFrame(null);
+      timelineContainerRef.current = null;
     }, []);
 
     // Add global mouse event listeners when dragging
@@ -82,19 +102,17 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
 
     return (
       <div
-        ref={timelineRef}
         className="absolute top-0 w-[2px] bg-red-500/90 dark:bg-red-500 pointer-events-none z-50"
         style={{
           left: markerPosition,
           transform: "translateX(-50%)",
           height: "calc(100% + 0px)",
           top: "0px",
-          willChange: "transform, left",
+          willChange: "left",
         }}
       >
         {/* Draggable triangle pointer at the top of the marker */}
         <div
-          ref={markerRef}
           className={`w-0 h-0 absolute top-[0px] left-1/2 transform -translate-x-1/2
             border-l-[5px] border-r-[5px] border-t-[8px] 
             border-l-transparent border-r-transparent 
@@ -103,7 +121,6 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
             hover:border-t-red-600 dark:hover:border-t-red-400
             transition-colors duration-150
             ${isDragging ? 'border-t-red-600 dark:border-t-red-400' : ''}`}
-          style={{ willChange: "transform" }}
           onMouseDown={handleMouseDown}
           title="Drag to seek"
         />
@@ -116,11 +133,10 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
             hover:bg-red-600 dark:hover:bg-red-400
             transition-colors duration-150 shadow-sm
             flex items-center justify-center
-            ${isDragging ? 'bg-red-600 dark:bg-red-400' : ''}`}
+            ${isDragging ? 'bg-red-600 dark:bg-red-400 scale-110' : ''}`}
           style={{ 
             top: "50%",
             marginTop: "-12px",
-            willChange: "transform" 
           }}
           onMouseDown={handleMouseDown}
           title="Drag to seek"
