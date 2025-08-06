@@ -39,9 +39,7 @@ interface AutosaveOptions {
 }
 
 //SETTING THE API BASE URL
-const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-  : 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * Hook for automatically saving editor state to IndexedDB

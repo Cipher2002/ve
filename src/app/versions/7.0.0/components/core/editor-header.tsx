@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 type AspectRatioOption = "16:9" | "9:16" | "1:1" | "4:5";
 
 //SETTING THE API BASE URL
-const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-  : 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * EditorHeader component renders the top navigation bar of the editor interface.

@@ -40,9 +40,7 @@ const getUserVideoDir = (uid?: string, projectName?: string) => {
 };
 
 //SETTING THE API BASE URL
-const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-  : 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 const getUserAudioDir = (uid?: string, projectName?: string) => {
   console.log('getUserAudioDir called with:', { uid, projectName });

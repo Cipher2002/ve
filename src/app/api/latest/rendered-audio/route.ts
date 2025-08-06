@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 
 //SETTING THE API BASE URL
-// const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,9 +53,7 @@ export async function GET(request: NextRequest) {
           audioFiles.push({
             id: renderId,
             filename: filename,
-            url: `${request.headers.get('host') === 'devmagix.zanopy.ai' 
-              ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-              : 'https://zanopy.ai/vedit/api/latest'}/user-files/${uid}/${projectFolder}/${filename}`,
+            url: `${apiBaseUrl}/user-files/${uid}/${projectFolder}/${filename}`,
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),

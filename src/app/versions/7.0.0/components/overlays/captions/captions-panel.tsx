@@ -10,9 +10,7 @@ import { captionTemplates } from "../../../templates/caption-templates";
 import { useSidebar } from "../../../contexts/sidebar-context";
 
 //SETTING THE API BASE URL
-const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-  : 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * CaptionsPanel Component

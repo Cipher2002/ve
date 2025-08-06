@@ -5,7 +5,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 //SETTING THE API BASE URL
-// const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 /**
  * Handles media file uploads
@@ -46,9 +46,6 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, buffer);
     
     // Return the file information
-    const apiBaseUrl = request.headers.get('host') === 'devmagix.zanopy.ai' 
-      ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-      : 'https://zanopy.ai/vedit/api/latest';
     const publicPath = `${apiBaseUrl}/files/users/${userId}/${fileName}`;
 
     return NextResponse.json({

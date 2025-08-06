@@ -66,9 +66,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   // const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
 
   //SETTING THE API BASE URL
-  const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-    ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-    : 'https://zanopy.ai/vedit/api/latest';
+  const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
   // Function to load media files (call this when panel opens)
   const loadMediaFiles = useCallback(async (isInitial = true) => {

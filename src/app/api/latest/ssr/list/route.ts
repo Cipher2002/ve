@@ -49,12 +49,7 @@ export async function GET(request: NextRequest) {
           
           // Extract render ID from filename (remove extension)
           const renderId = path.parse(filename).name;
-
-          // Set API base URL based on request host
-          const apiBaseUrl = request.headers.get('host') === 'devmagix.zanopy.ai' 
-            ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-            : 'https://zanopy.ai/vedit/api/latest';
-
+          
           videos.push({
             id: renderId,
             filename: filename,

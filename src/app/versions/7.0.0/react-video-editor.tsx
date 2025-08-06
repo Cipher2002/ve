@@ -45,9 +45,7 @@ import { clearAutosave } from "./utils/indexdb-helper";
 import { useTemplateLoader } from "./hooks/use-template-loader";
 
 //SETTING THE API BASE URL
-const apiBaseUrl = window.location.hostname === 'devmagix.zanopy.ai' 
-  ? 'https://devmagix.zanopy.ai/vedit/api/latest' 
-  : 'https://zanopy.ai/vedit/api/latest';
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 
 export default function ReactVideoEditor({ projectId, isAdminMode = false }: { projectId: string; isAdminMode?: boolean }) {
