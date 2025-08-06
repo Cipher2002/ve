@@ -63,7 +63,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const { uid, user_ref } = getUrlParams();
 
   // Define BASE_URL at the top where API calls are made
-  const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
+  // const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -233,11 +233,9 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         
         // Construct file URLs
         const fileName = uploadResult.fileName || file.name;
-        const fileUrl = `${BASE_URL}${uploadResult.serverPath}`;
+        const fileUrl = `${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
-        const fileThumbnailUrl = thumbnailServerPath ? 
-                                `${BASE_URL}${thumbnailServerPath}` : 
-                                fileUrl; // Fallback to original file for non-videos
+        const fileThumbnailUrl = thumbnailServerPath;
         
         // Call the Zanopy API to register the file
         const apiResponse = await fetch(`${apiBaseUrl}/media/upload-register`, {
