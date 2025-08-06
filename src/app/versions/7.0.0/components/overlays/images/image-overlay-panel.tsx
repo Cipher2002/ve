@@ -194,9 +194,9 @@ export const ImageOverlayPanel: React.FC = () => {
           const tagsParam = tags ? encodeURIComponent(tags) : '';
           
           if (imageOption.label === 'Text to Logo') {
-            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
+            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
           } else {
-            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&user_id=${uid}&tags=${tagsParam}&ratio=${ratioParam}`;
+            apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
           }
         }
 
