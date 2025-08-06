@@ -206,11 +206,23 @@ const SoundsPanel: React.FC = () => {
 
 
   const handleAddToTimeline = async (sound: LocalSound) => {
-    // Stop any playing preview
-    if (activeAudioRef.current) {
-      activeAudioRef.current.pause();
-      setPlayingTrack(null);
-    }
+  // Stop any playing preview
+  if (activeAudioRef.current) {
+    activeAudioRef.current.pause();
+    setPlayingTrack(null);
+  }
+
+  // Set this sound as loading in the UI
+  setLoadingTrack(sound.id);
+
+  try {
+    // Download the audio file once
+    const response = await fetch(sound.file);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Clear loading state
+    setLoadingTrack(null);
 
     const { from, row } = findNextAvailablePosition(
       overlays,
@@ -218,12 +230,11 @@ const SoundsPanel: React.FC = () => {
       durationInFrames
     );
 
-    // Create loading overlay first
-    const loadingSoundOverlay: SoundOverlay = {
+    const newSoundOverlay: SoundOverlay = {
       id: Date.now(),
       type: OverlayType.SOUND,
       content: sound.title,
-      src: '',
+      src: blobUrl,
       from,
       row,
       left: 0,
@@ -233,37 +244,17 @@ const SoundsPanel: React.FC = () => {
       rotation: 0,
       isDragging: false,
       durationInFrames: sound.duration * 30, // 30fps
-      isLoading: true,
       styles: {
-        opacity: 0.6,
+        opacity: 1,
       },
     };
 
-    addOverlay(loadingSoundOverlay);
-
-    try {
-      // Download the audio file once
-      const response = await fetch(sound.file);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      // Update the overlay with the blob URL
-      const finalSoundOverlay: SoundOverlay = {
-        ...loadingSoundOverlay,
-        src: blobUrl,
-        isLoading: false,
-        styles: {
-          opacity: 1,
-        },
-      };
-
-      changeOverlay(loadingSoundOverlay.id, finalSoundOverlay);
-    } catch (error) {
-      console.error('Failed to download audio:', error);
-      // Remove the loading overlay on error
-      changeOverlay(loadingSoundOverlay.id, { ...loadingSoundOverlay, isLoading: false, styles: { opacity: 1 } });
-    }
-  };
+    addOverlay(newSoundOverlay);
+  } catch (error) {
+    console.error('Failed to download audio:', error);
+    setLoadingTrack(null);
+  }
+};
 
   const renderSoundCard = useCallback((sound: LocalSound) => {
     const isPlaying = playingTrack === sound.id;
@@ -410,34 +401,8 @@ const SoundsPanel: React.FC = () => {
                   <div
                     key={audio.id}
                     onClick={async () => {
-                      const { from, row } = findNextAvailablePosition(
-                        overlays,
-                        visibleRows,
-                        durationInFrames
-                      );
-
-                      // Create loading overlay first
-                      const loadingSoundOverlay: SoundOverlay = {
-                        id: Date.now(),
-                        type: OverlayType.SOUND,
-                        content: audio.filename,
-                        src: '',
-                        from,
-                        row,
-                        left: 0,
-                        top: 0,
-                        width: 1920,
-                        height: 100,
-                        rotation: 0,
-                        isDragging: false,
-                        durationInFrames: 300, // Default duration
-                        isLoading: true,
-                        styles: {
-                          opacity: 0.6,
-                        },
-                      };
-
-                      addOverlay(loadingSoundOverlay);
+                      // Set this audio as loading in the UI
+                      setLoadingTrack(audio.id);
 
                       try {
                         // Download the audio file once
@@ -445,20 +410,38 @@ const SoundsPanel: React.FC = () => {
                         const blob = await response.blob();
                         const blobUrl = URL.createObjectURL(blob);
 
-                        // Update the overlay with the blob URL
-                        const finalSoundOverlay: SoundOverlay = {
-                          ...loadingSoundOverlay,
+                        // Clear loading state
+                        setLoadingTrack(null);
+
+                        const { from, row } = findNextAvailablePosition(
+                          overlays,
+                          visibleRows,
+                          durationInFrames
+                        );
+
+                        const newSoundOverlay: SoundOverlay = {
+                          id: Date.now(),
+                          type: OverlayType.SOUND,
+                          content: audio.filename,
                           src: blobUrl,
-                          isLoading: false,
+                          from,
+                          row,
+                          left: 0,
+                          top: 0,
+                          width: 1920,
+                          height: 100,
+                          rotation: 0,
+                          isDragging: false,
+                          durationInFrames: 300, // Default duration
                           styles: {
                             opacity: 1,
                           },
                         };
 
-                        changeOverlay(loadingSoundOverlay.id, finalSoundOverlay);
+                        addOverlay(newSoundOverlay);
                       } catch (error) {
                         console.error('Failed to download rendered audio:', error);
-                        changeOverlay(loadingSoundOverlay.id, { ...loadingSoundOverlay, isLoading: false, styles: { opacity: 1 } });
+                        setLoadingTrack(null);
                       }
                     }}
                     className="group flex items-center gap-3 p-2.5 bg-white dark:bg-gray-900 rounded-md 

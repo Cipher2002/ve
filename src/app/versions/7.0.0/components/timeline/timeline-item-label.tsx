@@ -64,7 +64,7 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
       return "";
     }
     if (item.type === OverlayType.SOUND && 'isLoading' in item && item.isLoading) {
-      return "Extracting...";
+      return "Loading...";
     }
     if (item.type === OverlayType.TEXT && typeof item.content === "string") {
       return item.content;
