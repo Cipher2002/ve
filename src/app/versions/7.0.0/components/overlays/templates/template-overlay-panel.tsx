@@ -284,7 +284,7 @@ export const TemplateOverlayPanel: React.FC = () => {
     // Hide loading indicator after a delay to show the action completed
     setTimeout(() => {
       setHidingTemplateId(null);
-    }, 300);
+    }, 3000);
   };
 
   return (
