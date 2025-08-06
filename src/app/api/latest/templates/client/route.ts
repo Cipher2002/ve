@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
                 tags: ["user-created", "project-template"],
                 duration: saveData.duration || 30,
                 aspectRatio: saveData.aspectRatio || "16:9",
-                overlays: saveData.overlays || []
+                overlays: saveData.overlays || [],
+                status: projectIndex.status || 'active'
               };
               
               templates.push(template);
