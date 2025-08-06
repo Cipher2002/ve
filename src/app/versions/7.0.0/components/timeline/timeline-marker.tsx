@@ -107,6 +107,31 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
           onMouseDown={handleMouseDown}
           title="Drag to seek"
         />
+        
+        {/* Visible draggable handle on the vertical line */}
+        <div
+          className={`absolute left-1/2 transform -translate-x-1/2 w-3 h-6 
+            bg-red-500/90 dark:bg-red-500 rounded-sm
+            pointer-events-auto cursor-grab active:cursor-grabbing
+            hover:bg-red-600 dark:hover:bg-red-400
+            transition-colors duration-150 shadow-sm
+            flex items-center justify-center
+            ${isDragging ? 'bg-red-600 dark:bg-red-400' : ''}`}
+          style={{ 
+            top: "50%",
+            marginTop: "-12px",
+            willChange: "transform" 
+          }}
+          onMouseDown={handleMouseDown}
+          title="Drag to seek"
+        >
+          {/* Three small dots to indicate it's draggable */}
+          <div className="flex flex-col gap-[1px]">
+            <div className="w-[2px] h-[2px] bg-white/80 rounded-full"></div>
+            <div className="w-[2px] h-[2px] bg-white/80 rounded-full"></div>
+            <div className="w-[2px] h-[2px] bg-white/80 rounded-full"></div>
+          </div>
+        </div>
       </div>
     );
   }
