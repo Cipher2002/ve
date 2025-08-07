@@ -208,6 +208,7 @@ export const TemplateOverlayPanel: React.FC = () => {
       setConfirmDialogOpen(false);
       setConfirmingTemplateId(null);
       setActivePanel(OverlayType.NONE);
+      setIsOpen(false);
     } catch (error) {
       console.error('Failed to apply template:', error);
       // Keep confirmation dialog open on error

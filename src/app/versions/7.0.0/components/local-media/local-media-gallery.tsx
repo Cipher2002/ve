@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useVideoCache } from "../../hooks/use-video-cache";
+import { useAudioCache } from "../../hooks/use-audio-cache";
 
 /**
  * User Media Gallery Component
@@ -47,6 +48,7 @@ export function LocalMediaGallery({
   const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
   const [downloadProgress, setDownloadProgress] = useState<Map<string, number>>(new Map());
   const { downloadVideo } = useVideoCache();
+  const { downloadAudio } = useAudioCache();
   const [addingToTimeline, setAddingToTimeline] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -118,14 +120,10 @@ export function LocalMediaGallery({
 
   const handleMediaSelect = (file: LocalMediaFile) => {
     console.log('handleMediaSelect called with:', file.type, file.id); // Add this line
-    if (file.type === "image" || file.type === "video") {
+    if (file.type === "image" || file.type === "video" || file.type === "audio") {
       console.log('Setting confirmingMediaId to:', file.id); // Add this line
       setConfirmingMediaId(file.id);
       setSelectedFile(file);
-    } else {
-      // For audio files, keep the original behavior
-      setSelectedFile(file);
-      setPreviewOpen(true);
     }
   };
 
@@ -206,22 +204,40 @@ export function LocalMediaGallery({
     }
   };
 
-  // Handle audio click (add directly)
+  // Handle audio click (download then add)
   const handleAudioClick = async (file: LocalMediaFile) => {
-    if (onSelectMedia) {
-      setAddingToTimeline(prev => new Set(prev).add(file.id));
-      
-      try {
-        onSelectMedia(file);
-      } catch (error) {
-        console.error('Failed to add audio to timeline:', error);
-      } finally {
-        setAddingToTimeline(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(file.id);
-          return newSet;
-        });
+    if (downloadingCards.has(file.id)) return;
+
+    setDownloadingCards(prev => new Set(prev).add(file.id));
+    setDownloadProgress(prev => new Map(prev).set(file.id, 0));
+
+    try {
+      const cachedAudioUrl = await downloadAudio(file.path, (progress) => {
+        setDownloadProgress(prev => new Map(prev).set(file.id, progress));
+      });
+
+      if (cachedAudioUrl && onSelectMedia) {
+        const audioFile = {
+          ...file,
+          path: file.path, // Keep original URL for Remotion
+          cachedPath: cachedAudioUrl, // Store cached URL separately
+        };
+        
+        onSelectMedia(audioFile);
       }
+    } catch (error) {
+      console.error('Failed to download audio:', error);
+    } finally {
+      setDownloadingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
+      setDownloadProgress(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(file.id);
+        return newMap;
+      });
     }
   };
 
@@ -371,13 +387,13 @@ export function LocalMediaGallery({
         <div
           key={file.id}
           className={`relative group/item border rounded-md overflow-hidden cursor-pointer transition-all flex flex-col ${
-            addingToTimeline.has(file.id)
+            addingToTimeline.has(file.id) || downloadingCards.has(file.id)
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
               : 'dark:border-gray-700 border-gray-200 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
           }`}
           onClick={(e) => {
             e.stopPropagation();
-            if (addingToTimeline.has(file.id)) return; // Prevent clicks when adding to timeline
+            if (addingToTimeline.has(file.id) || downloadingCards.has(file.id)) return; // Prevent clicks when adding to timeline or downloading
             if (confirmingMediaId === file.id) {
               setConfirmingMediaId(null);
             } else {
@@ -389,6 +405,18 @@ export function LocalMediaGallery({
           <div className="h-full flex flex-col items-center justify-center p-4">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
             <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Adding to Timeline...</p>
+          </div>
+        ) : downloadingCards.has(file.id) ? (
+          <div className="h-full flex flex-col items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Downloading...</p>
+            <p className="text-xs text-blue-500 dark:text-blue-300">{downloadProgress.get(file.id) || 0}%</p>
+            <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
+              <div 
+                className="h-full bg-blue-500 transition-all duration-300"
+                style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
+              ></div>
+            </div>
           </div>
         ) : confirmingMediaId === file.id ? (
         <div 
@@ -505,6 +533,35 @@ export function LocalMediaGallery({
                   </div>
                   
                   {/* Download Progress Overlay */}
+                  {/* {downloadingCards.has(file.id) && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
+                        <p className="text-xs font-medium">Downloading...</p>
+                        <p className="text-xs">{downloadProgress.get(file.id) || 0}%</p>
+                        <div className="w-16 h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
+                          <div 
+                            className="h-full bg-white transition-all duration-300"
+                            style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  )} */}
+                </>
+              )}
+              {file.type === "audio" && (
+                <>
+                  <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                    <Music className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+                  </div>
+                  
+                  {/* Audio label */}
+                  <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
+                    Audio
+                  </div>
+                  
+                  {/* Download Progress Overlay
                   {downloadingCards.has(file.id) && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
                       <div className="text-white text-center">
@@ -519,13 +576,8 @@ export function LocalMediaGallery({
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </>
-              )}
-              {file.type === "audio" && (
-                <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                  <Music className="w-10 h-10 text-gray-400 dark:text-gray-500" />
-                </div>
               )}
             </div>
 
