@@ -159,49 +159,6 @@ export const ImageOverlayPanel: React.FC = () => {
       setIsSearchingShared(false);
     }
   };
-
-  // const fetchGeneratedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string, imageType?: string) => {
-  //   if (append) {
-  //     setIsLoadingMoreGenerated(true);
-  //   } else {
-  //     setIsLoadingGenerated(true);
-  //   }
-    
-  //   try {
-  //     const { user_ref } = getUrlParams();
-      
-  //     // If user_ref exists and we're on zanopy tab, handle Zanopy logic inline
-  //     if (user_ref && activeTab === "generated-zanopy") {
-  //       if (append) {
-  //         setIsLoadingMoreZanopy(true);
-  //       } else {
-  //         setIsLoadingZanopyGenerated(true);
-  //       }
-        
-  //       // Use the most recent selectedImageType value
-  //       const currentImageType = imageType || selectedImageType;
-  //       const imageOption = imageTypeOptions.find(option => option.label === currentImageType);
-  //       if (!imageOption) return;
-
-  //       let apiUrl = '';
-  //       if (imageOption.label === 'Product Influencer') {
-  //         const { uid } = getUrlParams();
-  //         apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&user_id=${uid}&imageStatus=1&start_from=${startFrom}&max_results=20`;
-  //       } else {
-  //         const { uid } = getUrlParams();
-  //         const currentRatio = ratio || aspectRatioGenerated;
-  //         const ratioParam = aspectRatioOptions.find(option => option.label === currentRatio)?.value || "1%3A1";
-  //         const tagsParam = tags ? encodeURIComponent(tags) : '';
-          
-  //         if (imageOption.label === 'Text to Logo') {
-  //           apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
-  //         } else {
-  //           apiUrl = `${apiBaseUrl}/images/user?do_action=${imageOption.action}&start_from=${startFrom}&max_results=20&type=image&image_category=&user_ref=${user_ref}&tags=${tagsParam}&ratio=${ratioParam}`;
-  //         }
-  //       }
-
-  //       const response = await fetch(apiUrl);
-  //       const data = await response.json();
   const fetchGeneratedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string, imageType?: string) => {
     if (append) {
       setIsLoadingMoreGenerated(true);

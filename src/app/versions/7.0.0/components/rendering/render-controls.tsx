@@ -1,12 +1,6 @@
 import React from "react";
-import { Download, Loader2, Bell, Save, ChevronDown } from "lucide-react";
+import { Loader2, Save, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { formatDistanceToNow } from "date-fns";
 import { useEditorContext } from "../../contexts/editor-context";
 import {
   DropdownMenu,
@@ -17,7 +11,6 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AutosaveRecoveryDialog } from "../autosave/autosave-recovery-dialog";
 
 /**
  * Interface representing a single video render attempt
@@ -91,19 +84,8 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   const { 
     isSaving, 
     projectName,
-    autosaveTimestamp: contextAutosaveTimestamp,
-    handleRecoverAutosave: contextHandleRecoverAutosave,
-    handleDiscardAutosave: contextHandleDiscardAutosave,
   } = useEditorContext();
 
-  // Use props if provided, otherwise fall back to context
-  const finalAutosaveTimestamp = autosaveTimestamp ?? contextAutosaveTimestamp;
-  const finalHandleRecoverAutosave = onRecoverAutosave ?? contextHandleRecoverAutosave;
-  const finalHandleDiscardAutosave = onDiscardAutosave ?? contextHandleDiscardAutosave;
-
-  // Create hasAutosave based on whether autosaveTimestamp exists
-  const hasAutosave = Boolean(finalAutosaveTimestamp);
-  
   // Get project name from context or input field
   const getProjectName = () => {
     return projectName && projectName.trim() !== '' ? projectName : 'Untitled Project';
@@ -166,7 +148,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       // Extract filename from URL to get the correct extension
       const filename = url.split("/").pop() || "";
       const fileExtension = filename.split(".").pop() || "mp4";
-      const fileId = filename.replace(`.${fileExtension}`, "");
       
       // Convert the video URL to a download URL for SSR
       downloadUrl = url
@@ -184,18 +165,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  };
-
-  const getDisplayFileName = (url: string) => {
-    if (renderType === "ssr") {
-      return url.split("/").pop();
-    }
-    // For Lambda URLs, use the full URL pathname
-    try {
-      return new URL(url).pathname.split("/").pop();
-    } catch {
-      return url.split("/").pop();
-    }
   };
 
   return (
@@ -244,71 +213,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         </>
       )}
     </Button>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`relative text-white transition-all duration-300 ${
-              hasAutosave ? 'animate-pulse' : ''
-            }`}
-            style={{ backgroundColor: hasAutosave ? '#ef4444' : '#490972' }}
-            onMouseEnter={(e) => {
-              if (!hasAutosave) {
-                e.currentTarget.style.backgroundColor = '#490972';
-                e.currentTarget.style.color = 'white';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = hasAutosave ? '#ef4444' : '#490972';
-              e.currentTarget.style.color = 'white';
-            }}
-          >
-            <Bell className="w-3.5 h-3.5" />
-            {hasAutosave && (
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 animate-ping" />
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-4">
-          {hasAutosave && finalAutosaveTimestamp ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
-                <h4 className="text-sm font-semibold">Unsaved Changes Found</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                We found an autosaved version of your project from{" "}
-                <time className="font-medium">
-                  {formatDistanceToNow(new Date(finalAutosaveTimestamp), { addSuffix: true })}
-                </time>{" "}
-                ({new Date(finalAutosaveTimestamp).toLocaleTimeString()})
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={finalHandleDiscardAutosave}
-                  className="flex-1"
-                >
-                  Discard
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={finalHandleRecoverAutosave}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Recover Changes
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground">No autosave data found</p>
-            </div>
-          )}
-        </PopoverContent>
-      </Popover>
 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

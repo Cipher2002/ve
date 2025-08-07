@@ -19,11 +19,22 @@ function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAccessBlocked, setIsAccessBlocked] = useState(true); // Start as blocked
   const [isCheckComplete, setIsCheckComplete] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Allowed domains for iframe embedding
   const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
+    function handleFullscreenChange() {
+      setIsFullscreen(!!document.fullscreenElement);
+    }
+
+    // Add fullscreen event listeners
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
     function checkAccess() {
       // Check if required parameters exist
       const urlParams = new URLSearchParams(window.location.search);
@@ -96,6 +107,10 @@ function App() {
       window.removeEventListener('load', sendHeight);
       window.removeEventListener('resize', sendHeight);
       observer.disconnect();
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, []);
 
@@ -166,7 +181,7 @@ function App() {
             <div 
               className="relative w-full"
               style={{ 
-                height: '45vh',
+                height: isFullscreen ? '100vh' : '45vh',
                 maxWidth: '100%'
               }}
             >
@@ -176,7 +191,7 @@ function App() {
         </div>
 
         {/* Replaced Projects Section Card with SavedProjects Component */}
-        <SavedProjects />
+        {!isFullscreen && <SavedProjects />}
         </div>
       </>
       )}

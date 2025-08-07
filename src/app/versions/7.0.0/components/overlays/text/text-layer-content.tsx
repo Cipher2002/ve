@@ -16,31 +16,6 @@ const { fontFamily: interFontFamily } = loadInter("normal", {
   weights: ["700"],
 });
 
-const { fontFamily: merriweatherFontFamily } = loadMerriweather("normal", {
-  weights: ["700"],
-  subsets: ["latin"],
-});
-
-const { fontFamily: robotoMonoFontFamily } = loadRobotoMono("normal", {
-  weights: ["400"],
-  subsets: ["latin"],
-});
-
-const { fontFamily: vt323FontFamily } = loadVT323("normal", {
-  weights: ["400"],
-  subsets: ["latin"],
-});
-
-const { fontFamily: leagueSpartanFontFamily } = loadLeagueSpartan("normal", {
-  weights: ["400", "700"],
-  subsets: ["latin"],
-});
-
-const { fontFamily: bungeeInlineFontFamily } = loadBungeeInline("normal", {
-  weights: ["400"],
-  subsets: ["latin"],
-});
-
 interface TextLayerContentProps {
   overlay: TextOverlay;
 }
@@ -49,18 +24,6 @@ const getFontFamily = (fontClass: string) => {
   switch (fontClass) {
     case "font-sans":
       return interFontFamily;
-    // case "font-serif":
-    //   return merriweatherFontFamily;
-    // case "font-mono":
-    //   return robotoMonoFontFamily;
-    // case "font-retro":
-    //   return vt323FontFamily;
-    // case "font-league-spartan":
-    //   return leagueSpartanFontFamily;
-    // case "font-bungee-inline":
-    //   return bungeeInlineFontFamily;
-    
-    // Custom fonts - match the exact font-family names from globals.css
     case "font-custom-alexbrush-regular":
       return "Alex Brush, cursive";
     case "font-custom-allertastencil-regular":

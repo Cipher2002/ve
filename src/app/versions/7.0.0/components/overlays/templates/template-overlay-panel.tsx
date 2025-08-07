@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useEditorContext } from "../../../contexts/editor-context";
-import { TemplateOverlay } from "../../../types";
+import { TemplateOverlay, OverlayType } from "../../../types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { Pencil } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { useSidebar } from "../../../contexts/sidebar-context";
 
 
 //SETTING THE API BASE URL
@@ -27,6 +28,8 @@ export const TemplateOverlayPanel: React.FC = () => {
     isLoadingTemplate = false,
     templateLoadingProgress = { current: 0, total: 0 }
   } = useEditorContext();
+  const { setIsOpen, setActivePanel } = useSidebar();
+  
 
 
   const { templates, isLoading, error } = useTemplates({
@@ -204,6 +207,7 @@ export const TemplateOverlayPanel: React.FC = () => {
       await loadTemplateIntoEditor(template);
       setConfirmDialogOpen(false);
       setConfirmingTemplateId(null);
+      setActivePanel(OverlayType.NONE);
     } catch (error) {
       console.error('Failed to apply template:', error);
       // Keep confirmation dialog open on error
@@ -323,26 +327,6 @@ export const TemplateOverlayPanel: React.FC = () => {
         {/* Filter buttons for Created By You tab */}
         {activeTab === "created-by-you" && (
           <div className="flex border rounded-lg overflow-hidden mb-2 self-start">
-            {/* <button
-              onClick={() => setActiveTemplateFilter('active')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-l-lg rounded-r-none ${
-                activeTemplateFilter === 'active'
-                  ? 'bg-blue-500/15 text-blue-700 border border-blue-300 hover:bg-blue-500/15'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Active View
-            </button>
-            <button
-              onClick={() => setActiveTemplateFilter('all')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-l-none rounded-r-lg ${
-                activeTemplateFilter === 'all'
-                  ? 'bg-blue-500/15 text-blue-700 border border-blue-300 hover:bg-blue-500/15'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              All
-            </button> */}
             <Button
               variant="ghost"
               onClick={() => setActiveTemplateFilter('active')}

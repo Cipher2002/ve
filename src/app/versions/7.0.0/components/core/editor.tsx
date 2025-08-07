@@ -72,10 +72,6 @@ export const Editor: React.FC = () => {
     // Handle orientation changes and resizes
     window.addEventListener("resize", handleResize);
 
-    // DON'T prevent scrolling on body when used as embedded component
-    // document.body.style.overflow = "hidden";
-    // document.documentElement.style.overflow = "hidden";
-
     return () => {
       window.removeEventListener("resize", handleResize);
       // Don't restore overflow styles
@@ -117,11 +113,6 @@ export const Editor: React.FC = () => {
   return (
     <div
       className="flex flex-col h-full overflow-hidden"
-      // Remove the viewport height calculation for embedded use
-      // style={{
-      //   height: "calc(var(--vh, 1vh) * 100)",
-      //   maxHeight: "-webkit-fill-available" /* Safari fix */,
-      // }}
     >
       <EditorHeader />
       <div className="flex-grow flex flex-col lg:flex-row overflow-hidden">

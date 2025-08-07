@@ -43,9 +43,7 @@ export function LocalMediaGallery({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
-  // const [isLoadingMore, setIsLoadingMore] = useState(false);
   const hasInitialized = useRef(false);
-  // Add these state variables at the top
   const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
   const [downloadProgress, setDownloadProgress] = useState<Map<string, number>>(new Map());
   const { downloadVideo } = useVideoCache();
@@ -302,17 +300,6 @@ export function LocalMediaGallery({
     }
   };
 
-  // Handle infinite scroll
-  // const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-  //   if (scrollHeight - scrollTop <= clientHeight + 100) {
-  //     if (hasMore && !isLoadingMore && !isLoading) {
-  //       setIsLoadingMore(true);
-  //       loadMoreMedia().finally(() => setIsLoadingMore(false));
-  //     }
-  //   }
-  // }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
-
   // Render preview content based on file type
   const renderPreviewContent = () => {
     if (!selectedFile) return null;
@@ -553,25 +540,6 @@ export function LocalMediaGallery({
             </div>
           </div>
         )}
-
-        {/* Delete button - only show when not in confirm mode */}
-        {/* {confirmingMediaId !== file.id && (
-          <button
-            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-              text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
-              shadow-sm hover:shadow-md transform hover:scale-105"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Show warning since delete is not supported by API
-              if (confirm("Note: This will only remove the file from your current view. The file will remain on the server.")) {
-                removeMediaFile(file.id);
-              }
-            }}
-            title="Remove from view (file remains on server)"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        )} */}
       </div>
     );
   };

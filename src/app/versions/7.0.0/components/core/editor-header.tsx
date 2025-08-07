@@ -242,14 +242,6 @@ export function EditorHeader() {
       </div>
 
       {/* Media rendering controls */}
-      {/* <RenderControls
-        handleRender={renderMedia}
-        handleRenderAudio={renderAudio}
-        state={state}
-        saveProject={saveProject}
-        downloadTemplate={downloadTemplate}
-        renderType={renderType}
-      /> */}
       <RenderControls
         handleRender={renderMedia}
         handleRenderAudio={renderAudio}

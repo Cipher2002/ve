@@ -32,7 +32,6 @@ import {
 import { TimelineProvider } from "./contexts/timeline-context";
 
 // Autosave Components
-import { AutosaveRecoveryDialog } from "./components/autosave/autosave-recovery-dialog";
 import { AutosaveStatus } from "./components/autosave/autosave-status";
 import { useState, useEffect } from "react";
 import { useAutosave } from "./hooks/use-autosave";
