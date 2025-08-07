@@ -25,15 +25,11 @@ function App() {
   const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
-    function handleFullscreenChange() {
-      setIsFullscreen(!!document.fullscreenElement);
+    function checkFullscreenByViewport() {
+      // Check if viewport matches screen dimensions (indicating fullscreen)
+      const isViewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
+      setIsFullscreen(isViewportFullscreen);
     }
-
-    // Add fullscreen event listeners
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
     function checkAccess() {
       // Check if required parameters exist
@@ -95,9 +91,15 @@ function App() {
     // Check access first
     checkAccess();
 
+    // Check fullscreen state initially
+    checkFullscreenByViewport();
+
     // Send height initially and on resize
     window.addEventListener('load', sendHeight);
-    window.addEventListener('resize', sendHeight);
+    window.addEventListener('resize', () => {
+      sendHeight();
+      checkFullscreenByViewport();
+    });
 
     // Send height when DOM changes
     const observer = new MutationObserver(sendHeight);
@@ -105,12 +107,11 @@ function App() {
 
     return () => {
       window.removeEventListener('load', sendHeight);
-      window.removeEventListener('resize', sendHeight);
+      window.removeEventListener('resize', () => {
+        sendHeight();
+        checkFullscreenByViewport();
+      });
       observer.disconnect();
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, []);
 
