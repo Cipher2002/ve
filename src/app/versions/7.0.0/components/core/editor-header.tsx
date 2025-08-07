@@ -3,6 +3,7 @@ import RenderControls from "../rendering/render-controls";
 import { useEditorContext } from "../../contexts/editor-context";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 // Types
@@ -58,6 +59,11 @@ export function EditorHeader() {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [originalName, setOriginalName] = useState(projectName);
   const [isRenaming, setIsRenaming] = useState(false);
+
+  const handleCancelRename = () => {
+    setProjectName(originalName); // Revert to original name
+    setIsInputFocused(false); // Hide the rename controls
+  };
 
   const handleAspectRatioChange = (value: string) => {
     setAspectRatio(value as AspectRatioOption);
@@ -180,17 +186,29 @@ export function EditorHeader() {
         />
 
         {isInputFocused && (
-          <button
-            onClick={handleRenameProject}
-            onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
-            disabled={isRenaming}
-            className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-600 rounded-md transition-colors whitespace-nowrap select-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isRenaming && (
-              <div className="animate-spin rounded-full h-3 w-3 border border-blue-900 dark:border-blue-100 border-t-transparent"></div>
-            )}
-            {isRenaming ? 'Renaming...' : 'Rename Project'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRenameProject}
+              onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
+              disabled={isRenaming}
+              className="flex-shrink-0 px-3 py-1.5 text-sm bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15 rounded-md transition-colors whitespace-nowrap select-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isRenaming && (
+                <div className="animate-spin rounded-full h-3 w-3 border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15 border-t-transparent"></div>
+              )}
+              {isRenaming ? 'Renaming...' : 'Rename Project'}
+            </button>
+            
+            <button
+              onClick={handleCancelRename}
+              onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
+              disabled={isRenaming}
+              className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Cancel rename"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         )}
         
         <button

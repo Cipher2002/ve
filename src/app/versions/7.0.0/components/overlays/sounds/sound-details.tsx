@@ -168,7 +168,7 @@ export const SoundDetails: React.FC<SoundDetailsProps> = ({
           )}
         </Button>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-foreground truncate">
+          <p className="text-sm font-medium text-foreground break-words">
             {localOverlay.content}
           </p>
         </div>
