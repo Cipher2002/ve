@@ -89,7 +89,16 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       });
 
       console.log("Render result:", JSON.stringify(result, null, 2));
-      return result;
+      // Add cost information to the response
+      return {
+        ...result,
+        estimatedCost: estimatedCost.toFixed(5),
+        costInfo: {
+          cost: `$${estimatedCost.toFixed(5)}`,
+          frames: body.inputProps.durationInFrames,
+          duration: `${(body.inputProps.durationInFrames / body.inputProps.fps).toFixed(2)}s`
+        }
+      };
     } catch (error) {
       console.error("Error in renderMediaOnLambda:", error);
       throw error;
