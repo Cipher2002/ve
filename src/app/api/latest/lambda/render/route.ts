@@ -1,4 +1,4 @@
-import { AwsRegion, RenderMediaOnLambdaOutput } from "@remotion/lambda/client";
+import { AwsRegion, RenderMediaOnLambdaOutput, estimatePrice } from "@remotion/lambda/client";
 import { renderMediaOnLambda } from "@remotion/lambda/client";
 import { RenderRequest } from "@/app/versions/7.0.0/types";
 import { executeApi } from "@/app/versions/7.0.0/lambda-helpers/api-response";
@@ -59,6 +59,18 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
     validateAwsCredentials();
 
     try {
+      // Estimate render cost
+      const durationInMs = (body.inputProps.durationInFrames / body.inputProps.fps) * 1000;
+      const estimatedCost = estimatePrice({
+        region: REGION as AwsRegion,
+        durationInMilliseconds: durationInMs,
+        memorySizeInMb: 2048,
+        diskSizeInMb: 2048,
+        lambdasInvoked: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
+      });
+      
+      console.log(`Estimated render cost: $${estimatedCost.toFixed(5)} for ${body.inputProps.durationInFrames} frames`);
+      
       console.log("Rendering media on Lambda....");
       const result = await renderMediaOnLambda({
         codec: LAMBDA_CONFIG.CODEC,
