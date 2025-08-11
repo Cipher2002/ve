@@ -201,7 +201,7 @@ export function EditorHeader() {
             
             <button
               onClick={handleCancelRename}
-              onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
+              // onMouseDown={(e) => e.preventDefault()} // Prevent input from losing focus
               disabled={isRenaming}
               className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Cancel rename"
