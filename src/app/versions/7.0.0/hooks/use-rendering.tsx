@@ -10,6 +10,7 @@ import {
   getProgress as lambdaGetProgress,
   renderVideo as lambdaRenderVideo,
 } from "../lambda-helpers/api";
+import { transformOverlaysForLambda } from "../utils/lambda-overlay-transformer";
 
 // Define possible states for the rendering process
 export type State =
@@ -68,7 +69,15 @@ export const useRendering = (
       const getProgress =
         renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
 
-      const response = await renderVideo({ id, inputProps, format, codec });
+      // Transform overlays for Lambda rendering if using Lambda
+      const transformedInputProps = renderType === "lambda" 
+        ? {
+            ...inputProps,
+            overlays: transformOverlaysForLambda(inputProps.overlays)
+          }
+        : inputProps;
+
+      const response = await renderVideo({ id, inputProps: transformedInputProps, format, codec });
       const renderId = response.renderId;
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
