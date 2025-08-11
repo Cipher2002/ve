@@ -14,6 +14,10 @@ type ApiResponse<T> = {
   message?: string;
 };
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
+
 const makeRequest = async <Res>(
   endpoint: string,
   body: unknown
@@ -54,7 +58,7 @@ export const renderVideo = async ({
   };
 
   const response = await makeRequest<RenderMediaOnLambdaOutput>(
-    "/api/latest/lambda/render",
+    `${apiBaseUrl}/lambda/render`,
     body
   );
   console.log("Video render response", { response });
@@ -75,7 +79,7 @@ export const getProgress = async ({
   };
 
   const response = await makeRequest<ProgressResponse>(
-    "/api/latest/lambda/progress",
+    `${apiBaseUrl}/lambda/progress`,
     body
   );
   console.log("Progress response", { response });
