@@ -69,11 +69,9 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   handleRenderAudio,
   saveProject,
   downloadTemplate,
-  renderType = "ssr",
+  renderType = "lambda",
   hasAutosave: propsHasAutosave,
   autosaveTimestamp,
-  onRecoverAutosave,
-  onDiscardAutosave,
 }) => {
   // Get UID from URL
   const getUidFromUrl = () => {

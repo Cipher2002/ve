@@ -388,8 +388,8 @@ export function LocalMediaGallery({
           key={file.id}
           className={`relative group/item border rounded-md overflow-hidden cursor-pointer transition-all flex flex-col ${
             addingToTimeline.has(file.id) || downloadingCards.has(file.id)
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-              : 'dark:border-gray-700 border-gray-200 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
+              ? 'bg-[rgb(41,0,156)]/15 border-[rgb(41,0,156)]'
+              : 'dark:border-gray-700 border-gray-200 hover:border-[rgb(41,0,156)] dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
           }`}
           onClick={(e) => {
             e.stopPropagation();
@@ -403,14 +403,14 @@ export function LocalMediaGallery({
         >
         {addingToTimeline.has(file.id) ? (
           <div className="h-full flex flex-col items-center justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Adding to Timeline...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(41,0,156)] border-t-transparent mb-3"></div>
+            <p className="text-sm font-medium text-[rgb(41,0,156)] dark:text-blue-400">Adding to Timeline...</p>
           </div>
         ) : downloadingCards.has(file.id) ? (
           <div className="h-full flex flex-col items-center justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Downloading...</p>
-            <p className="text-xs text-blue-500 dark:text-blue-300">{downloadProgress.get(file.id) || 0}%</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(41,0,156)] border-t-transparent mb-3"></div>
+            <p className="text-sm font-medium text-[rgb(41,0,156)] dark:text-blue-400">Downloading...</p>
+            <p className="text-xs text-[rgb(41,0,156)] dark:text-blue-300">{downloadProgress.get(file.id) || 0}%</p>
             <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
               <div 
                 className="h-full bg-blue-500 transition-all duration-300"
@@ -420,7 +420,7 @@ export function LocalMediaGallery({
           </div>
         ) : confirmingMediaId === file.id ? (
         <div 
-          className="flex-1 flex flex-col justify-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md"
+          className="flex-1 flex flex-col justify-center p-4 bg-[rgb(41,0,156)]/15 rounded-md"
         >
           <div className="flex flex-col items-center text-center space-y-3 select-none">
             <h3 className="text-sm font-semibold">Media Options</h3>

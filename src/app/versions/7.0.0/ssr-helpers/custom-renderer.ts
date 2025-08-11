@@ -411,7 +411,6 @@ export function getRenderProgress(renderId: string) {
   };
 }
 
-// Replace the saveRenderToUserFolder function in custom-renderer.ts
 async function saveRenderToUserFolder(
   uid: string, 
   projectName: string, 

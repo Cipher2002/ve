@@ -445,9 +445,6 @@ export default function SavedProjects() {
   };
 
   // Pagination logic
-  // const filteredProjects = userProjects.filter(project => 
-  //   activeFilter === 'All' || project.status === 'active'
-  // );
   const filteredProjects = userProjects.filter(project => {
     // Status filter
     const statusMatch = activeFilter === 'All' || project.status === 'active';

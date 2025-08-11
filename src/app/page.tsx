@@ -17,108 +17,108 @@ import { useEffect } from 'react';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isAccessBlocked, setIsAccessBlocked] = useState(true); // Start as blocked
+  // const [isAccessBlocked, setIsAccessBlocked] = useState(true); // Start as blocked
   const [isCheckComplete, setIsCheckComplete] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Allowed domains for iframe embedding
-  const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
+  // const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
-  useEffect(() => {
-    function checkFullscreenByViewport() {
-      // Check if viewport matches screen dimensions (indicating fullscreen)
-      const isViewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
-      setIsFullscreen(isViewportFullscreen);
-    }
+  // useEffect(() => {
+  //   function checkFullscreenByViewport() {
+  //     // Check if viewport matches screen dimensions (indicating fullscreen)
+  //     const isViewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
+  //     setIsFullscreen(isViewportFullscreen);
+  //   }
 
-    function checkAccess() {
-      // Check if required parameters exist
-      const urlParams = new URLSearchParams(window.location.search);
-      const sid = urlParams.get('sid');
-      const uid = urlParams.get('uid');
-      const email = urlParams.get('email');
-      const pid = urlParams.get('pid');
+  //   function checkAccess() {
+  //     // Check if required parameters exist
+  //     const urlParams = new URLSearchParams(window.location.search);
+  //     const sid = urlParams.get('sid');
+  //     const uid = urlParams.get('uid');
+  //     const email = urlParams.get('email');
+  //     const pid = urlParams.get('pid');
 
-      if (!sid || !uid || !email || !pid) {
-        setIsAccessBlocked(true);
-        setIsCheckComplete(true);
-        return;
-      }
+  //     if (!sid || !uid || !email || !pid) {
+  //       setIsAccessBlocked(true);
+  //       setIsCheckComplete(true);
+  //       return;
+  //     }
 
-      // Check if in iframe and from allowed domain
-      if (window.top === window.self) {
-        // Not in iframe - block access
-        setIsAccessBlocked(true);
-        setIsCheckComplete(true);
-        return;
-      }
+  //     // Check if in iframe and from allowed domain
+  //     if (window.top === window.self) {
+  //       // Not in iframe - block access
+  //       setIsAccessBlocked(true);
+  //       setIsCheckComplete(true);
+  //       return;
+  //     }
 
-      // Check referrer domain
-      const referrer = document.referrer;
-      if (!referrer) {
-        setIsAccessBlocked(true);
-        setIsCheckComplete(true);
-        return;
-      }
+  //     // Check referrer domain
+  //     const referrer = document.referrer;
+  //     if (!referrer) {
+  //       setIsAccessBlocked(true);
+  //       setIsCheckComplete(true);
+  //       return;
+  //     }
 
-      try {
-        const referrerDomain = new URL(referrer).hostname;
-        const isAllowedDomain = allowedDomains.some(domain => 
-          referrerDomain === domain || referrerDomain.endsWith('.' + domain)
-        );
+  //     try {
+  //       const referrerDomain = new URL(referrer).hostname;
+  //       const isAllowedDomain = allowedDomains.some(domain => 
+  //         referrerDomain === domain || referrerDomain.endsWith('.' + domain)
+  //       );
         
-        if (!isAllowedDomain) {
-          setIsAccessBlocked(true);
-          setIsCheckComplete(true);
-          return;
-        }
-      } catch (e) {
-        setIsAccessBlocked(true);
-        setIsCheckComplete(true);
-        return;
-      }
+  //       if (!isAllowedDomain) {
+  //         setIsAccessBlocked(true);
+  //         setIsCheckComplete(true);
+  //         return;
+  //       }
+  //     } catch (e) {
+  //       setIsAccessBlocked(true);
+  //       setIsCheckComplete(true);
+  //       return;
+  //     }
 
-      // All checks passed
-      setIsAccessBlocked(false);
-      setIsCheckComplete(true);
-    }
+  //     // All checks passed
+  //     setIsAccessBlocked(false);
+  //     setIsCheckComplete(true);
+  //   }
 
-    function sendHeight() {
-      const height = document.documentElement.scrollHeight;
-      window.parent.postMessage({ type: 'setIframeHeight', height }, '*');
-    }
+  //   function sendHeight() {
+  //     const height = document.documentElement.scrollHeight;
+  //     window.parent.postMessage({ type: 'setIframeHeight', height }, '*');
+  //   }
 
-    // Check access first
-    checkAccess();
+  //   // Check access first
+  //   checkAccess();
 
-    // Check fullscreen state initially
-    checkFullscreenByViewport();
+  //   // Check fullscreen state initially
+  //   checkFullscreenByViewport();
 
-    // Send height initially and on resize
-    window.addEventListener('load', sendHeight);
-    window.addEventListener('resize', () => {
-      sendHeight();
-      checkFullscreenByViewport();
-    });
+  //   // Send height initially and on resize
+  //   window.addEventListener('load', sendHeight);
+  //   window.addEventListener('resize', () => {
+  //     sendHeight();
+  //     checkFullscreenByViewport();
+  //   });
 
-    // Send height when DOM changes
-    const observer = new MutationObserver(sendHeight);
-    observer.observe(document.body, { childList: true, subtree: true });
+  //   // Send height when DOM changes
+  //   const observer = new MutationObserver(sendHeight);
+  //   observer.observe(document.body, { childList: true, subtree: true });
 
-    return () => {
-      window.removeEventListener('load', sendHeight);
-      window.removeEventListener('resize', () => {
-        sendHeight();
-        checkFullscreenByViewport();
-      });
-      observer.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('load', sendHeight);
+  //     window.removeEventListener('resize', () => {
+  //       sendHeight();
+  //       checkFullscreenByViewport();
+  //     });
+  //     observer.disconnect();
+  //   };
+  // }, []);
 
   return (
     <div className="min-h-screen bg-white flex flex-col"> {/* Added flex flex-col */}
       {/* Show content only after check is complete */}
-      {!isCheckComplete ? (
+      {/* {!isCheckComplete ? (
         // Loading state - minimal to avoid flash
         <div className="min-h-screen bg-white"></div>
       ) : isAccessBlocked ? (
@@ -134,8 +134,8 @@ function App() {
             <p className="text-gray-600">This content is not available in the current context.</p>
           </div>
         </div>
-      ) : (
-      // Normal content
+      ) : ( */}
+      {/* // Normal content */}
       <>
       {/* Admin/Client Mode Toggle - Keep at top, centered */}
       {/* <div className="flex items-center justify-center py-6">
@@ -182,7 +182,8 @@ function App() {
             <div 
               className="relative w-full"
               style={{ 
-                height: isFullscreen ? '100vh' : '45vh',
+                // height: isFullscreen ? '100vh' : '45vh',
+                height: '100vh',
                 maxWidth: '100%'
               }}
             >
@@ -195,7 +196,7 @@ function App() {
         {!isFullscreen && <SavedProjects />}
         </div>
       </>
-      )}
+      {/* )} */}
     </div>
   );
 }

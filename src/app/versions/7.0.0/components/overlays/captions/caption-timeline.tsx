@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../../../../../../components/ui/card";
 import { CaptionOverlay } from "../../../types";
 
 /**

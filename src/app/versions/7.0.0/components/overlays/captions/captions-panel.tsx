@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "../../../../../../components/ui/button";
+import { Textarea } from "../../../../../../components/ui/textarea";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning";
 import { useTimeline } from "../../../contexts/timeline-context";

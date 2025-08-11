@@ -155,8 +155,8 @@ export const Editor: React.FC = () => {
             playerRef.current.detachAudio();
           }
         }}
-        onMuteVideo={handleMuteVideo} // Add this line
-        onMuteAudio={handleMuteAudio} // Add this line
+        onMuteVideo={handleMuteVideo}
+        onMuteAudio={handleMuteAudio}
       />
     </div>
   );

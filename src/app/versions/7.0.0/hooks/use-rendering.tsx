@@ -50,7 +50,7 @@ type RenderType = "ssr" | "lambda";
 export const useRendering = (
   id: string,
   inputProps: z.infer<typeof CompositionProps>,
-  renderType: RenderType = "ssr" // Default to SSR rendering
+  renderType: RenderType = "lambda" // Default to Lambda rendering
 ) => {
   // Maintain current state of the rendering process
   const [state, setState] = useState<State>({
