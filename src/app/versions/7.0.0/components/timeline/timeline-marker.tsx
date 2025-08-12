@@ -26,6 +26,7 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
     const [isDragging, setIsDragging] = useState(false);
     const [dragPosition, setDragPosition] = useState<number | null>(null);
     const timelineContainerRef = useRef<HTMLElement | null>(null);
+    const dragStartedRef = useRef(false);
 
     // Use drag position if dragging, otherwise use currentFrame
     const displayFrame = isDragging && dragPosition !== null ? dragPosition : currentFrame;
@@ -53,6 +54,7 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
         return;
       }
 
+      dragStartedRef.current = false; // Reset drag started flag
       setIsDragging(true);
       setDragPosition(currentFrame);
     }, [currentFrame, findTimelineContainer]);
@@ -60,6 +62,8 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
     const handleMouseMove = useCallback(
       (e: MouseEvent) => {
         if (!isDragging || !timelineContainerRef.current) return;
+
+        dragStartedRef.current = true; // Mark that actual dragging has started
 
         const rect = timelineContainerRef.current.getBoundingClientRect();
         const relativeX = e.clientX - rect.left;
@@ -71,7 +75,6 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
 
         // Also call onSeek for actual seeking
         if (onSeek) {
-          // console.log('TimelineMarker onSeek called with:', newFrame, 'totalDuration:', totalDuration);
           onSeek(newFrame);
         }
       },
