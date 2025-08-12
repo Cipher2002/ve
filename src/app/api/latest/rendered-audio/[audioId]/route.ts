@@ -15,7 +15,7 @@ export async function DELETE(
     }
 
     // Search for the file in user's directories
-    const userDir = path.join(process.cwd(), "users", uid);
+    const userDir = path.join("/home/zanopyai/htdocs/data/video_editor_data", uid);
     
     if (!fs.existsSync(userDir)) {
       return NextResponse.json({ error: 'User directory not found' }, { status: 404 });

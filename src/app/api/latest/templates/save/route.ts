@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const projectName = templateData.name;
     
     // Create user/project folder structure
-    const projectPath = path.join(process.cwd(), 'users', uid, projectName);
+    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
     
     // Ensure the directory exists
     if (!fs.existsSync(projectPath)) {

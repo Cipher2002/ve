@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       id: fileId,
-      fileName: file.name,
+      fileName: fileName, // Use the generated filename instead of original
+      originalName: file.name,
       serverPath: publicPath,
       size: file.size,
       type: file.type,

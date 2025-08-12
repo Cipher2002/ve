@@ -33,7 +33,7 @@ export const useRenderedVideos = () => {
     
     try {
       const uid = getUidFromUrl();
-      const response = await fetch(`${apiBaseUrl}/ssr/list?uid=${uid}&t=${Date.now()}`);
+      const response = await fetch(`${apiBaseUrl}/lambda/list?uid=${uid}&t=${Date.now()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch rendered videos');
       }

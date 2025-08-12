@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const audioFiles: any[] = [];
-    const supportedExtensions = ['.wav', '.mp3', '.aac'];
+    const videos: any[] = [];
+    const supportedExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm', '.wav', '.mp3', '.aac'];
 
     try {
       // Get all project folders for this user
@@ -37,23 +37,24 @@ export async function GET(request: NextRequest) {
           .filter(dirent => dirent.isFile())
           .map(dirent => dirent.name);
 
-        // Filter for supported audio files
-        const audioFilesList = files.filter(file => 
+        // Filter for supported video/audio files
+        const mediaFiles = files.filter(file => 
           supportedExtensions.some(ext => file.toLowerCase().endsWith(ext))
         );
 
-        // Add each audio file to the audioFiles array
-        for (const filename of audioFilesList) {
+        // Add each media file to the videos array
+        for (const filename of mediaFiles) {
           const filePath = path.join(projectPath, filename);
           const stats = fs.statSync(filePath);
           
           // Extract render ID from filename (remove extension)
           const renderId = path.parse(filename).name;
           
-          audioFiles.push({
+          videos.push({
             id: renderId,
             filename: filename,
             url: `${apiBaseUrl}/user-files/${uid}/${projectFolder}/${filename}`,
+            thumbnail: null, // You can implement thumbnail generation if needed
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),
@@ -63,15 +64,15 @@ export async function GET(request: NextRequest) {
       }
 
       // Sort by creation date (newest first)
-      audioFiles.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      videos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-      return NextResponse.json(audioFiles);
+      return NextResponse.json(videos);
     } catch (error) {
       console.error('Error reading user directories:', error);
       return NextResponse.json([]);
     }
   } catch (error) {
-    console.error('Error in rendered-audio API:', error);
+    console.error('Error in list API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

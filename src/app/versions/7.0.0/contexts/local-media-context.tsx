@@ -259,6 +259,24 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error('API registration failed');
         }
 
+        // Clean up local files after successful registration
+        try {
+          await fetch(`${apiBaseUrl}/local-media/cleanup`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: uid,
+              fileName: uploadResult.fileName,
+              thumbnailFileName: thumbnailServerPath ? `${uploadResult.fileName.split('.')[0]}_thumbnail.jpg` : null,
+            }),
+          });
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup local files:', cleanupError);
+          // Don't throw error here as the main upload was successful
+        }
+
         // Create LocalMediaFile object
         const newMediaFile: LocalMediaFile = {
           id: apiData.RESPONSE.file_id,

@@ -17,7 +17,7 @@ export async function DELETE(request: NextRequest) {
 
     // Extract project name from templateId (format: uid-projectName)
     const projectName = templateId.replace(`${uid}-`, '');
-    const projectPath = path.join(process.cwd(), 'users', uid, projectName);
+    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
 
     // Check if project exists
     if (!fs.existsSync(projectPath)) {

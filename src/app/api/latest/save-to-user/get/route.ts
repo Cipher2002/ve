@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userFolderPath = path.join(process.cwd(), 'users', uid);
+    const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
 
     // Check if user folder exists
     if (!fs.existsSync(userFolderPath)) {

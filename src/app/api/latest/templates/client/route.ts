@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get('uid') || 'default';
 
-    const userFolderPath = path.join(process.cwd(), 'users', uid);
+    const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
 
     // Check if user directory exists
     if (!fs.existsSync(userFolderPath)) {

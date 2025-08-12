@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the folder structure: users/{uid}/{projectName}
-    const userFolderPath = path.join(process.cwd(), 'users', uid, projectName);
+    const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
     
     // Ensure the directory exists
     fs.mkdirSync(userFolderPath, { recursive: true });

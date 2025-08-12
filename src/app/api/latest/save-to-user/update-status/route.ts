@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Extract project name from projectId (format: uid-projectName)
     const projectName = projectId.replace(`${uid}-`, '');
-    const projectPath = path.join(process.cwd(), 'users', uid, projectName);
+    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
     const indexPath = path.join(projectPath, 'project-index.json');
 
     // Check if project folder exists
