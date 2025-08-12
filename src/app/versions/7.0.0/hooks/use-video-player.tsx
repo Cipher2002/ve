@@ -71,6 +71,7 @@ export const useVideoPlayer = () => {
    * @returns Formatted time string in MM:SS format
    */
   const formatTime = useCallback((frames: number) => {
+    console.log('formatTime called with frames:', frames);
     const totalSeconds = frames / FPS;
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = Math.floor(totalSeconds % 60);
@@ -78,9 +79,11 @@ export const useVideoPlayer = () => {
       .toString()
       .padStart(2, "0");
 
-    return `${minutes.toString().padStart(2, "0")}:${seconds
+    const result = `${minutes.toString().padStart(2, "0")}:${seconds
       .toString()
       .padStart(2, "0")}.${frames2Digits}`;
+    console.log('formatTime result:', result);
+    return result;
   }, []);
 
   /**

@@ -71,7 +71,7 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
 
         // Also call onSeek for actual seeking
         if (onSeek) {
-          console.log('TimelineMarker onSeek called with:', newFrame, 'totalDuration:', totalDuration);
+          // console.log('TimelineMarker onSeek called with:', newFrame, 'totalDuration:', totalDuration);
           onSeek(newFrame);
         }
       },
