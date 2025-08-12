@@ -40,7 +40,6 @@ export async function DELETE(
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
             fileDeleted = true;
-            console.log(`Deleted audio file: ${filePath}`);
             break;
           }
         }

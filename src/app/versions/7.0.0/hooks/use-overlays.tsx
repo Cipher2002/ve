@@ -78,7 +78,6 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
     if (overlayToDelete && overlayToDelete.type === OverlayType.VIDEO && overlayToDelete.src) {
       // For now, we don't delete immediately on remove to allow re-adding same video
       // The cache will auto-expire after 48 hours
-      console.log('Video overlay removed from timeline. Cache will auto-expire in 48 hours:', overlayToDelete.src);
     }
   }, []);
 

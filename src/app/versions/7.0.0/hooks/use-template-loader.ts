@@ -27,7 +27,6 @@ export const useTemplateLoader = () => {
         // If this is a video overlay, we need to re-download the video
         if (newOverlay.type === 'video' && newOverlay.originalUrl) {
           try {
-            console.log('Re-downloading video for template:', newOverlay.originalUrl);
             
             // Download the video and get a new blob URL
             const newBlobUrl = await downloadVideo(newOverlay.originalUrl);
@@ -35,7 +34,6 @@ export const useTemplateLoader = () => {
             if (newBlobUrl) {
               // Update the overlay with the new blob URL
               newOverlay.src = newBlobUrl;
-              console.log('Video re-downloaded successfully for template');
             } else {
               // Fallback: use the original URL directly
               console.warn('Failed to download video, using original URL');

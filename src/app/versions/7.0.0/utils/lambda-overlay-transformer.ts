@@ -71,8 +71,6 @@ const getOriginalUrl = (videoOverlay: ClipOverlay): string => {
     return videoOverlay.src;
   }
   
-  // Fallback: if all are blob URLs, log warning and use originalUrl
-  console.log('All URLs for video overlay are blob URLs, Lambda rendering may fail:', videoOverlay);
   return videoOverlay.originalUrl || videoOverlay.content || videoOverlay.src;
 };
 
@@ -89,7 +87,6 @@ const getOriginalUrlForSound = (soundOverlay: SoundOverlay): string => {
     return soundOverlay.src;
   }
 
-  console.log('All URLs for sound overlay are blob URLs, Lambda rendering may fail:', soundOverlay);
   return soundOverlay.content || soundOverlay.src;
 };
 
@@ -106,6 +103,5 @@ const getOriginalUrlForImage = (imageOverlay: ImageOverlay): string => {
     return imageOverlay.src;
   }
 
-  console.log('All URLs for image overlay are blob URLs, Lambda rendering may fail:', imageOverlay);
   return imageOverlay.src;
 };

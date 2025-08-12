@@ -119,9 +119,7 @@ export function LocalMediaGallery({
   };
 
   const handleMediaSelect = (file: LocalMediaFile) => {
-    console.log('handleMediaSelect called with:', file.type, file.id); // Add this line
     if (file.type === "image" || file.type === "video" || file.type === "audio") {
-      console.log('Setting confirmingMediaId to:', file.id); // Add this line
       setConfirmingMediaId(file.id);
       setSelectedFile(file);
     }
@@ -429,7 +427,7 @@ export function LocalMediaGallery({
             </p>
             <div className="flex flex-col gap-2 w-full">
               <button 
-                className="w-full px-3 py-2 text-xs bg-[#490972] border rounded hover:bg-[#3a0759]"
+                className="w-full px-3 py-2 text-xs bg-[#490972] text-white rounded hover:bg-[#3a0759]"
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePreviewInNewTab();

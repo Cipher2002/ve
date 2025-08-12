@@ -64,15 +64,8 @@ export const renderVideo = async ({
 
   // Transform overlays to use original URLs for rendering
   const transformedOverlays = inputProps.overlays?.map((overlay: any) => {
-    console.log('Processing overlay:', overlay.type, {
-      hasSrc: !!overlay.src,
-      hasOriginalUrl: !!overlay.originalUrl,
-      srcValue: overlay.src?.substring(0, 50) + '...',
-      originalUrlValue: overlay.originalUrl?.substring(0, 50) + '...'
-    });
     
     if (overlay.type === 'video' && overlay.originalUrl) {
-      console.log('Transforming video overlay from blob to original URL');
       return {
         ...overlay,
         src: overlay.originalUrl,
@@ -81,16 +74,6 @@ export const renderVideo = async ({
     return overlay;
   }) || [];
 
-  console.log('Final transformed overlays count:', transformedOverlays.length);
-  console.log('Video overlays after transformation:', 
-    transformedOverlays
-      .filter((o: any) => o.type === 'video')
-      .map((o: any) => ({ 
-        type: o.type, 
-        src: o.src?.substring(0, 50) + '...', 
-        originalUrl: o.originalUrl?.substring(0, 50) + '...' 
-      }))
-  );
 
   const body: z.infer<typeof RenderRequest> = {
     id,
@@ -133,15 +116,9 @@ export const renderAudio = async ({
   };
 
   const transformedOverlays = inputProps.overlays?.map((overlay: any) => {
-    console.log('Processing overlay:', overlay.type, {
-      hasSrc: !!overlay.src,
-      hasOriginalUrl: !!overlay.originalUrl,
-      srcValue: overlay.src?.substring(0, 50) + '...',
-      originalUrlValue: overlay.originalUrl?.substring(0, 50) + '...'
-    });
+
     
     if (overlay.type === 'video' && overlay.originalUrl) {
-      console.log('Transforming video overlay from blob to original URL');
       return {
         ...overlay,
         src: overlay.originalUrl, // Use original URL for Remotion
@@ -150,16 +127,6 @@ export const renderAudio = async ({
     return overlay;
   }) || [];
 
-  console.log('Final transformed overlays count:', transformedOverlays.length);
-  console.log('Video overlays after transformation:', 
-    transformedOverlays
-      .filter((o: any) => o.type === 'video')
-      .map((o: any) => ({ 
-        type: o.type, 
-        src: o.src?.substring(0, 50) + '...', 
-        originalUrl: o.originalUrl?.substring(0, 50) + '...' 
-      }))
-  );
 
   const body: z.infer<typeof RenderRequest> = {
     id,

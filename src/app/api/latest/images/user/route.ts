@@ -64,8 +64,6 @@ export async function GET(request: NextRequest) {
 
     const fullUrl = `${baseUrl}?${queryParams.toString()}`;
     
-    console.log('Fetching from Zanopy:', fullUrl);
-
     // Make the request to Zanopy
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -86,12 +84,6 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    
-    console.log('Zanopy response:', {
-      action: do_action,
-      dataKeys: Object.keys(data),
-      itemCount: data.images?.length || data.projects?.length || 0
-    });
 
     // Return the data as-is, let the frontend handle transformation
     return NextResponse.json(data);

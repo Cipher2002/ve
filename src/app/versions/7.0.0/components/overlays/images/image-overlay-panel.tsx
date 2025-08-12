@@ -217,7 +217,6 @@ export const ImageOverlayPanel: React.FC = () => {
         }
 
         const apiUrl = `${baseUrl}?${queryParams.toString()}`;
-        console.log('Fetching from Zanopy:', apiUrl);
 
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -234,13 +233,7 @@ export const ImageOverlayPanel: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Zanopy response:', {
-          action: imageOption.action,
-          dataKeys: Object.keys(data),
-          itemCount: data.images?.length || data.projects?.length || 0
-        });
-                
-        
+
         // Handle the Zanopy API response structure
         let rawImages = [];
         

@@ -18,7 +18,6 @@ import {
 // Ensure the videos directory exists
 // Helper function to get user-specific directory
 const getUserVideoDir = (uid?: string, projectName?: string) => {
-  console.log('getUserVideoDir called with:', { uid, projectName });
   
   if (!uid || uid.trim() === '') {
     throw new Error('UID is required for video rendering. Received: ' + JSON.stringify(uid));
@@ -29,11 +28,9 @@ const getUserVideoDir = (uid?: string, projectName?: string) => {
   }
   
   const userProjectDir = path.join(process.cwd(), "users", uid.trim(), projectName.trim());
-  console.log('Creating video directory:', userProjectDir);
   
   if (!fs.existsSync(userProjectDir)) {
     fs.mkdirSync(userProjectDir, { recursive: true });
-    console.log('Created directory:', userProjectDir);
   }
   
   return userProjectDir;
@@ -43,7 +40,6 @@ const getUserVideoDir = (uid?: string, projectName?: string) => {
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
 const getUserAudioDir = (uid?: string, projectName?: string) => {
-  console.log('getUserAudioDir called with:', { uid, projectName });
   
   if (!uid || uid.trim() === '') {
     throw new Error('UID is required for audio rendering. Received: ' + JSON.stringify(uid));
@@ -54,11 +50,9 @@ const getUserAudioDir = (uid?: string, projectName?: string) => {
   }
   
   const userProjectDir = path.join(process.cwd(), "users", uid.trim(), projectName.trim());
-  console.log('Creating audio directory:', userProjectDir);
   
   if (!fs.existsSync(userProjectDir)) {
     fs.mkdirSync(userProjectDir, { recursive: true });
-    console.log('Created directory:', userProjectDir);
   }
   
   return userProjectDir;
@@ -80,7 +74,6 @@ export async function startRendering(
   format: string = 'mp4',
   codec: string = 'h264'
 ) {
-  console.log('startRendering called with inputProps:', JSON.stringify(inputProps, null, 2));
   
   // Validate required inputs
   if (!inputProps.uid) {
@@ -91,7 +84,6 @@ export async function startRendering(
     throw new Error('inputProps.projectName is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
   }
   
-  console.log('Video rendering with format:', format, 'codec:', codec);
   const renderId = uuidv4();
 
   // Initialize render state
@@ -167,8 +159,6 @@ export async function startRendering(
       const outputPath = path.join(outputDir, `${renderId}.${format}`);
 
       const remotionCodec = codecMap[codec] || codec;
-      console.log('Video mapped codec:', codec, 'to:', remotionCodec); // Add logging
-      console.log('Rendering video with codec:', remotionCodec, 'to file:', outputPath); // Add logging
 
       const baseRenderOptions = {
         codec: remotionCodec as any,
@@ -216,9 +206,6 @@ export async function startRendering(
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
       const servingPath = `${apiBaseUrl}/user-files/${uid}/${projectName}/${renderId}.${format}`;
-
-      console.log('Video saved to:', outputPath);
-      console.log('Will be served from:', servingPath);
       
       // Save metadata to project index
       await saveRenderToUserFolder(
@@ -248,7 +235,6 @@ export async function startAudioRendering(
   format: string = 'wav',
   codec: string = 'wav'
 ) {
-  console.log('startAudioRendering called with inputProps:', JSON.stringify(inputProps, null, 2));
   
   // Validate required inputs
   if (!inputProps.uid) {
@@ -259,7 +245,6 @@ export async function startAudioRendering(
     throw new Error('inputProps.projectName is required for rendering. Current inputProps: ' + JSON.stringify(inputProps));
   }
   
-  console.log('Audio rendering with format:', format, 'codec:', codec);
   const renderId = uuidv4();
 
   // Ensure the audio directory exists
@@ -323,16 +308,13 @@ export async function startAudioRendering(
         (inputProps.durationInFrames as number) || composition.durationInFrames;
 
       // Render audio only
-// Render audio only
       const outputPath = path.join(outputDir, `${renderId}.${format}`);
-      console.log('Rendering with codec:', codec, 'to file:', outputPath);
       const codecMap: Record<string, string> = {
         'mp3': 'mp3',
         'wav': 'wav', 
         'aac': 'aac',
       };
       const remotionCodec = codecMap[codec] || codec;
-      console.log('Mapped codec:', codec, 'to:', remotionCodec);
       await renderMedia({
         codec: remotionCodec as any,
         composition: {
@@ -359,9 +341,6 @@ export async function startAudioRendering(
       const uid = inputProps.uid as string;
       const projectName = inputProps.projectName as string;
       const servingPath = `${apiBaseUrl}/user-files/${uid}/${projectName}/${renderId}.${format}`;
-
-      console.log('Audio saved to:', outputPath);
-      console.log('Will be served from:', servingPath);
       
       // Save metadata to project index
       await saveRenderToUserFolder(
@@ -468,7 +447,6 @@ async function saveRenderToUserFolder(
     // Write updated index
     fs.writeFileSync(indexPath, JSON.stringify(projectIndex, null, 2));
     
-    console.log('Successfully updated project index directly');
   } catch (error) {
     console.error('Error saving render metadata to user folder:', error);
   }

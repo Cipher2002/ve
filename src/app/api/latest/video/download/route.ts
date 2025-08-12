@@ -9,8 +9,6 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Missing video URL', { status: 400 });
     }
 
-    console.log('Downloading video via proxy:', videoUrl);
-
     const response = await fetch(videoUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; VideoDownloader/1.0)',

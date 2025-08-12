@@ -2,8 +2,6 @@ import path from "path";
 import type { WebpackOverrideFn } from "@remotion/bundler";
 
 export const webpackOverride: WebpackOverrideFn = (config) => {
-  console.log("✅ remotion.config.ts loaded!");
-
   return {
     ...config,
     resolve: {

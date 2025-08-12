@@ -201,7 +201,6 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                     thumbnailFormData.append('userId', uid);
                     
                     try {
-                      console.log('Starting thumbnail upload...');
                       const thumbResponse = await fetch(`${apiBaseUrl}/local-media/upload`, {
                         method: 'POST',
                         body: thumbnailFormData,
@@ -210,8 +209,6 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                       if (thumbResponse.ok) {
                         const thumbResult = await thumbResponse.json();
                         thumbnailServerPath = thumbResult.serverPath;
-                        console.log('Thumbnail uploaded successfully:', thumbnailServerPath);
-                        console.log('Thumbnail response:', thumbResult);
                       } else {
                         console.error('Thumbnail upload failed:', thumbResponse.status, await thumbResponse.text());
                       }

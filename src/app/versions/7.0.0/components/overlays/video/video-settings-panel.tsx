@@ -140,11 +140,8 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         throw new Error('User ID not found in URL');
       }
 
-      console.log('Starting video audio generation with:', { prompt, isAiDecide, uid });
-
       // For "Let AI Decide" - send video URL directly with video_to_audio
       if (isAiDecide) {
-        console.log('Using video URL directly for AI decision:', localOverlay.src);
         
         // Check if the video source is available
         if (!localOverlay.src) {
@@ -169,7 +166,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
 
         // Check if this is a cached video (blob URL) - use original URL from content field
         if (localOverlay.src.startsWith('blob:') && localOverlay.content) {
-          console.log('Using original video URL for API:', localOverlay.content);
           videoUrlForAPI = localOverlay.content;
         }
 
@@ -181,13 +177,10 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         // Send the original video URL that the API can access
         formData.append('input_file', videoUrlForAPI);
 
-        console.log('Form data prepared with video URL');
 
         // Make API call
         await makeApiCall(formData);
       } else {
-        // For prompt-based generation (text-to-audio with video reference)
-        console.log('Using text prompt with video URL for text-to-audio:', { prompt, videoUrl: localOverlay.src });
         
         // Check if the video source is available
         if (!localOverlay.src) {
@@ -206,7 +199,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
 
         // Check if this is a cached video (blob URL) - use original URL from content field
         if (localOverlay.src.startsWith('blob:') && localOverlay.content) {
-          console.log('Using original video URL for text-to-audio API:', localOverlay.content);
           videoUrlForAPI = localOverlay.content;
         }
 
@@ -218,7 +210,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         // Send the original video URL that the API can access
         formData.append('input_file', videoUrlForAPI);
 
-        console.log('Form data prepared for text-to-audio with video URL');
 
         // Make API call
         await makeApiCallPrompt(formData);
@@ -232,13 +223,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
   // Separate function to handle the API call for prompt-based generation (different URL)
   const makeApiCallPrompt = async (formData: FormData) => {
     try {
-      console.log('Making prompt-based API call...');
-      
-      // Log form data contents for debugging
-      console.log('FormData contents:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-      }
 
       // Use different proxy API for prompt-based generation
       const apiResponse = await fetch(`${apiBaseUrl}/audio/generate-prompt`, {
@@ -246,15 +230,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         body: formData,
       });
 
-      // ... rest of the response handling code same as makeApiCall
-      console.log('API Response received:', {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        type: apiResponse.type
-      });
-
       if (apiResponse.type === 'opaque') {
-        console.log('Received opaque response (no-cors mode)');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -267,10 +243,8 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       }
 
       const responseText = await apiResponse.text();
-      console.log('Raw API Response:', responseText);
 
       if (!responseText || responseText.trim().length === 0) {
-        console.log('Empty response - might be normal for this API');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -281,7 +255,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log('Parsed result:', result);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         throw new Error('Invalid response format from server');
@@ -289,7 +262,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
 
       if (result.status === 'success' && result.genai_code) {
         const genaiCode = result.genai_code;
-        console.log('Audio generation started with code:', genaiCode);
         await pollForAudioCompletion(genaiCode);
       } else {
         throw new Error(result.MESSAGE || result.message || 'Failed to start audio generation');
@@ -304,13 +276,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
   // Separate function to handle the API call
   const makeApiCall = async (formData: FormData) => {
     try {
-      console.log('Making API call...');
-      
-      // Log form data contents for debugging
-      console.log('FormData contents:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-      }
+
 
       // Use your proxy API instead of direct call
       const apiResponse = await fetch(`${apiBaseUrl}/audio/generate`, {
@@ -318,15 +284,8 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         body: formData,
       });
 
-      console.log('API Response received:', {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        type: apiResponse.type
-      });
-
       // Handle no-cors mode (opaque response)
       if (apiResponse.type === 'opaque') {
-        console.log('Received opaque response (no-cors mode)');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -340,10 +299,8 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       }
 
       const responseText = await apiResponse.text();
-      console.log('Raw API Response:', responseText);
 
       if (!responseText || responseText.trim().length === 0) {
-        console.log('Empty response - might be normal for this API');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -354,14 +311,12 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log('Parsed result:', result);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         throw new Error('Invalid response format from server');
       }
 
       if (result.RESULT === 'SUCCESS' && result.RESPONSE) {
-        console.log('Video audio generation started with code:', result.RESPONSE);
         await pollForAudioCompletion(result.RESPONSE);
       } else {
         throw new Error(result.MESSAGE || 'Failed to start audio generation');
@@ -396,7 +351,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
 
         // Get the response text first to debug
         const responseText = await response.text();
-        console.log('Polling Response:', responseText);
 
         // Try to parse as JSON
         let result;
@@ -408,7 +362,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         }
         
         if (result.RESULT === 'SUCCESS' && result.RESPONSE && typeof result.RESPONSE === 'string' && (result.RESPONSE.startsWith('http') || result.RESPONSE.endsWith('.mp4'))) {
-          console.log('Video URL received, extracting audio:', result.RESPONSE);
           
           try {            
             // Download the video file using your proxy to avoid CORS
@@ -430,12 +383,10 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
             
             const videoFile = new File([videoBlob], 'generated_video.mp4', { type: 'video/mp4' });
             
-            console.log('Video downloaded, extracting audio with FFmpeg...');
             
             // Use your existing FFmpeg hook to extract audio
             const extractedAudioUrl = await extractAudio(videoFile);
             
-            console.log('Audio extraction completed:', extractedAudioUrl);
                         
             // Add the extracted audio as a sound overlay to the timeline
             const newSoundOverlay = {
@@ -475,7 +426,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
           
         } else if (result.RESULT === 'SUCCESS' && result.RESPONSE && typeof result.RESPONSE === 'object' && result.RESPONSE.progress !== undefined) {
           // Handle progress response - still generating
-          console.log(`Video audio generation in progress... ${result.RESPONSE.progress_msg || 'Processing'} (attempt ${attempts + 1}/${maxAttempts})`);
           attempts++;
           if (attempts < maxAttempts) {
             setTimeout(poll, 5000); // Poll every 5 seconds
@@ -492,7 +442,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
           }
         } else if (result.RESULT === 'ERROR' && result.RESPONSE && result.RESPONSE.includes('Video is not generated')) {
           // Audio is still being generated, continue polling
-          console.log(`Video audio still generating... attempt ${attempts + 1}/${maxAttempts}`);
           attempts++;
           if (attempts < maxAttempts) {
             setTimeout(poll, 5000); // Poll every 5 seconds

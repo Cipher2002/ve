@@ -27,7 +27,6 @@ export const useVideoCache = () => {
         try {
           const deletedCount = await cleanupExpiredVideos();
           if (deletedCount > 0) {
-            console.log(`Cleaned up ${deletedCount} expired cached videos`);
           }
         } catch (error) {
           console.error('Error during periodic video cache cleanup:', error);
@@ -61,14 +60,12 @@ export const useVideoCache = () => {
   ): Promise<string | null> => {
     // Check if already downloading
     if (downloadingVideos.current.has(url)) {
-      console.log('Video already being downloaded:', url);
       return null;
     }
 
     // Check cache first
     const cachedUrl = await getCachedVideo(url);
     if (cachedUrl) {
-      console.log('Video found in cache:', url);
       return cachedUrl;
     }
 
@@ -76,7 +73,6 @@ export const useVideoCache = () => {
     downloadingVideos.current.add(url);
     
     try {
-      console.log('Downloading video for cache:', url);
       
       // Use your proxy endpoint to download the video
       const proxyUrl = `${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`;
@@ -122,7 +118,6 @@ export const useVideoCache = () => {
       const success = await addCachedVideo(url, blob, filename);
       
       if (success) {
-        console.log('Video cached successfully:', url);
         return URL.createObjectURL(blob);
       } else {
         console.error('Failed to cache video:', url);
@@ -148,7 +143,6 @@ export const useVideoCache = () => {
    * Remove video from cache
    */
   const removeCachedVideo = useCallback(async (url: string): Promise<boolean> => {
-    console.log('Removing video from cache:', url);
     return await deleteCachedVideo(url);
   }, []);
 
@@ -171,7 +165,6 @@ export const useVideoCache = () => {
    * Clean up expired videos manually
    */
   const cleanupNow = useCallback(async (): Promise<number> => {
-    console.log('Starting manual video cache cleanup...');
     return await cleanupExpiredVideos();
   }, []);
 
@@ -179,7 +172,6 @@ export const useVideoCache = () => {
    * Clear entire cache
    */
   const clearCache = useCallback(async (): Promise<boolean> => {
-    console.log('Clearing entire video cache...');
     return await clearAllCachedVideos();
   }, []);
 

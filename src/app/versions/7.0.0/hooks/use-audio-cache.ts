@@ -26,9 +26,6 @@ export const useAudioCache = () => {
       cleanupIntervalRef.current = setInterval(async () => {
         try {
           const deletedCount = await cleanupExpiredVideos();
-          if (deletedCount > 0) {
-            console.log(`Cleaned up ${deletedCount} expired cached audio files`);
-          }
         } catch (error) {
           console.error('Error during periodic audio cache cleanup:', error);
         }
@@ -61,14 +58,12 @@ export const useAudioCache = () => {
   ): Promise<string | null> => {
     // Check if already downloading
     if (downloadingAudio.current.has(url)) {
-      console.log('Audio already being downloaded:', url);
       return null;
     }
 
     // Check cache first
     const cachedUrl = await getCachedVideo(url);
     if (cachedUrl) {
-      console.log('Audio found in cache:', url);
       return cachedUrl;
     }
 
@@ -76,7 +71,6 @@ export const useAudioCache = () => {
     downloadingAudio.current.add(url);
     
     try {
-      console.log('Downloading audio for cache:', url);
       
       // Use the video proxy endpoint to download the audio (it can handle any media file)
       const proxyUrl = `${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`;
@@ -122,7 +116,6 @@ export const useAudioCache = () => {
       const success = await addCachedVideo(url, blob, filename);
       
       if (success) {
-        console.log('Audio cached successfully:', url);
         return URL.createObjectURL(blob);
       } else {
         console.error('Failed to cache audio:', url);
@@ -148,7 +141,6 @@ export const useAudioCache = () => {
    * Remove audio from cache
    */
   const removeCachedAudio = useCallback(async (url: string): Promise<boolean> => {
-    console.log('Removing audio from cache:', url);
     return await deleteCachedVideo(url);
   }, []);
 
@@ -171,7 +163,6 @@ export const useAudioCache = () => {
    * Clean up expired audio manually
    */
   const cleanupNow = useCallback(async (): Promise<number> => {
-    console.log('Starting manual audio cache cleanup...');
     return await cleanupExpiredVideos();
   }, []);
 
@@ -179,7 +170,6 @@ export const useAudioCache = () => {
    * Clear entire cache
    */
   const clearCache = useCallback(async (): Promise<boolean> => {
-    console.log('Clearing entire audio cache...');
     return await clearAllCachedVideos();
   }, []);
 

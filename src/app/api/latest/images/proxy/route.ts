@@ -10,9 +10,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.log('Proxying request for:', imageUrl);
-
     // Fetch the file from the external URL (this bypasses CORS since it's server-side)
     const response = await fetch(imageUrl, {
       method: 'GET',
@@ -32,12 +29,6 @@ export async function POST(request: NextRequest) {
     // Get the file data as ArrayBuffer
     const arrayBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
-
-    console.log('Successfully fetched file:', {
-      size: arrayBuffer.byteLength,
-      contentType: contentType
-    });
-
     // Return the file data with appropriate headers
     return new NextResponse(arrayBuffer, {
       status: 200,

@@ -137,9 +137,7 @@ const Timeline: React.FC<TimelineProps> = ({
     async (id: number) => {
       const videoOverlay = overlays.find(overlay => overlay.id === id);
       if (!videoOverlay || videoOverlay.type !== OverlayType.VIDEO) return;
-      
-      console.log('Starting audio extraction for overlay:', videoOverlay.src);
-      
+            
       const targetRow = videoOverlay.row + 1;
       
       // Create a loading placeholder sound overlay immediately
@@ -201,30 +199,22 @@ const Timeline: React.FC<TimelineProps> = ({
         
         // Check if src is a blob URL or regular URL
         if (videoOverlay.src.startsWith('blob:')) {
-          console.log('Processing blob URL...');
           const response = await fetch(videoOverlay.src);
           if (!response.ok) {
             throw new Error(`Failed to fetch blob: ${response.status}`);
           }
           const blob = await response.blob();
-          console.log('Blob fetched successfully, size:', blob.size);
           videoFile = new File([blob], 'video.mp4', { type: 'video/mp4' });
         } else {
-          console.log('Processing regular URL...');
           const response = await fetch(videoOverlay.src);
           if (!response.ok) {
             throw new Error(`Failed to fetch video: ${response.status}`);
           }
           videoFile = new File([await response.blob()], 'video.mp4', { type: 'video/mp4' });
         }
-        
-        console.log('Video file created, attempting extraction...');
-        
         // Extract audio using FFmpeg
         const extractedAudioUrl = await extractAudio(videoFile);
-        
-        console.log('Audio extraction successful!');
-        
+                
         // Replace the loading overlay with the actual audio overlay
         const finalSoundOverlay = {
           ...loadingSoundOverlay,
@@ -248,7 +238,6 @@ const Timeline: React.FC<TimelineProps> = ({
         console.error('Failed to extract audio:', error);
         
         // Fallback: replace loading overlay with random sound
-        console.log('Using fallback random sound...');
         const randomSounds = ['Take Care Of Yourself Full Version.mp3', '138_upbeat_corporate.mp3'];
         const randomSound = randomSounds[Math.floor(Math.random() * randomSounds.length)];
         
@@ -319,7 +308,6 @@ const Timeline: React.FC<TimelineProps> = ({
   const handleVideoAddedToTimeline = useCallback(async (videoOverlay: Overlay) => {
     if (videoOverlay.type === OverlayType.VIDEO && videoOverlay.src) {
       // Download video when added to timeline
-      console.log('Video added to timeline, starting download:', videoOverlay.src);
       await downloadVideo(videoOverlay.src);
     }
   }, [downloadVideo]);
@@ -329,7 +317,6 @@ const Timeline: React.FC<TimelineProps> = ({
       // Check if we should delete this video from cache
       const shouldDelete = await shouldDeleteOnRemove(videoOverlay.src);
       if (shouldDelete) {
-        console.log('Removing video from cache after timeline removal:', videoOverlay.src);
         await removeCachedVideo(videoOverlay.src);
       }
     }

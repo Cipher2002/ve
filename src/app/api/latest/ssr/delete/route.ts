@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
             fileDeleted = true;
-            console.log(`Deleted file: ${filePath}`);
             break;
           }
         }

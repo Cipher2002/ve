@@ -93,8 +93,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   // Video player controls and state
   const { isPlaying, currentFrame, playerRef, togglePlayPause, formatTime } =
     useVideoPlayer();
-  console.log('Current frame in editor:', currentFrame);
-
   // Composition duration calculations
   const { durationInFrames, durationInSeconds } = useCompositionDuration(overlays);
 

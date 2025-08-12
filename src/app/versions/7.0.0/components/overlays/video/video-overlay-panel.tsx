@@ -224,8 +224,6 @@ export const VideoOverlayPanel: React.FC = () => {
       setDownloadProgress(prev => new Map(prev).set(project.id, 0));
 
       try {
-        // Download video first with progress tracking
-        console.log('Starting video download:', project.video_url);
         const cachedVideoUrl = await downloadVideo(project.video_url, (progress) => {
           setDownloadProgress(prev => new Map(prev).set(project.id, progress));
         });
@@ -264,7 +262,6 @@ export const VideoOverlayPanel: React.FC = () => {
           };
 
           addOverlay(videoOverlay);
-          console.log('Video added to timeline successfully');
         } else {
           console.error('Failed to download video');
         }
@@ -294,7 +291,6 @@ export const VideoOverlayPanel: React.FC = () => {
 
       try {
         // Download video first with progress tracking
-        console.log('Starting rendered video download:', video.url);
         const cachedVideoUrl = await downloadVideo(video.url, (progress) => {
           setDownloadProgress(prev => new Map(prev).set(video.id, progress));
         });
@@ -333,7 +329,6 @@ export const VideoOverlayPanel: React.FC = () => {
           };
 
           addOverlay(videoOverlay);
-          console.log('Rendered video added to timeline successfully');
         } else {
           console.error('Failed to download rendered video');
         }

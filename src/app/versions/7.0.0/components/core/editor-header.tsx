@@ -131,7 +131,6 @@ export function EditorHeader() {
         } else {
           // Project doesn't exist yet (hasn't been saved), just update the name locally
           setOriginalName(newName);
-          console.log('Project name updated locally (not saved yet)');
         }
       } catch (error) {
         console.error('Error updating project name:', error);
@@ -139,7 +138,6 @@ export function EditorHeader() {
         if (error instanceof TypeError && error.message.includes('fetch')) {
           // Network error - might be unsaved project, allow local rename
           setOriginalName(newName);
-          console.log('Project name updated locally due to network error');
         } else {
           setProjectName(oldName);
         }

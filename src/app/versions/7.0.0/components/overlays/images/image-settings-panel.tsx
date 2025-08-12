@@ -65,11 +65,9 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         throw new Error('User ID not found in URL');
       }
 
-      console.log('Starting audio generation with:', { prompt, isAiDecide, uid });
 
       // For "Let AI Decide" - send image URL directly
       if (isAiDecide) {
-        console.log('Using image URL directly for AI decision:', localOverlay.src);
         
         // Check if the image source is available
         if (!localOverlay.src) {
@@ -86,13 +84,11 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         // Send the image URL directly, not as a file upload
         formData.append('input_file', localOverlay.src);
 
-        console.log('Form data prepared with image URL');
 
         // Make API call
         await makeApiCall(formData);
       } else {
         // For prompt-based generation (text-to-audio)
-        console.log('Using text prompt with image URL for text-to-audio:', { prompt, imageUrl: localOverlay.src });
         
         // Check if the image source is available
         if (!localOverlay.src) {
@@ -108,7 +104,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         formData.append('negative_prompt', 'speech, voice, talking, narration, vocals, dialogue, singing, human sounds');
         formData.append('seed', '-1');
 
-        console.log('Form data prepared for text-to-audio with image URL');
 
         // Make API call
         await makeApiCallPrompt(formData);
@@ -122,13 +117,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   // Separate function to handle the API call for prompt-based generation (different URL)
   const makeApiCallPrompt = async (formData: FormData) => {
     try {
-      console.log('Making prompt-based API call...');
-      
-      // Log form data contents for debugging
-      console.log('FormData contents:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-      }
+
 
       // Use different proxy API for prompt-based generation
       const apiResponse = await fetch(`${apiBaseUrl}/audio/generate-prompt`, {
@@ -136,15 +125,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         body: formData,
       });
 
-      // ... rest of the response handling code same as makeApiCall
-      console.log('API Response received:', {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        type: apiResponse.type
-      });
-
       if (apiResponse.type === 'opaque') {
-        console.log('Received opaque response (no-cors mode)');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -157,10 +138,8 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       }
 
       const responseText = await apiResponse.text();
-      console.log('Raw API Response:', responseText);
 
       if (!responseText || responseText.trim().length === 0) {
-        console.log('Empty response - might be normal for this API');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -171,7 +150,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log('Parsed result:', result);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         throw new Error('Invalid response format from server');
@@ -179,7 +157,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 
       if (result.status === 'success' && result.genai_code) {
         const genaiCode = result.genai_code;
-        console.log('Audio generation started with code:', genaiCode);
         await pollForAudioCompletion(genaiCode);
       } else {
         throw new Error(result.MESSAGE || result.message || 'Failed to start audio generation');
@@ -194,29 +171,14 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   // Separate function to handle the API call
   const makeApiCall = async (formData: FormData) => {
     try {
-      console.log('Making API call...');
-      
-      // Log form data contents for debugging
-      console.log('FormData contents:');
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-      }
-
       // Use your proxy API instead of direct call
       const apiResponse = await fetch(`${apiBaseUrl}/audio/generate`, {
         method: 'POST',
         body: formData,
       });
 
-      console.log('API Response received:', {
-        status: apiResponse.status,
-        statusText: apiResponse.statusText,
-        type: apiResponse.type
-      });
-
       // Handle no-cors mode (opaque response)
       if (apiResponse.type === 'opaque') {
-        console.log('Received opaque response (no-cors mode)');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -230,10 +192,8 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       }
 
       const responseText = await apiResponse.text();
-      console.log('Raw API Response:', responseText);
 
       if (!responseText || responseText.trim().length === 0) {
-        console.log('Empty response - might be normal for this API');
         setTimeout(() => {
           setAudioPrompt('');
           setAiAudioSection(null);
@@ -244,14 +204,12 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log('Parsed result:', result);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         throw new Error('Invalid response format from server');
       }
 
       if (result.RESULT === 'SUCCESS' && result.RESPONSE) {
-        console.log('Audio generation started with code:', result.RESPONSE);
         await pollForAudioCompletion(result.RESPONSE);
       } else {
         throw new Error(result.MESSAGE || 'Failed to start audio generation');
@@ -286,7 +244,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 
         // Get the response text first to debug
         const responseText = await response.text();
-        console.log('Polling Response:', responseText);
 
         // Try to parse as JSON
         let result;
@@ -298,7 +255,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         }
         
         if (result.RESULT === 'SUCCESS' && result.RESPONSE && typeof result.RESPONSE === 'string' && (result.RESPONSE.startsWith('http') || result.RESPONSE.endsWith('.mp4'))) {
-          console.log('Video URL received, extracting audio:', result.RESPONSE);
           
           try {            
             // Download the video file using your proxy to avoid CORS
@@ -320,12 +276,10 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
             
             const videoFile = new File([videoBlob], 'generated_video.mp4', { type: 'video/mp4' });
             
-            console.log('Video downloaded, extracting audio with FFmpeg...');
             
             // Use your existing FFmpeg hook to extract audio
             const extractedAudioUrl = await extractAudio(videoFile);
             
-            console.log('Audio extraction completed:', extractedAudioUrl);
                         
             // Add the extracted audio as a sound overlay to the timeline
             const newSoundOverlay = {
@@ -365,7 +319,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
           
         } else if (result.RESULT === 'SUCCESS' && result.RESPONSE && typeof result.RESPONSE === 'object' && result.RESPONSE.progress !== undefined) {
           // Handle progress response - still generating
-          console.log(`Audio generation in progress... ${result.RESPONSE.progress_msg || 'Processing'} (attempt ${attempts + 1}/${maxAttempts})`);
           attempts++;
           if (attempts < maxAttempts) {
             setTimeout(poll, 5000); // Poll every 5 seconds
@@ -381,8 +334,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
             throw new Error('Audio generation timed out');
           }
         } else if (result.RESULT === 'ERROR' && result.RESPONSE && result.RESPONSE.includes('Video is not generated')) {
-          // Audio is still being generated, continue polling
-          console.log(`Audio still generating... attempt ${attempts + 1}/${maxAttempts}`);
           attempts++;
           if (attempts < maxAttempts) {
             setTimeout(poll, 5000); // Poll every 5 seconds

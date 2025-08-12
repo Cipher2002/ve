@@ -4,15 +4,6 @@ export async function POST(request: NextRequest) {
   try {
     // Get the form data from the request
     const formData = await request.formData();
-    
-    console.log('Proxying prompt-based audio generation request...');
-    
-    // Log form data contents for debugging
-    console.log('FormData contents:');
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value);
-    }
-
     // Forward the request to the different Zanopy API endpoint for prompt-based generation
     const response = await fetch('https://zanopy.ai/process_request.php', {
       method: 'POST',
@@ -20,12 +11,6 @@ export async function POST(request: NextRequest) {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       },
-    });
-
-    console.log('Zanopy API Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries(response.headers.entries())
     });
 
     if (!response.ok) {
@@ -38,11 +23,8 @@ export async function POST(request: NextRequest) {
     }
 
     const responseText = await response.text();
-    console.log('Raw Zanopy Response:', responseText);
-
     // Check if response is empty
     if (!responseText || responseText.trim().length === 0) {
-      console.log('Empty response from Zanopy - might be normal');
       return NextResponse.json({
         RESULT: 'SUCCESS',
         MESSAGE: 'Request submitted successfully (empty response)',
