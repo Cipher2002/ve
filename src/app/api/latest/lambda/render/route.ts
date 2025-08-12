@@ -14,7 +14,7 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 100,
+  FRAMES_PER_LAMBDA: 50,
   MAX_RETRIES: 2,
 } as const;
 
@@ -101,9 +101,20 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       };
 
       // Add codec-specific options for video
-      const finalRenderOptions = isAudio || body.codec === 'gif' 
-        ? renderOptions
-        : {
+      let finalRenderOptions: any = renderOptions;
+      
+      if (!isAudio && body.codec !== 'gif') {
+        if (body.codec === 'vp8') {
+          finalRenderOptions = {
+            ...renderOptions,
+            crf: 4, // VP8 minimum CRF value
+            imageFormat: "png" as const,
+            colorSpace: "bt709" as const,
+            jpegQuality: 100,
+          };
+        } else {
+          // H.264 and other codecs
+          finalRenderOptions = {
             ...renderOptions,
             crf: 1,
             imageFormat: "png" as const,
@@ -111,6 +122,8 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
             x264Preset: "veryslow" as const,
             jpegQuality: 100,
           };
+        }
+      }
 
       const result = await renderMediaOnLambda(finalRenderOptions);
 
