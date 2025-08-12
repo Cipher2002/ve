@@ -82,10 +82,9 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
     );
 
     const handleMouseUp = useCallback((e: MouseEvent) => {
-      if (dragStartedRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      // Always prevent default and stop propagation for mouseup during dragging
+      e.preventDefault();
+      e.stopPropagation();
       
       setIsDragging(false);
       setDragPosition(null);
@@ -107,19 +106,18 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
         };
 
         const handleUp = (e: MouseEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
           handleMouseUp(e);
         };
 
-        document.addEventListener('mousemove', handleMove, { passive: false });
-        document.addEventListener('mouseup', handleUp, { passive: false });
+        // Use capture phase to ensure we get the event first
+        document.addEventListener('mousemove', handleMove, { passive: false, capture: true });
+        document.addEventListener('mouseup', handleUp, { passive: false, capture: true });
         document.body.style.cursor = 'grabbing';
         document.body.style.userSelect = 'none';
         
         return () => {
-          document.removeEventListener('mousemove', handleMove);
-          document.removeEventListener('mouseup', handleUp);
+          document.removeEventListener('mousemove', handleMove, { capture: true });
+          document.removeEventListener('mouseup', handleUp, { capture: true });
           document.body.style.cursor = '';
           document.body.style.userSelect = '';
         };
