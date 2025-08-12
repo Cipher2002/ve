@@ -653,7 +653,7 @@ export const ImageOverlayPanel: React.FC = () => {
                   <select
                     value={selectedImageType}
                     onChange={(e) => handleImageTypeChange(e.target.value)}
-                    className="bg-background border border-border text-foreground rounded-md text-sm"
+                    className="bg-background border border-[rgb(41,0,156)] text-foreground rounded-md text-sm"
                     disabled={false}
                     style={{ pointerEvents: 'auto', zIndex: 10 }}
                   >
@@ -666,7 +666,7 @@ export const ImageOverlayPanel: React.FC = () => {
                   <select
                     value={aspectRatioGenerated}
                     onChange={(e) => handleGeneratedAspectRatioChange(e.target.value)}
-                    className="bg-background border border-border text-foreground rounded-md px-3 py-2 text-sm"
+                    className="bg-background border border-[rgb(41,0,156)] text-foreground rounded-md px-3 py-2 text-sm"
                     disabled={false}
                     style={{ pointerEvents: 'auto', zIndex: 10 }}
                   >
@@ -690,7 +690,7 @@ export const ImageOverlayPanel: React.FC = () => {
                     <Input
                       placeholder="Search images..."
                       value={searchQueryGenerated}
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-blue-400"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgb(41,0,156)]"
                       onChange={(e) => handleGeneratedSearchInputChange(e.target.value)}
                       style={{ fontSize: "16px" }}
                       autoFocus
