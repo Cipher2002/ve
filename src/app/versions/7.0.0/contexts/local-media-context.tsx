@@ -174,7 +174,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
           const video = document.createElement('video');
           video.src = URL.createObjectURL(file);
           
-          await new Promise((resolve) => {
+          thumbnailServerPath = await new Promise((resolve) => {
             video.onloadedmetadata = () => {
               duration = video.duration;
               
@@ -191,7 +191,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
               if (ctx) {
                 ctx.drawImage(video, 0, 0);
                 
-                // Convert canvas to blob - use Promise.resolve to make it properly async
+                // Convert canvas to blob
                 canvas.toBlob(async (blob) => {
                   if (blob) {
                     // Upload thumbnail as a separate file
@@ -208,21 +208,24 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
                       
                       if (thumbResponse.ok) {
                         const thumbResult = await thumbResponse.json();
-                        thumbnailServerPath = thumbResult.serverPath;
+                        resolve(thumbResult.serverPath); // Return the actual thumbnail path
                       } else {
                         console.error('Thumbnail upload failed:', thumbResponse.status, await thumbResponse.text());
+                        resolve(''); // Return empty string on failure
                       }
                     } catch (error) {
                       console.error('Failed to upload thumbnail:', error);
+                      resolve(''); // Return empty string on failure
                     }
+                  } else {
+                    resolve(''); // Return empty string if blob creation failed
                   }
                   
                   URL.revokeObjectURL(video.src);
-                  resolve(void 0); // This resolves AFTER thumbnail upload completes
                 }, 'image/jpeg', 0.7);
               } else {
                 URL.revokeObjectURL(video.src);
-                resolve(void 0);
+                resolve(''); // Return empty string if canvas context failed
               }
             };
           });
@@ -233,8 +236,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         const fileUrl = `${uploadResult.serverPath}`;
         const fileCdnUrl = fileUrl;
         const fileThumbnailUrl = thumbnailServerPath ? 
-                                fileUrl : // Fallback to original file for non-videos
-                                fileUrl;
+                                thumbnailServerPath : // Use actual thumbnail path
+                                fileUrl; // Fallback to original file for non-videos
 
         // Call the Zanopy API to register the file
         const apiResponse = await fetch(`${apiBaseUrl}/media/upload-register`, {
