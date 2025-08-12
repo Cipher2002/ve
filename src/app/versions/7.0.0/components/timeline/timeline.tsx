@@ -27,6 +27,7 @@ import {
   SNAPPING_CONFIG,
 } from "../../constants";
 import { useAssetLoading } from "../../contexts/asset-loading-context";
+import { useEditorContext } from "../../contexts/editor-context";
 import { MobileNavBar } from "../mobile/mobile-nav-bar";
 import { useTimelineSnapping } from "../../hooks/use-timeline-snapping";
 
@@ -78,8 +79,8 @@ const Timeline: React.FC<TimelineProps> = ({
   onMuteVideo,
   onMuteAudio,
   isExtractingAudio, // Add this
-
 }) => {
+  const { playerRef } = useEditorContext();
   // State for tracking hover position during split operations
   const [lastKnownHoverInfo, setLastKnownHoverInfo] = useState<{
     itemId: number;
@@ -607,7 +608,12 @@ const Timeline: React.FC<TimelineProps> = ({
               <TimelineMarker
                 currentFrame={currentFrame}
                 totalDuration={durationInFrames}
-                onSeek={setCurrentFrame}
+                onSeek={(frame) => {
+                  setCurrentFrame(frame);
+                  if (playerRef.current) {
+                    playerRef.current.seekTo(frame);
+                  }
+                }}
               />
 
               {/* Drag operation visual feedback */}
