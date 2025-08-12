@@ -82,11 +82,15 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
     );
 
     const handleMouseUp = useCallback((e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      if (dragStartedRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
       setIsDragging(false);
       setDragPosition(null);
       timelineContainerRef.current = null;
+      dragStartedRef.current = false;
       
       // Force cursor reset
       document.body.style.cursor = '';
