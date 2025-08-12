@@ -21,15 +21,28 @@ function App() {
   const [isCheckComplete, setIsCheckComplete] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Function to reset zoom level
+  const resetZoom = () => {
+    try {
+      // Reset document zoom if it exists
+      (document.body.style as any).zoom = '1';
+      document.documentElement.style.transform = 'scale(1)';
+      document.documentElement.style.transformOrigin = 'top left';
+      
+      // Also try to reset any CSS transforms that might affect scaling
+      document.body.style.transform = 'scale(1)';
+      document.body.style.transformOrigin = 'top left';
+    } catch (e) {
+      // Ignore any errors
+    }
+  };
+
   // Allowed domains for iframe embedding
   const allowedDomains = ['zanopy.ai']; // Add more domains here as needed
 
   useEffect(() => {
     function checkFullscreenByViewport() {
-      // Multiple detection methods for better reliability
-      const viewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
-      
-      // Type-safe fullscreen element checks
+      // Primary check: Fullscreen API detection
       const doc = document as any;
       const documentFullscreen = !!(
         document.fullscreenElement || 
@@ -54,15 +67,20 @@ function App() {
         // Cross-origin access denied - ignore
       }
       
-      // Additional checks for iframe scenarios
+      // Only use viewport detection as secondary check with stricter conditions
       const heightRatio = window.innerHeight / screen.height;
       const widthRatio = window.innerWidth / screen.width;
-      const ratioFullscreen = heightRatio > 0.95 && widthRatio > 0.95; // 95% threshold for zoom tolerance
       
-      // Check if iframe takes up most of the screen
-      const iframeFullscreen = window.innerHeight > 600 && (heightRatio > 0.9 || widthRatio > 0.9);
+      // Much stricter viewport fullscreen detection
+      const strictViewportFullscreen = (
+        heightRatio >= 0.98 && 
+        widthRatio >= 0.98 && 
+        window.innerHeight >= 800 && // Minimum height for fullscreen
+        window.innerWidth >= 1200    // Minimum width for fullscreen
+      );
       
-      const isFullscreenDetected = viewportFullscreen || documentFullscreen || parentFullscreen || ratioFullscreen || iframeFullscreen;
+      // Final determination - prioritize API detection
+      const isFullscreenDetected = documentFullscreen || parentFullscreen || strictViewportFullscreen;
       
       setIsFullscreen(isFullscreenDetected);
     }
@@ -144,17 +162,26 @@ function App() {
       checkFullscreenByViewport();
     });
 
-    // Listen for fullscreen events
+    // Listen for fullscreen events with zoom reset
+    const handleFullscreenChange = () => {
+      checkFullscreenByViewport();
+      // Reset zoom when exiting fullscreen
+      setTimeout(() => {
+        if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+          resetZoom();
+        }
+      }, 100);
+    };
+
     const fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'msfullscreenchange'];
     fullscreenEvents.forEach(event => {
-      document.addEventListener(event, checkFullscreenByViewport);
+      document.removeEventListener(event, handleFullscreenChange);
       try {
         if (window.parent && window.parent.document && window.parent !== window) {
-          window.parent.document.addEventListener(event, checkFullscreenByViewport);
+          window.parent.document.removeEventListener(event, handleFullscreenChange);
         }
       } catch (e) {
         // Cross-origin access denied - ignore
-        console.log(e);
       }
     });
 
