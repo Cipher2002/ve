@@ -64,11 +64,11 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
         const rect = timelineContainerRef.current.getBoundingClientRect();
         const relativeX = e.clientX - rect.left;
         const percentage = Math.max(0, Math.min(1, relativeX / rect.width));
-        const newFrame = Math.round(percentage * totalDuration);
-        
+        const newFrame = Math.max(0, Math.min(totalDuration - 1, Math.round(percentage * totalDuration)));
+
         // Update drag position immediately for visual feedback
         setDragPosition(newFrame);
-        
+
         // Also call onSeek for actual seeking
         if (onSeek) {
           onSeek(newFrame);

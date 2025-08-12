@@ -190,9 +190,8 @@ const TimeMarkers = ({
         const { left, width } = event.currentTarget.getBoundingClientRect();
         const clickPosition = (event.clientX - left) / width;
         // Convert click position to frame-accurate position
-        const framePosition =
-          Math.round(clickPosition * durationInFrames) / durationInFrames;
-        handleTimelineClick(framePosition);
+        const frameNumber = Math.round(clickPosition * durationInFrames);
+        handleTimelineClick(frameNumber);
       }
     },
     [handleTimelineClick, durationInFrames]
