@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { useCallback, useMemo, useState } from "react";
 import { CompositionProps } from "../types";
-import {
-  getProgress as ssrGetProgress,
-  renderVideo as ssrRenderVideo,
-  renderAudio as ssrRenderAudio,
-} from "../ssr-helpers/api";
+// import {
+//   getProgress as ssrGetProgress,
+//   renderVideo as ssrRenderVideo,
+//   renderAudio as ssrRenderAudio,
+// } from "../ssr-helpers/api";
 import {
   getProgress as lambdaGetProgress,
   renderVideo as lambdaRenderVideo,
@@ -66,20 +66,33 @@ export const useRendering = (
       status: "invoking",
     });
     try {
-      const renderVideo =
-        renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
-      const getProgress =
-        renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
+      // const renderVideo =
+      //   renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
+      // const getProgress =
+      //   renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
 
-      // Transform overlays for Lambda rendering if using Lambda
-      const transformedInputProps = renderType === "lambda" 
-        ? {
-            ...inputProps,
-            overlays: transformOverlaysForLambda(inputProps.overlays)
-          }
-        : inputProps;
+      // // Transform overlays for Lambda rendering if using Lambda
+      // const transformedInputProps = renderType === "lambda" 
+      //   ? {
+      //       ...inputProps,
+      //       overlays: transformOverlaysForLambda(inputProps.overlays)
+      //     }
+      //   : inputProps;
 
-      const response = await renderVideo({ 
+      // Transform overlays for Lambda rendering
+      const transformedInputProps = {
+        ...inputProps,
+        overlays: transformOverlaysForLambda(inputProps.overlays)
+      };
+
+      // const response = await renderVideo({ 
+      //   id, 
+      //   inputProps: transformedInputProps, 
+      //   format, 
+      //   codec,
+      //   mediaType: "video" 
+      // });
+      const response = await lambdaRenderVideo({ 
         id, 
         inputProps: transformedInputProps, 
         format, 
@@ -90,10 +103,11 @@ export const useRendering = (
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
 
-      if (renderType === "ssr") {
-        // Add a small delay for SSR rendering to ensure initialization
-        await wait(3000);
-      }
+      // if (renderType === "ssr") {
+      //   // Add a small delay for SSR rendering to ensure initialization
+      //   await wait(3000);
+      // }
+
 
       setState({
         status: "rendering",
@@ -105,7 +119,11 @@ export const useRendering = (
       let pending = true;
 
       while (pending) {
-        const result = await getProgress({
+        // const result = await getProgress({
+        //   id: renderId,
+        //   bucketName: typeof bucketName === "string" ? bucketName : "",
+        // });
+        const result = await lambdaGetProgress({
           id: renderId,
           bucketName: typeof bucketName === "string" ? bucketName : "",
         });
@@ -160,34 +178,46 @@ export const useRendering = (
       status: "invoking",
     });
     try {
-      const renderAudioFn = renderType === "ssr" ? ssrRenderAudio : 
-        (renderType === "lambda" ? lambdaRenderAudio : ssrRenderAudio);
+      // const renderAudioFn = renderType === "ssr" ? ssrRenderAudio : 
+      //   (renderType === "lambda" ? lambdaRenderAudio : ssrRenderAudio);
       
-      const transformedInputProps = renderType === "lambda" 
-        ? {
-            ...inputProps,
-            overlays: transformOverlaysForLambda(inputProps.overlays)
-          }
-        : inputProps;
+      // const transformedInputProps = renderType === "lambda" 
+      //   ? {
+      //       ...inputProps,
+      //       overlays: transformOverlaysForLambda(inputProps.overlays)
+      //     }
+      //   : inputProps;
+      const transformedInputProps = {
+        ...inputProps,
+        overlays: transformOverlaysForLambda(inputProps.overlays)
+      };
         
-      const response = await renderAudioFn({ id, inputProps: transformedInputProps, format, codec });
+      // const response = await renderAudioFn({ id, inputProps: transformedInputProps, format, codec });
+      const response = await lambdaRenderAudio({ id, inputProps: transformedInputProps, format, codec });
       const renderId = response.renderId;
+      const bucketName =
+        "bucketName" in response ? response.bucketName : undefined;
 
-      // Add a small delay for SSR rendering to ensure initialization
-      await wait(3000);
+      // // Add a small delay for SSR rendering to ensure initialization
+      // await wait(3000);
 
       setState({
         status: "rendering",
         progress: 0,
         renderId,
+        bucketName: typeof bucketName === "string" ? bucketName : undefined,
       });
 
       let pending = true;
 
       while (pending) {
-        const result = await ssrGetProgress({
+        // const result = await ssrGetProgress({
+        //   id: renderId,
+        //   bucketName: "",
+        // });
+        const result = await lambdaGetProgress({
           id: renderId,
-          bucketName: "",
+          bucketName: typeof bucketName === "string" ? bucketName : "",
         });
         switch (result.type) {
           case "error": {
@@ -227,7 +257,8 @@ export const useRendering = (
         renderId: null,
       });
     }
-  }, [id, inputProps]);
+  // }, [id, inputProps]);
+  }, [id, inputProps, renderType]);
 
   return useMemo(
   () => ({
