@@ -653,7 +653,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
                 <button
                   onClick={() => generateAudio(audioPrompt, false)}
                   disabled={!audioPrompt.trim() || isGeneratingAudio}
-                  className="w-full px-3 py-2 text-xs bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
                 >
                   {isGeneratingAudio ? (
                     <>
@@ -699,7 +699,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
                 <button
                   onClick={() => generateAudio('', true)}
                   disabled={isGeneratingAudio}
-                  className="w-full px-3 py-2 text-xs bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
+                  className="w-full px-3 py-2 text-xs bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center justify-center gap-2"
                 >
                   {isGeneratingAudio ? (
                     <>

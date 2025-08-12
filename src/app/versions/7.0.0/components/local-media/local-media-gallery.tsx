@@ -413,7 +413,7 @@ export function LocalMediaGallery({
             <p className="text-xs text-[rgb(41,0,156)] dark:text-blue-300">{downloadProgress.get(file.id) || 0}%</p>
             <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
               <div 
-                className="h-full bg-blue-500 transition-all duration-300"
+                className="h-full bg-[rgb(41,0,156)] transition-all duration-300"
                 style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
               ></div>
             </div>
@@ -429,7 +429,7 @@ export function LocalMediaGallery({
             </p>
             <div className="flex flex-col gap-2 w-full">
               <button 
-                className="w-full px-3 py-2 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="w-full px-3 py-2 text-xs bg-[#490972] border rounded hover:bg-[#3a0759]"
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePreviewInNewTab();
@@ -438,7 +438,7 @@ export function LocalMediaGallery({
                 Preview
               </button>
               <button 
-                className="w-full px-3 py-2 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="w-full px-3 py-2 text-xs bg-[#490972] text-white rounded hover:bg-[#3a0759]"
                 onClick={async (e) => {
                   e.stopPropagation();
                   setConfirmingMediaId(null); // Clear confirmation immediately

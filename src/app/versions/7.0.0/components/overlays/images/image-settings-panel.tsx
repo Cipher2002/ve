@@ -423,7 +423,7 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 
   return (
     <div className="space-y-6">
-            {/* AI Audio Settings */}
+      {/* AI Audio Settings */}
       <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
