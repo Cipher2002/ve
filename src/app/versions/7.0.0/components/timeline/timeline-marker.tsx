@@ -78,10 +78,16 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
       [isDragging, onSeek, totalDuration]
     );
 
-    const handleMouseUp = useCallback(() => {
+    const handleMouseUp = useCallback((e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       setIsDragging(false);
       setDragPosition(null);
       timelineContainerRef.current = null;
+      
+      // Force cursor reset
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     }, []);
 
     // Add global mouse event listeners when dragging
@@ -89,12 +95,14 @@ const TimelineMarker: React.FC<TimelineMarkerProps> = React.memo(
       if (isDragging) {
         const handleMove = (e: MouseEvent) => {
           e.preventDefault();
+          e.stopPropagation();
           handleMouseMove(e);
         };
-        
+
         const handleUp = (e: MouseEvent) => {
           e.preventDefault();
-          handleMouseUp();
+          e.stopPropagation();
+          handleMouseUp(e);
         };
 
         document.addEventListener('mousemove', handleMove, { passive: false });
