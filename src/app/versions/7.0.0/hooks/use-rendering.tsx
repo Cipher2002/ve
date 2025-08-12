@@ -9,8 +9,10 @@ import {
 import {
   getProgress as lambdaGetProgress,
   renderVideo as lambdaRenderVideo,
+  renderAudio as lambdaRenderAudio,
 } from "../lambda-helpers/api";
 import { transformOverlaysForLambda } from "../utils/lambda-overlay-transformer";
+
 
 // Define possible states for the rendering process
 export type State =
@@ -77,7 +79,13 @@ export const useRendering = (
           }
         : inputProps;
 
-      const response = await renderVideo({ id, inputProps: transformedInputProps, format, codec });
+      const response = await renderVideo({ 
+        id, 
+        inputProps: transformedInputProps, 
+        format, 
+        codec,
+        mediaType: "video" 
+      });
       const renderId = response.renderId;
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
@@ -152,7 +160,17 @@ export const useRendering = (
       status: "invoking",
     });
     try {
-      const response = await ssrRenderAudio({ id, inputProps, format, codec });
+      const renderAudioFn = renderType === "ssr" ? ssrRenderAudio : 
+        (renderType === "lambda" ? lambdaRenderAudio : ssrRenderAudio);
+      
+      const transformedInputProps = renderType === "lambda" 
+        ? {
+            ...inputProps,
+            overlays: transformOverlaysForLambda(inputProps.overlays)
+          }
+        : inputProps;
+        
+      const response = await renderAudioFn({ id, inputProps: transformedInputProps, format, codec });
       const renderId = response.renderId;
 
       // Add a small delay for SSR rendering to ensure initialization

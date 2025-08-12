@@ -45,13 +45,22 @@ const makeRequest = async <Res>(
 export const renderVideo = async ({
   id,
   inputProps,
+  format = "mp4",
+  codec = "h264", 
+  mediaType = "video",
 }: {
   id: string;
   inputProps: z.infer<typeof CompositionProps>;
+  format?: string;
+  codec?: string;
+  mediaType?: "video" | "audio";
 }) => {
   const body: z.infer<typeof RenderRequest> = {
     id,
     inputProps,
+    format,
+    codec,
+    mediaType,
   };
 
   const response = await makeRequest<RenderMediaOnLambdaOutput>(
@@ -78,4 +87,24 @@ export const getProgress = async ({
     body
   );
   return response;
+};
+
+export const renderAudio = async ({
+  id,
+  inputProps,
+  format = "wav",
+  codec = "wav",
+}: {
+  id: string;
+  inputProps: z.infer<typeof CompositionProps>;
+  format?: string;
+  codec?: string;
+}) => {
+  return renderVideo({
+    id,
+    inputProps,
+    format,
+    codec,
+    mediaType: "audio",
+  });
 };

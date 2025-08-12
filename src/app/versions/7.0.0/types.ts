@@ -380,8 +380,9 @@ export const CompositionProps = z.object({
 export const RenderRequest = z.object({
   id: z.string(),
   inputProps: CompositionProps,
-  format: z.string().optional(),
-  codec: z.string().optional(),
+  format: z.string().optional().default("mp4"),
+  codec: z.string().optional().default("h264"),
+  mediaType: z.enum(["video", "audio"]).optional().default("video"),
 });
 
 export const ProgressRequest = z.object({
