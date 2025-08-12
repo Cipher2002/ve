@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Create user directory if it doesn't exist
-    const userDir = path.join(process.cwd(), 'public', 'users', userId);
+    const userDir = path.join('/home/zanopyai/htdocs/data/video_editor_data', userId, 'uploaded-media');
     if (!existsSync(userDir)) {
       await mkdir(userDir, { recursive: true });
     }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, buffer);
     
     // Return the file information
-    const publicPath = `${apiBaseUrl}/files/users/${userId}/${fileName}`;
+    const publicPath = `https://zanopy.ai/data/video_editor_data/${userId}/uploaded-media/${fileName}`;
 
     return NextResponse.json({
       success: true,
