@@ -26,9 +26,45 @@ function App() {
 
   useEffect(() => {
     function checkFullscreenByViewport() {
-      // Check if viewport matches screen dimensions (indicating fullscreen)
-      const isViewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
-      setIsFullscreen(isViewportFullscreen);
+      // Multiple detection methods for better reliability
+      const viewportFullscreen = window.innerHeight === screen.height && window.innerWidth === screen.width;
+      
+      // Type-safe fullscreen element checks
+      const doc = document as any;
+      const documentFullscreen = !!(
+        document.fullscreenElement || 
+        doc.webkitFullscreenElement || 
+        doc.mozFullScreenElement || 
+        doc.msFullscreenElement
+      );
+      
+      // Check parent fullscreen safely
+      let parentFullscreen = false;
+      try {
+        if (window.parent && window.parent !== window && window.parent.document) {
+          const parentDoc = window.parent.document as any;
+          parentFullscreen = !!(
+            parentDoc.fullscreenElement ||
+            parentDoc.webkitFullscreenElement ||
+            parentDoc.mozFullScreenElement ||
+            parentDoc.msFullscreenElement
+          );
+        }
+      } catch (e) {
+        // Cross-origin access denied - ignore
+      }
+      
+      // Additional checks for iframe scenarios
+      const heightRatio = window.innerHeight / screen.height;
+      const widthRatio = window.innerWidth / screen.width;
+      const ratioFullscreen = heightRatio > 0.95 && widthRatio > 0.95; // 95% threshold for zoom tolerance
+      
+      // Check if iframe takes up most of the screen
+      const iframeFullscreen = window.innerHeight > 600 && (heightRatio > 0.9 || widthRatio > 0.9);
+      
+      const isFullscreenDetected = viewportFullscreen || documentFullscreen || parentFullscreen || ratioFullscreen || iframeFullscreen;
+      
+      setIsFullscreen(isFullscreenDetected);
     }
 
     function checkAccess() {
@@ -94,11 +130,37 @@ function App() {
     // Check fullscreen state initially
     checkFullscreenByViewport();
 
+    // Create ResizeObserver for more reliable detection
+    const resizeObserver = new ResizeObserver(() => {
+      checkFullscreenByViewport();
+      sendHeight();
+    });
+    resizeObserver.observe(document.documentElement);
+
     // Send height initially and on resize
     window.addEventListener('load', sendHeight);
     window.addEventListener('resize', () => {
       sendHeight();
       checkFullscreenByViewport();
+    });
+
+    // Listen for fullscreen events
+    const fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'msfullscreenchange'];
+    fullscreenEvents.forEach(event => {
+      document.addEventListener(event, checkFullscreenByViewport);
+      try {
+        if (window.parent && window.parent.document && window.parent !== window) {
+          window.parent.document.addEventListener(event, checkFullscreenByViewport);
+        }
+      } catch (e) {
+        // Cross-origin access denied - ignore
+        console.log(e);
+      }
+    });
+
+    // Listen for orientation changes (mobile)
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkFullscreenByViewport, 100);
     });
 
     // Send height when DOM changes
@@ -111,7 +173,20 @@ function App() {
         sendHeight();
         checkFullscreenByViewport();
       });
+      window.removeEventListener('orientationchange', () => {
+        setTimeout(checkFullscreenByViewport, 100);
+      });
+      
+      // Remove fullscreen event listeners
+      fullscreenEvents.forEach(event => {
+        document.removeEventListener(event, checkFullscreenByViewport);
+        if (window.parent && window.parent.document) {
+          window.parent.document.removeEventListener(event, checkFullscreenByViewport);
+        }
+      });
+      
       observer.disconnect();
+      resizeObserver.disconnect();
     };
   }, []);
 
@@ -183,7 +258,8 @@ function App() {
               className="relative w-full"
               style={{ 
                 height: isFullscreen ? '100vh' : '45vh',
-                maxWidth: '100%'
+                maxWidth: '100%',
+                minHeight: isFullscreen ? '100vh' : '45vh'
               }}
             >
               <ReactVideoEditor projectId="default-project" isAdminMode={isAdminMode} />
