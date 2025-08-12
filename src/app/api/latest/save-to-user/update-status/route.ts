@@ -21,9 +21,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract project name from projectId (format: uid-projectName)
-    const projectName = projectId.replace(`${uid}-`, '');
-    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
+    // Load projects_id_list.json to find project
+    const userBasePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
+    
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json(
+        { error: 'No projects found for this user' },
+        { status: 404 }
+      );
+    }
+
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    const projectsList = JSON.parse(projectsListContent);
+    
+    if (!projectsList[projectId]) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+    
+    const projectName = projectsList[projectId].project_name;
+    const projectPath = path.join(userBasePath, projectId, projectName);
     const indexPath = path.join(projectPath, 'project-index.json');
 
     // Check if project folder exists

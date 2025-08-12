@@ -15,9 +15,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Extract project name from projectId (format: uid-projectName)
-    const projectName = projectId.replace(`${uid}-`, '');
-    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
+    // Load projects_id_list.json to find project
+    const userBasePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
+    
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json({ files: [] });
+    }
+
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    const projectsList = JSON.parse(projectsListContent);
+    
+    if (!projectsList[projectId]) {
+      return NextResponse.json({ files: [] });
+    }
+    
+    const projectName = projectsList[projectId].project_name;
+    const projectPath = path.join(userBasePath, projectId, projectName);
 
     if (!fs.existsSync(projectPath)) {
       return NextResponse.json({ files: [] });
@@ -54,7 +68,7 @@ export async function GET(request: NextRequest) {
             type: isVideo ? 'video' : isAudio ? 'audio' : 'media',
             fileSize: stats.size,
             fileExtension: fileExtension.replace('.', ''),
-            filePath: `/users/${uid}/${projectName}/${fileName}`, // Relative path for download
+            filePath: `/users/${uid}/${projectId}/${projectName}/${fileName}`, // Relative path for download
           });
         }
       }
@@ -87,7 +101,7 @@ export async function GET(request: NextRequest) {
                   type: isVideo ? 'video' : isAudio ? 'audio' : 'media',
                   fileSize: render.fileSize || stats.size,
                   fileExtension: fileExtension.replace('.', ''),
-                  filePath: `/users/${uid}/${projectName}/${render.fileName}`,
+                  filePath: `/users/${uid}/${projectId}/${projectName}/${render.fileName}`,
                 });
               }
             }

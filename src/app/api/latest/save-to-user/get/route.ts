@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userFolderPath, 'projects_id_list.json');
 
     // Check if user folder exists
     if (!fs.existsSync(userFolderPath)) {
@@ -23,13 +24,19 @@ export async function GET(request: NextRequest) {
 
     const projects: any[] = [];
     
-    // Read all project folders for this user
-    const projectFolders = fs.readdirSync(userFolderPath, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
+    // Check if projects_id_list.json exists
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json({ projects: [] });
+    }
 
-    for (const projectName of projectFolders) {
-      const projectPath = path.join(userFolderPath, projectName);
+    // Read projects list
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    const projectsList = JSON.parse(projectsListContent);
+
+    // Iterate through each project in the list
+    for (const [projectId, projectInfo] of Object.entries(projectsList)) {
+      const projectName = (projectInfo as any).project_name;
+      const projectPath = path.join(userFolderPath, projectId, projectName);
       const indexPath = path.join(projectPath, 'project-index.json');
 
       if (fs.existsSync(indexPath)) {
@@ -38,7 +45,7 @@ export async function GET(request: NextRequest) {
           const projectIndex = JSON.parse(indexContent);
           
           projects.push({
-            id: `${uid}-${projectName}`,
+            id: projectId,
             name: projectIndex.projectName || projectName,
             uid: projectIndex.uid,
             status: projectIndex.status || 'active',

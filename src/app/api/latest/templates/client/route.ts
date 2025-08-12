@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const uid = searchParams.get('uid') || 'default';
 
     const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userFolderPath, 'projects_id_list.json');
 
     // Check if user directory exists
     if (!fs.existsSync(userFolderPath)) {
@@ -16,13 +17,19 @@ export async function GET(request: NextRequest) {
 
     const templates: any[] = [];
 
-    // Read all project folders for this user
-    const projectFolders = fs.readdirSync(userFolderPath, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
+    // Check if projects_id_list.json exists
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json([]);
+    }
 
-    for (const projectName of projectFolders) {
-      const projectPath = path.join(userFolderPath, projectName);
+    // Read projects list
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    const projectsList = JSON.parse(projectsListContent);
+
+    // Iterate through each project in the list
+    for (const [projectId, projectInfo] of Object.entries(projectsList)) {
+      const projectName = (projectInfo as any).project_name;
+      const projectPath = path.join(userFolderPath, projectId, projectName);
       const projectIndexPath = path.join(projectPath, 'project-index.json');
 
       // Check if project has saves (templates)
@@ -43,7 +50,7 @@ export async function GET(request: NextRequest) {
               
               // Convert save data to template format
               const template = {
-                id: `${uid}-${projectName}`,
+                id: projectId,
                 name: projectIndex.projectName || projectName,
                 description: `Template from ${projectIndex.projectName || projectName}`,
                 createdAt: projectIndex.createdAt,

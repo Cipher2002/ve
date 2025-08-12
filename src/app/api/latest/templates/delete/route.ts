@@ -15,9 +15,29 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Extract project name from templateId (format: uid-projectName)
-    const projectName = templateId.replace(`${uid}-`, '');
-    const projectPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectName);
+    // Load projects_id_list.json to find project
+    const userBasePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
+    
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json(
+        { error: "No projects found for this user" },
+        { status: 404 }
+      );
+    }
+
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    let projectsList = JSON.parse(projectsListContent);
+    
+    if (!projectsList[templateId]) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      );
+    }
+    
+    const projectName = projectsList[templateId].project_name;
+    const projectPath = path.join(userBasePath, templateId, projectName);
 
     // Check if project exists
     if (!fs.existsSync(projectPath)) {
@@ -29,6 +49,10 @@ export async function DELETE(request: NextRequest) {
 
     // Delete the entire project folder
     fs.rmSync(projectPath, { recursive: true, force: true });
+    
+    // Remove from projects_id_list.json
+    delete projectsList[templateId];
+    fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
 
     return NextResponse.json({ 
       success: true, 

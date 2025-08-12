@@ -23,9 +23,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userFolderPath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
-    const oldProjectPath = path.join(userFolderPath, oldName);
-    const newProjectPath = path.join(userFolderPath, sanitizedNewName);
+    const userBasePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
+    
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json(
+        { error: 'No projects found for this user' },
+        { status: 404 }
+      );
+    }
+
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    let projectsList = JSON.parse(projectsListContent);
+    
+    // Find project entry by projectId
+    if (!projectsList[projectId]) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Check if new name already exists in any project
+    const existingProject = Object.values(projectsList).find((project: any) => 
+      project.project_name === sanitizedNewName && project.project_id !== projectId
+    );
+    
+    if (existingProject) {
+      return NextResponse.json(
+        { error: 'Project with this name already exists' },
+        { status: 409 }
+      );
+    }
+    
+    const oldProjectPath = path.join(userBasePath, projectId, oldName);
+    const newProjectPath = path.join(userBasePath, projectId, sanitizedNewName);
 
     // Check if old project folder exists
     if (!fs.existsSync(oldProjectPath)) {
@@ -61,6 +93,10 @@ export async function POST(request: NextRequest) {
       // Write updated index
       fs.writeFileSync(indexPath, JSON.stringify(projectIndex, null, 2));
     }
+
+    // Update projects_id_list.json
+    projectsList[projectId].project_name = sanitizedNewName;
+    fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
 
     return NextResponse.json({
       success: true,

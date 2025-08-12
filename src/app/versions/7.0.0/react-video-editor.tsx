@@ -55,8 +55,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [dynamicDuration, setDynamicDuration] = useState(30 * FPS);
   // const [projectName, setProjectName] = useState("Default Project");
   const [projectName, setProjectName] = useState(() => {
-  const now = new Date();
-  const date = now.toLocaleDateString('en-US', { 
+    const now = new Date();
+    const date = now.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: '2-digit', 
       day: '2-digit' 
