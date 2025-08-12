@@ -29,14 +29,29 @@ export async function PUT(request: NextRequest) {
     const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
     let projectsList = JSON.parse(projectsListContent);
     
-    if (!projectsList[templateId]) {
+    let actualProjectId = templateId;
+    
+    // Handle old format projectId (uid-projectName) - backward compatibility
+    if (templateId.includes('-') && !projectsList[templateId]) {
+      // Try to find project by name for backward compatibility
+      const projectName = templateId.split('-').slice(1).join('-'); // Remove uid part
+      const foundProject = Object.entries(projectsList).find(([id, project]: [string, any]) => 
+        project.project_name === projectName
+      );
+      
+      if (foundProject) {
+        actualProjectId = foundProject[0];
+      }
+    }
+    
+    if (!projectsList[actualProjectId]) {
       return NextResponse.json(
         { error: "Project not found" },
         { status: 404 }
       );
     }
     
-    const oldProjectName = projectsList[templateId].project_name;
+    const oldProjectName = projectsList[actualProjectId].project_name;
     
     // Check if new name already exists in any other project
     const existingProject = Object.values(projectsList).find((project: any) => 
@@ -50,8 +65,8 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const oldProjectPath = path.join(userBasePath, templateId, oldProjectName);
-    const newProjectPath = path.join(userBasePath, templateId, newName);
+    const oldProjectPath = path.join(userBasePath, actualProjectId, oldProjectName);
+    const newProjectPath = path.join(userBasePath, actualProjectId, newName);
 
     // Check if old project exists
     if (!fs.existsSync(oldProjectPath)) {
@@ -67,7 +82,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update projects_id_list.json
-    projectsList[templateId].project_name = newName;
+    projectsList[actualProjectId].project_name = newName;
     fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
 
     // Update project index
@@ -86,7 +101,7 @@ export async function PUT(request: NextRequest) {
       success: true, 
       message: "Template name updated successfully",
       template: {
-        id: templateId,
+        id: actualProjectId,
         name: newName,
         updatedAt: new Date().toISOString()
       }
