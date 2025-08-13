@@ -107,9 +107,9 @@ function DateRangeCalendar({
   const nextMonthDays = generateCalendar(nextMonthDate);
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
       {/* First Calendar */}
-      <div className="w-64">
+      <div className="w-full lg:w-64">
         <div className="flex items-center justify-between mb-4">
           <button onClick={prevMonth} className="p-1 hover:bg-gray-100 rounded">
             <ChevronRight className="h-4 w-4 rotate-180" />
@@ -149,7 +149,7 @@ function DateRangeCalendar({
       </div>
 
       {/* Second Calendar */}
-      <div className="w-64">
+      <div className="w-full lg:w-64 hidden lg:block">
         <div className="flex items-center justify-center mb-4">
           <div className="font-medium">
             {nextMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -183,8 +183,8 @@ function DateRangeCalendar({
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-col justify-end">
-        <div className="flex flex-col gap-2">
+      <div className="flex lg:flex-col justify-center lg:justify-end mt-4 lg:mt-0">
+        <div className="flex lg:flex-col gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -737,12 +737,12 @@ export default function SavedProjects() {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <div className="flex flex-col xs:flex-row xs:items-center justify-between mb-4 gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl xs:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Your Saved Projects
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-sm xs:text-base lg:text-lg">
                 Effortlessly Manage and Edit Your Creative Canvas Projects Anytime
               </p>
             </div>
@@ -759,23 +759,23 @@ export default function SavedProjects() {
                 Back to Projects
               </Button>
             ) : (
-              /* Filter Buttons when viewing projects list */
-              <div className="flex border rounded-lg overflow-hidden">
+              <div className="flex border rounded-lg overflow-hidden shrink-0">
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('Active')}
-                  className={`px-4 py-[10px] rounded-l-lg rounded-r-none font-medium ${
+                  className={`px-2 xs:px-4 py-[10px] rounded-l-lg rounded-r-none font-medium text-xs xs:text-sm ${
                     activeFilter === 'Active'
                       ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
                       : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
                   }`}
                 >
-                  Active View
+                  <span className="hidden xs:inline">Active View</span>
+                  <span className="xs:hidden">Active</span>
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('All')}
-                  className={`px-4 py-[10px] rounded-l-none rounded-r-lg font-medium  ${
+                  className={`px-2 xs:px-4 py-[10px] rounded-l-none rounded-r-lg font-medium text-xs xs:text-sm ${
                     activeFilter === 'All'
                       ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
                       : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
@@ -809,9 +809,9 @@ export default function SavedProjects() {
               <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="outline"
-                    className="min-w-52 max-w-80  bg-white border-gray-300 justify-between text-left font-normal text-gray-900"
-                  >
+                      variant="outline"
+                      className="min-w-32 xs:min-w-52 max-w-full xs:max-w-80 bg-white border-gray-300 justify-between text-left font-normal text-gray-900 text-xs xs:text-sm"
+                    >
                     <span className="truncate">
                       {getDateFilterDisplay()}
                     </span>
@@ -1299,11 +1299,11 @@ export default function SavedProjects() {
                               key={page}
                               variant="outline"
                               onClick={() => setCurrentFilesPage(page as number)}
-                              className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
-                                currentFilesPage === page
-                                  ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
-                                  : 'text-gray-600 hover:bg-gray-50'
-                              }`}
+                              className={`px-2 xs:px-4 py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm ${
+                              currentPage === page
+                                ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
                             >
                               {page}
                             </Button>
@@ -1509,13 +1509,14 @@ export default function SavedProjects() {
             </p>
 
             {/* Pagination */}
-            <div className="flex items-center">
+            <div className="flex items-center overflow-x-auto">
               <Button
                 variant="ghost"
                 onClick={handlePrevious}
-                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[6px] xs:px-[10px] py-[5.5px] text-gray-600 rounded-none text-xs xs:text-sm whitespace-nowrap"
               >
-                Previous
+                <span className="hidden xs:inline">Previous</span>
+                <span className="xs:hidden">Prev</span>
               </Button>
               
               {/* Page numbers */}
@@ -1580,11 +1581,11 @@ export default function SavedProjects() {
                       key={page}
                       variant="outline"
                       onClick={() => handlePageChange(page as number)}
-                      className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
-                        currentPage === page
-                          ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
-                          : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                      className={`px-2 xs:px-4 py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm ${
+                      currentPage === page
+                        ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                     >
                       {page}
                     </Button>
@@ -1595,9 +1596,10 @@ export default function SavedProjects() {
               <Button
                 variant="ghost"
                 onClick={handleNext}
-                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[6px] xs:px-[10px] py-[5.5px] text-gray-600 rounded-none text-xs xs:text-sm whitespace-nowrap"
               >
-                Next
+                <span className="hidden xs:inline">Next</span>
+                <span className="xs:inline">Next</span>
               </Button>
             </div>
           </div>
