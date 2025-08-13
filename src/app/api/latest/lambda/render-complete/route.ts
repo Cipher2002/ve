@@ -1,0 +1,216 @@
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+interface RenderCompleteData {
+  uid: string;
+  projectName: string;
+  renderId: string;
+  s3Url: string;
+  fileSize: number;
+  format: string;
+  codec: string;
+  mediaType: 'video' | 'audio';
+  duration?: number;
+  dimensions?: { width: number; height: number };
+}
+
+// Helper function to generate thumbnail from video using FFmpeg
+async function generateThumbnail(videoUrl: string, renderId: string, outputPath: string): Promise<string> {
+  const { FFmpeg } = require('@ffmpeg/ffmpeg');
+  const { fetchFile } = require('@ffmpeg/util');
+  const https = require('https');
+  const http = require('http');
+  
+  try {
+    const thumbnailFileName = `thumbnail-${renderId}.webp`;
+    const thumbnailPath = path.join(outputPath, thumbnailFileName);
+    
+    // Initialize FFmpeg
+    const ffmpeg = new FFmpeg();
+    await ffmpeg.load();
+    
+    // Download video to memory
+    const videoData = await new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      const request = videoUrl.startsWith('https:') ? https : http;
+      
+      request.get(videoUrl, (response: any) => {
+        response.on('data', (chunk: any) => chunks.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(chunks)));
+        response.on('error', reject);
+      }).on('error', reject);
+    });
+    
+    // Write video data to FFmpeg filesystem
+    await ffmpeg.writeFile('input.mp4', new Uint8Array(videoData as Buffer));
+    
+    // Extract thumbnail at 1 second mark, resize to 320x180, convert to WebP
+    await ffmpeg.exec([
+      '-i', 'input.mp4',
+      '-ss', '1',
+      '-vframes', '1',
+      '-vf', 'scale=320:180:force_original_aspect_ratio=decrease,pad=320:180:(ow-iw)/2:(oh-ih)/2',
+      '-f', 'webp',
+      '-quality', '80',
+      'output.webp'
+    ]);
+    
+    // Read the generated thumbnail
+    const thumbnailData = await ffmpeg.readFile('output.webp');
+    
+    // Write thumbnail to disk
+    fs.writeFileSync(thumbnailPath, thumbnailData);
+    
+    // Clean up FFmpeg filesystem
+    await ffmpeg.deleteFile('input.mp4');
+    await ffmpeg.deleteFile('output.webp');
+    
+    return thumbnailFileName;
+  } catch (error) {
+    console.error('Error generating thumbnail with FFmpeg:', error);
+    
+    // Create simple placeholder thumbnail
+    const thumbnailFileName = `thumbnail-${renderId}.webp`;
+    const placeholderPath = path.join(outputPath, thumbnailFileName);
+    
+    // Create a simple 1x1 pixel WebP as placeholder (minimal file)
+    const placeholderData = Buffer.from([
+      0x52, 0x49, 0x46, 0x46, 0x26, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+      0x56, 0x50, 0x38, 0x20, 0x1A, 0x00, 0x00, 0x00, 0x30, 0x01, 0x00, 0x9D,
+      0x01, 0x2A, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
+      0x03, 0x70, 0x00, 0xFE, 0xFB, 0xFD, 0x50, 0x00
+    ]);
+    
+    try {
+      fs.writeFileSync(placeholderPath, placeholderData);
+    } catch (writeError) {
+      console.error('Failed to write placeholder thumbnail:', writeError);
+    }
+    
+    return thumbnailFileName;
+  }
+}
+
+
+export async function POST(request: NextRequest) {
+  try {
+    const data: RenderCompleteData = await request.json();
+    
+    const { uid, projectName, renderId, s3Url, fileSize, format, codec, mediaType, duration, dimensions } = data;
+
+    if (!uid || !projectName || !renderId || !s3Url) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Load projects_id_list.json to find project_id
+    const userBasePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid);
+    const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
+    
+    if (!fs.existsSync(projectsListPath)) {
+      return NextResponse.json(
+        { error: 'No projects found for this user' },
+        { status: 404 }
+      );
+    }
+
+    const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+    const projectsList = JSON.parse(projectsListContent);
+    
+    // Find project_id by projectName
+    const projectEntry = Object.values(projectsList).find((project: any) => 
+      project.project_name === projectName
+    );
+    
+    if (!projectEntry) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+    
+    const projectId = (projectEntry as any).project_id;
+    const projectPath = path.join(userBasePath, projectId);
+
+    // Ensure project directory exists
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath, { recursive: true });
+    }
+
+    // Load or create renders.json
+    const rendersJsonPath = path.join(projectPath, 'renders.json');
+    let rendersData: any[] = [];
+
+    if (fs.existsSync(rendersJsonPath)) {
+      const rendersContent = fs.readFileSync(rendersJsonPath, 'utf-8');
+      rendersData = JSON.parse(rendersContent);
+    }
+
+    // Generate thumbnail
+    const thumbnailFileName = await generateThumbnail(s3Url, renderId, projectPath);
+    
+    // Create render entry
+    const renderEntry = {
+      renderId,
+      s3Url,
+      thumbnailPath: thumbnailFileName,
+      timestamp: new Date().toISOString(),
+      format,
+      codec,
+      mediaType,
+      duration: duration || null,
+      dimensions: dimensions || null,
+      fileSize,
+      status: 'completed'
+    };
+
+    // Add to renders data (newest first)
+    rendersData.unshift(renderEntry);
+
+    // Save renders.json
+    fs.writeFileSync(rendersJsonPath, JSON.stringify(rendersData, null, 2));
+
+    // Also update project-index.json for compatibility
+    const indexPath = path.join(projectPath, 'project-index.json');
+    if (fs.existsSync(indexPath)) {
+      const indexContent = fs.readFileSync(indexPath, 'utf-8');
+      const projectIndex = JSON.parse(indexContent);
+      
+      if (!projectIndex.renders) {
+        projectIndex.renders = [];
+      }
+      
+      projectIndex.renders.unshift({
+        fileName: `${renderId}.${format}`,
+        timestamp: renderEntry.timestamp,
+        status: 'completed',
+        url: s3Url,
+        fileSize,
+        renderId,
+        format,
+        mediaType
+      });
+      
+      projectIndex.lastRender = renderEntry.timestamp;
+      projectIndex.lastUpdated = renderEntry.timestamp;
+      
+      fs.writeFileSync(indexPath, JSON.stringify(projectIndex, null, 2));
+    }
+
+    return NextResponse.json({
+      success: true,
+      renderId,
+      message: 'Render completed and stored successfully'
+    });
+
+  } catch (error) {
+    console.error('Error in render-complete API:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

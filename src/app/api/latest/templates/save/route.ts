@@ -28,37 +28,39 @@ export async function POST(request: NextRequest) {
     const existingProject = Object.values(projectsList).find((project: any) => 
       project.project_name === projectName
     );
-    
+
+    let projectId: string;
+    let projectPath: string;
+
     if (existingProject) {
-      return NextResponse.json(
-        { error: 'Project name already exists' },
-        { status: 400 }
-      );
+      // Use existing project instead of creating new one
+      projectId = (existingProject as any).project_id;
+      projectPath = path.join(userBasePath, projectId);
+    } else {
+      // Generate new project_id using current timestamp
+      const timestamp = new Date().toISOString();
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      projectId = `${year}${month}${day}${hours}${minutes}${seconds}`;
+
+      // Add to projects list
+      projectsList[projectId] = {
+        project_id: projectId,
+        project_name: projectName,
+        time_created_at: timestamp
+      };
+
+      // Save updated projects list
+      fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
+
+      // Create folder structure: users/{uid}/{project_id}
+      projectPath = path.join(userBasePath, projectId);
     }
-
-    // Generate new project_id using current timestamp
-    const timestamp = new Date().toISOString();
-    const date = new Date(timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    const projectId = `${year}${month}${day}${hours}${minutes}${seconds}`;
-    
-    // Add to projects list
-    projectsList[projectId] = {
-      project_id: projectId,
-      project_name: projectName,
-      time_created_at: timestamp
-    };
-
-    // Save updated projects list
-    fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
-    
-    // Create folder structure: users/{uid}/{project_id}
-    const projectPath = path.join(userBasePath, projectId);
     
     // Ensure the directory exists
     fs.mkdirSync(projectPath, { recursive: true });

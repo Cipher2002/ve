@@ -42,18 +42,16 @@ export async function POST(request: NextRequest) {
     let userFolderPath: string;
 
     if (type === 'project') {
-      // Check if project name already exists
-      const existingProject = Object.values(projectsList).find((project: any) => 
-        project.project_name === projectName
-      );
-      
-      if (existingProject) {
-        return NextResponse.json(
-          { error: 'Project name already exists' },
-          { status: 400 }
-        );
-      }
-
+    // Check if project name already exists
+    const existingProject = Object.values(projectsList).find((project: any) => 
+      project.project_name === projectName
+    );
+    
+    if (existingProject) {
+      // Use existing project instead of creating new one
+      projectId = (existingProject as any).project_id;
+      userFolderPath = path.join(userBasePath, projectId);
+    } else {
       // Generate new project_id
       projectId = formatTimestampToProjectId(timestamp);
       
@@ -69,6 +67,7 @@ export async function POST(request: NextRequest) {
       
       // Create folder structure: /home/zanopyai/htdocs/data/video_editor_data/{uid}/{project_id}
       userFolderPath = path.join(userBasePath, projectId);
+    }
     } else if (type === 'render') {
       // Look up project_id by projectName
       const existingProject = Object.values(projectsList).find((project: any) => 

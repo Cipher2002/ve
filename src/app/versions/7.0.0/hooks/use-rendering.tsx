@@ -14,6 +14,10 @@ import {
 import { transformOverlaysForLambda } from "../utils/lambda-overlay-transformer";
 
 
+//SETTING THE API BASE URL
+const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
+
 // Define possible states for the rendering process
 export type State =
   | { status: "init" } // Initial state
@@ -139,6 +143,33 @@ export const useRendering = (
             break;
           }
           case "done": {
+            // Call render-complete API before setting final state
+            try {
+              await fetch(`${apiBaseUrl}/render-complete`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  uid: inputProps.uid,
+                  projectName: inputProps.projectName,
+                  renderId: renderId,
+                  s3Url: result.url,
+                  fileSize: result.size,
+                  format: format || 'mp4',
+                  codec: codec || 'h264',
+                  mediaType: 'video',
+                  duration: inputProps.durationInFrames / inputProps.fps,
+                  dimensions: {
+                    width: inputProps.width,
+                    height: inputProps.height
+                  }
+                }),
+              });
+            } catch (error) {
+              console.error('Error calling render-complete API:', error);
+            }
+
             setState({
               size: result.size,
               url: result.url,
@@ -231,6 +262,29 @@ export const useRendering = (
             break;
           }
           case "done": {
+            // Call render-complete API before setting final state
+            try {
+              await fetch(`${apiBaseUrl}/render-complete`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  uid: inputProps.uid,
+                  projectName: inputProps.projectName,
+                  renderId: renderId,
+                  s3Url: result.url,
+                  fileSize: result.size,
+                  format: format || 'wav',
+                  codec: codec || 'wav',
+                  mediaType: 'audio',
+                  duration: inputProps.durationInFrames / inputProps.fps
+                }),
+              });
+            } catch (error) {
+              console.error('Error calling render-complete API:', error);
+            }
+
             setState({
               size: result.size,
               url: result.url,
