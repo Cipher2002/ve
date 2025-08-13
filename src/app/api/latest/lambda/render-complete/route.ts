@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
+import http from 'http';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
 
 interface RenderCompleteData {
   uid: string;
@@ -17,10 +21,6 @@ interface RenderCompleteData {
 
 // Helper function to generate thumbnail from video using FFmpeg
 async function generateThumbnail(videoUrl: string, renderId: string, outputPath: string): Promise<string> {
-  const { FFmpeg } = require('@ffmpeg/ffmpeg');
-  const { fetchFile } = require('@ffmpeg/util');
-  const https = require('https');
-  const http = require('http');
   
   try {
     const thumbnailFileName = `thumbnail-${renderId}.webp`;
