@@ -1238,20 +1238,78 @@ export default function SavedProjects() {
                       </Button>
                       
                       {/* Page numbers */}
-                      {Array.from({ length: Math.max(1, totalFilesPages) }, (_, i) => i + 1).map((page) => (
-                        <Button
-                          key={page}
-                          variant="outline"
-                          onClick={() => setCurrentFilesPage(page)}
-                          className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
-                            currentFilesPage === page
-                              ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
-                              : 'text-gray-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </Button>
-                      ))}
+                      {(() => {
+                        const getVisiblePages = () => {
+                          const width = window.innerWidth;
+                          let maxVisible;
+                          
+                          if (width < 640) {
+                            maxVisible = 3; // Mobile: show 3 pages
+                          } else if (width < 1024) {
+                            maxVisible = 5; // Tablet: show 5 pages
+                          } else {
+                            maxVisible = 7; // Desktop: show 7 pages
+                          }
+                          
+                          if (totalFilesPages <= maxVisible) {
+                          return Array.from({ length: totalFilesPages }, (_, i) => i + 1);
+                        }
+                        
+                        const half = Math.floor(maxVisible / 2);
+                        let start = Math.max(1, currentFilesPage - half);
+                        let end = Math.min(totalFilesPages, start + maxVisible - 1);
+                        
+                        if (end - start + 1 < maxVisible) {
+                          start = Math.max(1, end - maxVisible + 1);
+                        }
+                        
+                        const pages = [];
+                        
+                        // Always show first page
+                        if (start > 1) {
+                          pages.push(1);
+                          if (start > 2) {
+                            pages.push('...');
+                          }
+                        }
+                        
+                        // Show middle pages
+                        for (let i = start; i <= end; i++) {
+                          pages.push(i);
+                        }
+                        
+                        // Always show last page
+                        if (end < totalFilesPages) {
+                          if (end < totalFilesPages - 1) {
+                            pages.push('...');
+                          }
+                          pages.push(totalFilesPages);
+                        }
+                          
+                          return pages;
+                        };
+                        
+                        return getVisiblePages().map((page, index) => (
+                          page === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2 py-2 text-gray-600">
+                              ...
+                            </span>
+                          ) : (
+                            <Button
+                              key={page}
+                              variant="outline"
+                              onClick={() => setCurrentFilesPage(page as number)}
+                              className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
+                                currentFilesPage === page
+                                  ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                                  : 'text-gray-600 hover:bg-gray-50'
+                              }`}
+                            >
+                              {page}
+                            </Button>
+                          )
+                        ));
+                      })()}
                       
                       <Button
                         variant="ghost"
@@ -1461,20 +1519,78 @@ export default function SavedProjects() {
               </Button>
               
               {/* Page numbers */}
-              {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant="outline"
-                  onClick={() => handlePageChange(page)}
-                  className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
-                    currentPage === page
-                      ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {page}
-                </Button>
-              ))}
+              {(() => {
+                const getVisiblePages = () => {
+                  const width = window.innerWidth;
+                  let maxVisible;
+                  
+                  if (width < 640) {
+                    maxVisible = 3; // Mobile: show 3 pages
+                  } else if (width < 1024) {
+                    maxVisible = 5; // Tablet: show 5 pages
+                  } else {
+                    maxVisible = 7; // Desktop: show 7 pages
+                  }
+                  
+                  if (totalPages <= maxVisible) {
+                    return Array.from({ length: totalPages }, (_, i) => i + 1);
+                  }
+                  
+                  const half = Math.floor(maxVisible / 2);
+                  let start = Math.max(1, currentPage - half);
+                  let end = Math.min(totalPages, start + maxVisible - 1);
+                  
+                  if (end - start + 1 < maxVisible) {
+                    start = Math.max(1, end - maxVisible + 1);
+                  }
+                  
+                  const pages = [];
+                  
+                  // Always show first page
+                  if (start > 1) {
+                    pages.push(1);
+                    if (start > 2) {
+                      pages.push('...');
+                    }
+                  }
+                  
+                  // Show middle pages
+                  for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                  }
+                  
+                  // Always show last page
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push('...');
+                    }
+                    pages.push(totalPages);
+                  }
+                  
+                  return pages;
+                };
+                
+                return getVisiblePages().map((page, index) => (
+                  page === '...' ? (
+                    <span key={`ellipsis-${index}`} className="px-2 py-2 text-gray-600">
+                      ...
+                    </span>
+                  ) : (
+                    <Button
+                      key={page}
+                      variant="outline"
+                      onClick={() => handlePageChange(page as number)}
+                      className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
+                        currentPage === page
+                          ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                          : 'text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </Button>
+                  )
+                ));
+              })()}
               
               <Button
                 variant="ghost"
