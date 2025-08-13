@@ -246,12 +246,56 @@ export default function SavedProjects() {
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
 
+  // // Responsive pagination hook
+  // useEffect(() => {
+  //   const updateItemsPerPage = () => {
+  //     const width = window.innerWidth;
+  //     let newItemsPerPage;
+  //     let newFilesPerPage;
+      
+  //     if (width < 580) {
+  //       // Mobile: 1 card
+  //       newItemsPerPage = 1;
+  //       newFilesPerPage = 1;
+  //     } else if (width < 880) {
+  //       // Small tablet: 2 cards
+  //       newItemsPerPage = 2;
+  //       newFilesPerPage = 2;
+  //     } else if (width < 1180) {
+  //       // Large tablet: 3 cards
+  //       newItemsPerPage = 3;
+  //       newFilesPerPage = 3;
+  //     } else {
+  //       // Desktop: 4 cards
+  //       newItemsPerPage = 4;
+  //       newFilesPerPage = 4;
+  //     }
+      
+  //     setItemsPerPage(newItemsPerPage);
+  //     setFilesPerPage(newFilesPerPage);
+      
+  //     // Reset to first page when items per page changes
+  //     setCurrentPage(1);
+  //     setCurrentFilesPage(1);
+  //   };
+
+  //   // Initial check
+  //   updateItemsPerPage();
+
+  //   // Add resize listener
+  //   window.addEventListener('resize', updateItemsPerPage);
+    
+  //   return () => window.removeEventListener('resize', updateItemsPerPage);
+  // }, []);
+
   // Responsive pagination hook
   useEffect(() => {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       let newItemsPerPage;
       let newFilesPerPage;
+      
+      console.log('Window width:', width); // Debug log
       
       if (width < 580) {
         // Mobile: 1 card
@@ -261,7 +305,7 @@ export default function SavedProjects() {
         // Small tablet: 2 cards
         newItemsPerPage = 2;
         newFilesPerPage = 2;
-      } else if (width < 1180) {
+      } else if (width < 1100) {  // Reduced from 1180 to 1100
         // Large tablet: 3 cards
         newItemsPerPage = 3;
         newFilesPerPage = 3;
@@ -270,6 +314,8 @@ export default function SavedProjects() {
         newItemsPerPage = 4;
         newFilesPerPage = 4;
       }
+      
+      console.log('Items per page:', newItemsPerPage); // Debug log
       
       setItemsPerPage(newItemsPerPage);
       setFilesPerPage(newFilesPerPage);
