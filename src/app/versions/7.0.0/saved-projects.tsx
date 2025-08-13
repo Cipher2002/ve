@@ -216,7 +216,7 @@ export default function SavedProjects() {
   const [editingName, setEditingName] = useState('');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4); // 3 projects per page (1 row of 3)
+  const [itemsPerPage] = useState(4);
   const [dateFilter, setDateFilter] = useState('all');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState(() => {
@@ -229,6 +229,18 @@ export default function SavedProjects() {
   });
   const [currentFilesPage, setCurrentFilesPage] = useState(1);
   const [filesPerPage] = useState(4);
+  const [filesActiveFilter, setFilesActiveFilter] = useState('All');
+  const [filesSearchValue, setFilesSearchValue] = useState('');
+  const [filesDateFilter, setFilesDateFilter] = useState('all');
+  const [showFilesDatePicker, setShowFilesDatePicker] = useState(false);
+  const [filesCustomDateRange, setFilesCustomDateRange] = useState(() => {
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    return {
+      start: oneYearAgo,
+      end: now
+    };
+  });
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -246,6 +258,24 @@ export default function SavedProjects() {
         return `${startOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${endOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
       case 'custom':
         return `${customDateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${customDateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      default:
+        return 'All';
+    }
+  };
+
+  // Get display text for files date filter
+  const getFilesDateFilterDisplay = () => {
+    const now = new Date();
+    switch (filesDateFilter) {
+      case 'all':
+        const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        return `${oneYearAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      case 'month':
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        return `${startOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${endOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      case 'custom':
+        return `${filesCustomDateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${filesCustomDateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
       default:
         return 'All';
     }
@@ -305,9 +335,17 @@ export default function SavedProjects() {
     }
   };
 
+  // Reset files page when filters change
+  React.useEffect(() => {
+    setCurrentFilesPage(1);
+  }, [filesActiveFilter, filesSearchValue, filesDateFilter]);
+
   // Reset files page when project changes
   React.useEffect(() => {
     setCurrentFilesPage(1);
+    setFilesActiveFilter('All');
+    setFilesSearchValue('');
+    setFilesDateFilter('all');
   }, [selectedProject]);
 
   React.useEffect(() => {
@@ -426,8 +464,6 @@ export default function SavedProjects() {
       console.error('Error downloading project renders:', error);
     }
   };
-
-
 
   // Handle toggling active status
   const handleToggleActiveStatus = async (project: UserProject) => {
@@ -607,7 +643,6 @@ export default function SavedProjects() {
     }
   };
 
-
   return (
     <div className="bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
@@ -648,7 +683,6 @@ export default function SavedProjects() {
                 >
                   Active View
                 </Button>
-                {/* <div className="w-px bg-[rgb(41,0,156)]"></div> */}
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('All')}
@@ -776,166 +810,307 @@ export default function SavedProjects() {
           ) : selectedProject ? (
             /* Project Files View */
             <div>
-              {/* Project Header */}
-              <div className="mb-6">
-                <p className="text-gray-600">
-                </p>
-              </div>
+              {/* Controls Row for Files */}
+              {projectFiles.length > 0 && (
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  {/* Date Selector for Files */}
+                  <Popover open={showFilesDatePicker} onOpenChange={setShowFilesDatePicker}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="min-w-52 max-w-80 bg-white border-gray-300 justify-between text-left font-normal text-gray-900"
+                      >
+                        <span className="truncate">
+                          {getFilesDateFilterDisplay()}
+                        </span>
+                        <ChevronRight className="h-4 w-4 rotate-90" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <div className="flex">
+                        {/* Left sidebar with options */}
+                        <div className="w-32 border-r bg-gray-50">
+                          <div 
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${filesDateFilter === 'all' ? 'bg-blue-500 text-white' : ''}`}
+                            onClick={() => {
+                              setFilesDateFilter('all');
+                              setShowFilesDatePicker(false);
+                            }}
+                          >
+                            All
+                          </div>
+                          <div 
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${filesDateFilter === 'month' ? 'bg-blue-500 text-white' : ''}`}
+                            onClick={() => {
+                              setFilesDateFilter('month');
+                              setShowFilesDatePicker(false);
+                            }}
+                          >
+                            This Month
+                          </div>
+                          <div 
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${filesDateFilter === 'custom' ? 'bg-blue-500 text-white' : ''}`}
+                            onClick={() => {
+                              setFilesDateFilter('custom');
+                              // Don't close popover immediately for custom range
+                            }}
+                          >
+                            Custom Range
+                          </div>
+                        </div>
+                        
+                        {/* Calendar section - only show when custom is selected */}
+                        {filesDateFilter === 'custom' && (
+                          <div className="p-4 bg-white">
+                            <DateRangeCalendar 
+                              startDate={filesCustomDateRange.start}
+                              endDate={filesCustomDateRange.end}
+                              onDateChange={(start, end) => {
+                                setFilesCustomDateRange({ start, end });
+                              }}
+                              onApply={() => {
+                                setShowFilesDatePicker(false);
+                              }}
+                              onCancel={() => {
+                                setShowFilesDatePicker(false);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Search for Files */}
+                  <div className="flex items-center gap-3">
+                    <label htmlFor="files-search" className="text-gray-700 font-medium">
+                      Search
+                    </label>
+                    <Input
+                      id="files-search"
+                      type="text"
+                      value={filesSearchValue}
+                      onChange={(e) => setFilesSearchValue(e.target.value)}
+                      className="w-80 bg-white border-gray-300 text-gray-900"
+                      placeholder=""
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Files Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
                 {(() => {
+                  // Apply filters to files
+                  const filteredFiles = projectFiles.filter(file => {
+                    // Type filter (All means show all types)
+                    const typeMatch = filesActiveFilter === 'All' || 
+                      (filesActiveFilter === 'Video' && file.type === 'video') ||
+                      (filesActiveFilter === 'Audio' && file.type === 'audio');
+                    
+                    // Search filter
+                    const searchMatch = filesSearchValue === '' || 
+                      file.fileName.toLowerCase().includes(filesSearchValue.toLowerCase());
+                    
+                    // Date filter
+                    let dateMatch = true;
+                    if (filesDateFilter === 'month') {
+                      const now = new Date();
+                      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                      const fileDate = new Date(file.timestamp);
+                      dateMatch = fileDate >= startOfMonth && fileDate <= endOfMonth;
+                    } else if (filesDateFilter === 'custom') {
+                      const fileDate = new Date(file.timestamp);
+                      dateMatch = fileDate >= filesCustomDateRange.start && fileDate <= filesCustomDateRange.end;
+                    }
+                    
+                    return typeMatch && searchMatch && dateMatch;
+                  });
+
                   const startIndex = (currentFilesPage - 1) * filesPerPage;
                   const endIndex = startIndex + filesPerPage;
-                  const currentFiles = projectFiles.slice(startIndex, endIndex);
+                  const currentFiles = filteredFiles.slice(startIndex, endIndex);
                   
-                  return currentFiles.map((file, index) => (
-                  <div 
-                    key={index} 
-                    className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow relative"
-                    style={{ width: '280px', height: '320px' }}
-                  >
-                    {/* File Thumbnail */}
-                    <div className="h-48 bg-gray-100 rounded-t-xl flex items-center justify-center relative overflow-hidden">
-                      {file.thumbnailPath ? (
-                        <img
-                          src={`${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`}
-                          alt={file.fileName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Fallback to icon if thumbnail fails
-                            const img = e.target as HTMLImageElement;
-                            img.style.display = 'none';
-                            const container = img.parentElement;
-                            if (container) {
-                              const iconHtml = file.type === 'video' 
-                                ? `<div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                                     <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
-                                       <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                         <path d="M8 5v14l11-7z"/>
-                                       </svg>
-                                     </div>
-                                   </div>`
-                                : `<div class="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                                     <div class="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center">
-                                       <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                         <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                                       </svg>
-                                     </div>
-                                   </div>`;
-                              container.innerHTML = iconHtml;
-                            }
-                          }}
-                        />
-                      ) : file.type === 'video' ? (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                          <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z"/>
-                            </svg>
+                  return currentFiles.length > 0 ? currentFiles.map((file, index) => (
+                    <div 
+                      key={index} 
+                      className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
+                      style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
+                    >
+                      {/* File Thumbnail */}
+                      <div className="h-48 bg-gray-100 rounded-t-xl flex items-center justify-center relative overflow-hidden">
+                        {file.thumbnailPath ? (
+                          <img
+                            src={`${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`}
+                            alt={file.fileName}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to icon if thumbnail fails
+                              const img = e.target as HTMLImageElement;
+                              img.style.display = 'none';
+                              const container = img.parentElement;
+                              if (container) {
+                                const iconHtml = file.type === 'video' 
+                                  ? `<div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                                       <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
+                                         <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                           <path d="M8 5v14l11-7z"/>
+                                         </svg>
+                                       </div>
+                                     </div>`
+                                  : `<div class="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                                       <div class="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center">
+                                         <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                           <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                         </svg>
+                                       </div>
+                                     </div>`;
+                                container.innerHTML = iconHtml;
+                              }
+                            }}
+                          />
+                        ) : file.type === 'video' ? (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                            <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
+                              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                          <div className="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                            </svg>
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                            <div className="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center">
+                              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                              </svg>
+                            </div>
                           </div>
+                        )}
+                        
+                        {/* File extension badge */}
+                        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded uppercase">
+                          {file.fileExtension}
                         </div>
-                      )}
-                      
-                      {/* File extension badge */}
-                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded uppercase">
-                        {file.fileExtension}
-                      </div>
-                      {/* Render badge */}
-                      {file.isRender && (
+                        {/* Render badge */}
                         <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
                           RENDER
                         </div>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* File Info */}
-                    <div className="p-4 flex flex-col h-32">
-                      <h3 className="font-semibold text-gray-900 text-sm truncate mb-1" title={file.fileName}>
-                        {file.fileName.length > 20 ? file.fileName.substring(0, 17) + '...' : file.fileName}
-                      </h3>
-                      <p className="text-gray-500 text-xs mb-3">
-                        {new Date(file.timestamp).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })}
-                      </p>
+                      {/* File Info */}
+                      <div className="p-4 flex flex-col h-32">
+                        <h3 className="font-semibold text-gray-900 text-sm truncate flex-1 mb-1">
+                          {file.fileName.length > 20 ? file.fileName.substring(0, 17) + '...' : file.fileName}
+                        </h3>
+                        
+                        <p className="text-gray-500 text-xs mb-3">
+                          {new Date(file.timestamp).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </p>
 
-                      {/* Bottom section */}
-                      <div className="flex items-center justify-between mt-auto">
-                        <button 
-                          onClick={() => {
-                            // Download directly from S3 URL
-                            const link = document.createElement('a');
-                            link.href = file.filePath; // This is the S3 URL
-                            link.download = file.fileName;
-                            link.target = '_blank';
-                            link.click();
-                          }}
-                          className="w-6 h-6 flex items-center justify-center"
-                          title="Download render"
-                        >
-                          <Download className="w-5 h-5 text-gray-600" />
-                        </button>
-                        <div className="flex items-center gap-1 text-yellow-600">
-                          <span className="text-xs">💰</span>
-                          <span className="text-xs font-medium">
-                            {Math.round(file.fileSize / (1024 * 1024))}
-                          </span>
+                        {/* Bottom section */}
+                        <div className="flex items-center justify-between mt-auto">
+                          <button 
+                            onClick={() => {
+                              // Download directly from S3 URL
+                              const link = document.createElement('a');
+                              link.href = file.filePath; // This is the S3 URL
+                              link.download = file.fileName;
+                              link.target = '_blank';
+                              link.click();
+                            }}
+                            className="w-6 h-6 flex items-center justify-center"
+                            title="Download render"
+                          >
+                            <Download className="w-5 h-5 text-gray-600" />
+                          </button>
+                          <div className="flex items-center gap-1 text-yellow-600">
+                            <span className="text-xs">💰</span>
+                            <span className="text-xs font-medium">
+                              {Math.round(file.fileSize / (1024 * 1024))}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  )) : (
+                    <div className="col-span-4 w-full flex items-center justify-center py-12 select-none">
+                      <div className="text-center">
+                        <div className="text-gray-500 text-lg mb-2">No renders found</div>
+                        <div className="text-gray-400 text-sm">
+                          {filesSearchValue !== '' && `No renders match "${filesSearchValue}"`}
+                          {filesSearchValue !== '' && filesDateFilter !== 'all' && ' with the selected date range'}
+                          {filesSearchValue === '' && filesDateFilter !== 'all' && 'No renders found in the selected date range'}
+                        </div>
+                      </div>
+                    </div>
+                  );
                 })()}
                 
                 {projectFiles.length === 0 && (
-                  <div className="w-full text-center py-12 text-gray-500">
+                  <div className="col-span-4 w-full text-center py-12 text-gray-500">
                     No rendered files in this project yet
                   </div>
                 )}
               </div>
               
               {/* Files Pagination */}
-              {projectFiles.length > 0 && (
-                <div className="flex items-center justify-between mt-8">
-                  {/* Showing entries text */}
-                  <p className="text-gray-600">
-                    Showing {(() => {
-                      const startIndex = (currentFilesPage - 1) * filesPerPage;
-                      const endIndex = startIndex + filesPerPage;
-                      return projectFiles.length === 0 ? '0-0' : `${startIndex + 1}-${Math.min(endIndex, projectFiles.length)}`;
-                    })()} of {projectFiles.length} files
-                  </p>
+              {(() => {
+                const filteredFiles = projectFiles.filter(file => {
+                  const typeMatch = filesActiveFilter === 'All' || 
+                    (filesActiveFilter === 'Video' && file.type === 'video') ||
+                    (filesActiveFilter === 'Audio' && file.type === 'audio');
+                  
+                  const searchMatch = filesSearchValue === '' || 
+                    file.fileName.toLowerCase().includes(filesSearchValue.toLowerCase());
+                  
+                  let dateMatch = true;
+                  if (filesDateFilter === 'month') {
+                    const now = new Date();
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    const fileDate = new Date(file.timestamp);
+                    dateMatch = fileDate >= startOfMonth && fileDate <= endOfMonth;
+                  } else if (filesDateFilter === 'custom') {
+                    const fileDate = new Date(file.timestamp);
+                    dateMatch = fileDate >= filesCustomDateRange.start && fileDate <= filesCustomDateRange.end;
+                  }
+                  
+                  return typeMatch && searchMatch && dateMatch;
+                });
 
-                  {/* Pagination */}
-                  <div className="flex items-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
-                        if (totalFilesPages > 1 && currentFilesPage > 1) {
-                          setCurrentFilesPage(currentFilesPage - 1);
-                        }
-                      }}
-                      className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
-                    >
-                      Previous
-                    </Button>
-                    
-                    {/* Page numbers */}
-                    {(() => {
-                      const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
-                      return Array.from({ length: Math.max(1, totalFilesPages) }, (_, i) => i + 1).map((page) => (
+                const totalFilesPages = Math.ceil(filteredFiles.length / filesPerPage);
+                const startIndex = (currentFilesPage - 1) * filesPerPage;
+                const endIndex = startIndex + filesPerPage;
+
+                return filteredFiles.length > 0 ? (
+                  <div className="flex items-center justify-between mt-8">
+                    {/* Showing entries text */}
+                    <p className="text-gray-600">
+                      Showing {filteredFiles.length === 0 ? '0-0' : `${startIndex + 1}-${Math.min(endIndex, filteredFiles.length)}`} of {filteredFiles.length} renders
+                    </p>
+
+                    {/* Pagination */}
+                    <div className="flex items-center">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          if (totalFilesPages > 1 && currentFilesPage > 1) {
+                            setCurrentFilesPage(currentFilesPage - 1);
+                          }
+                        }}
+                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                      >
+                        Previous
+                      </Button>
+                      
+                      {/* Page numbers */}
+                      {Array.from({ length: Math.max(1, totalFilesPages) }, (_, i) => i + 1).map((page) => (
                         <Button
                           key={page}
                           variant="outline"
@@ -948,24 +1123,23 @@ export default function SavedProjects() {
                         >
                           {page}
                         </Button>
-                      ));
-                    })()}
-                    
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
-                        if (totalFilesPages > 1 && currentFilesPage < totalFilesPages) {
-                          setCurrentFilesPage(currentFilesPage + 1);
-                        }
-                      }}
-                      className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
-                    >
-                      Next
-                    </Button>
+                      ))}
+                      
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          if (totalFilesPages > 1 && currentFilesPage < totalFilesPages) {
+                            setCurrentFilesPage(currentFilesPage + 1);
+                          }
+                        }}
+                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null;
+              })()}
             </div>
           ) : (
             <>
@@ -982,161 +1156,160 @@ export default function SavedProjects() {
                 </div>
               )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
-              {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
-              {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
-                <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
-                  style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
-                >
-                  <div className="flex flex-col gap-[10px] m-2 py-[90px] px-0 rounded-xl border-dashed border border-[#29009c]"
-                    style={{ outlineOffset: '-1px' }}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
+                {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
+                {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
+                  <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
+                    style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                   >
-                    <div className="flex justify-center items-center text-[#490972] text-center"
-                      style={{ font: '50 64px / 0.69 Poppins, Helvetica, Arial, serif' }}
+                    <div className="flex flex-col gap-[10px] m-2 py-[90px] px-0 rounded-xl border-dashed border border-[#29009c]"
+                      style={{ outlineOffset: '-1px' }}
                     >
-                      +
-                    </div>
-                    <div className="flex justify-center items-center text-[#490972] text-center"
-                      style={{ font: '600 16px / 1.5 Poppins, Helvetica, Arial, serif' }}
-                    >
-                      Start Generating
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* User Projects */}
-              {currentProjects.map((project) => (
-                <div 
-                  key={project.id} 
-                  onClick={() => handleProjectClick(project)}
-                  // className="bg-white rounded-xl shadow-sm border cursor-pointer hover:shadow-md transition-shadow relative"
-                  className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
-                  style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
-                >
-                  {/* Folder Icon/Thumbnail */}
-                  <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl flex items-center justify-center relative overflow-hidden">
-                    <div className="w-20 h-16 bg-yellow-400 rounded-lg shadow-lg flex items-center justify-center relative">
-                      <div className="w-16 h-12 bg-yellow-500 rounded-md"></div>
-                      <div className="absolute -top-1 -right-1 w-4 h-3 bg-yellow-300 rounded-tr-lg rounded-bl-lg"></div>
-                    </div>
-                  </div>
-
-                  {/* Project Info */}
-                  <div className="p-4 flex flex-col h-32">
-                    <div className="flex items-center gap-2 mb-1">
-                      {editingProject === project.id ? (
-                        <input
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onBlur={() => handleSaveProjectName(project)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleSaveProjectName(project);
-                            } else if (e.key === 'Escape') {
-                              setEditingProject(null);
-                              setEditingName('');
-                            }
-                          }}
-                          className="font-semibold text-gray-900 text-sm bg-transparent border-b border-gray-300 focus:outline-none focus:border-purple-500 flex-1"
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      ) : (
-                        <h3 className="font-semibold text-gray-900 text-sm truncate flex-1">
-                          {project.name}
-                        </h3>
-                      )}
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingProject(project.id);
-                          setEditingName(project.name);
-                        }}
-                        className="w-4 h-4 flex items-center justify-center hover:bg-gray-100 rounded"
+                      <div className="flex justify-center items-center text-[#490972] text-center"
+                        style={{ font: '50 64px / 0.69 Poppins, Helvetica, Arial, serif' }}
                       >
-                        <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
+                        +
+                      </div>
+                      <div className="flex justify-center items-center text-[#490972] text-center"
+                        style={{ font: '600 16px / 1.5 Poppins, Helvetica, Arial, serif' }}
+                      >
+                        Start Generating
+                      </div>
                     </div>
-                    
-                    <p className="text-gray-500 text-xs mb-3">
-                      {project.lastSaved ? new Date(project.lastSaved).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      }) : 'Never'}
-                    </p>
+                  </div>
+                )}
 
-                    {/* Bottom section */}
-                    <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-2">
+                {/* User Projects */}
+                {currentProjects.map((project) => (
+                  <div 
+                    key={project.id} 
+                    onClick={() => handleProjectClick(project)}
+                    className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
+                    style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
+                  >
+                    {/* Folder Icon/Thumbnail */}
+                    <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl flex items-center justify-center relative overflow-hidden">
+                      <div className="w-20 h-16 bg-yellow-400 rounded-lg shadow-lg flex items-center justify-center relative">
+                        <div className="w-16 h-12 bg-yellow-500 rounded-md"></div>
+                        <div className="absolute -top-1 -right-1 w-4 h-3 bg-yellow-300 rounded-tr-lg rounded-bl-lg"></div>
+                      </div>
+                    </div>
+
+                    {/* Project Info */}
+                    <div className="p-4 flex flex-col h-32">
+                      <div className="flex items-center gap-2 mb-1">
+                        {editingProject === project.id ? (
+                          <input
+                            type="text"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            onBlur={() => handleSaveProjectName(project)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleSaveProjectName(project);
+                              } else if (e.key === 'Escape') {
+                                setEditingProject(null);
+                                setEditingName('');
+                              }
+                            }}
+                            className="font-semibold text-gray-900 text-sm bg-transparent border-b border-gray-300 focus:outline-none focus:border-purple-500 flex-1"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        ) : (
+                          <h3 className="font-semibold text-gray-900 text-sm truncate flex-1">
+                            {project.name}
+                          </h3>
+                        )}
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDownloadAllRenders(project);
+                            setEditingProject(project.id);
+                            setEditingName(project.name);
                           }}
-                          className="w-6 h-6 flex items-center justify-center"
-                          title="Download all renders"
+                          className="w-4 h-4 flex items-center justify-center hover:bg-gray-100 rounded"
                         >
-                          <Download className="w-5 h-5 text-gray-600" />
-                        </button>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleApplyTemplate(project);
-                          }}
-                          className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors"
-                          title="Apply as template"
-                        >
-                          Apply Template
+                          <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
                         </button>
                       </div>
                       
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">
-                          {project.renders?.length || 0} renders
-                        </span>
-                        
-                        {/* Three dots menu */}
-                        <div className="relative z-10" data-menu>
+                      <p className="text-gray-500 text-xs mb-3">
+                        {project.lastSaved ? new Date(project.lastSaved).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        }) : 'Never'}
+                      </p>
+
+                      {/* Bottom section */}
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2">
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              setMenuOpen(menuOpen === project.id ? null : project.id);
+                              handleDownloadAllRenders(project);
                             }}
-                            className="w-6 h-6 hover:bg-gray-100 rounded flex items-center justify-center"
+                            className="w-6 h-6 flex items-center justify-center"
+                            title="Download all renders"
                           >
-                            <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                            </svg>
+                            <Download className="w-5 h-5 text-gray-600" />
                           </button>
                           
-                          {/* Dropdown menu */}
-                          {menuOpen === project.id && (
-                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap min-w-max">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleActiveStatus(project);
-                                  setMenuOpen(null);
-                                }}
-                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 block"
-                              >
-                                {project.status === 'active' ? 'Hide From Active View' : 'Show in Active View'}
-                              </button>
-                            </div>
-                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleApplyTemplate(project);
+                            }}
+                            className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors"
+                            title="Apply as template"
+                          >
+                            Apply Template
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">
+                            {project.renders?.length || 0} renders
+                          </span>
+                          
+                          {/* Three dots menu */}
+                          <div className="relative z-10" data-menu>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuOpen(menuOpen === project.id ? null : project.id);
+                              }}
+                              className="w-6 h-6 hover:bg-gray-100 rounded flex items-center justify-center"
+                            >
+                              <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                              </svg>
+                            </button>
+                            
+                            {/* Dropdown menu */}
+                            {menuOpen === project.id && (
+                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap min-w-max">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleActiveStatus(project);
+                                    setMenuOpen(null);
+                                  }}
+                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 block"
+                                >
+                                  {project.status === 'active' ? 'Hide From Active View' : 'Show in Active View'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
             </>
           )}
         </div>
