@@ -44,6 +44,48 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   const { addRow } = useTimeline();
   const { extractAudio } = useFFmpeg();
 
+  // Function to handle credit deduction for audio generation
+  const handleAudioCreditDeduction = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('uid');
+    const sessionId = urlParams.get('sid');
+    
+    if (!userId || !sessionId) {
+      console.error('Missing uid or sid from URL parameters');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/deduct-credits`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          sessionId,
+          productCode: 'EDIT_VIDEO_ADD_AUDIO',
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to deduct credits for audio generation');
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Audio credits deducted successfully:', data.data);
+      } else {
+        console.error('Audio credit deduction failed:', data.error);
+      }
+      
+    } catch (error) {
+      console.error('Error in audio credit deduction process:', error);
+    }
+  };
+
   // Helper function to get URL parameters
   const getUrlParams = () => {
     if (typeof window !== 'undefined') {
@@ -309,6 +351,8 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
             } as const;
 
             addOverlay(newSoundOverlay);
+            // Deduct credits for audio generation
+            handleAudioCreditDeduction();
             // Stop the loading state only after successfully adding to timeline
             setIsGeneratingAudio(false);
             

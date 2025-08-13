@@ -99,6 +99,9 @@ const RenderControls: React.FC<RenderControlsProps> = ({
           timestamp: new Date().toISOString()
         } 
       }));
+      
+      // Handle credit deduction after successful render
+      handleCreditDeduction();
     } else if (state.status === "error") {
       // Optionally emit an error event
       window.dispatchEvent(new CustomEvent('renderError', { 
@@ -136,6 +139,47 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       }
     } catch (error) {
       console.error('Error saving to user folder:', error);
+    }
+  };
+
+  // Function to handle credit deduction after successful render
+  const handleCreditDeduction = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('uid');
+    const sessionId = urlParams.get('sid');
+    
+    if (!userId || !sessionId) {
+      console.error('Missing uid or sid from URL parameters');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/deduct-credits`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          sessionId,
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to deduct credits');
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Credits deducted successfully:', data.data);
+      } else {
+        console.error('Credit deduction failed:', data.error);
+      }
+      
+    } catch (error) {
+      console.error('Error in credit deduction process:', error);
     }
   };
 

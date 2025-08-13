@@ -221,7 +221,7 @@ export const CaptionsPanel: React.FC = () => {
     return uploadResult.audioUrl;
   };
 
-const handleAutomaticCaptions = async () => {
+  const handleAutomaticCaptions = async () => {
     setIsGeneratingCaptions(true);
     
     try {
@@ -308,6 +308,48 @@ const handleAutomaticCaptions = async () => {
       setIsGeneratingCaptions(false);
     }
     // Don't reset loading state here - let pollCaptionStatus handle it
+  };
+
+  // Function to handle credit deduction for captions
+  const handleCaptionCreditDeduction = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('uid');
+    const sessionId = urlParams.get('sid');
+    
+    if (!userId || !sessionId) {
+      console.error('Missing uid or sid from URL parameters');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/deduct-credits`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          sessionId,
+          productCode: 'EDIT_VIDEO_ADD_CAPTION',
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to deduct credits for captions');
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Caption credits deducted successfully:', data.data);
+      } else {
+        console.error('Caption credit deduction failed:', data.error);
+      }
+      
+    } catch (error) {
+      console.error('Error in caption credit deduction process:', error);
+    }
   };
 
   const pollMultipleCaptionStatus = async (results: any[]) => {
@@ -481,6 +523,9 @@ const handleAutomaticCaptions = async () => {
       // Add all caption overlays
       const finalOverlays = [...updatedOverlays, ...newCaptionOverlays];
       setOverlays(finalOverlays);
+      
+      // Deduct credits for caption generation
+      handleCaptionCreditDeduction();
       
       // Force open the style panel with the first caption overlay
       if (newCaptionOverlays.length > 0) {
