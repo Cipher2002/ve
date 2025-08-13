@@ -783,7 +783,7 @@ export default function SavedProjects() {
               </div>
 
               {/* Files Grid */}
-              <div className="flex flex-wrap gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {(() => {
                   const startIndex = (currentFilesPage - 1) * filesPerPage;
                   const endIndex = startIndex + filesPerPage;
