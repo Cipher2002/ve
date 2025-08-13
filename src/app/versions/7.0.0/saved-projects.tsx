@@ -18,6 +18,8 @@ interface ProjectFile {
   fileSize: number;
   fileExtension: string;
   filePath: string;
+  isRender?: boolean;
+  thumbnailPath?: string | null;
 }
 
 interface UserProject {
@@ -269,17 +271,35 @@ export default function SavedProjects() {
     }
   };
 
-  // Fetch project files for selected project
+  // Fetch rendered files for selected project
   const fetchProjectFiles = async (projectId: string) => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`${apiBaseUrl}/save-to-user/get-files?uid=${uid}&projectId=${projectId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setProjectFiles(data.files || []);
+      const rendersResponse = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}&projectId=${projectId}`);
+
+      if (rendersResponse.ok) {
+        const rendersData = await rendersResponse.json();
+        const renderFiles = (rendersData.renders || []).map((render: any) => ({
+          fileName: `${render.renderId}.${render.format}`,
+          timestamp: render.timestamp,
+          type: render.mediaType as 'video' | 'audio' | 'media',
+          fileSize: render.fileSize,
+          fileExtension: render.format,
+          filePath: render.s3Url, // Use S3 URL as file path for downloads
+          isRender: true, // Flag to identify renders
+          thumbnailPath: render.thumbnailPath || null
+        }));
+
+        // Sort by timestamp (newest first)
+        renderFiles.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        setProjectFiles(renderFiles);
+      } else {
+        setProjectFiles([]);
       }
     } catch (error) {
-      console.error('Error fetching project files:', error);
+      console.error('Error fetching project renders:', error);
+      setProjectFiles([]);
     }
   };
 
@@ -373,26 +393,30 @@ export default function SavedProjects() {
     setEditingName('');
   };
 
-  // Handle downloading project (latest render)
-  const handleDownloadProject = async (project: UserProject) => {
+  // Handle downloading all renders for a project
+  const handleDownloadAllRenders = async (project: UserProject) => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`${apiBaseUrl}/save-to-user/get-files?uid=${uid}&projectId=${project.id}`);
+      const response = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}&projectId=${project.id}`);
       if (response.ok) {
         const data = await response.json();
-        const files = data.files || [];
+        const renders = data.renders || [];
         
-        if (files.length > 0) {
-          // Download the most recent file
-          const latestFile = files[0];
-          const link = document.createElement('a');
-          link.href = `${apiBaseUrl}/download-file?filePath=${encodeURIComponent(latestFile.filePath)}`;
-          link.download = latestFile.fileName;
-          link.click();
+        if (renders.length > 0) {
+          // Download all renders
+          renders.forEach((render: any, index: number) => {
+            setTimeout(() => {
+              const link = document.createElement('a');
+              link.href = render.s3Url;
+              link.download = `${render.renderId}.${render.format}`;
+              link.target = '_blank';
+              link.click();
+            }, index * 500); // Stagger downloads by 500ms to avoid browser blocking
+          });
         }
       }
     } catch (error) {
-      console.error('Error downloading project:', error);
+      console.error('Error downloading project renders:', error);
     }
   };
 
@@ -761,7 +785,30 @@ export default function SavedProjects() {
                   >
                     {/* File Thumbnail */}
                     <div className="h-48 bg-gray-100 rounded-t-xl flex items-center justify-center relative overflow-hidden">
-                      {file.type === 'video' ? (
+                      {file.isRender && file.type === 'video' && file.thumbnailPath ? (
+                        <img
+                          src={`${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`}
+                          alt={file.fileName}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to icon if thumbnail fails
+                            const img = e.target as HTMLImageElement;
+                            img.style.display = 'none';
+                            const container = img.parentElement;
+                            if (container) {
+                              container.innerHTML = `
+                                <div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                                  <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                  </div>
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                      ) : file.type === 'video' ? (
                         <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                           <div className="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
                             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -783,6 +830,12 @@ export default function SavedProjects() {
                       <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded uppercase">
                         {file.fileExtension}
                       </div>
+                      {/* Render badge */}
+                      {file.isRender && (
+                        <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                          RENDER
+                        </div>
+                      )}
                     </div>
 
                     {/* File Info */}
@@ -802,12 +855,15 @@ export default function SavedProjects() {
                       <div className="flex items-center justify-between mt-auto">
                         <button 
                           onClick={() => {
+                            // Download directly from S3 URL
                             const link = document.createElement('a');
-                            link.href = `${apiBaseUrl}/download-file?filePath=${encodeURIComponent(file.filePath)}`;
+                            link.href = file.filePath; // This is the S3 URL
                             link.download = file.fileName;
+                            link.target = '_blank';
                             link.click();
                           }}
                           className="w-6 h-6 flex items-center justify-center"
+                          title="Download render"
                         >
                           <Download className="w-5 h-5 text-gray-600" />
                         </button>
@@ -824,7 +880,7 @@ export default function SavedProjects() {
                 
                 {projectFiles.length === 0 && (
                   <div className="w-full text-center py-12 text-gray-500">
-                    No media files in this project yet
+                    No rendered files in this project yet
                   </div>
                 )}
               </div>
@@ -938,10 +994,10 @@ export default function SavedProjects() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDownloadProject(project);
+                            handleDownloadAllRenders(project);
                           }}
                           className="w-6 h-6 flex items-center justify-center"
-                          title="Download latest render"
+                          title="Download all renders"
                         >
                           <Download className="w-5 h-5 text-gray-600" />
                         </button>
