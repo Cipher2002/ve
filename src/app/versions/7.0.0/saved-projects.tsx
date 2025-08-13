@@ -1028,7 +1028,7 @@ export default function SavedProjects() {
               )}
 
               {/* Files Grid */}
-              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-4 max-w-full items-center justify-center px-2 cards-4:px-4">
+              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-2 max-w-full items-center justify-center px-2 cards-4:px-1">
                 {(() => {
                   // Apply filters to files
                   const filteredFiles = projectFiles.filter(file => {
@@ -1284,7 +1284,7 @@ export default function SavedProjects() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-4 max-w-full items-center justify-center px-2 cards-4:px-4">
+              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-2 max-w-full items-center justify-center px-2 cards-4:px-1">
                 {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
                 {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
                   <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
