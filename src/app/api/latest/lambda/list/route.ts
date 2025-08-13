@@ -23,14 +23,24 @@ export async function GET(request: NextRequest) {
     const supportedExtensions = ['.mp4', '.mov', '.mkv', '.gif', '.webm', '.wav', '.mp3', '.aac'];
 
     try {
-      // Get all project folders for this user
-      const projectFolders = fs.readdirSync(userDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+      // Load projects_id_list.json to get project information
+      const projectsListPath = path.join(userDir, 'projects_id_list.json');
+      
+      if (!fs.existsSync(projectsListPath)) {
+        return NextResponse.json([]);
+      }
 
-      // Search through all project folders
-      for (const projectFolder of projectFolders) {
-        const projectPath = path.join(userDir, projectFolder);
+      const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+      const projectsList = JSON.parse(projectsListContent);
+
+      // Search through all project folders using project IDs
+      for (const [projectId, projectInfo] of Object.entries(projectsList)) {
+        const projectPath = path.join(userDir, projectId);
+        
+        // Check if project folder exists
+        if (!fs.existsSync(projectPath)) {
+          continue;
+        }
         
         // Get all files in the project folder
         const files = fs.readdirSync(projectPath, { withFileTypes: true })
@@ -53,12 +63,12 @@ export async function GET(request: NextRequest) {
           videos.push({
             id: renderId,
             filename: filename,
-            url: `${apiBaseUrl}/user-files/${uid}/${projectFolder}/${filename}`,
+            url: `${apiBaseUrl}/user-files/${uid}/${projectId}/${filename}`,
             thumbnail: null, // You can implement thumbnail generation if needed
             size: stats.size,
             createdAt: stats.birthtime.toISOString(),
             modifiedAt: stats.mtime.toISOString(),
-            projectName: projectFolder, // Include project name for reference
+            projectName: (projectInfo as any).project_name, // Include project name for reference
           });
         }
       }

@@ -42,8 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const projectName = projectsList[projectId].project_name;
-    const projectPath = path.join(userBasePath, projectId, projectName);
+    const projectPath = path.join(userBasePath, projectId);
     const indexPath = path.join(projectPath, 'project-index.json');
 
     // Check if project folder exists

@@ -28,8 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Iterate through each project in the list
     for (const [projectId, projectInfo] of Object.entries(projectsList)) {
-      const projectName = (projectInfo as any).project_name;
-      const projectPath = path.join(userFolderPath, projectId, projectName);
+      const projectPath = path.join(userFolderPath, projectId);
       const projectIndexPath = path.join(projectPath, 'project-index.json');
 
       // Check if project has saves (templates)
@@ -51,8 +50,8 @@ export async function GET(request: NextRequest) {
               // Convert save data to template format
               const template = {
                 id: projectId,
-                name: projectIndex.projectName || projectName,
-                description: `Template from ${projectIndex.projectName || projectName}`,
+                name: projectIndex.projectName || (projectInfo as any).project_name,
+                description: `Template from ${projectIndex.projectName || (projectInfo as any).project_name}`,
                 createdAt: projectIndex.createdAt,
                 updatedAt: projectIndex.lastUpdated || projectIndex.createdAt,
                 createdBy: { id: uid, name: "User" },
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
             }
           }
         } catch (error) {
-          console.error(`Error reading project ${projectName}:`, error);
+          console.error(`Error reading project ${(projectInfo as any).project_name}:`, error);
         }
       }
     }

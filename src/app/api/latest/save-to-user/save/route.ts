@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
       // Save updated projects list
       fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
       
-      // Create folder structure: /home/zanopyai/htdocs/data/video_editor_data/{uid}/{project_id}/{projectName}
-      userFolderPath = path.join(userBasePath, projectId, projectName);
+      // Create folder structure: /home/zanopyai/htdocs/data/video_editor_data/{uid}/{project_id}
+      userFolderPath = path.join(userBasePath, projectId);
     } else if (type === 'render') {
       // Look up project_id by projectName
       const existingProject = Object.values(projectsList).find((project: any) => 
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       }
       
       projectId = (existingProject as any).project_id;
-      userFolderPath = path.join(userBasePath, projectId, projectName);
+      userFolderPath = path.join(userBasePath, projectId);
     } else {
       return NextResponse.json(
         { error: 'Invalid type' },

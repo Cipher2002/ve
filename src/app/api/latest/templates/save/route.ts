@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     // Save updated projects list
     fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
     
-    // Create folder structure: users/{uid}/{project_id}/{projectName}
-    const projectPath = path.join(userBasePath, projectId, projectName);
+    // Create folder structure: users/{uid}/{project_id}
+    const projectPath = path.join(userBasePath, projectId);
     
     // Ensure the directory exists
     fs.mkdirSync(projectPath, { recursive: true });

@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const oldProjectPath = path.join(userBasePath, projectId, oldName);
-    const newProjectPath = path.join(userBasePath, projectId, sanitizedNewName);
+    const oldProjectPath = path.join(userBasePath, projectId);
+    const newProjectPath = path.join(userBasePath, projectId);
 
-    // Check if old project folder exists
+    // Check if project folder exists
     if (!fs.existsSync(oldProjectPath)) {
       return NextResponse.json(
         { error: 'Project folder not found' },
@@ -67,21 +67,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if new name already exists (and it's not the same folder)
-    if (fs.existsSync(newProjectPath) && oldProjectPath !== newProjectPath) {
-      return NextResponse.json(
-        { error: 'Project with this name already exists' },
-        { status: 409 }
-      );
-    }
-
-    // Rename the folder if names are different
-    if (oldProjectPath !== newProjectPath) {
-      fs.renameSync(oldProjectPath, newProjectPath);
-    }
-
     // Update the project index file
-    const indexPath = path.join(newProjectPath, 'project-index.json');
+    const indexPath = path.join(oldProjectPath, 'project-index.json');
     if (fs.existsSync(indexPath)) {
       const indexContent = fs.readFileSync(indexPath, 'utf-8');
       const projectIndex = JSON.parse(indexContent);

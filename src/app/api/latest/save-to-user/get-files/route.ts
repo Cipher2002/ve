@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ files: [] });
     }
     
-    const projectName = projectsList[projectId].project_name;
-    const projectPath = path.join(userBasePath, projectId, projectName);
+    const projectPath = path.join(userBasePath, projectId);
 
     if (!fs.existsSync(projectPath)) {
       return NextResponse.json({ files: [] });
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
             type: isVideo ? 'video' : isAudio ? 'audio' : 'media',
             fileSize: stats.size,
             fileExtension: fileExtension.replace('.', ''),
-            filePath: `/users/${uid}/${projectId}/${projectName}/${fileName}`, // Relative path for download
+            filePath: `/users/${uid}/${projectId}/${fileName}`, // Relative path for download
           });
         }
       }
@@ -101,7 +100,7 @@ export async function GET(request: NextRequest) {
                   type: isVideo ? 'video' : isAudio ? 'audio' : 'media',
                   fileSize: render.fileSize || stats.size,
                   fileExtension: fileExtension.replace('.', ''),
-                  filePath: `/users/${uid}/${projectId}/${projectName}/${render.fileName}`,
+                  filePath: `/users/${uid}/${projectId}/${render.fileName}`,
                 });
               }
             }

@@ -51,8 +51,6 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const oldProjectName = projectsList[actualProjectId].project_name;
-    
     // Check if new name already exists in any other project
     const existingProject = Object.values(projectsList).find((project: any) => 
       project.project_name === newName && project.project_id !== templateId
@@ -65,28 +63,24 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const oldProjectPath = path.join(userBasePath, actualProjectId, oldProjectName);
-    const newProjectPath = path.join(userBasePath, actualProjectId, newName);
+    const projectPath = path.join(userBasePath, actualProjectId);
 
-    // Check if old project exists
-    if (!fs.existsSync(oldProjectPath)) {
+    // Check if project exists
+    if (!fs.existsSync(projectPath)) {
       return NextResponse.json(
         { error: "Project not found" },
         { status: 404 }
       );
     }
 
-    // Rename the project folder if name changed
-    if (oldProjectName !== newName) {
-      fs.renameSync(oldProjectPath, newProjectPath);
-    }
+    // Note: No folder renaming needed since we're not using project name in folder structure
 
     // Update projects_id_list.json
     projectsList[actualProjectId].project_name = newName;
     fs.writeFileSync(projectsListPath, JSON.stringify(projectsList, null, 2));
 
     // Update project index
-    const indexPath = path.join(newProjectPath, 'project-index.json');
+    const indexPath = path.join(projectPath, 'project-index.json');
     if (fs.existsSync(indexPath)) {
       const indexContent = fs.readFileSync(indexPath, 'utf-8');
       const projectIndex = JSON.parse(indexContent);

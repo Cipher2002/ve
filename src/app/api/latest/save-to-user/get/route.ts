@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     // Iterate through each project in the list
     for (const [projectId, projectInfo] of Object.entries(projectsList)) {
       const projectName = (projectInfo as any).project_name;
-      const projectPath = path.join(userFolderPath, projectId, projectName);
+      const projectPath = path.join(userFolderPath, projectId);
       const indexPath = path.join(projectPath, 'project-index.json');
 
       if (fs.existsSync(indexPath)) {

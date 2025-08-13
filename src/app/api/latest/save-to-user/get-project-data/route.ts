@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
     
     const projectId = (projectEntry as any).project_id;
-    const userFolderPath = path.join(userBasePath, projectId, projectName);
+    const userFolderPath = path.join(userBasePath, projectId);
     const indexPath = path.join(userFolderPath, 'project-index.json');
 
     // Check if project index exists

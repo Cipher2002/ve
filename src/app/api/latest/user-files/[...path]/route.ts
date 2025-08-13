@@ -8,13 +8,13 @@ export async function GET(
 ) {
   try {
     const { path: pathParams } = await params;
-    const [uid, projectName, filename] = pathParams;
+    const [uid, projectId, filename] = pathParams;
     
-    if (!uid || !projectName || !filename) {
+    if (!uid || !projectId || !filename) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), 'users', uid, projectName, filename);
+    const filePath = path.join('/home/zanopyai/htdocs/data/video_editor_data', uid, projectId, filename);
     
     if (!fs.existsSync(filePath)) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
