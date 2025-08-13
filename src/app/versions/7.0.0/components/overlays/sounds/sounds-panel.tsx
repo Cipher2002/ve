@@ -75,7 +75,7 @@ const SoundsPanel: React.FC = () => {
   } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
-  const { audio: renderedAudio, isLoading: renderedLoading, refetch: refetchRendered, deleteAudio } = useRenderedAudio();
+  const { audio: renderedAudio, isLoading: renderedLoading, refetch: refetchRendered } = useRenderedAudio();
 
   // Reset items when tab changes or search changes
   useEffect(() => {
@@ -483,19 +483,6 @@ const SoundsPanel: React.FC = () => {
                         {(audio.size / (1024 * 1024)).toFixed(1)} MB • {new Date(audio.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-
-                    <button
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-                        text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 
-                        shadow-sm hover:shadow-md transform hover:scale-105"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        deleteAudio(audio.id);
-                      }}
-                      title="Delete audio"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 ))
             ) : (

@@ -103,7 +103,7 @@ export const VideoOverlayPanel: React.FC = () => {
     { label: 'Talking Video', value: 'talking-video', apiAction: 'GET_TALKING_IMAGE_PROJECT', imageStatus: '1' }
   ];
   
-  const { videos: renderedVideos, isLoading: renderedLoading, refetch: refetchRendered, deleteVideo } = useRenderedVideos();
+  const { videos: renderedVideos, isLoading: renderedLoading, refetch: refetchRendered } = useRenderedVideos();
   const { downloadVideo } = useVideoCache();
 
   const fetchProjects = async (projectType: string) => {
@@ -540,15 +540,40 @@ export const VideoOverlayPanel: React.FC = () => {
                     >
                       {/* Video thumbnail */}
                       <div className="aspect-video relative bg-gray-50 dark:bg-gray-900">
-                        <video
-                          src={video.url}
-                          className="w-full h-full object-cover"
-                          muted
-                          preload="metadata"
-                          onLoadedData={(e) => {
-                            e.currentTarget.currentTime = 1;
-                          }}
-                        />
+                        {video.thumbnailPath ? (
+                          <img
+                            src={`${apiBaseUrl}/user-files/${getUrlParams().uid}/${video.projectId}/${video.thumbnailPath}`}
+                            alt={video.filename}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to video frame if thumbnail fails
+                              const img = e.target as HTMLImageElement;
+                              img.style.display = 'none';
+                              const container = img.parentElement;
+                              if (container) {
+                                const videoElement = document.createElement('video');
+                                videoElement.src = video.url;
+                                videoElement.className = "w-full h-full object-cover";
+                                videoElement.muted = true;
+                                videoElement.preload = "metadata";
+                                videoElement.onloadeddata = () => {
+                                  videoElement.currentTime = 1;
+                                };
+                                container.appendChild(videoElement);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <video
+                            src={video.url}
+                            className="w-full h-full object-cover"
+                            muted
+                            preload="metadata"
+                            onLoadedData={(e) => {
+                              e.currentTarget.currentTime = 1;
+                            }}
+                          />
+                        )}
 
                         {/* Download Progress Overlay */}
                         {downloadingCards.has(video.id) && (
@@ -582,21 +607,7 @@ export const VideoOverlayPanel: React.FC = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                           {(video.size / (1024 * 1024)).toFixed(1)} MB • {formatDate(video.createdAt)}
                         </p>
-                      </div>
-
-                      {/* Delete button */}
-                      <button
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-                          text-white p-1.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-all duration-200 
-                          shadow-sm hover:shadow-md transform hover:scale-105"
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          deleteVideo(video.id);
-                        }}
-                        title="Delete video"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      </div>                      
                     </div>
                   ))}
                 </div>
