@@ -107,9 +107,9 @@ function DateRangeCalendar({
   const nextMonthDays = generateCalendar(nextMonthDate);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
-      {/* First Calendar */}
-      <div className="w-full lg:w-64">
+    <div className="flex flex-col gap-2 max-w-[280px]">
+      {/* First Calendar - Always single month */}
+      <div className="w-full">
         <div className="flex items-center justify-between mb-4">
           <button onClick={prevMonth} className="p-1 hover:bg-gray-100 rounded">
             <ChevronRight className="h-4 w-4 rotate-180" />
@@ -124,7 +124,7 @@ function DateRangeCalendar({
         
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 p-2">
+            <div key={day} className="text-center text-xs font-medium text-gray-500 p-1">
               {day}
             </div>
           ))}
@@ -136,7 +136,7 @@ function DateRangeCalendar({
               key={index}
               onClick={() => handleDateClick(date)}
               className={`
-                p-2 text-sm hover:bg-blue-100 rounded
+                p-1 text-xs hover:bg-blue-100 rounded
                 ${date.getMonth() !== currentMonth.getMonth() ? 'text-gray-300' : ''}
                 ${isSelected(date) ? 'bg-blue-500 text-white' : ''}
                 ${isInRange(date) && !isSelected(date) ? 'bg-blue-100' : ''}
@@ -148,8 +148,8 @@ function DateRangeCalendar({
         </div>
       </div>
 
-      {/* Second Calendar */}
-      <div className="w-full lg:w-64 hidden lg:block">
+      {/* Second Calendar - Remove completely for iframe */}
+        <div className="hidden">
         <div className="flex items-center justify-center mb-4">
           <div className="font-medium">
             {nextMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -183,8 +183,8 @@ function DateRangeCalendar({
       </div>
 
       {/* Action buttons */}
-      <div className="flex lg:flex-col justify-center lg:justify-end mt-4 lg:mt-0">
-        <div className="flex lg:flex-col gap-2">
+      <div className="flex justify-center mt-2">
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -737,8 +737,8 @@ export default function SavedProjects() {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex flex-col xs:flex-row xs:items-center justify-between mb-4 gap-4">
-            <div className="flex-1">
+          <div className="flex flex-col xs:flex-row xs:items-start justify-between mb-4 gap-4">
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl xs:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Your Saved Projects
               </h1>
@@ -759,7 +759,7 @@ export default function SavedProjects() {
                 Back to Projects
               </Button>
             ) : (
-              <div className="flex border rounded-lg overflow-hidden shrink-0">
+              <div className="flex border rounded-lg overflow-hidden flex-shrink-0 self-start">
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('Active')}
@@ -818,7 +818,7 @@ export default function SavedProjects() {
                     <ChevronRight className="h-4 w-4 rotate-90" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                   <div className="flex">
                     {/* Left sidebar with options */}
                     <div className="w-32 border-r bg-gray-50">
@@ -941,7 +941,7 @@ export default function SavedProjects() {
                         <ChevronRight className="h-4 w-4 rotate-90" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <div className="flex">
                         {/* Left sidebar with options */}
                         <div className="w-32 border-r bg-gray-50">
@@ -1224,7 +1224,7 @@ export default function SavedProjects() {
                     </p>
 
                     {/* Pagination */}
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-wrap gap-1 justify-center xs:justify-start">
                       <Button
                         variant="ghost"
                         onClick={() => {
@@ -1232,9 +1232,10 @@ export default function SavedProjects() {
                             setCurrentFilesPage(currentFilesPage - 1);
                           }
                         }}
-                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[6px] xs:px-[10px] py-[5.5px] text-gray-600 rounded-none text-xs xs:text-sm whitespace-nowrap"
                       >
-                        Previous
+                        <span className="hidden xs:inline">Previous</span>
+                        <span className="xs:hidden">Prev</span>
                       </Button>
                       
                       {/* Page numbers */}
@@ -1299,8 +1300,8 @@ export default function SavedProjects() {
                               key={page}
                               variant="outline"
                               onClick={() => setCurrentFilesPage(page as number)}
-                              className={`px-2 xs:px-4 py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm ${
-                              currentPage === page
+                              className={`px-1 xs:px-2 sm:px-4 py-1 xs:py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm min-w-[32px] xs:min-w-[40px] ${
+                              currentFilesPage === page
                                 ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
                                 : 'text-gray-600 hover:bg-gray-50'
                             }`}
@@ -1318,9 +1319,10 @@ export default function SavedProjects() {
                             setCurrentFilesPage(currentFilesPage + 1);
                           }
                         }}
-                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                        className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[6px] xs:px-[10px] py-[5.5px] text-gray-600 rounded-none text-xs xs:text-sm whitespace-nowrap"
                       >
-                        Next
+                        <span className="hidden xs:inline">Next</span>
+                        <span className="xs:hidden">Next</span>
                       </Button>
                     </div>
                   </div>
@@ -1502,14 +1504,14 @@ export default function SavedProjects() {
 
         {/* Footer - Always show when viewing projects list */}
         {!selectedProject && !loading && (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col xs:flex-row items-center justify-between gap-4">
             {/* Showing entries text */}
             <p className="text-gray-600">
               Showing {filteredProjects.length === 0 ? '0-0' : `${startIndex + 1}-${Math.min(endIndex, filteredProjects.length)}`} of {filteredProjects.length} entries
             </p>
 
             {/* Pagination */}
-            <div className="flex items-center overflow-x-auto">
+            <div className="flex items-center flex-wrap gap-1 justify-center xs:justify-start">
               <Button
                 variant="ghost"
                 onClick={handlePrevious}
@@ -1581,7 +1583,7 @@ export default function SavedProjects() {
                       key={page}
                       variant="outline"
                       onClick={() => handlePageChange(page as number)}
-                      className={`px-2 xs:px-4 py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm ${
+                      className={`px-1 xs:px-2 sm:px-4 py-1 xs:py-2 rounded-none border-[rgb(135,133,133)] text-xs xs:text-sm min-w-[32px] xs:min-w-[40px] ${
                       currentPage === page
                         ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
                         : 'text-gray-600 hover:bg-gray-50'
@@ -1599,7 +1601,7 @@ export default function SavedProjects() {
                 className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[6px] xs:px-[10px] py-[5.5px] text-gray-600 rounded-none text-xs xs:text-sm whitespace-nowrap"
               >
                 <span className="hidden xs:inline">Next</span>
-                <span className="xs:inline">Next</span>
+                <span className="xs:hidden">Next</span>
               </Button>
             </div>
           </div>
