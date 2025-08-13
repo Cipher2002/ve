@@ -227,6 +227,8 @@ export default function SavedProjects() {
       end: now
     };
   });
+  const [currentFilesPage, setCurrentFilesPage] = useState(1);
+  const [filesPerPage] = useState(4);
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -302,6 +304,11 @@ export default function SavedProjects() {
       setProjectFiles([]);
     }
   };
+
+  // Reset files page when project changes
+  React.useEffect(() => {
+    setCurrentFilesPage(1);
+  }, [selectedProject]);
 
   React.useEffect(() => {
     fetchUserProjects();
@@ -777,7 +784,12 @@ export default function SavedProjects() {
 
               {/* Files Grid */}
               <div className="flex flex-wrap gap-6">
-                {projectFiles.map((file, index) => (
+                {(() => {
+                  const startIndex = (currentFilesPage - 1) * filesPerPage;
+                  const endIndex = startIndex + filesPerPage;
+                  const currentFiles = projectFiles.slice(startIndex, endIndex);
+                  
+                  return currentFiles.map((file, index) => (
                   <div 
                     key={index} 
                     className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow relative"
@@ -785,7 +797,7 @@ export default function SavedProjects() {
                   >
                     {/* File Thumbnail */}
                     <div className="h-48 bg-gray-100 rounded-t-xl flex items-center justify-center relative overflow-hidden">
-                      {file.isRender && file.type === 'video' && file.thumbnailPath ? (
+                      {file.thumbnailPath ? (
                         <img
                           src={`${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`}
                           alt={file.fileName}
@@ -796,15 +808,22 @@ export default function SavedProjects() {
                             img.style.display = 'none';
                             const container = img.parentElement;
                             if (container) {
-                              container.innerHTML = `
-                                <div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                                  <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M8 5v14l11-7z"/>
-                                    </svg>
-                                  </div>
-                                </div>
-                              `;
+                              const iconHtml = file.type === 'video' 
+                                ? `<div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                                     <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center">
+                                       <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                         <path d="M8 5v14l11-7z"/>
+                                       </svg>
+                                     </div>
+                                   </div>`
+                                : `<div class="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                                     <div class="w-16 h-16 bg-green-500 rounded-lg flex items-center justify-center">
+                                       <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                         <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                       </svg>
+                                     </div>
+                                   </div>`;
+                              container.innerHTML = iconHtml;
                             }
                           }}
                         />
@@ -876,7 +895,8 @@ export default function SavedProjects() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+                })()}
                 
                 {projectFiles.length === 0 && (
                   <div className="w-full text-center py-12 text-gray-500">
@@ -884,6 +904,68 @@ export default function SavedProjects() {
                   </div>
                 )}
               </div>
+              
+              {/* Files Pagination */}
+              {projectFiles.length > 0 && (
+                <div className="flex items-center justify-between mt-8">
+                  {/* Showing entries text */}
+                  <p className="text-gray-600">
+                    Showing {(() => {
+                      const startIndex = (currentFilesPage - 1) * filesPerPage;
+                      const endIndex = startIndex + filesPerPage;
+                      return projectFiles.length === 0 ? '0-0' : `${startIndex + 1}-${Math.min(endIndex, projectFiles.length)}`;
+                    })()} of {projectFiles.length} files
+                  </p>
+
+                  {/* Pagination */}
+                  <div className="flex items-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
+                        if (totalFilesPages > 1 && currentFilesPage > 1) {
+                          setCurrentFilesPage(currentFilesPage - 1);
+                        }
+                      }}
+                      className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                    >
+                      Previous
+                    </Button>
+                    
+                    {/* Page numbers */}
+                    {(() => {
+                      const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
+                      return Array.from({ length: Math.max(1, totalFilesPages) }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant="outline"
+                          onClick={() => setCurrentFilesPage(page)}
+                          className={`px-4 py-2 rounded-none border-[rgb(135,133,133)] ${
+                            currentFilesPage === page
+                              ? 'bg-[#f4f2fa] text-[#490972] shadow-[inset_-1px_-2px_8px_rgba(41,0,156,0.25)] border-t-[0.8px] border-b-[0.8px] border-t-[rgb(135,133,133)] border-b-[rgb(135,133,133)]'
+                              : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </Button>
+                      ));
+                    })()}
+                    
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const totalFilesPages = Math.ceil(projectFiles.length / filesPerPage);
+                        if (totalFilesPages > 1 && currentFilesPage < totalFilesPages) {
+                          setCurrentFilesPage(currentFilesPage + 1);
+                        }
+                      }}
+                      className="cursor-pointer border-[0.8px] border-[#878585] bg-transparent overflow-hidden flex items-center justify-start px-[10px] py-[5.5px] text-gray-600 rounded-none"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>
