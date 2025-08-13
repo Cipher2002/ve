@@ -50,9 +50,9 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
       '-i', 'input.mp4',
       '-ss', '1',
       '-vframes', '1',
-      '-vf', 'scale=320:180:force_original_aspect_ratio=decrease,pad=320:180:(ow-iw)/2:(oh-ih)/2',
+      '-s', '320x180',
       '-f', 'webp',
-      '-quality', '80',
+      '-quality', '90',
       'output.webp'
     ]);
     
@@ -70,22 +70,41 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
   } catch (error) {
     console.error('Error generating thumbnail with FFmpeg:', error);
     
-    // Create simple placeholder thumbnail
+    // Create better placeholder thumbnail
     const thumbnailFileName = `thumbnail-${renderId}.webp`;
     const placeholderPath = path.join(outputPath, thumbnailFileName);
     
-    // Create a simple 1x1 pixel WebP as placeholder (minimal file)
-    const placeholderData = Buffer.from([
-      0x52, 0x49, 0x46, 0x46, 0x26, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-      0x56, 0x50, 0x38, 0x20, 0x1A, 0x00, 0x00, 0x00, 0x30, 0x01, 0x00, 0x9D,
-      0x01, 0x2A, 0x01, 0x00, 0x01, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
-      0x03, 0x70, 0x00, 0xFE, 0xFB, 0xFD, 0x50, 0x00
-    ]);
-    
     try {
+      // Initialize a new FFmpeg instance for placeholder
+      const placeholderFFmpeg = new FFmpeg();
+      await placeholderFFmpeg.load();
+      
+      // Create a solid color image as placeholder
+      await placeholderFFmpeg.exec([
+        '-f', 'lavfi',
+        '-i', 'color=c=gray:size=320x180:duration=1',
+        '-vframes', '1',
+        '-f', 'webp',
+        '-quality', '90',
+        'placeholder.webp'
+      ]);
+      
+      // Read and save the placeholder
+      const placeholderData = await placeholderFFmpeg.readFile('placeholder.webp');
       fs.writeFileSync(placeholderPath, placeholderData);
-    } catch (writeError) {
-      console.error('Failed to write placeholder thumbnail:', writeError);
+      
+      // Clean up
+      await placeholderFFmpeg.deleteFile('placeholder.webp');
+    } catch (placeholderError) {
+      console.error('Failed to create placeholder thumbnail:', placeholderError);
+      // Create minimal gray WebP manually
+      const minimalWebP = Buffer.from([
+        0x52, 0x49, 0x46, 0x46, 0x3E, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+        0x56, 0x50, 0x38, 0x20, 0x32, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x9D,
+        0x01, 0x2A, 0x40, 0x01, 0xB4, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
+        0x03, 0x70, 0x00, 0xFE, 0xFC, 0xFD, 0x50, 0x00
+      ]);
+      fs.writeFileSync(placeholderPath, minimalWebP);
     }
     
     return thumbnailFileName;

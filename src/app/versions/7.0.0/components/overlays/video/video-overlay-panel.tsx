@@ -309,7 +309,7 @@ export const VideoOverlayPanel: React.FC = () => {
             top: 0,
             width,
             height,
-            durationInFrames: 300,
+            durationInFrames: await getVideoDurationInFrames(cachedVideoUrl),
             from,
             id: Date.now(),
             rotation: 0,
