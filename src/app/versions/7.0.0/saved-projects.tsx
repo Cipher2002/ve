@@ -38,6 +38,71 @@ interface UserProject {
   folderPath: string;
 }
 
+// Simple date input component for mobile/tablet
+function SimpleDatePicker({ 
+  startDate, 
+  endDate, 
+  onDateChange, 
+  onApply, 
+  onCancel 
+}: {
+  startDate: Date;
+  endDate: Date;
+  onDateChange: (start: Date, end: Date) => void;
+  onApply: () => void;
+  onCancel: () => void;
+}) {
+  const [localStart, setLocalStart] = useState(startDate.toISOString().split('T')[0]);
+  const [localEnd, setLocalEnd] = useState(endDate.toISOString().split('T')[0]);
+
+  const handleApply = () => {
+    const start = new Date(localStart);
+    const end = new Date(localEnd);
+    onDateChange(start, end);
+    onApply();
+  };
+
+  return (
+    <div className="p-4 space-y-4 max-w-[280px]">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input
+          type="date"
+          value={localStart}
+          onChange={(e) => setLocalStart(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded text-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input
+          type="date"
+          value={localEnd}
+          onChange={(e) => setLocalEnd(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded text-sm"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onCancel}
+          className="flex-1"
+        >
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleApply}
+          className="bg-blue-500 hover:bg-blue-600 flex-1"
+        >
+          Apply
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 // Date Range Calendar Component
 function DateRangeCalendar({ 
   startDate, 
@@ -818,7 +883,7 @@ export default function SavedProjects() {
                     <ChevronRight className="h-4 w-4 rotate-90" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                <PopoverContent className="w-auto p-0" align="start">
                   <div className="flex">
                     {/* Left sidebar with options */}
                     <div className="w-32 border-r bg-gray-50">
@@ -854,19 +919,37 @@ export default function SavedProjects() {
                     {/* Calendar section - only show when custom is selected */}
                     {dateFilter === 'custom' && (
                       <div className="p-4 bg-white">
-                        <DateRangeCalendar 
-                          startDate={customDateRange.start}
-                          endDate={customDateRange.end}
-                          onDateChange={(start, end) => {
-                            setCustomDateRange({ start, end });
-                          }}
-                          onApply={() => {
-                            setShowDatePicker(false);
-                          }}
-                          onCancel={() => {
-                            setShowDatePicker(false);
-                          }}
-                        />
+                        {/* Show SimpleDatePicker on mobile/tablet, DateRangeCalendar on desktop */}
+                        <div className="block lg:hidden">
+                          <SimpleDatePicker 
+                            startDate={customDateRange.start}
+                            endDate={customDateRange.end}
+                            onDateChange={(start, end) => {
+                              setCustomDateRange({ start, end });
+                            }}
+                            onApply={() => {
+                              setShowDatePicker(false);
+                            }}
+                            onCancel={() => {
+                              setShowDatePicker(false);
+                            }}
+                          />
+                        </div>
+                        <div className="hidden lg:block">
+                          <DateRangeCalendar 
+                            startDate={customDateRange.start}
+                            endDate={customDateRange.end}
+                            onDateChange={(start, end) => {
+                              setCustomDateRange({ start, end });
+                            }}
+                            onApply={() => {
+                              setShowDatePicker(false);
+                            }}
+                            onCancel={() => {
+                              setShowDatePicker(false);
+                            }}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -941,7 +1024,7 @@ export default function SavedProjects() {
                         <ChevronRight className="h-4 w-4 rotate-90" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <div className="flex">
                         {/* Left sidebar with options */}
                         <div className="w-32 border-r bg-gray-50">
@@ -977,19 +1060,37 @@ export default function SavedProjects() {
                         {/* Calendar section - only show when custom is selected */}
                         {filesDateFilter === 'custom' && (
                           <div className="p-4 bg-white">
-                            <DateRangeCalendar 
-                              startDate={filesCustomDateRange.start}
-                              endDate={filesCustomDateRange.end}
-                              onDateChange={(start, end) => {
-                                setFilesCustomDateRange({ start, end });
-                              }}
-                              onApply={() => {
-                                setShowFilesDatePicker(false);
-                              }}
-                              onCancel={() => {
-                                setShowFilesDatePicker(false);
-                              }}
-                            />
+                            {/* Show SimpleDatePicker on mobile/tablet, DateRangeCalendar on desktop */}
+                            <div className="block lg:hidden">
+                              <SimpleDatePicker 
+                                startDate={filesCustomDateRange.start}
+                                endDate={filesCustomDateRange.end}
+                                onDateChange={(start, end) => {
+                                  setFilesCustomDateRange({ start, end });
+                                }}
+                                onApply={() => {
+                                  setShowFilesDatePicker(false);
+                                }}
+                                onCancel={() => {
+                                  setShowFilesDatePicker(false);
+                                }}
+                              />
+                            </div>
+                            <div className="hidden lg:block">
+                              <DateRangeCalendar 
+                                startDate={filesCustomDateRange.start}
+                                endDate={filesCustomDateRange.end}
+                                onDateChange={(start, end) => {
+                                  setFilesCustomDateRange({ start, end });
+                                }}
+                                onApply={() => {
+                                  setShowFilesDatePicker(false);
+                                }}
+                                onCancel={() => {
+                                  setShowFilesDatePicker(false);
+                                }}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
