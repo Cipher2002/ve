@@ -1350,7 +1350,7 @@ export default function SavedProjects() {
                           } else if (width < 1024) {
                             maxVisible = 5; // Tablet: show 5 pages
                           } else {
-                            maxVisible = 7; // Desktop: show 7 pages
+                            maxVisible = 5; // Desktop: show 5 pages
                           }
                           
                           if (totalFilesPages <= maxVisible) {
@@ -1633,7 +1633,7 @@ export default function SavedProjects() {
                   } else if (width < 1024) {
                     maxVisible = 5; // Tablet: show 5 pages
                   } else {
-                    maxVisible = 7; // Desktop: show 7 pages
+                    maxVisible = 5; // Desktop: show 7 pages
                   }
                   
                   if (totalPages <= maxVisible) {
