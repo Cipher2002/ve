@@ -73,44 +73,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [templateLoadingProgress, setTemplateLoadingProgress] = useState({ current: 0, total: 0 });
 
-  const [isLandscapeMode, setIsLandscapeMode] = useState(false);
-
-  // Handle landscape mode for screens below 1400px
-  useEffect(() => {
-    const handleResize = () => {
-      const shouldBeLandscape = window.innerWidth < 1400;
-      setIsLandscapeMode(shouldBeLandscape);
-    };
-
-    // Initial check
-    handleResize();
-
-    // Add resize listener
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-    };
-  }, []);
-
-  // Prevent body scroll when in landscape mode
-  useEffect(() => {
-    if (isLandscapeMode) {
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    };
-  }, [isLandscapeMode]);
-
 
   // Overlay management hooks
   const {
@@ -598,17 +560,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   return (
       <div 
-        className="flex flex-col overflow-hidden h-full transform-gpu transition-transform duration-300"
+        className="flex flex-col overflow-hidden h-full"
         style={{
           backgroundColor: 'rgb(244, 242, 250)',
-          transform: isLandscapeMode ? 'rotate(90deg)' : 'none',
-          transformOrigin: 'center center',
-          width: isLandscapeMode ? '100vh' : '100%',
-          height: isLandscapeMode ? '100vw' : '100%',
-          position: isLandscapeMode ? 'fixed' : 'relative',
-          top: isLandscapeMode ? '0' : 'auto',
-          left: isLandscapeMode ? '0' : 'auto',
-          zIndex: isLandscapeMode ? 1000 : 'auto',
         }}
       >
       <UISidebarProvider>
