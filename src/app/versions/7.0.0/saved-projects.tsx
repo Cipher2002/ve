@@ -700,7 +700,7 @@ export default function SavedProjects() {
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 mb-6">
-            <span className="text-[#490972] font-semibold font-medium cursor-pointer hover:text-[#3d075f]">
+            <span className="text-[#490972] font-semibold font-medium hover:text-[#3d075f]">
               Your Saved Projects
             </span>
             {selectedProject && (
@@ -1052,11 +1052,11 @@ export default function SavedProjects() {
                   );
                 })()}
                 
-                {projectFiles.length === 0 && (
+                {/* {projectFiles.length === 0 && (
                   <div className="col-span-4 w-full text-center py-12 text-gray-500">
                     No rendered files in this project yet
                   </div>
-                )}
+                )} */}
               </div>
               
               {/* Files Pagination */}
@@ -1262,7 +1262,7 @@ export default function SavedProjects() {
                               e.stopPropagation();
                               handleApplyTemplate(project);
                             }}
-                            className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors"
+                            className="px-2 py-1 text-xs bg-[#490972] hover:bg-[#490972] text-white rounded transition-colors"
                             title="Apply as template"
                           >
                             Apply Template
