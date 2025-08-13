@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -216,7 +216,8 @@ export default function SavedProjects() {
   const [editingName, setEditingName] = useState('');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4);
+  const [itemsPerPage, setItemsPerPage] = useState(4);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [dateFilter, setDateFilter] = useState('all');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState(() => {
@@ -228,7 +229,7 @@ export default function SavedProjects() {
     };
   });
   const [currentFilesPage, setCurrentFilesPage] = useState(1);
-  const [filesPerPage] = useState(4);
+  const [filesPerPage, setFilesPerPage] = useState(4);
   const [filesActiveFilter, setFilesActiveFilter] = useState('All');
   const [filesSearchValue, setFilesSearchValue] = useState('');
   const [filesDateFilter, setFilesDateFilter] = useState('all');
@@ -244,6 +245,48 @@ export default function SavedProjects() {
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
+
+  // Responsive pagination hook
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      const width = window.innerWidth;
+      let newItemsPerPage;
+      let newFilesPerPage;
+      
+      if (width < 580) {
+        // Mobile: 1 card
+        newItemsPerPage = 1;
+        newFilesPerPage = 1;
+      } else if (width < 880) {
+        // Small tablet: 2 cards
+        newItemsPerPage = 2;
+        newFilesPerPage = 2;
+      } else if (width < 1180) {
+        // Large tablet: 3 cards
+        newItemsPerPage = 3;
+        newFilesPerPage = 3;
+      } else {
+        // Desktop: 4 cards
+        newItemsPerPage = 4;
+        newFilesPerPage = 4;
+      }
+      
+      setItemsPerPage(newItemsPerPage);
+      setFilesPerPage(newFilesPerPage);
+      
+      // Reset to first page when items per page changes
+      setCurrentPage(1);
+      setCurrentFilesPage(1);
+    };
+
+    // Initial check
+    updateItemsPerPage();
+
+    // Add resize listener
+    window.addEventListener('resize', updateItemsPerPage);
+    
+    return () => window.removeEventListener('resize', updateItemsPerPage);
+  }, []);
 
   // Get display text for date filter
   const getDateFilterDisplay = () => {
@@ -786,19 +829,45 @@ export default function SavedProjects() {
 
               {/* Search */}
               <div className="flex items-center gap-3">
-                <label htmlFor="search" className="text-gray-700 font-medium">
-                  Search
-                </label>
-                <Input
-                  id="search"
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="w-80 bg-white border-gray-300 text-gray-900"
-                  placeholder=""
-                  autoComplete="off"
-                />
+                {/* Desktop/Tablet Search */}
+                <div className="hidden cards-2:flex items-center gap-3">
+                  <label htmlFor="search" className="text-gray-700 font-medium">
+                    Search
+                  </label>
+                  <Input
+                    id="search"
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="w-60 cards-3:w-80 bg-white border-gray-300 text-gray-900"
+                    placeholder=""
+                    autoComplete="off"
+                  />
+                </div>
+                
+                {/* Mobile Search Icon */}
+                <button
+                  onClick={() => setShowMobileSearch(!showMobileSearch)}
+                  className="cards-2:hidden flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-md"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
               </div>
+            </div>
+          )}
+          {/* Mobile Search Bar */}
+          {!selectedProject && !loading && userProjects.length > 0 && showMobileSearch && (
+            <div className="cards-2:hidden mt-4">
+              <Input
+                type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="w-full bg-white border-gray-300 text-gray-900"
+                placeholder="Search projects..."
+                autoComplete="off"
+              />
             </div>
           )}
         </div>
@@ -883,24 +952,37 @@ export default function SavedProjects() {
 
                   {/* Search for Files */}
                   <div className="flex items-center gap-3">
-                    <label htmlFor="files-search" className="text-gray-700 font-medium">
-                      Search
-                    </label>
-                    <Input
-                      id="files-search"
-                      type="text"
-                      value={filesSearchValue}
-                      onChange={(e) => setFilesSearchValue(e.target.value)}
-                      className="w-80 bg-white border-gray-300 text-gray-900"
-                      placeholder=""
-                      autoComplete="off"
-                    />
+                    {/* Desktop/Tablet Search */}
+                    <div className="hidden cards-2:flex items-center gap-3">
+                      <label htmlFor="files-search" className="text-gray-700 font-medium">
+                        Search
+                      </label>
+                      <Input
+                        id="files-search"
+                        type="text"
+                        value={filesSearchValue}
+                        onChange={(e) => setFilesSearchValue(e.target.value)}
+                        className="w-60 cards-3:w-80 bg-white border-gray-300 text-gray-900"
+                        placeholder=""
+                        autoComplete="off"
+                      />
+                    </div>
+                    
+                    {/* Mobile Search Icon */}
+                    <button
+                      onClick={() => setShowMobileSearch(!showMobileSearch)}
+                      className="cards-2:hidden flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-md"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               )}
 
               {/* Files Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
+              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-4 cards-3:gap-3 cards-4:gap-6 max-w-full items-center justify-center px-4">
                 {(() => {
                   // Apply filters to files
                   const filteredFiles = projectFiles.filter(file => {
@@ -1156,7 +1238,7 @@ export default function SavedProjects() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl items-center justify-center">
+              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-4 cards-3:gap-3 cards-4:gap-6 max-w-full items-center justify-center px-4">
                 {/* Show "Start Generating" card only when there are truly no projects and no active search/filter */}
                 {currentProjects.length === 0  && searchValue === '' && dateFilter === 'all' && (
                   <div className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"

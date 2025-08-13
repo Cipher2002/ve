@@ -148,6 +148,18 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      screens: {
+        'xs': '480px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+        // Custom breakpoints for card layouts
+        'cards-2': '580px',   // 2 cards minimum
+        'cards-3': '880px',   // 3 cards minimum
+        'cards-4': '1180px',  // 4 cards minimum
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
