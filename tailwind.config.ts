@@ -158,7 +158,7 @@ const config: Config = {
         // Custom breakpoints for card layouts
         'cards-2': '580px',   // 2 cards minimum
         'cards-3': '880px',   // 3 cards minimum
-        'cards-4': '1180px',  // 4 cards minimum
+        'cards-4': '1100px',  // 4 cards minimum
       },
     },
   },
