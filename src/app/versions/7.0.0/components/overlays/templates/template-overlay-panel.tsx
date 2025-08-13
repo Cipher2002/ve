@@ -64,7 +64,16 @@ export const TemplateOverlayPanel: React.FC = () => {
           : template
       ));
       
-      // Call the project name update API to handle folder renaming
+      // First, find the actual projectId from projects list
+      const projectsResponse = await fetch(`${apiBaseUrl}/save-to-user/get?uid=${uid}`);
+      const projectsData = await projectsResponse.json();
+      const actualProject = projectsData.projects?.find((p: any) => p.name === oldProjectName);
+
+      if (!actualProject) {
+        console.error('Project not found in projects list');
+        return;
+      }
+
       const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
         method: 'POST',
         headers: {
@@ -74,7 +83,7 @@ export const TemplateOverlayPanel: React.FC = () => {
           uid,
           oldName: oldProjectName,
           newName: newName,
-          projectId: `${uid}-${oldProjectName}`,
+          projectId: actualProject.id,
         }),
       });
       

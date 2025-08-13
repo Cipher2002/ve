@@ -87,7 +87,17 @@ export function EditorHeader() {
         const checkResponse = await fetch(`${apiBaseUrl}/save-to-user/get-project-data?uid=${uid}&projectName=${oldName}`);
         
         if (checkResponse.ok) {
-          // Project exists, rename it
+          // First, find the actual projectId from projects list
+          const projectsResponse = await fetch(`${apiBaseUrl}/save-to-user/get?uid=${uid}`);
+          const projectsData = await projectsResponse.json();
+          const actualProject = projectsData.projects?.find((p: any) => p.name === oldName);
+
+          if (!actualProject) {
+            console.error('Project not found in projects list');
+            setProjectName(oldName);
+            return;
+          }
+
           const updateResponse = await fetch(`${apiBaseUrl}/save-to-user/update-name`, {
             method: 'POST',
             headers: {
@@ -97,7 +107,7 @@ export function EditorHeader() {
               uid,
               oldName: oldName,
               newName: newName,
-              projectId: `${uid}-${oldName}`,
+              projectId: actualProject.id,
             }),
           });
           
