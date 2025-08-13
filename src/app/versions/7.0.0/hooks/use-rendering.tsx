@@ -145,7 +145,7 @@ export const useRendering = (
           case "done": {
             // Call render-complete API before setting final state
             try {
-              await fetch(`${apiBaseUrl}/render-complete`, {
+              await fetch(`${apiBaseUrl}/lambda/render-complete`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ export const useRendering = (
           case "done": {
             // Call render-complete API before setting final state
             try {
-              await fetch(`${apiBaseUrl}/render-complete`, {
+              await fetch(`${apiBaseUrl}/lambda/render-complete`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
