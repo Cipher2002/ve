@@ -834,7 +834,7 @@ export default function SavedProjects() {
               <Button
                 onClick={handleBackToProjects}
                 variant="outline"
-                className="px-6 py-2 rounded-lg font-medium bg-white text-gray-700 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+                className="px-6 py-2 rounded-lg font-medium bg-white text-gray-700 border-gray-300 hover:bg-gray-50 flex items-center gap-2 select-none"
               >
                 <ChevronRight className="w-4 h-4 rotate-180" />
                 Back to Projects
@@ -844,7 +844,7 @@ export default function SavedProjects() {
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('Active')}
-                  className={`px-2 xs:px-4 py-[10px] rounded-l-lg rounded-r-none font-medium text-xs xs:text-sm ${
+                  className={`px-2 xs:px-4 py-[10px] rounded-l-lg rounded-r-none font-medium text-xs xs:text-sm select-none ${
                     activeFilter === 'Active'
                       ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
                       : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
@@ -856,7 +856,7 @@ export default function SavedProjects() {
                 <Button
                   variant="ghost"
                   onClick={() => setActiveFilter('All')}
-                  className={`px-2 xs:px-4 py-[10px] rounded-l-none rounded-r-lg font-medium text-xs xs:text-sm ${
+                  className={`px-2 xs:px-4 py-[10px] rounded-l-none rounded-r-lg font-medium text-xs xs:text-sm select-none ${
                     activeFilter === 'All'
                       ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
                       : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
@@ -976,7 +976,7 @@ export default function SavedProjects() {
               <div className="flex items-center gap-3">
                 {/* Desktop/Tablet Search */}
                 <div className="hidden cards-2:flex items-center gap-3">
-                  <label htmlFor="search" className="text-gray-700 font-medium">
+                  <label htmlFor="search" className="text-gray-700 font-medium select-none">
                     Search
                   </label>
                   <Input
@@ -1020,7 +1020,7 @@ export default function SavedProjects() {
         {/* Main Content Area */}
         <div className="mb-8 relative">
           {loading ? (
-            <div className="text-center py-8">Loading projects...</div>
+            <div className="text-center py-8 select-none">Loading projects...</div>
           ) : selectedProject ? (
             /* Project Files View */
             <div>
@@ -1117,7 +1117,7 @@ export default function SavedProjects() {
                   <div className="flex items-center gap-3">
                     {/* Desktop/Tablet Search */}
                     <div className="hidden cards-2:flex items-center gap-3">
-                      <label htmlFor="files-search" className="text-gray-700 font-medium">
+                      <label htmlFor="files-search" className="text-gray-700 font-medium select-none">
                         Search
                       </label>
                       <Input
@@ -1134,7 +1134,7 @@ export default function SavedProjects() {
                     {/* Mobile Search Icon */}
                     <button
                       onClick={() => setShowMobileSearch(!showMobileSearch)}
-                      className="cards-2:hidden flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-md"
+                      className="cards-2:hidden flex items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-md select-none"
                     >
                       <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1145,7 +1145,7 @@ export default function SavedProjects() {
               )}
 
               {/* Files Grid */}
-              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-2 max-w-full items-center justify-center px-2 cards-4:px-1">
+              <div className="grid grid-cols-1 cards-2:grid-cols-2 cards-3:grid-cols-3 cards-4:grid-cols-4 gap-3 cards-4:gap-2 max-w-full items-center justify-center px-2 cards-4:px-1 select-none">
                 {(() => {
                   // Apply filters to files
                   const filteredFiles = projectFiles.filter(file => {
@@ -1192,15 +1192,8 @@ export default function SavedProjects() {
                             alt={file.fileName}
                             className="w-full h-full object-cover"
                             onLoad={() => {
-                              console.log('✅ Thumbnail loaded successfully:', file.thumbnailPath);
                             }}
                             onError={(e) => {
-                              console.error('❌ Thumbnail failed to load:', {
-                                thumbnailPath: file.thumbnailPath,
-                                url: `${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`,
-                                fileName: file.fileName,
-                                fileType: file.type
-                              });
                               
                               // Fallback to icon if thumbnail fails
                               const img = e.target as HTMLImageElement;
@@ -1353,7 +1346,7 @@ export default function SavedProjects() {
                     </p>
 
                     {/* Pagination */}
-                    <div className="flex items-center flex-wrap justify-center xs:justify-start">
+                    <div className="flex items-center flex-wrap justify-center xs:justify-start select-none">
                       <Button
                         variant="ghost"
                         onClick={() => {
@@ -1505,7 +1498,7 @@ export default function SavedProjects() {
                     style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                   >
                     {/* Folder Icon/Thumbnail */}
-                    <div className="h-48 bg-gradient-to-br from-[rgb(41,0,156)/15] to-[rgb(41,0,156)/15] rounded-t-xl flex items-center justify-center relative overflow-hidden">
+                    <div className="h-48 bg-[rgb(41,0,156)]/15 rounded-t-xl flex items-center justify-center relative overflow-hidden">
                       <div className="w-20 h-16 bg-yellow-400 rounded-lg shadow-lg flex items-center justify-center relative">
                         <div className="w-16 h-12 bg-yellow-500 rounded-md"></div>
                         <div className="absolute -top-1 -right-1 w-4 h-3 bg-yellow-300 rounded-tr-lg rounded-bl-lg"></div>
@@ -1552,7 +1545,7 @@ export default function SavedProjects() {
                         </button>
                       </div>
                       
-                      <p className="text-gray-500 text-xs mb-3">
+                      <p className="text-gray-500 text-xs mb-3 select-none">
                         {project.lastSaved ? new Date(project.lastSaved).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric', 
@@ -1579,7 +1572,7 @@ export default function SavedProjects() {
                               e.stopPropagation();
                               handleApplyTemplate(project);
                             }}
-                            className="px-2 py-1 text-xs bg-[#490972] hover:bg-[#490972] text-white rounded transition-colors"
+                            className="px-2 py-1 text-xs bg-[#490972] hover:bg-[#490972] text-white rounded transition-colors select-none"
                             title="Apply as template"
                           >
                             Apply Template
@@ -1587,7 +1580,7 @@ export default function SavedProjects() {
                         </div>
                         
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 select-none">
                             {project.renders?.length || 0} renders
                           </span>
                           
@@ -1614,7 +1607,7 @@ export default function SavedProjects() {
                                     handleToggleActiveStatus(project);
                                     setMenuOpen(null);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 block"
+                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 block select-none"
                                 >
                                   {project.status === 'active' ? 'Hide From Active View' : 'Show in Active View'}
                                 </button>
@@ -1633,14 +1626,14 @@ export default function SavedProjects() {
 
         {/* Footer - Always show when viewing projects list */}
         {!selectedProject && !loading && (
-          <div className="flex flex-col xs:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col xs:flex-row items-center justify-between gap-4 select-none">
             {/* Showing entries text */}
             <p className="text-gray-600">
               Showing {filteredProjects.length === 0 ? '0-0' : `${startIndex + 1}-${Math.min(endIndex, filteredProjects.length)}`} of {filteredProjects.length} entries
             </p>
 
             {/* Pagination */}
-            <div className="flex items-center flex-wrap justify-center xs:justify-start">
+            <div className="flex items-center flex-wrap justify-center xs:justify-start select-none">
               <Button
                 variant="ghost"
                 onClick={handlePrevious}
