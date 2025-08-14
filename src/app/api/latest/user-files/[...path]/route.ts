@@ -35,7 +35,11 @@ export async function GET(
     else if (fileExtension === '.aac') contentType = 'audio/aac';
     else if (fileExtension === '.webp') {
       contentType = 'image/webp';
-      disposition = 'inline'; // Display in browser, don't force download
+      disposition = 'inline';
+    }
+    else if (fileExtension === '.png') {
+      contentType = 'image/png';
+      disposition = 'inline';
     }
     else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
       contentType = 'image/jpeg';

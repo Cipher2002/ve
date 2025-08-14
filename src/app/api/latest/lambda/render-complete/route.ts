@@ -24,17 +24,19 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
   
   // Skip thumbnail generation for audio files
   if (mediaType === 'audio') {
-    const thumbnailFileName = `thumbnail-${renderId}.webp`;
+    const thumbnailFileName = `thumbnail-${renderId}.png`;
     const placeholderPath = path.join(outputPath, thumbnailFileName);
     
-    // Create a simple audio placeholder
-    const minimalWebP = Buffer.from([
-      0x52, 0x49, 0x46, 0x46, 0x3E, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-      0x56, 0x50, 0x38, 0x20, 0x32, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x9D,
-      0x01, 0x2A, 0x40, 0x01, 0xB4, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
-      0x03, 0x70, 0x00, 0xFE, 0xFC, 0xFD, 0x50, 0x00
+    // Create a simple audio placeholder PNG
+    const minimalPNG = Buffer.from([
+      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+      0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00,
+      0x0C, 0x49, 0x44, 0x41, 0x54, 0x08, 0x1D, 0x01, 0x01, 0x00, 0x00, 0xFF,
+      0xFF, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x0E, 0x27, 0xDE, 0xFC, 0x00,
+      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
     ]);
-    fs.writeFileSync(placeholderPath, minimalWebP);
+    fs.writeFileSync(placeholderPath, minimalPNG);
     
     return thumbnailFileName;
   }
@@ -70,31 +72,31 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
     
     console.log(`📸 Extracting thumbnail from ${inputFileName}`);
     
-    // Extract thumbnail at 1 second mark, resize to smaller size, convert to WebP
+    // Extract thumbnail at 1 second mark, resize to smaller size, convert to PNG
     await ffmpeg.exec([
+      '-ss', '1', 
       '-i', inputFileName,
-      '-ss', '00:00:01.000',  // More specific timestamp format
       '-vframes', '1',
-      '-vf', 'scale=160:90',  // Use video filter for scaling
-      '-f', 'webp',
-      '-q:v', '75',          // Use -q:v instead of -quality
-      '-compression_level', '4', // Reduced compression level
-      'output.webp'
+      '-s', '160x90',
+      '-f', 'png',
+      'output.png'
     ]);
     
-    console.log(`✅ Thumbnail generated successfully`);
-    
     // Read the generated thumbnail
-    const thumbnailData = await ffmpeg.readFile('output.webp');
+    const thumbnailData = await ffmpeg.readFile('output.png');
+    
+    // Update the filename to .png
+    const pngThumbnailFileName = `thumbnail-${renderId}.png`;
+    const pngThumbnailPath = path.join(outputPath, pngThumbnailFileName);
     
     // Write thumbnail to disk
-    fs.writeFileSync(thumbnailPath, thumbnailData);
+    fs.writeFileSync(pngThumbnailPath, thumbnailData);
     
     // Clean up FFmpeg filesystem
     await ffmpeg.deleteFile(inputFileName);
-    await ffmpeg.deleteFile('output.webp');
+    await ffmpeg.deleteFile('output.png');
     
-    return thumbnailFileName;
+    return pngThumbnailFileName;
   } catch (error) {
     console.error('Error generating thumbnail with FFmpeg:', error);
     
@@ -112,31 +114,35 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
         '-f', 'lavfi',
         '-i', 'color=c=gray:size=160x90:duration=1',
         '-vframes', '1',
-        '-f', 'webp',
-        '-q:v', '75',
-        '-compression_level', '4',
-        'placeholder.webp'
+        '-f', 'png',
+        'placeholder.png'
       ]);
       
       // Read and save the placeholder
-      const placeholderData = await placeholderFFmpeg.readFile('placeholder.webp');
-      fs.writeFileSync(placeholderPath, placeholderData);
+      const placeholderData = await placeholderFFmpeg.readFile('placeholder.png');
+      const pngPlaceholderFileName = `thumbnail-${renderId}.png`;
+      const pngPlaceholderPath = path.join(outputPath, pngPlaceholderFileName);
+      fs.writeFileSync(pngPlaceholderPath, placeholderData);
       
       // Clean up
-      await placeholderFFmpeg.deleteFile('placeholder.webp');
+      await placeholderFFmpeg.deleteFile('placeholder.png');
     } catch (placeholderError) {
       console.error('Failed to create placeholder thumbnail:', placeholderError);
-      // Create minimal gray WebP manually
-      const minimalWebP = Buffer.from([
-        0x52, 0x49, 0x46, 0x46, 0x3E, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-        0x56, 0x50, 0x38, 0x20, 0x32, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x9D,
-        0x01, 0x2A, 0x40, 0x01, 0xB4, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
-        0x03, 0x70, 0x00, 0xFE, 0xFC, 0xFD, 0x50, 0x00
+      // Create minimal gray PNG manually (1x1 gray pixel PNG)
+      const minimalPNG = Buffer.from([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00,
+        0x0C, 0x49, 0x44, 0x41, 0x54, 0x08, 0x1D, 0x01, 0x01, 0x00, 0x00, 0xFF,
+        0xFF, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x0E, 0x27, 0xDE, 0xFC, 0x00,
+        0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
       ]);
-      fs.writeFileSync(placeholderPath, minimalWebP);
+      const pngFallbackFileName = `thumbnail-${renderId}.png`;
+      const pngFallbackPath = path.join(outputPath, pngFallbackFileName);
+      fs.writeFileSync(pngFallbackPath, minimalPNG);
     }
     
-    return thumbnailFileName;
+    return `thumbnail-${renderId}.png`;
   }
 }
 
