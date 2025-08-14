@@ -22,9 +22,28 @@ interface RenderCompleteData {
 // Helper function to generate thumbnail from video using FFmpeg
 async function generateThumbnail(videoUrl: string, renderId: string, outputPath: string, format: string, mediaType: string): Promise<string> {
   
+  // Skip thumbnail generation for audio files
+  if (mediaType === 'audio') {
+    const thumbnailFileName = `thumbnail-${renderId}.webp`;
+    const placeholderPath = path.join(outputPath, thumbnailFileName);
+    
+    // Create a simple audio placeholder
+    const minimalWebP = Buffer.from([
+      0x52, 0x49, 0x46, 0x46, 0x3E, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+      0x56, 0x50, 0x38, 0x20, 0x32, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x9D,
+      0x01, 0x2A, 0x40, 0x01, 0xB4, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
+      0x03, 0x70, 0x00, 0xFE, 0xFC, 0xFD, 0x50, 0x00
+    ]);
+    fs.writeFileSync(placeholderPath, minimalWebP);
+    
+    return thumbnailFileName;
+  }
+  
   try {
     const thumbnailFileName = `thumbnail-${renderId}.webp`;
     const thumbnailPath = path.join(outputPath, thumbnailFileName);
+    
+    console.log(`🎬 Generating thumbnail for: ${videoUrl}`);
     
     // Initialize FFmpeg
     const ffmpeg = new FFmpeg();
@@ -42,26 +61,28 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
       }).on('error', reject);
     });
     
-    // Determine input file extension from URL or default to mp4
-    let inputFileName = 'input.mp4';
-    if (format === 'webm') inputFileName = 'input.webm';
-    else if (format === 'mov') inputFileName = 'input.mov';
-    else if (format === 'mkv') inputFileName = 'input.mkv';
+    // Since S3 URLs all end with .mp4, we'll always use mp4 as input format
+    // The actual container format doesn't matter for thumbnail extraction
+    const inputFileName = 'input.mp4';
 
     // Write video data to FFmpeg filesystem
     await ffmpeg.writeFile(inputFileName, new Uint8Array(videoData as Buffer));
     
-    // Extract thumbnail at 1 second mark, resize to smaller size, convert to WebP with lower quality
+    console.log(`📸 Extracting thumbnail from ${inputFileName}`);
+    
+    // Extract thumbnail at 1 second mark, resize to smaller size, convert to WebP
     await ffmpeg.exec([
       '-i', inputFileName,
-      '-ss', '1',
+      '-ss', '00:00:01.000',  // More specific timestamp format
       '-vframes', '1',
-      '-s', '160x90',    // Much smaller size for faster loading
+      '-vf', 'scale=160:90',  // Use video filter for scaling
       '-f', 'webp',
-      '-quality', '30',   // Lower quality for much smaller file size
-      '-compression_level', '6', // Higher compression
+      '-q:v', '75',          // Use -q:v instead of -quality
+      '-compression_level', '4', // Reduced compression level
       'output.webp'
     ]);
+    
+    console.log(`✅ Thumbnail generated successfully`);
     
     // Read the generated thumbnail
     const thumbnailData = await ffmpeg.readFile('output.webp');
@@ -92,8 +113,8 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
         '-i', 'color=c=gray:size=160x90:duration=1',
         '-vframes', '1',
         '-f', 'webp',
-        '-quality', '30',
-        '-compression_level', '6',
+        '-q:v', '75',
+        '-compression_level', '4',
         'placeholder.webp'
       ]);
       
