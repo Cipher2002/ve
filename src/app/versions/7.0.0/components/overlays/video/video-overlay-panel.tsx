@@ -103,7 +103,8 @@ export const VideoOverlayPanel: React.FC = () => {
     { label: 'Talking Video', value: 'talking-video', apiAction: 'GET_TALKING_IMAGE_PROJECT', imageStatus: '1' }
   ];
   
-  const { videos: renderedVideos, isLoading: renderedLoading, refetch: refetchRendered } = useRenderedVideos();
+  const [renderedVideos, setRenderedVideos] = useState<any[]>([]);
+  const [renderedLoading, setRenderedLoading] = useState(true);
   const { downloadVideo } = useVideoCache();
 
   const fetchProjects = async (projectType: string) => {
@@ -131,6 +132,38 @@ export const VideoOverlayPanel: React.FC = () => {
     } finally {
       setIsLoadingProjects(false);
     }
+  };
+
+  const fetchRenderedVideos = async () => {
+    setRenderedLoading(true);
+    try {
+      const { uid } = getUrlParams();
+      const response = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}`);
+      const data = await response.json();
+      
+      // Filter and format video renders
+      const videoRenders = (data.renders || [])
+        .filter((render: any) => render.mediaType === 'video')
+        .map((render: any) => ({
+          id: render.renderId,
+          filename: `${render.renderId}.${render.format}`,
+          url: render.s3Url,
+          size: render.fileSize,
+          createdAt: render.timestamp,
+          projectId: render.projectId,
+          thumbnailPath: render.thumbnailPath
+        }));
+      
+      setRenderedVideos(videoRenders);
+    } catch (error) {
+      console.error('Failed to fetch rendered videos:', error);
+    } finally {
+      setRenderedLoading(false);
+    }
+  };
+
+  const refetchRendered = () => {
+    fetchRenderedVideos();
   };
 
   const handleProjectTypeChange = (newType: string) => {
@@ -166,6 +199,8 @@ export const VideoOverlayPanel: React.FC = () => {
       if (projectOption) {
         fetchProjects(projectOption.value);
       }
+    } else if (activeTab === 'rendered-video') {
+      fetchRenderedVideos();
     }
   }, [activeTab, selectedProjectType]);
 

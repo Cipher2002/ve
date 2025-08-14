@@ -65,6 +65,9 @@ const SoundsPanel: React.FC = () => {
   
   // Only store currently active audio instances
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  //SETTING THE API BASE URL
+  const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
   
   const {
     addOverlay,
@@ -75,7 +78,8 @@ const SoundsPanel: React.FC = () => {
   } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
-  const { audio: renderedAudio, isLoading: renderedLoading, refetch: refetchRendered } = useRenderedAudio();
+  const [renderedAudio, setRenderedAudio] = useState<any[]>([]);
+  const [renderedLoading, setRenderedLoading] = useState(true);
 
   // Reset items when tab changes or search changes
   useEffect(() => {
@@ -96,6 +100,12 @@ const SoundsPanel: React.FC = () => {
       setLocalOverlay(selectedOverlay);
     }
   }, [selectedOverlayId, overlays]);
+
+  useEffect(() => {
+    if (activeTab === 'rendered-audio') {
+      fetchRenderedAudio();
+    }
+  }, [activeTab]);
 
   // Infinite scroll handler
   useEffect(() => {
@@ -118,6 +128,46 @@ const SoundsPanel: React.FC = () => {
   const handleUpdateOverlay = (updatedOverlay: SoundOverlay) => {
     setLocalOverlay(updatedOverlay);
     changeOverlay(updatedOverlay.id, updatedOverlay);
+  };
+
+  // Get UID from URL
+  const getUidFromUrl = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || 'default';
+    }
+    return 'default';
+  };
+
+  const fetchRenderedAudio = async () => {
+    setRenderedLoading(true);
+    try {
+      const uid = getUidFromUrl();
+      const response = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}`);
+      const data = await response.json();
+      
+      // Filter and format audio renders
+      const audioRenders = (data.renders || [])
+        .filter((render: any) => render.mediaType === 'audio')
+        .map((render: any) => ({
+          id: render.renderId,
+          filename: `${render.renderId}.${render.format}`,
+          url: render.s3Url,
+          size: render.fileSize,
+          createdAt: render.timestamp,
+          projectId: render.projectId
+        }));
+      
+      setRenderedAudio(audioRenders);
+    } catch (error) {
+      console.error('Failed to fetch rendered audio:', error);
+    } finally {
+      setRenderedLoading(false);
+    }
+  };
+
+  const refetchRendered = () => {
+    fetchRenderedAudio();
   };
 
   // Cleanup on unmount

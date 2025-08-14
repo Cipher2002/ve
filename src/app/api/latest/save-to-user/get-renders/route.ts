@@ -32,22 +32,47 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ renders });
     }
 
-    // If no projectId, return projects with render counts from projects_id_list.json
+    // If no projectId, return all renders from all projects that have renders
     const projectsListPath = path.join(userBasePath, 'projects_id_list.json');
     
     if (!fs.existsSync(projectsListPath)) {
-      return NextResponse.json({ projects: [] });
+      return NextResponse.json({ renders: [] });
     }
 
     const projectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
     const projectsList = JSON.parse(projectsListContent);
 
-    // Filter projects that have renders (render_count > 0)
+    // Get projects that have renders (render_count > 0)
     const projectsWithRenders = Object.values(projectsList).filter(
       (project: any) => (project.render_count || 0) > 0
     );
 
-    return NextResponse.json({ projects: projectsWithRenders });
+    // Collect all renders from all projects
+    const allRenders: any[] = [];
+    
+    for (const project of projectsWithRenders) {
+      const projectPath = path.join(userBasePath, (project as any).project_id);
+      const rendersJsonPath = path.join(projectPath, 'renders.json');
+      
+      if (fs.existsSync(rendersJsonPath)) {
+        try {
+          const rendersContent = fs.readFileSync(rendersJsonPath, 'utf-8');
+          const renders = JSON.parse(rendersContent);
+          
+          // Add project_id to each render for reference
+          const rendersWithProjectId = renders.map((render: any) => ({
+            ...render,
+            projectId: (project as any).project_id
+          }));
+          
+          allRenders.push(...rendersWithProjectId);
+        } catch (error) {
+          console.error(`Error reading renders for project ${(project as any).project_id}:`, error);
+        }
+      }
+    }
+
+    return NextResponse.json({ renders: allRenders });
 
   } catch (error) {
     console.error('Error fetching renders:', error);
