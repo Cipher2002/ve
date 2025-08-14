@@ -692,7 +692,7 @@ const Timeline: React.FC<TimelineProps> = ({
                           <span className="text-white text-xs font-bold">!</span>
                         </div>
                         <span className="text-sm font-semibold text-red-700 dark:text-red-300">
-                          Timeline Limit Exceeded
+                          Content exceeds 5-minute render limit
                         </span>
                       </div>
                       <div className="text-center">
