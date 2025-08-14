@@ -90,42 +90,62 @@ const RenderControls: React.FC<RenderControlsProps> = ({
   };
 
   React.useEffect(() => {
-    if (state.status === "done") {
-      // Generate and upload thumbnail for videos
-      if (state.mediaType === 'video' && state.url) {
-        generateClientThumbnail(state.url, state.renderId)
-          .then(blob => {
-            if (blob) {
-              uploadThumbnail(blob, state.renderId, getProjectName());
-            }
-          })
-          .catch(error => {
-            console.error('Failed to generate/upload thumbnail:', error);
-          });
-      }
-      
-      // Emit event to notify that rendering is complete
-      window.dispatchEvent(new CustomEvent('renderCompleted', { 
-        detail: { 
+      if (state.status === "done") {
+        // Extract renderId from URL (last part of the path before /out.extension)
+        const urlParts = state.url.split('/');
+        const renderId = urlParts[urlParts.length - 2]; // Gets "qt5d2urtsy" from the URL
+        
+        // Check if it's a video (not audio) by looking at file extension
+        const isVideo = state.url.includes('.mp4') || state.url.includes('.webm') || state.url.includes('.mov') || state.url.includes('.mkv');
+        
+        console.log('🎬 Render completed:', {
           url: state.url,
-          projectName: getProjectName(),
-          timestamp: new Date().toISOString()
-        } 
-      }));
-      
-      // Handle credit deduction after successful render
-      handleCreditDeduction();
-    } else if (state.status === "error") {
-      // Optionally emit an error event
-      window.dispatchEvent(new CustomEvent('renderError', { 
-        detail: { 
-          error: state.error?.message || "Failed to render video. Please try again.",
-          projectName: getProjectName(),
-          timestamp: new Date().toISOString()
-        } 
-      }));
-    }
-  }, [state.status, state.url, state.error, state.mediaType, state.renderId]);
+          renderId,
+          isVideo,
+          projectName: getProjectName()
+        });
+        
+        // Generate and upload thumbnail for videos only
+        if (isVideo && state.url && renderId) {
+          console.log('📸 Starting thumbnail generation...');
+          generateClientThumbnail(state.url, renderId)
+            .then(blob => {
+              if (blob) {
+                console.log('✅ Thumbnail generated, uploading...');
+                uploadThumbnail(blob, renderId, getProjectName());
+              } else {
+                console.error('❌ Failed to generate thumbnail blob');
+              }
+            })
+            .catch(error => {
+              console.error('❌ Failed to generate/upload thumbnail:', error);
+            });
+        } else {
+          console.log('⏭️ Skipping thumbnail generation (audio file or missing data)');
+        }
+        
+        // Emit event to notify that rendering is complete
+        window.dispatchEvent(new CustomEvent('renderCompleted', { 
+          detail: { 
+            url: state.url,
+            projectName: getProjectName(),
+            timestamp: new Date().toISOString()
+          } 
+        }));
+        
+        // Handle credit deduction after successful render
+        handleCreditDeduction();
+      } else if (state.status === "error") {
+        // Optionally emit an error event
+        window.dispatchEvent(new CustomEvent('renderError', { 
+          detail: { 
+            error: state.error?.message || "Failed to render video. Please try again.",
+            projectName: getProjectName(),
+            timestamp: new Date().toISOString()
+          } 
+        }));
+      }
+    }, [state.status, state.url, state.error]);
 
   // Function to save data to user folder structure
   const saveToUserFolder = async (type: 'project' | 'render', data: any) => {
@@ -267,6 +287,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
   // Add this function to upload the thumbnail
   const uploadThumbnail = async (thumbnailBlob: Blob, renderId: string, projectName: string) => {
+    console.log('📤 Uploading thumbnail:', {
+      renderId,
+      projectName,
+      blobSize: thumbnailBlob.size,
+      uid: getUidFromUrl()
+    });
+    
     const formData = new FormData();
     formData.append('thumbnail', thumbnailBlob, `thumbnail-${renderId}.png`);
     formData.append('renderId', renderId);
@@ -280,9 +307,11 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       });
       
       if (response.ok) {
-        console.log('✅ Thumbnail uploaded successfully');
+        const result = await response.json();
+        console.log('✅ Thumbnail uploaded successfully:', result);
       } else {
-        console.error('❌ Failed to upload thumbnail');
+        const error = await response.text();
+        console.error('❌ Failed to upload thumbnail:', response.status, error);
       }
     } catch (error) {
       console.error('❌ Error uploading thumbnail:', error);
