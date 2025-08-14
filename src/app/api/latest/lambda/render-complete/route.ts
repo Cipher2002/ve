@@ -198,7 +198,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate thumbnail
-    const thumbnailFileName = await generateThumbnail(s3Url, renderId, projectPath, format, mediaType);
+    let thumbnailFileName;
+    let thumbnailSuccess = false;
+    
+    try {
+      thumbnailFileName = await generateThumbnail(s3Url, renderId, projectPath, format, mediaType);
+      thumbnailSuccess = true;
+    } catch (error) {
+      console.error('Thumbnail generation failed:', error);
+      // Create fallback thumbnail name
+      thumbnailFileName = `thumbnail-${renderId}.webp`;
+      
+      // Create a minimal placeholder file
+      const placeholderPath = path.join(projectPath, thumbnailFileName);
+      const minimalWebP = Buffer.from([
+        0x52, 0x49, 0x46, 0x46, 0x3E, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+        0x56, 0x50, 0x38, 0x20, 0x32, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x9D,
+        0x01, 0x2A, 0x40, 0x01, 0xB4, 0x00, 0x02, 0x00, 0x34, 0x25, 0xA4, 0x00,
+        0x03, 0x70, 0x00, 0xFE, 0xFC, 0xFD, 0x50, 0x00
+      ]);
+      fs.writeFileSync(placeholderPath, minimalWebP);
+    }
     
     // Create render entry
     const renderEntry = {
@@ -277,7 +297,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       renderId,
-      message: 'Render completed and stored successfully'
+      message: 'Render completed and stored successfully',
+      thumbnailGenerated: thumbnailSuccess,
+      thumbnailPath: thumbnailFileName,
+      debugInfo: {
+        mediaType,
+        format,
+        s3Url,
+        projectPath
+      }
     });
 
   } catch (error) {
