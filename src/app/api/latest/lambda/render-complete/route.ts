@@ -20,7 +20,7 @@ interface RenderCompleteData {
 }
 
 // Helper function to generate thumbnail from video using FFmpeg
-async function generateThumbnail(videoUrl: string, renderId: string, outputPath: string): Promise<string> {
+async function generateThumbnail(videoUrl: string, renderId: string, outputPath: string, format: string, mediaType: string): Promise<string> {
   
   try {
     const thumbnailFileName = `thumbnail-${renderId}.webp`;
@@ -42,17 +42,24 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
       }).on('error', reject);
     });
     
+    // Determine input file extension from URL or default to mp4
+    let inputFileName = 'input.mp4';
+    if (format === 'webm') inputFileName = 'input.webm';
+    else if (format === 'mov') inputFileName = 'input.mov';
+    else if (format === 'mkv') inputFileName = 'input.mkv';
+
     // Write video data to FFmpeg filesystem
-    await ffmpeg.writeFile('input.mp4', new Uint8Array(videoData as Buffer));
+    await ffmpeg.writeFile(inputFileName, new Uint8Array(videoData as Buffer));
     
-    // Extract thumbnail at 1 second mark, resize to 320x180, convert to WebP
+    // Extract thumbnail at 1 second mark, resize to smaller size, convert to WebP with lower quality
     await ffmpeg.exec([
-      '-i', 'input.mp4',
+      '-i', inputFileName,
       '-ss', '1',
       '-vframes', '1',
-      '-s', '320x180',
+      '-s', '160x90',    // Much smaller size for faster loading
       '-f', 'webp',
-      '-quality', '50',
+      '-quality', '30',   // Lower quality for much smaller file size
+      '-compression_level', '6', // Higher compression
       'output.webp'
     ]);
     
@@ -63,7 +70,7 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
     fs.writeFileSync(thumbnailPath, thumbnailData);
     
     // Clean up FFmpeg filesystem
-    await ffmpeg.deleteFile('input.mp4');
+    await ffmpeg.deleteFile(inputFileName);
     await ffmpeg.deleteFile('output.webp');
     
     return thumbnailFileName;
@@ -82,10 +89,11 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
       // Create a solid color image as placeholder
       await placeholderFFmpeg.exec([
         '-f', 'lavfi',
-        '-i', 'color=c=gray:size=320x180:duration=1',
+        '-i', 'color=c=gray:size=160x90:duration=1',
         '-vframes', '1',
         '-f', 'webp',
-        '-quality', '50',
+        '-quality', '30',
+        '-compression_level', '6',
         'placeholder.webp'
       ]);
       
@@ -169,7 +177,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate thumbnail
-    const thumbnailFileName = await generateThumbnail(s3Url, renderId, projectPath);
+    const thumbnailFileName = await generateThumbnail(s3Url, renderId, projectPath, format, mediaType);
     
     // Create render entry
     const renderEntry = {
