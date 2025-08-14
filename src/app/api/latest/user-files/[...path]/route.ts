@@ -24,17 +24,33 @@ export async function GET(
     const fileExtension = path.extname(filename).toLowerCase();
     
     let contentType = 'application/octet-stream';
+    let disposition = `attachment; filename="${filename}"`; // Default to download
+    
+    // Handle different file types
     if (fileExtension === '.mp4') contentType = 'video/mp4';
     else if (fileExtension === '.mov') contentType = 'video/quicktime';
     else if (fileExtension === '.webm') contentType = 'video/webm';
     else if (fileExtension === '.mp3') contentType = 'audio/mpeg';
     else if (fileExtension === '.wav') contentType = 'audio/wav';
     else if (fileExtension === '.aac') contentType = 'audio/aac';
+    else if (fileExtension === '.webp') {
+      contentType = 'image/webp';
+      disposition = 'inline'; // Display in browser, don't force download
+    }
+    else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+      contentType = 'image/jpeg';
+      disposition = 'inline';
+    }
+    else if (fileExtension === '.png') {
+      contentType = 'image/png';
+      disposition = 'inline';
+    }
 
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': disposition,
+        'Cache-Control': 'public, max-age=86400', // Cache images for 24 hours
       },
     });
   } catch (error) {

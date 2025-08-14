@@ -52,7 +52,7 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
       '-vframes', '1',
       '-s', '320x180',
       '-f', 'webp',
-      '-quality', '90',
+      '-quality', '50',
       'output.webp'
     ]);
     
@@ -85,7 +85,7 @@ async function generateThumbnail(videoUrl: string, renderId: string, outputPath:
         '-i', 'color=c=gray:size=320x180:duration=1',
         '-vframes', '1',
         '-f', 'webp',
-        '-quality', '90',
+        '-quality', '50',
         'placeholder.webp'
       ]);
       
