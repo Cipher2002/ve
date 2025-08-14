@@ -1258,12 +1258,6 @@ export default function SavedProjects() {
                           >
                             <Download className="w-5 h-5 text-gray-600" />
                           </button>
-                          <div className="flex items-center gap-1 text-yellow-600">
-                            <span className="text-xs">💰</span>
-                            <span className="text-xs font-medium">
-                              {Math.round(file.fileSize / (1024 * 1024))}
-                            </span>
-                          </div>
                         </div>
                       </div>
                     </div>
