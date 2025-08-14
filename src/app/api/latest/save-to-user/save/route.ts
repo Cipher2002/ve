@@ -59,7 +59,9 @@ export async function POST(request: NextRequest) {
       projectsList[projectId] = {
         project_id: projectId,
         project_name: projectName,
-        time_created_at: timestamp
+        time_created_at: timestamp,
+        render_count: 0,
+        last_render_timestamp: null
       };
 
       // Save updated projects list
