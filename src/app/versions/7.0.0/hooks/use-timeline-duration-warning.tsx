@@ -32,7 +32,7 @@ export const useTimelineDurationWarning = (overlays: Overlay[]) => {
       // Auto-dismiss after 3 seconds
       warningTimeoutRef.current = setTimeout(() => {
         setShowWarning(false);
-      }, 3000);
+      }, 5000);
     }
   };
 
