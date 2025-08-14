@@ -1175,7 +1175,17 @@ export default function SavedProjects() {
                             src={`${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`}
                             alt={file.fileName}
                             className="w-full h-full object-cover"
+                            onLoad={() => {
+                              console.log('✅ Thumbnail loaded successfully:', file.thumbnailPath);
+                            }}
                             onError={(e) => {
+                              console.error('❌ Thumbnail failed to load:', {
+                                thumbnailPath: file.thumbnailPath,
+                                url: `${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject?.id}/${file.thumbnailPath}`,
+                                fileName: file.fileName,
+                                fileType: file.type
+                              });
+                              
                               // Fallback to icon if thumbnail fails
                               const img = e.target as HTMLImageElement;
                               img.style.display = 'none';

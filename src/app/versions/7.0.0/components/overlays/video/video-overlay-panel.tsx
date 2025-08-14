@@ -630,7 +630,7 @@ export const VideoOverlayPanel: React.FC = () => {
                         )}
 
                         <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
-                          MP4
+                          {video.format?.toUpperCase() || 'MP4'}
                         </div>
                       </div>
 
