@@ -91,6 +91,19 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
   React.useEffect(() => {
     if (state.status === "done") {
+      // Generate and upload thumbnail for videos
+      if (state.mediaType === 'video' && state.url) {
+        generateClientThumbnail(state.url, state.renderId)
+          .then(blob => {
+            if (blob) {
+              uploadThumbnail(blob, state.renderId, getProjectName());
+            }
+          })
+          .catch(error => {
+            console.error('Failed to generate/upload thumbnail:', error);
+          });
+      }
+      
       // Emit event to notify that rendering is complete
       window.dispatchEvent(new CustomEvent('renderCompleted', { 
         detail: { 
@@ -112,7 +125,7 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         } 
       }));
     }
-  }, [state.status, state.url, state.error]);
+  }, [state.status, state.url, state.error, state.mediaType, state.renderId]);
 
   // Function to save data to user folder structure
   const saveToUserFolder = async (type: 'project' | 'render', data: any) => {
@@ -207,6 +220,73 @@ const RenderControls: React.FC<RenderControlsProps> = ({
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  // Add this function to generate thumbnails client-side
+  const generateClientThumbnail = async (videoUrl: string, renderId: string): Promise<Blob | null> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      
+      video.onloadeddata = () => {
+        video.currentTime = 1; // Seek to 1 second
+      };
+      
+      video.onseeked = () => {
+        try {
+          // Create canvas and draw video frame
+          const canvas = document.createElement('canvas');
+          canvas.width = 160;
+          canvas.height = 90;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+          
+          // Draw the video frame to canvas
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Convert to blob
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, 'image/png', 0.8);
+          
+        } catch (error) {
+          console.error('Error generating thumbnail:', error);
+          resolve(null);
+        }
+      };
+      
+      video.onerror = () => resolve(null);
+      video.src = videoUrl;
+    });
+  };
+
+  // Add this function to upload the thumbnail
+  const uploadThumbnail = async (thumbnailBlob: Blob, renderId: string, projectName: string) => {
+    const formData = new FormData();
+    formData.append('thumbnail', thumbnailBlob, `thumbnail-${renderId}.png`);
+    formData.append('renderId', renderId);
+    formData.append('projectName', projectName);
+    formData.append('uid', getUidFromUrl());
+    
+    try {
+      const response = await fetch(`${apiBaseUrl}/upload-thumbnail`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        console.log('✅ Thumbnail uploaded successfully');
+      } else {
+        console.error('❌ Failed to upload thumbnail');
+      }
+    } catch (error) {
+      console.error('❌ Error uploading thumbnail:', error);
+    }
   };
 
   return (

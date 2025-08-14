@@ -37,10 +37,6 @@ export async function GET(
       contentType = 'image/webp';
       disposition = 'inline';
     }
-    else if (fileExtension === '.png') {
-      contentType = 'image/png';
-      disposition = 'inline';
-    }
     else if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
       contentType = 'image/jpeg';
       disposition = 'inline';
