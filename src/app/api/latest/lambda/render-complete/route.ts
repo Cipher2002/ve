@@ -192,6 +192,32 @@ export async function POST(request: NextRequest) {
     // Save renders.json
     fs.writeFileSync(rendersJsonPath, JSON.stringify(rendersData, null, 2));
 
+    // Update projects_id_list.json with render count and last render timestamp
+    const updateProjectsList = async (retries = 2) => {
+      try {
+        // Re-read the projects list to get the latest data
+        const currentProjectsListContent = fs.readFileSync(projectsListPath, 'utf-8');
+        const currentProjectsList = JSON.parse(currentProjectsListContent);
+        
+        if (currentProjectsList[projectId]) {
+          currentProjectsList[projectId].render_count = rendersData.length;
+          currentProjectsList[projectId].last_render_timestamp = renderEntry.timestamp;
+          
+          fs.writeFileSync(projectsListPath, JSON.stringify(currentProjectsList, null, 2));
+        }
+      } catch (error) {
+        console.error('Error updating projects list:', error);
+        if (retries > 0) {
+          console.log(`Retrying projects list update. Retries left: ${retries}`);
+          setTimeout(() => updateProjectsList(retries - 1), 100);
+        } else {
+          console.error('Failed to update projects list after all retries');
+        }
+      }
+    };
+
+    await updateProjectsList();
+
     // Also update project-index.json for compatibility
     const indexPath = path.join(projectPath, 'project-index.json');
     if (fs.existsSync(indexPath)) {
