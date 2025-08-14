@@ -366,31 +366,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   };
 
   // Load template into editor function
-  // const loadTemplateIntoEditor = (template: TemplateOverlay) => {
-  //   // Update project name
-  //   setProjectName(template.name);
-    
-  //   // Apply template data
-  //   const newOverlays = template.overlays.map((overlayTemplate, index) => ({
-  //     ...overlayTemplate,
-  //     id: Math.floor(Math.random() * 1000000) + index,
-  //   }));
-    
-  //   setOverlays(newOverlays);
-  //   setSelectedOverlayId(null);
-    
-  //   if (template.aspectRatio) {
-  //     setAspectRatio(template.aspectRatio);
-  //   }
-
-  //   // Trigger project saved event to refresh saved projects with new name
-  //   setTimeout(() => {
-  //     window.dispatchEvent(new CustomEvent('projectSaved', { 
-  //       detail: { projectName: template.name } 
-  //     }));
-  //   }, 100);
-  // };
-
   const loadTemplateIntoEditor = async (template: TemplateOverlay) => {
     setIsLoadingTemplate(true);
     setTemplateLoadingProgress({ current: 0, total: 0 });

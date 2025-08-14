@@ -30,6 +30,8 @@ import { useAssetLoading } from "../../contexts/asset-loading-context";
 import { useEditorContext } from "../../contexts/editor-context";
 import { MobileNavBar } from "../mobile/mobile-nav-bar";
 import { useTimelineSnapping } from "../../hooks/use-timeline-snapping";
+import { useTimelineDurationWarning } from "../../hooks/use-timeline-duration-warning";
+import { TIMELINE_DURATION_LIMIT_FRAMES, FPS } from "../../constants";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -321,6 +323,9 @@ const Timeline: React.FC<TimelineProps> = ({
       }
     }
   }, [shouldDeleteOnRemove, removeCachedVideo]);
+
+  // Duration warning hook
+  const { showWarning: showDurationWarning, isOverLimit, currentDuration, triggerWarningIfNeeded } = useTimelineDurationWarning(overlays);
   
   
   const { alignmentLines, snappedGhostElement } = useTimelineSnapping({
@@ -346,6 +351,18 @@ const Timeline: React.FC<TimelineProps> = ({
       handleDragStart(overlay, clientX, clientY, action);
     },
     [timelineStateHandleDragStart, handleDragStart]
+  );
+
+  // Enhanced drag end handler that checks duration limit
+  const combinedHandleDragEnd = useCallback(
+    () => {
+      handleDragEnd();
+      // Trigger warning check after drag operation completes
+      setTimeout(() => {
+        triggerWarningIfNeeded();
+      }, 100);
+    },
+    [handleDragEnd, triggerWarningIfNeeded]
   );
 
   const handleDeleteItem = useCallback(
@@ -570,8 +587,8 @@ const Timeline: React.FC<TimelineProps> = ({
             }}
             onMouseMove={handleMouseMove}
             onTouchMove={handleTouchMove}
-            onMouseUp={handleDragEnd}
-            onTouchEnd={handleDragEnd}
+            onMouseUp={combinedHandleDragEnd}
+            onTouchEnd={combinedHandleDragEnd}
             onMouseLeave={handleTimelineMouseLeave}
             onClick={(e) => {
               // Check if the click came from a context menu action that shouldn't move timeline
@@ -654,6 +671,33 @@ const Timeline: React.FC<TimelineProps> = ({
                       <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                         Loading project...
                       </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Duration Limit Warning Overlay */}
+                {showDurationWarning && (
+                  <div
+                    className="absolute inset-0 bg-red-50/80 dark:bg-red-900/80 backdrop-blur-[1px] flex items-center justify-center z-50"
+                    style={{ willChange: "opacity" }}
+                  >
+                    <div className="flex flex-col items-center gap-3 px-6 py-4 bg-white/95 dark:bg-gray-800/95 rounded-lg shadow-lg ring-1 ring-red-200 dark:ring-red-700 max-w-md mx-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">!</span>
+                        </div>
+                        <span className="text-sm font-semibold text-red-700 dark:text-red-300">
+                          Timeline Limit Exceeded
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-gray-700 dark:text-gray-300 mb-1">
+                          Your timeline is <strong>{Math.ceil((currentDuration - TIMELINE_DURATION_LIMIT_FRAMES) / FPS)}s</strong> over the 5-minute limit.
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Please trim, split, or remove content to fit within 5 minutes for optimal rendering.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
