@@ -209,7 +209,13 @@ const SoundsPanel: React.FC = () => {
       setLoadingTrack(soundId);
       
       // Get the audio file URL (either from system sounds or rendered audio)
-      const audioUrl = sound ? sound.file : renderedSound!.url;
+      let audioUrl;
+      if (sound) {
+        audioUrl = sound.file;
+      } else {
+        // Use proxy for rendered audio to avoid CORS
+        audioUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(renderedSound!.url)}`;
+      }
       
       // Create new audio instance only when needed
       const audio = new Audio(audioUrl);
@@ -455,12 +461,7 @@ const SoundsPanel: React.FC = () => {
                       setLoadingTrack(audio.id);
 
                       try {
-                        // Download the audio file once
-                        const response = await fetch(audio.url);
-                        const blob = await response.blob();
-                        const blobUrl = URL.createObjectURL(blob);
-
-                        // Clear loading state
+                        // Use the audio URL directly for Remotion (no need to download)
                         setLoadingTrack(null);
 
                         const { from, row } = findNextAvailablePosition(
@@ -469,11 +470,13 @@ const SoundsPanel: React.FC = () => {
                           durationInFrames
                         );
 
+                        const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
+
                         const newSoundOverlay: SoundOverlay = {
                           id: Date.now(),
                           type: OverlayType.SOUND,
                           content: audio.filename,
-                          src: blobUrl,
+                          src: proxyUrl, // Use proxy URL instead
                           from,
                           row,
                           left: 0,
@@ -490,7 +493,7 @@ const SoundsPanel: React.FC = () => {
 
                         addOverlay(newSoundOverlay);
                       } catch (error) {
-                        console.error('Failed to download rendered audio:', error);
+                        console.error('Failed to add rendered audio:', error);
                         setLoadingTrack(null);
                       }
                     }}
