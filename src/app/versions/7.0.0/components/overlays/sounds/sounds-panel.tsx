@@ -461,7 +461,24 @@ const SoundsPanel: React.FC = () => {
                       setLoadingTrack(audio.id);
 
                       try {
-                        // Use the audio URL directly for Remotion (no need to download)
+                        // Download the audio file using proxy to avoid CORS
+                        const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
+                        const response = await fetch(proxyUrl);
+                        const blob = await response.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+
+                        // Get actual audio duration
+                        const audioDuration = await new Promise<number>((resolve) => {
+                          const audioElement = new Audio(blobUrl);
+                          audioElement.addEventListener('loadedmetadata', () => {
+                            resolve(audioElement.duration);
+                          });
+                          audioElement.addEventListener('error', () => {
+                            resolve(30); // Fallback to 30 seconds if duration can't be determined
+                          });
+                        });
+
+                        // Clear loading state
                         setLoadingTrack(null);
 
                         const { from, row } = findNextAvailablePosition(
@@ -470,13 +487,11 @@ const SoundsPanel: React.FC = () => {
                           durationInFrames
                         );
 
-                        const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
-
                         const newSoundOverlay: SoundOverlay = {
                           id: Date.now(),
                           type: OverlayType.SOUND,
                           content: audio.filename,
-                          src: proxyUrl, // Use proxy URL instead
+                          src: blobUrl,
                           from,
                           row,
                           left: 0,
@@ -485,7 +500,7 @@ const SoundsPanel: React.FC = () => {
                           height: 100,
                           rotation: 0,
                           isDragging: false,
-                          durationInFrames: 300, // Default duration
+                          durationInFrames: Math.round(audioDuration * 30), // Convert seconds to frames (30fps)
                           styles: {
                             opacity: 1,
                           },
@@ -493,7 +508,7 @@ const SoundsPanel: React.FC = () => {
 
                         addOverlay(newSoundOverlay);
                       } catch (error) {
-                        console.error('Failed to add rendered audio:', error);
+                        console.error('Failed to download rendered audio:', error);
                         setLoadingTrack(null);
                       }
                     }}
