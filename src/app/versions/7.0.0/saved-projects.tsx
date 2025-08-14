@@ -277,6 +277,7 @@ export default function SavedProjects() {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<UserProject | null>(null);
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
+  const [loadingProjectFiles, setLoadingProjectFiles] = useState(false);
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -441,6 +442,18 @@ export default function SavedProjects() {
     return urlParams.get('uid') || 'default';
   };
 
+  // Debug UID values
+  React.useEffect(() => {
+    console.log('🔍 Saved Projects UID Debug:', {
+      fromFunction: getUidFromUrl(),
+      fromURL: new URLSearchParams(window.location.search).get('uid'),
+      selectedProjectId: selectedProject?.id,
+      fullThumbnailURL: selectedProject ? 
+        `${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject.id}/thumbnail-example.webp` : 
+        'No project selected'
+    });
+  }, [selectedProject]);
+
   // Fetch user projects
   const fetchUserProjects = async () => {
     const uid = getUidFromUrl();
@@ -460,6 +473,7 @@ export default function SavedProjects() {
   // Fetch rendered files for selected project
   const fetchProjectFiles = async (projectId: string) => {
     const uid = getUidFromUrl();
+    setLoadingProjectFiles(true);
     try {
       const rendersResponse = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}&projectId=${projectId}`);
 
@@ -486,6 +500,8 @@ export default function SavedProjects() {
     } catch (error) {
       console.error('Error fetching project renders:', error);
       setProjectFiles([]);
+    } finally {
+      setLoadingProjectFiles(false);
     }
   };
 
@@ -1271,7 +1287,15 @@ export default function SavedProjects() {
                         </div>
                       </div>
                     </div>
-                  )) : (
+                  )) : loadingProjectFiles ? (
+                    <div className="col-span-4 w-full flex items-center justify-center py-12 select-none">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3 mx-auto"></div>
+                        <div className="text-gray-500 text-lg mb-2">Loading renders...</div>
+                        <div className="text-gray-400 text-sm">Please wait while we fetch your project files</div>
+                      </div>
+                    </div>
+                  ) : (
                     <div className="col-span-4 w-full flex items-center justify-center py-12 select-none">
                       <div className="text-center">
                         <div className="text-gray-500 text-lg mb-2">No renders found</div>
