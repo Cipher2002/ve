@@ -39,12 +39,22 @@ export const POST = executeApi<ProgressResponse, typeof ProgressRequest>(
     }
 
     if (renderProgress.done) {
+      // Original S3 URL from getRenderProgress
+      const s3Url = renderProgress.outputFile as string;
+
+      // Replace the S3 part with your CloudFront domain
+      const cdnUrl = s3Url.replace(
+        /^https:\/\/s3\.us-east-1\.amazonaws\.com\/remotionlambda-useast1-ovs6xk604z\/renders\//,
+        "https://d22iylr6aysikx.cloudfront.net/"
+      );
+
       return {
         type: "done",
-        url: renderProgress.outputFile as string,
+        url: cdnUrl,
         size: renderProgress.outputSizeInBytes as number,
       };
     }
+
 
     return {
       type: "progress",
