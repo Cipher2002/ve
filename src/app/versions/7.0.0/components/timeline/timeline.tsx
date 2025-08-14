@@ -326,6 +326,11 @@ const Timeline: React.FC<TimelineProps> = ({
 
   // Duration warning hook
   const { showWarning: showDurationWarning, isOverLimit, currentDuration, triggerWarningIfNeeded } = useTimelineDurationWarning(overlays);
+
+  // Watch for overlay changes and trigger warning
+  useEffect(() => {
+    triggerWarningIfNeeded();
+  }, [overlays, triggerWarningIfNeeded]);
   
   
   const { alignmentLines, snappedGhostElement } = useTimelineSnapping({
