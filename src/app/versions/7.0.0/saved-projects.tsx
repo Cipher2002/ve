@@ -1353,7 +1353,7 @@ export default function SavedProjects() {
                     </p>
 
                     {/* Pagination */}
-                    <div className="flex items-center flex-wrap gap-1 justify-center xs:justify-start">
+                    <div className="flex items-center flex-wrap justify-center xs:justify-start">
                       <Button
                         variant="ghost"
                         onClick={() => {
@@ -1505,7 +1505,7 @@ export default function SavedProjects() {
                     style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                   >
                     {/* Folder Icon/Thumbnail */}
-                    <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl flex items-center justify-center relative overflow-hidden">
+                    <div className="h-48 bg-gradient-to-br from-[rgb(41,0,156)/15] to-[rgb(41,0,156)/15] rounded-t-xl flex items-center justify-center relative overflow-hidden">
                       <div className="w-20 h-16 bg-yellow-400 rounded-lg shadow-lg flex items-center justify-center relative">
                         <div className="w-16 h-12 bg-yellow-500 rounded-md"></div>
                         <div className="absolute -top-1 -right-1 w-4 h-3 bg-yellow-300 rounded-tr-lg rounded-bl-lg"></div>
@@ -1640,7 +1640,7 @@ export default function SavedProjects() {
             </p>
 
             {/* Pagination */}
-            <div className="flex items-center flex-wrap gap-1 justify-center xs:justify-start">
+            <div className="flex items-center flex-wrap justify-center xs:justify-start">
               <Button
                 variant="ghost"
                 onClick={handlePrevious}
