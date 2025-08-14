@@ -12,6 +12,7 @@ import {
   renderAudio as lambdaRenderAudio,
 } from "../lambda-helpers/api";
 import { transformOverlaysForLambda } from "../utils/lambda-overlay-transformer";
+import { RENDER_DURATION_LIMIT_FRAMES } from "../constants";
 
 
 //SETTING THE API BASE URL
@@ -83,10 +84,11 @@ export const useRendering = (
       //     }
       //   : inputProps;
 
-      // Transform overlays for Lambda rendering
+      // Transform overlays for Lambda rendering and enforce duration limit
       const transformedInputProps = {
         ...inputProps,
-        overlays: transformOverlaysForLambda(inputProps.overlays)
+        overlays: transformOverlaysForLambda(inputProps.overlays),
+        durationInFrames: Math.min(inputProps.durationInFrames, RENDER_DURATION_LIMIT_FRAMES)
       };
 
       // const response = await renderVideo({ 
@@ -220,7 +222,8 @@ export const useRendering = (
       //   : inputProps;
       const transformedInputProps = {
         ...inputProps,
-        overlays: transformOverlaysForLambda(inputProps.overlays)
+        overlays: transformOverlaysForLambda(inputProps.overlays),
+        durationInFrames: Math.min(inputProps.durationInFrames, RENDER_DURATION_LIMIT_FRAMES)
       };
         
       // const response = await renderAudioFn({ id, inputProps: transformedInputProps, format, codec });

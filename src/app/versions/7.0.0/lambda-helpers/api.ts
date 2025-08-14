@@ -7,6 +7,7 @@ import {
   ProgressResponse,
 } from "@/app/versions/7.0.0/types";
 import { CompositionProps } from "@/app/versions/7.0.0/types";
+import { RENDER_DURATION_LIMIT_FRAMES } from "@/app/versions/7.0.0/constants";
 
 type ApiResponse<T> = {
   type: "success" | "error";
@@ -57,7 +58,10 @@ export const renderVideo = async ({
 }) => {
   const body: z.infer<typeof RenderRequest> = {
     id,
-    inputProps,
+    inputProps: {
+      ...inputProps,
+      durationInFrames: Math.min(inputProps.durationInFrames, RENDER_DURATION_LIMIT_FRAMES)
+    },
     format,
     codec,
     mediaType,

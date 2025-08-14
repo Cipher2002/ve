@@ -64,6 +64,9 @@ export const AUTO_SAVE_INTERVAL = 10000; // Autosave every 10 seconds
 // Timeline duration limit (5 minutes in frames)
 export const TIMELINE_DURATION_LIMIT_FRAMES = 5 * 60 * FPS; // 5 minutes
 
+// Render duration limit (5 minutes in frames) - enforced during rendering
+export const RENDER_DURATION_LIMIT_FRAMES = 5 * 60 * FPS; // 5 minutes
+
 // This is where the default template is loaded
 export const DEFAULT_OVERLAYS: Overlay[] = [
 ];
