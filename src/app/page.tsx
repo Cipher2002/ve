@@ -99,6 +99,18 @@ function App() {
         return;
       }
 
+      // Check for auto-load video parameters
+      const videoUrl = urlParams.get('url');
+      const videoType = urlParams.get('type');
+      
+      if (videoUrl && videoType) {
+        // Store in sessionStorage for the editor to pick up
+        sessionStorage.setItem('autoLoadVideo', JSON.stringify({
+          url: decodeURIComponent(videoUrl),
+          type: videoType
+        }));
+      }
+
       // Check if in iframe and from allowed domain
       if (window.top === window.self) {
         // Not in iframe - block access

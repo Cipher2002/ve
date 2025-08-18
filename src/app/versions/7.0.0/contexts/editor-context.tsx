@@ -110,6 +110,9 @@ interface EditorContextProps {
   isGeneratingCaptions: boolean;
   setIsGeneratingCaptions: (loading: boolean) => void;
 
+  // Auto-load video from URL parameters
+  handleAutoLoadVideo: () => Promise<void>;
+
 
 }
 
