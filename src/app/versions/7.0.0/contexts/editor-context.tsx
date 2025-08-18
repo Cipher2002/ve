@@ -112,6 +112,7 @@ interface EditorContextProps {
 
   // Auto-load video from URL parameters
   handleAutoLoadVideo: () => Promise<void>;
+  isAutoLoadingVideo: boolean;
 
 
 }

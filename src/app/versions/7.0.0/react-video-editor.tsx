@@ -72,6 +72,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const { loadTemplateWithVideos } = useTemplateLoader();
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [templateLoadingProgress, setTemplateLoadingProgress] = useState({ current: 0, total: 0 });
+  const [isAutoLoadingVideo, setIsAutoLoadingVideo] = useState(false);
+
 
 
   // Overlay management hooks
@@ -156,6 +158,106 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
 
   // Auto-load video from URL parameters
+  // const handleAutoLoadVideo = async () => {
+  //   try {
+  //     const autoLoadData = sessionStorage.getItem('autoLoadVideo');
+  //     if (!autoLoadData) return;
+
+  //     const { url, type } = JSON.parse(autoLoadData);
+      
+  //     // Clear the session storage to prevent re-loading
+  //     sessionStorage.removeItem('autoLoadVideo');
+
+  //     // Download the video directly using fetch
+  //     const response = await fetch(`${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`);
+      
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to download video: ${response.status}`);
+  //     }
+
+  //     const blob = await response.blob();
+  //     const cachedVideoUrl = URL.createObjectURL(blob);
+      
+  //     if (cachedVideoUrl) {
+  //       // Get video dimensions
+  //       const getVideoNaturalDimensions = (videoUrl: string): Promise<{ width: number; height: number }> => {
+  //         return new Promise((resolve) => {
+  //           const video = document.createElement('video');
+  //           video.preload = 'metadata';
+            
+  //           video.onloadedmetadata = () => {
+  //             resolve({
+  //               width: video.videoWidth,
+  //               height: video.videoHeight
+  //             });
+  //           };
+            
+  //           video.onerror = () => {
+  //             // Fallback to composition dimensions
+  //             resolve(getAspectRatioDimensions());
+  //           };
+            
+  //           video.src = videoUrl;
+  //         });
+  //       };
+
+  //       const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
+  //         return new Promise((resolve) => {
+  //           const video = document.createElement('video');
+  //           video.preload = 'metadata';
+            
+  //           video.onloadedmetadata = () => {
+  //             const durationInSeconds = video.duration;
+  //             const durationInFrames = Math.round(durationInSeconds * 30);
+  //             resolve(durationInFrames);
+  //           };
+            
+  //           video.onerror = () => {
+  //             // Fallback to 300 frames (10 seconds)
+  //             resolve(300);
+  //           };
+            
+  //           video.src = videoUrl;
+  //         });
+  //       };
+
+  //       // Get video properties
+  //       const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
+  //       const videoDuration = await getVideoDurationInFrames(cachedVideoUrl);
+
+  //       // Create video overlay
+  //       const videoOverlay: Overlay = {
+  //         left: 0,
+  //         top: 0,
+  //         width,
+  //         height,
+  //         durationInFrames: videoDuration,
+  //         from: 0, // Place at beginning of timeline
+  //         id: Date.now(),
+  //         rotation: 0,
+  //         row: 0, // Place on first row
+  //         isDragging: false,
+  //         type: 'video' as any,
+  //         content: url, // Keep original URL for Remotion
+  //         src: cachedVideoUrl, // Keep blob URL for preview
+  //         originalUrl: url,
+  //         videoStartTime: 0,
+  //         styles: {
+  //           opacity: 1,
+  //           zIndex: 100,
+  //           transform: "none",
+  //           objectFit: "contain",
+  //         },
+  //       };
+
+  //       // Add the overlay to the timeline
+  //       addOverlay(videoOverlay);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to auto-load video:', error);
+  //   }
+  // };
+
   const handleAutoLoadVideo = async () => {
     try {
       const autoLoadData = sessionStorage.getItem('autoLoadVideo');
@@ -165,6 +267,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       
       // Clear the session storage to prevent re-loading
       sessionStorage.removeItem('autoLoadVideo');
+      
+      // Set loading state
+      setIsAutoLoadingVideo(true);
 
       // Download the video directly using fetch
       const response = await fetch(`${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`);
@@ -253,6 +358,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       }
     } catch (error) {
       console.error('Failed to auto-load video:', error);
+    } finally {
+      // Clear loading state
+      setIsAutoLoadingVideo(false);
     }
   };
 
@@ -644,6 +752,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
     // Auto-load video from URL parameters
     handleAutoLoadVideo,
+    isAutoLoadingVideo,
     
   };
 

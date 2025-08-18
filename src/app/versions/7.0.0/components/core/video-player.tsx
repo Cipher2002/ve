@@ -28,6 +28,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     updatePlayerDimensions,
     getAspectRatioDimensions,
     durationInFrames,
+    isAutoLoadingVideo,
   } = useEditorContext();
 
   /**
@@ -70,6 +71,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
         bg-[size:16px_16px] 
         shadow-lg"
       >
+        {/* Auto-load Video Loader */}
+        {isAutoLoadingVideo && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="flex flex-col items-center gap-3 px-6 py-4 bg-white/95 dark:bg-gray-800/95 rounded-lg shadow-lg ring-1 ring-gray-200 dark:ring-gray-700">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Loading video...
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Preparing your content
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Player wrapper with centering */}
         <div className="z-10 absolute inset-2 sm:inset-4 flex items-center justify-center">
           <div
