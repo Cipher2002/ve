@@ -103,6 +103,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     playbackRate,
     setPlaybackRate,
     playerRef,
+    resetOverlays,
   } = useEditorContext();
 
   const { visibleRows, addRow, removeRow, zoomScale, setZoomScale } =
@@ -179,7 +180,26 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   const handleReset = () => {
+    // Clear all keyframes
     clearAllKeyframes();
+    
+    // Reset overlays (clears timeline)
+    if (resetOverlays) {
+      resetOverlays();
+    }
+    
+    // Reset aspect ratio to default
+    setAspectRatio("16:9");
+    
+    // Reset timeline rows to default (5 rows)
+    // Calculate how many rows to remove to get back to INITIAL_ROWS (5)
+    const rowsToRemove = visibleRows - INITIAL_ROWS;
+    for (let i = 0; i < rowsToRemove; i++) {
+      if (visibleRows > INITIAL_ROWS) {
+        removeRow();
+      }
+    }
+    
     setDropdownOpen(false);
   };
 
