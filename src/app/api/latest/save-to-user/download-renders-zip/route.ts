@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import archiver from 'archiver';
-import { Readable } from 'stream';
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,27 +51,37 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Create a zip archive
+    // Clean project name for filename
+    const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const zipFileName = `${safeProjectName}_renders_${Date.now()}.zip`;
+    const zipFilePath = path.join(projectPath, zipFileName);
+
+    // Create zip file in the project folder
+    const output = fs.createWriteStream(zipFilePath);
     const archive = archiver('zip', {
-      zlib: { level: 9 } // Maximum compression
+      zlib: { level: 6 } // Balanced compression for speed
     });
 
-    // Create a readable stream from the archive
-    const chunks: Buffer[] = [];
-    
-    archive.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
+    // Handle archive events
+    archive.pipe(output);
 
     archive.on('error', (err) => {
       console.error('Archive error:', err);
+      // Clean up partial zip file on error
+      if (fs.existsSync(zipFilePath)) {
+        fs.unlinkSync(zipFilePath);
+      }
       throw err;
     });
 
-    // Download and add each render file to the zip
-    for (const render of renders) {
+    // Process and add each render file to the zip
+    for (let i = 0; i < renders.length; i++) {
+      const render = renders[i];
+      
       try {
         if (render.s3Url && render.renderId && render.format) {
+          console.log(`Processing ${i + 1}/${renders.length}: ${render.renderId}`);
+          
           // Download file from S3 URL
           const response = await fetch(render.s3Url);
           
@@ -88,33 +97,50 @@ export async function GET(request: NextRequest) {
           }
         }
       } catch (error) {
-        console.error(`Error downloading render ${render.renderId}:`, error);
+        console.error(`Error processing render ${render.renderId}:`, error);
         // Continue with other files even if one fails
       }
     }
 
     // Finalize the archive
     await new Promise<void>((resolve, reject) => {
-      archive.on('end', resolve);
+      output.on('close', () => {
+        console.log(`Zip file created: ${zipFilePath} (${archive.pointer()} bytes)`);
+        resolve();
+      });
+      
+      output.on('error', reject);
       archive.on('error', reject);
+      
       archive.finalize();
     });
 
-    // Combine all chunks into a single buffer
-    const zipBuffer = Buffer.concat(chunks);
-
-    // Clean project name for filename (remove invalid characters)
-    const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const zipFileName = `${safeProjectName}_renders.zip`;
-
-    return new NextResponse(zipBuffer, {
+    // Read the completed zip file
+    const zipBuffer = fs.readFileSync(zipFilePath);
+    
+    // Send the zip file to the client
+    const response = new NextResponse(zipBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/zip',
         'Content-Length': zipBuffer.length.toString(),
-        'Content-Disposition': `attachment; filename="${zipFileName}"`,
+        'Content-Disposition': `attachment; filename="${safeProjectName}_renders.zip"`,
       },
     });
+
+    // Clean up the zip file after sending (with a small delay to ensure download starts)
+    setTimeout(() => {
+      try {
+        if (fs.existsSync(zipFilePath)) {
+          fs.unlinkSync(zipFilePath);
+          console.log(`Cleaned up zip file: ${zipFilePath}`);
+        }
+      } catch (error) {
+        console.error(`Error cleaning up zip file: ${zipFilePath}`, error);
+      }
+    }, 5000); // Delete after 5 seconds
+
+    return response;
 
   } catch (error) {
     console.error('Error creating renders zip:', error);
