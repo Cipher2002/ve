@@ -614,26 +614,29 @@ export default function SavedProjects() {
   const handleDownloadAllRenders = async (project: UserProject) => {
     const uid = getUidFromUrl();
     try {
-      const response = await fetch(`${apiBaseUrl}/save-to-user/get-renders?uid=${uid}&projectId=${project.id}`);
+      // Call the backend API to create and download the zip file
+      const response = await fetch(`${apiBaseUrl}/save-to-user/download-renders-zip?uid=${uid}&projectId=${project.id}`, {
+        method: 'GET',
+      });
+      
       if (response.ok) {
-        const data = await response.json();
-        const renders = data.renders || [];
+        // Get the zip file as a blob
+        const blob = await response.blob();
         
-        if (renders.length > 0) {
-          // Download all renders
-          renders.forEach((render: any, index: number) => {
-            setTimeout(() => {
-              const link = document.createElement('a');
-              link.href = render.s3Url;
-              link.download = `${render.renderId}.${render.format}`;
-              link.target = '_blank';
-              link.click();
-            }, index * 500); // Stagger downloads by 500ms to avoid browser blocking
-          });
-        }
+        // Create download link for the zip file
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${project.name}_renders.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        console.error('Failed to download renders zip:', response.statusText);
       }
     } catch (error) {
-      console.error('Error downloading project renders:', error);
+      console.error('Error downloading project renders zip:', error);
     }
   };
 

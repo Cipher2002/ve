@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm ci && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -42,6 +42,7 @@
     "@remotion/renderer": "4.0.332",
     "@remotion/studio": "4.0.332",
     "aos": "^2.3.4",
+    "archiver": "^7.0.1",
     "bufferutil": "^4.0.9",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
@@ -72,6 +73,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/aos": "^3.0.7",
+    "@types/archiver": "^6.0.3",
     "@types/lodash": "^4.17.12",
     "@types/node": "^20",
     "@types/react": "^19",
