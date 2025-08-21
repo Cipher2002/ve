@@ -310,6 +310,13 @@ export default function SavedProjects() {
   });
   const [applyingTemplate, setApplyingTemplate] = useState<string | null>(null);
   const [templateApplied, setTemplateApplied] = useState<string | null>(null);
+  const [downloadingProject, setDownloadingProject] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<{
+    status: string;
+    current: number;
+    total: number;
+    message: string;
+  } | null>(null);
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -610,33 +617,69 @@ export default function SavedProjects() {
     setEditingName('');
   };
 
-  // Handle downloading all renders for a project
   const handleDownloadAllRenders = async (project: UserProject) => {
     const uid = getUidFromUrl();
+    setDownloadingProject(project.id);
+    setDownloadProgress(null);
+    
     try {
-      // Call the backend API to create and download the zip file
-      const response = await fetch(`${apiBaseUrl}/save-to-user/download-renders-zip?uid=${uid}&projectId=${project.id}`, {
-        method: 'GET',
-      });
+      // Start the zip creation process
+      const startResponse = await fetch(
+        `${apiBaseUrl}/save-to-user/download-renders-zip?uid=${uid}&projectId=${project.id}`
+      );
       
-      if (response.ok) {
-        // Get the zip file as a blob
-        const blob = await response.blob();
-        
-        // Create download link for the zip file
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${project.name}_renders.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } else {
-        console.error('Failed to download renders zip:', response.statusText);
+      if (!startResponse.ok) {
+        throw new Error('Failed to start zip creation');
       }
+      
+      const { jobId } = await startResponse.json();
+      
+      // Poll for progress
+      const pollInterval = setInterval(async () => {
+        try {
+          const progressResponse = await fetch(
+            `${apiBaseUrl}/save-to-user/download-renders-zip?uid=${uid}&projectId=${project.id}&action=progress`
+          );
+          
+          if (progressResponse.ok) {
+            const progress = await progressResponse.json();
+            setDownloadProgress(progress);
+            
+            if (progress.status === 'completed') {
+              clearInterval(pollInterval);
+              
+              // Download the completed zip file
+              const downloadUrl = `${apiBaseUrl}/save-to-user/download-renders-zip?uid=${uid}&projectId=${project.id}&action=download`;
+              const link = document.createElement('a');
+              link.href = downloadUrl;
+              link.download = `${project.name}_renders.zip`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              // Reset states
+              setDownloadingProject(null);
+              setDownloadProgress(null);
+              
+            } else if (progress.status === 'error') {
+              clearInterval(pollInterval);
+              console.error('Zip creation failed:', progress.error);
+              setDownloadingProject(null);
+              setDownloadProgress(null);
+            }
+          }
+        } catch (error) {
+          console.error('Error polling progress:', error);
+          clearInterval(pollInterval);
+          setDownloadingProject(null);
+          setDownloadProgress(null);
+        }
+      }, 1000); // Poll every second
+      
     } catch (error) {
-      console.error('Error downloading project renders zip:', error);
+      console.error('Error starting zip download:', error);
+      setDownloadingProject(null);
+      setDownloadProgress(null);
     }
   };
 
@@ -1594,12 +1637,40 @@ export default function SavedProjects() {
                               e.stopPropagation();
                               handleDownloadAllRenders(project);
                             }}
-                            className="w-6 h-6 flex items-center justify-center"
-                            title="Download all renders"
+                            disabled={downloadingProject === project.id}
+                            className={`w-6 h-6 flex items-center justify-center ${
+                              downloadingProject === project.id ? 'cursor-not-allowed' : ''
+                            }`}
+                            title={
+                              downloadingProject === project.id 
+                                ? downloadProgress?.message || 'Processing...'
+                                : 'Download all renders'
+                            }
                           >
-                            <Download className="w-5 h-5 text-gray-600" />
-                          </button>
-                          
+                            {downloadingProject === project.id ? (
+                              <div className="w-4 h-4 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <Download className="w-5 h-5 text-gray-600" />
+                            )}
+                          </button> 
+                          {downloadingProject === project.id && downloadProgress && (
+                            <div className="absolute -bottom-8 left-0 right-0 bg-white rounded border shadow-sm p-2 z-20">
+                              <div className="text-xs text-gray-600 mb-1">
+                                {downloadProgress.message}
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-1">
+                                <div 
+                                  className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                                  style={{ 
+                                    width: `${(downloadProgress.current / downloadProgress.total) * 100}%` 
+                                  }}
+                                ></div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {downloadProgress.current}/{downloadProgress.total}
+                              </div>
+                            </div>
+                          )}              
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
