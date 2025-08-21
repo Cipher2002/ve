@@ -1776,12 +1776,22 @@ export default function SavedProjects() {
                                 e.stopPropagation();
                                 handleDownloadAllRenders(project);
                               }}
-                              className="w-6 h-6 flex items-center justify-center"
-                              title="Download all renders"
+                              disabled={downloadingProject === project.id}
+                              className={`w-6 h-6 flex items-center justify-center ${
+                                downloadingProject === project.id ? 'cursor-not-allowed' : ''
+                              }`}
+                              title={
+                                downloadingProject === project.id 
+                                  ? 'Starting download...'
+                                  : 'Download all renders'
+                              }
                             >
-                              <Download className="w-5 h-5 text-gray-600" />
+                              {downloadingProject === project.id ? (
+                                <div className="w-4 h-4 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Download className="w-5 h-5 text-gray-600" />
+                              )}
                             </button>
-                            
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
