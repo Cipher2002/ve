@@ -1630,7 +1630,7 @@ export default function SavedProjects() {
                       </p>
 
                       {/* Bottom section */}
-                      <div className="flex items-center justify-between mt-auto">
+                      {/* <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={(e) => {
@@ -1716,7 +1716,7 @@ export default function SavedProjects() {
                           </span>
                           
                           {/* Three dots menu */}
-                          <div className="relative z-10" data-menu>
+                          {/* <div className="relative z-10" data-menu>
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1727,10 +1727,10 @@ export default function SavedProjects() {
                               <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                               </svg>
-                            </button>
+                            </button> */}
                             
                             {/* Dropdown menu */}
-                            {menuOpen === project.id && (
+                            {/* {menuOpen === project.id && (
                               <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap min-w-max">
                                 <button
                                   onClick={(e) => {
@@ -1746,7 +1746,119 @@ export default function SavedProjects() {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </div> */}
+
+                      {/* Bottom section */}
+                      {downloadingProject === project.id && downloadProgress ? (
+                        /* Progress view */
+                        <div className="w-full mt-auto">
+                          <div className="text-xs text-gray-600 mb-2">
+                            {downloadProgress.message}
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div 
+                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              style={{ 
+                                width: `${(downloadProgress.current / downloadProgress.total) * 100}%` 
+                              }}
+                            ></div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {downloadProgress.current}/{downloadProgress.total}
+                          </div>
+                        </div>
+                      ) : (
+                        /* Normal view */
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownloadAllRenders(project);
+                              }}
+                              className="w-6 h-6 flex items-center justify-center"
+                              title="Download all renders"
+                            >
+                              <Download className="w-5 h-5 text-gray-600" />
+                            </button>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleApplyTemplate(project);
+                              }}
+                              disabled={applyingTemplate === project.id || templateApplied === project.id}
+                              className={`px-2 py-1 text-xs rounded transition-colors select-none flex items-center gap-1 ${
+                                applyingTemplate === project.id
+                                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                                  : templateApplied === project.id
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-[#490972] hover:bg-[#490972] text-white'
+                              }`}
+                              title={
+                                applyingTemplate === project.id
+                                  ? 'Applying template...'
+                                  : templateApplied === project.id
+                                  ? 'Template applied successfully'
+                                  : 'Apply as template'
+                              }
+                            >
+                              {applyingTemplate === project.id ? (
+                                <>
+                                  <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                                  Applying...
+                                </>
+                              ) : templateApplied === project.id ? (
+                                <>
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                  Applied
+                                </>
+                              ) : (
+                                'Apply Template'
+                              )}
+                            </button>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 select-none">
+                              {project.renders?.length || 0} renders
+                            </span>
+                            
+                            {/* Three dots menu */}
+                            <div className="relative z-10" data-menu>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMenuOpen(menuOpen === project.id ? null : project.id);
+                                }}
+                                className="w-6 h-6 hover:bg-gray-100 rounded flex items-center justify-center"
+                              >
+                                <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                </svg>
+                              </button>
+                              
+                              {/* Dropdown menu */}
+                              {menuOpen === project.id && (
+                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 whitespace-nowrap min-w-max">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleToggleActiveStatus(project);
+                                      setMenuOpen(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 block select-none"
+                                  >
+                                    {project.status === 'active' ? 'Hide From Active View' : 'Show in Active View'}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
