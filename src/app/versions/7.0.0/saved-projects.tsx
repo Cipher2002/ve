@@ -308,6 +308,8 @@ export default function SavedProjects() {
       end: now
     };
   });
+  const [applyingTemplate, setApplyingTemplate] = useState<string | null>(null);
+  const [templateApplied, setTemplateApplied] = useState<string | null>(null);
 
   //SETTING THE API BASE URL
   const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -779,8 +781,30 @@ export default function SavedProjects() {
     return () => window.removeEventListener('projectStatusChanged', handleProjectStatusChanged as EventListener);
   }, []);
 
+  React.useEffect(() => {
+    const handleTemplateLoadingComplete = (event: CustomEvent) => {
+      const { projectId } = event.detail || {};
+      
+      // Clear applying state and show success
+      setApplyingTemplate(null);
+      setTemplateApplied(projectId);
+      
+      // Reset success state after 2 seconds
+      setTimeout(() => {
+        setTemplateApplied(null);
+      }, 2000);
+    };
+
+    window.addEventListener('templateLoadingComplete', handleTemplateLoadingComplete as EventListener);
+    return () => window.removeEventListener('templateLoadingComplete', handleTemplateLoadingComplete as EventListener);
+  }, []);
+
   const handleApplyTemplate = async (project: UserProject) => {
     const uid = getUidFromUrl();
+    
+    // Set applying state
+    setApplyingTemplate(project.id);
+    
     try {
       // Get the latest save file for this project
       const response = await fetch(`${apiBaseUrl}/save-to-user/get-project-data?uid=${uid}&projectName=${project.name}`);
@@ -804,12 +828,14 @@ export default function SavedProjects() {
           
           // Dispatch event to load template into editor
           window.dispatchEvent(new CustomEvent('applyTemplate', { 
-            detail: { template } 
+            detail: { template, projectId: project.id } 
           }));
         }
       }
     } catch (error) {
       console.error('Error loading project template:', error);
+      // Clear applying state on error
+      setApplyingTemplate(null);
     }
   };
 
@@ -1572,10 +1598,37 @@ export default function SavedProjects() {
                               e.stopPropagation();
                               handleApplyTemplate(project);
                             }}
-                            className="px-2 py-1 text-xs bg-[#490972] hover:bg-[#490972] text-white rounded transition-colors select-none"
-                            title="Apply as template"
+                            disabled={applyingTemplate === project.id || templateApplied === project.id}
+                            className={`px-2 py-1 text-xs rounded transition-colors select-none flex items-center gap-1 ${
+                              applyingTemplate === project.id
+                                ? 'bg-gray-400 text-white cursor-not-allowed'
+                                : templateApplied === project.id
+                                ? 'bg-green-500 text-white'
+                                : 'bg-[#490972] hover:bg-[#490972] text-white'
+                            }`}
+                            title={
+                              applyingTemplate === project.id
+                                ? 'Applying template...'
+                                : templateApplied === project.id
+                                ? 'Template applied successfully'
+                                : 'Apply as template'
+                            }
                           >
-                            Apply Template
+                            {applyingTemplate === project.id ? (
+                              <>
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                                Applying...
+                              </>
+                            ) : templateApplied === project.id ? (
+                              <>
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                Applied
+                              </>
+                            ) : (
+                              'Apply Template'
+                            )}
                           </button>
                         </div>
                         

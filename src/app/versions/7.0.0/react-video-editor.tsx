@@ -651,15 +651,28 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   }, [overlays.length, hasTimelineContent]);
 
   useEffect(() => {
-    const handleApplyTemplate = (event: CustomEvent) => {
-      const { template } = event.detail;
+    const handleApplyTemplate = async (event: CustomEvent) => {
+      const { template, projectId } = event.detail;
       
-      // Use the existing loadTemplateIntoEditor function
-      loadTemplateIntoEditor(template);
+      try {
+        // Use the existing loadTemplateIntoEditor function
+        await loadTemplateIntoEditor(template);
+        
+        // Dispatch completion event
+        window.dispatchEvent(new CustomEvent('templateLoadingComplete', { 
+          detail: { projectId } 
+        }));
+      } catch (error) {
+        console.error('Error applying template:', error);
+        // Still dispatch completion event to reset button state
+        window.dispatchEvent(new CustomEvent('templateLoadingComplete', { 
+          detail: { projectId } 
+        }));
+      }
     };
 
-    window.addEventListener('applyTemplate', handleApplyTemplate as EventListener);
-    return () => window.removeEventListener('applyTemplate', handleApplyTemplate as EventListener);
+    window.addEventListener('applyTemplate', handleApplyTemplate as any);
+    return () => window.removeEventListener('applyTemplate', handleApplyTemplate as any);
   }, [loadTemplateIntoEditor]);
 
   // Auto-load video from URL parameters on component mount
