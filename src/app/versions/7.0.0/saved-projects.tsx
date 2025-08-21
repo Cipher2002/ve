@@ -1523,6 +1523,10 @@ export default function SavedProjects() {
                     className="flex flex-col w-[255px] bg-white rounded-xl cursor-pointer transition-shadow relative"
                     style={{ boxShadow: '4px 4px 40px 0 rgba(0, 0, 0, 0.25)' }}
                   >
+                    {/* Translucent overlay for inactive projects */}
+                    {project.status !== 'active' && (
+                      <div className="absolute inset-0 bg-white/70 rounded-xl z-10 pointer-events-none"></div>
+                    )}
                     {/* Folder Icon/Thumbnail */}
                     <div className="h-48 bg-[rgb(41,0,156)]/15 rounded-t-xl flex items-center justify-center relative overflow-hidden">
                       <div className="w-20 h-16 bg-yellow-400 rounded-lg shadow-lg flex items-center justify-center relative">
