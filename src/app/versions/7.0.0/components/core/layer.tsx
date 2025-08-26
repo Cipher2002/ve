@@ -59,35 +59,13 @@ export const Layer: React.FC<{
    * Calculate extended duration for video and audio to fill gaps
    */
   const getExtendedDuration = useMemo(() => {
-    if (overlay.type !== "video" && overlay.type !== "sound") {
-      return overlay.durationInFrames;
-    }
-
-    // Find all overlays in the same row
-    const overlaysInSameRow = allOverlays
-      .filter(o => o.row === overlay.row && o.id !== overlay.id)
-      .sort((a, b) => a.from - b.from);
-
-    const currentEnd = overlay.from + overlay.durationInFrames;
-    
-    // Find the next overlay that starts after this one ends
-    const nextOverlay = overlaysInSameRow.find(o => o.from >= currentEnd);
-    
-    console.log(`[Layer ${overlay.id}] Type: ${overlay.type}, Current end: ${currentEnd}, Next overlay:`, nextOverlay?.from);
-    
-    if (nextOverlay) {
-      const gap = nextOverlay.from - currentEnd;
-      console.log(`[Layer ${overlay.id}] Gap detected: ${gap} frames`);
-      
-      // If there's a gap of 3 frames or less, extend to fill it
-      if (gap > 0 && gap <= 3) {
-        console.log(`[Layer ${overlay.id}] Extending duration from ${overlay.durationInFrames} to ${overlay.durationInFrames + gap}`);
-        return overlay.durationInFrames + gap;
-      }
+    // Always extend video and audio by 1 frame to prevent gaps
+    if (overlay.type === "video" || overlay.type === "sound") {
+      return overlay.durationInFrames + 1;
     }
     
     return overlay.durationInFrames;
-  }, [overlay, allOverlays]);
+  }, [overlay.type, overlay.durationInFrames]);
 
   /**
    * Special handling for sound overlays
