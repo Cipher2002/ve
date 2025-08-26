@@ -127,15 +127,11 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     videoSrc = toAbsoluteUrl(overlay.src);
   }
 
-  // Calculate the actual video start time accounting for timeline position
-  // This ensures seamless playback without gaps between consecutive videos
-  const actualStartTime = (overlay.videoStartTime || 0) + (frame / FPS);
-
   return (
     <div style={containerStyle}>
       <OffthreadVideo
         src={videoSrc}
-        startFrom={actualStartTime}
+        startFrom={overlay.videoStartTime || 0}
         style={videoStyle}
         volume={overlay.styles.volume ?? 1}
         playbackRate={overlay.speed ?? 1}
