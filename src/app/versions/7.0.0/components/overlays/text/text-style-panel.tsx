@@ -134,27 +134,15 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
 
   // Load fonts when style panel opens
   React.useEffect(() => {
-    if (!fontsLoaded) {
-      // Load a few default fonts immediately
-      const defaultFonts = ['Inter', 'Roboto', 'Dancing Script', 'Playfair Display'];
-      const loadPromises = defaultFonts.map(fontFamily => {
-        const font = GOOGLE_FONTS.find(f => f.family === fontFamily);
-        if (font) {
-          return loadGoogleFont(font.family, font.variants);
-        }
-        return Promise.resolve();
-      });
-      
-      Promise.all(loadPromises).then(() => {
-        setFontsLoaded(true);
-      });
-    }
-  }, [fontsLoaded]);
+    setFontsLoaded(true); // Skip initial loading for now
+  }, []);
 
   const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
+    console.log('Font selected:', font.family, variant); // Debug log
     try {
       await loadGoogleFont(font.family, [variant]);
       const fontFamilyString = getFontFamilyString(font.family);
+      console.log('Setting font family to:', fontFamilyString); // Debug log
       handleStyleChange("fontFamily", fontFamilyString);
       handleStyleChange("fontWeight", variant.weight);
       handleStyleChange("fontStyle", variant.style);
@@ -165,6 +153,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
       handleStyleChange("fontFamily", "Arial, sans-serif");
       handleStyleChange("fontWeight", "400");
       handleStyleChange("fontStyle", "normal");
+      setSelectedFont(null);
     }
   };
 
@@ -187,54 +176,56 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Font Family</label>
           <div className="relative">
-            <Select
-              value={localOverlay.styles.fontFamily || ""}
-              onValueChange={() => {}} // Handled by font selection
-            >
-              <SelectTrigger className="w-full text-xs">
-                <SelectValue placeholder="Select a font" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                {GOOGLE_FONTS.map((font) => (
-                  <div
-                    key={font.family}
-                    className="relative group"
-                    onMouseEnter={() => handleFontHover(font)}
-                  >
-                    <SelectItem
-                      value={font.family}
-                      className="text-xs cursor-pointer"
-                      style={{ fontFamily: getFontFamilyString(font.family) }}
-                      onClick={() => setSelectedFont(font)}
-                    >
-                      {font.family}
-                    </SelectItem>
-                    
-                    {/* Variants submenu */}
-                    {selectedFont?.family === font.family && (
-                      <div className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40">
-                        <div className="p-1">
-                          {font.variants.map((variant) => (
-                            <button
-                              key={`${variant.weight}-${variant.style}`}
-                              className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm"
-                              style={{ 
-                                fontFamily: getFontFamilyString(font.family),
-                                fontWeight: variant.weight,
-                                fontStyle: variant.style
-                              }}
-                              onClick={() => handleFontSelect(font, variant)}
-                            >
-                              {variant.displayName}
-                            </button>
-                          ))}
+            <div className="relative">
+              <button 
+                className="w-full text-left px-3 py-2 text-xs border rounded-md bg-background hover:bg-accent"
+                onClick={() => setSelectedFont(selectedFont ? null : GOOGLE_FONTS[0])}
+              >
+                {localOverlay.styles.fontFamily || "Select a font"}
+              </button>
+              
+              {selectedFont && (
+                <div className="absolute top-full left-0 mt-1 w-full bg-popover border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                  <div className="p-1">
+                    {GOOGLE_FONTS.map((font) => (
+                      <div key={font.family} className="relative group">
+                        <div
+                          className="px-2 py-1 text-xs cursor-pointer hover:bg-accent rounded-sm flex justify-between items-center"
+                          style={{ fontFamily: getFontFamilyString(font.family) }}
+                          onMouseEnter={() => handleFontHover(font)}
+                          onClick={() => setSelectedFont(font)}
+                        >
+                          <span>{font.family}</span>
+                          <span className="text-xs opacity-50">→</span>
                         </div>
+                        
+                        {/* Variants submenu */}
+                        {selectedFont?.family === font.family && (
+                          <div className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40">
+                            <div className="p-1">
+                              {font.variants.map((variant) => (
+                                <button
+                                  key={`${variant.weight}-${variant.style}`}
+                                  className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm"
+                                  style={{ 
+                                    fontFamily: getFontFamilyString(font.family),
+                                    fontWeight: variant.weight,
+                                    fontStyle: variant.style
+                                  }}
+                                  onClick={() => handleFontSelect(font, variant)}
+                                >
+                                  {variant.displayName}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </SelectContent>
-            </Select>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -452,37 +452,31 @@ const loadedFonts = new Set<string>();
 
 export const loadGoogleFont = (family: string, variants: FontVariant[]): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const fontKey = `${family}-${variants.map(v => `${v.weight}${v.style}`).join('-')}`;
+    const fontKey = family; // Simplified key
     
     if (loadedFonts.has(fontKey)) {
       resolve();
       return;
     }
 
-    // Create weight:style pairs for the URL
-    const weights = variants.map(variant => variant.weight).join(';');
-    const hasItalic = variants.some(variant => variant.style === 'italic');
+    // Build a simple URL - just load all common weights
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family.replace(/\s+/g, '+'))}:wght@300;400;500;700&display=swap`;
     
-    let fontUrl;
-    if (hasItalic) {
-      const italicWeights = variants.filter(v => v.style === 'italic').map(v => v.weight).join(';');
-      const normalWeights = variants.filter(v => v.style === 'normal').map(v => v.weight).join(';');
-      fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:ital,wght@0,${normalWeights};1,${italicWeights}&display=swap`;
-    } else {
-      fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weights}&display=swap`;
-    }
-
+    console.log('Loading font URL:', fontUrl); // Debug log
+    
     // Create link element
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = fontUrl;
     
     link.onload = () => {
+      console.log('Font loaded successfully:', family); // Debug log
       loadedFonts.add(fontKey);
       resolve();
     };
     
-    link.onerror = () => {
+    link.onerror = (error) => {
+      console.error('Font load error for:', family, error); // Debug log
       reject(new Error(`Failed to load font: ${family}`));
     };
 
