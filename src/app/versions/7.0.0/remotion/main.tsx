@@ -97,6 +97,7 @@ export const Main: React.FC<MainProps> = ({
               overlay={overlay}
               selectedOverlayId={selectedOverlayId}
               baseUrl={baseUrl}
+              allOverlays={overlays}
             />
           );
         })}

@@ -14,7 +14,8 @@ export const Layer: React.FC<{
   overlay: Overlay;
   selectedOverlayId: number | null;
   baseUrl?: string;
-}> = ({ overlay, selectedOverlayId, baseUrl }) => {
+  allOverlays?: Overlay[];
+}> = ({ overlay, selectedOverlayId, baseUrl, allOverlays = [] }) => {
   /**
    * Memoized style calculations for the layer
    * Handles positioning, dimensions, rotation, and z-index based on:
@@ -55,6 +56,35 @@ export const Layer: React.FC<{
   ]);
 
   /**
+   * Calculate extended duration for video and audio to fill gaps
+   */
+  const getExtendedDuration = useMemo(() => {
+    if (overlay.type !== "video" && overlay.type !== "sound") {
+      return overlay.durationInFrames;
+    }
+
+    // Find all overlays in the same row
+    const overlaysInSameRow = allOverlays
+      .filter(o => o.row === overlay.row && o.id !== overlay.id)
+      .sort((a, b) => a.from - b.from);
+
+    const currentEnd = overlay.from + overlay.durationInFrames;
+    
+    // Find the next overlay that starts after this one ends
+    const nextOverlay = overlaysInSameRow.find(o => o.from >= currentEnd);
+    
+    if (nextOverlay) {
+      // If there's a gap of 3 frames or less, extend to fill it
+      const gap = nextOverlay.from - currentEnd;
+      if (gap > 0 && gap <= 3) {
+        return overlay.durationInFrames + gap;
+      }
+    }
+    
+    return overlay.durationInFrames;
+  }, [overlay, allOverlays]);
+
+  /**
    * Special handling for sound overlays
    * Sound overlays don't need positioning or visual representation,
    * they just need to be sequenced correctly
@@ -64,7 +94,7 @@ export const Layer: React.FC<{
       <Sequence
         key={overlay.id}
         from={overlay.from}
-        durationInFrames={overlay.durationInFrames}
+        durationInFrames={getExtendedDuration}
       >
         <LayerContent overlay={overlay} baseUrl={baseUrl} />
       </Sequence>
@@ -81,7 +111,7 @@ export const Layer: React.FC<{
     <Sequence
       key={overlay.id}
       from={overlay.from}
-      durationInFrames={overlay.durationInFrames}
+      durationInFrames={overlay.type === "video" ? getExtendedDuration : overlay.durationInFrames}
       layout="none"
     >
       <div style={style}>
