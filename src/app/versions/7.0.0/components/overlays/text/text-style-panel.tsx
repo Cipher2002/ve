@@ -19,86 +19,89 @@ import ColorPicker from "react-best-gradient-color-picker";
 /**
  * Available font options for text overlays
  */
-const fonts = [
+// const fonts = [
 
-  // Custom fonts from public/fonts
-  { value: "font-custom-alexbrush-regular", label: "Alexbrush" },
-  { value: "font-custom-allertastencil-regular", label: "Allertastencil" },
-  { value: "font-custom-allison-regular", label: "Allison" },
-  { value: "font-custom-allura-regular", label: "Allura" },
-  { value: "font-custom-alumnisans-variablefont-wght", label: "Alumnisans Variablefont Wght" },
-  { value: "font-custom-berkshireswash-regular", label: "Berkshireswash" },
-  { value: "font-custom-bitcountpropsingle-variablefont-crsv-elsh-elxp-slnt-wght", label: "Bitcountpropsingle Variablefont Crsv,elsh,elxp,slnt,wght" },
-  { value: "font-custom-bitcountpropsingle-cursive-regular", label: "Bitcountpropsingle Cursive" },
-  { value: "font-custom-bodonimoda-variablefont-opsz-wght", label: "Bodonimoda Variablefont Opsz,wght" },
-  { value: "font-custom-bungeeinline-regular", label: "Bungeeinline" },
-  { value: "font-custom-bungeetint-regular", label: "Bungeetint" },
-  { value: "font-custom-caesardressing-regular", label: "Caesardressing" },
-  { value: "font-custom-caveat-variablefont-wght", label: "Caveat Variablefont Wght" },
-  { value: "font-custom-cinzel-variablefont-wght", label: "Cinzel Variablefont Wght" },
-  { value: "font-custom-courgette-regular", label: "Courgette" },
-  { value: "font-custom-creepster-regular", label: "Creepster" },
-  { value: "font-custom-damion-regular", label: "Damion" },
-  { value: "font-custom-dancingscript-variablefont-wght", label: "Dancingscript Variablefont Wght" },
-  { value: "font-custom-eduqldhand-variablefont-wght", label: "Eduqldhand Variablefont Wght" },
-  { value: "font-custom-eduvicwanthand-variablefont-wght", label: "Eduvicwanthand Variablefont Wght" },
-  { value: "font-custom-exile-regular", label: "Exile" },
-  { value: "font-custom-exo-variablefont-wght", label: "Exo Variablefont Wght" },
-  { value: "font-custom-frederickathegreat-regular", label: "Frederickathegreat" },
-  { value: "font-custom-gloriahallelujah-regular", label: "Gloriahallelujah" },
-  { value: "font-custom-goldman-bold", label: "Goldman" },
-  { value: "font-custom-goldman-regular", label: "Goldman" },
-  { value: "font-custom-gravitasone-regular", label: "Gravitasone" },
-  { value: "font-custom-greatvibes-regular", label: "Greatvibes" },
-  { value: "font-custom-homemadeapple-regular", label: "Homemadeapple" },
-  { value: "font-custom-indieflower-regular", label: "Indieflower" },
-  // Original fonts
-  { value: "font-sans", label: "Inter (Sans-serif)" },
+//   // Custom fonts from public/fonts
+//   { value: "font-custom-alexbrush-regular", label: "Alexbrush" },
+//   { value: "font-custom-allertastencil-regular", label: "Allertastencil" },
+//   { value: "font-custom-allison-regular", label: "Allison" },
+//   { value: "font-custom-allura-regular", label: "Allura" },
+//   { value: "font-custom-alumnisans-variablefont-wght", label: "Alumnisans Variablefont Wght" },
+//   { value: "font-custom-berkshireswash-regular", label: "Berkshireswash" },
+//   { value: "font-custom-bitcountpropsingle-variablefont-crsv-elsh-elxp-slnt-wght", label: "Bitcountpropsingle Variablefont Crsv,elsh,elxp,slnt,wght" },
+//   { value: "font-custom-bitcountpropsingle-cursive-regular", label: "Bitcountpropsingle Cursive" },
+//   { value: "font-custom-bodonimoda-variablefont-opsz-wght", label: "Bodonimoda Variablefont Opsz,wght" },
+//   { value: "font-custom-bungeeinline-regular", label: "Bungeeinline" },
+//   { value: "font-custom-bungeetint-regular", label: "Bungeetint" },
+//   { value: "font-custom-caesardressing-regular", label: "Caesardressing" },
+//   { value: "font-custom-caveat-variablefont-wght", label: "Caveat Variablefont Wght" },
+//   { value: "font-custom-cinzel-variablefont-wght", label: "Cinzel Variablefont Wght" },
+//   { value: "font-custom-courgette-regular", label: "Courgette" },
+//   { value: "font-custom-creepster-regular", label: "Creepster" },
+//   { value: "font-custom-damion-regular", label: "Damion" },
+//   { value: "font-custom-dancingscript-variablefont-wght", label: "Dancingscript Variablefont Wght" },
+//   { value: "font-custom-eduqldhand-variablefont-wght", label: "Eduqldhand Variablefont Wght" },
+//   { value: "font-custom-eduvicwanthand-variablefont-wght", label: "Eduvicwanthand Variablefont Wght" },
+//   { value: "font-custom-exile-regular", label: "Exile" },
+//   { value: "font-custom-exo-variablefont-wght", label: "Exo Variablefont Wght" },
+//   { value: "font-custom-frederickathegreat-regular", label: "Frederickathegreat" },
+//   { value: "font-custom-gloriahallelujah-regular", label: "Gloriahallelujah" },
+//   { value: "font-custom-goldman-bold", label: "Goldman" },
+//   { value: "font-custom-goldman-regular", label: "Goldman" },
+//   { value: "font-custom-gravitasone-regular", label: "Gravitasone" },
+//   { value: "font-custom-greatvibes-regular", label: "Greatvibes" },
+//   { value: "font-custom-homemadeapple-regular", label: "Homemadeapple" },
+//   { value: "font-custom-indieflower-regular", label: "Indieflower" },
+//   // Original fonts
+//   { value: "font-sans", label: "Inter (Sans-serif)" },
   
-  { value: "font-custom-justanotherhand-regular", label: "Justanotherhand" },
-  { value: "font-custom-lato-regular", label: "Lato" },
-  { value: "font-custom-lato-thin", label: "Lato Thin" },
-  { value: "font-custom-leckerlione-regular", label: "Leckerlione" },
-  { value: "font-custom-libertinusmono-regular", label: "Libertinusmono" },
-  { value: "font-custom-lobstertwo-regular", label: "Lobstertwo" },
-  { value: "font-custom-manufacturingconsent-regular", label: "Manufacturingconsent" },
-  { value: "font-custom-marcellus-regular", label: "Marcellus" },
-  { value: "font-custom-marckscript-regular", label: "Marckscript" },
-  { value: "font-custom-michroma-regular", label: "Michroma" },
-  { value: "font-custom-monoton-regular", label: "Monoton" },
-  { value: "font-custom-montserrat-italic-variablefont-wght", label: "Montserrat Italic Variablefont Wght" },
-  { value: "font-custom-mrdafoe-regular", label: "Mrdafoe" },
-  { value: "font-custom-mrssaintdelafield-regular", label: "Mrssaintdelafield" },
-  { value: "font-custom-mysoul-regular", label: "Mysoul" },
-  { value: "font-custom-nothingyoucoulddo-regular", label: "Nothingyoucoulddo" },
-  { value: "font-custom-orbitron-variablefont-wght", label: "Orbitron Variablefont Wght" },
-  { value: "font-custom-pacifico-regular", label: "Pacifico" },
-  { value: "font-custom-parisienne-regular", label: "Parisienne" },
-  { value: "font-custom-permanentmarker-regular", label: "Permanentmarker" },
-  { value: "font-custom-pinyonscript-regular", label: "Pinyonscript" },
-  { value: "font-custom-protestrevolution-regular", label: "Protestrevolution" },
-  { value: "font-custom-reeniebeanie-regular", label: "Reeniebeanie" },
-  { value: "font-custom-robotocondensed-italic-variablefont-wght", label: "Robotocondensed Italic Variablefont Wght" },
-  { value: "font-custom-robotocondensed-variablefont-wght", label: "Robotocondensed Variablefont Wght" },
-  { value: "font-custom-rocksalt-regular", label: "Rocksalt" },
-  { value: "font-custom-rubikmonoone-regular", label: "Rubikmonoone" },
-  { value: "font-custom-rubikmoonrocks-regular", label: "Rubikmoonrocks" },
-  { value: "font-custom-rye-regular", label: "Rye" },
-  { value: "font-custom-sacramento-regular", label: "Sacramento" },
-  { value: "font-custom-satisfy-regular", label: "Satisfy" },
-  { value: "font-custom-savate-variablefont-wght", label: "Savate Variablefont Wght" },
-  { value: "font-custom-shadowsintolight-regular", label: "Shadowsintolight" },
-  { value: "font-custom-smoochsans-variablefont-wght", label: "Smoochsans Variablefont Wght" },
-  { value: "font-custom-sourceserif4-variablefont-opsz-wght", label: "Sourceserif4 Variablefont Opsz,wght" },
-  { value: "font-custom-specialgothicexpandedone-regular", label: "Specialgothicexpandedone" },
-  { value: "font-custom-squadaone-regular", label: "Squadaone" },
-  { value: "font-custom-tangerine-bold", label: "Tangerine" },
-  { value: "font-custom-titilliumweb-extralightitalic", label: "Titilliumweb Extralightitalic" },
-  { value: "font-custom-titilliumweb-regular", label: "Titilliumweb" },
-  { value: "font-custom-winkyrough-variablefont-wght", label: "Winkyrough Variablefont Wght" },
-  { value: "font-custom-zeyada-regular", label: "Zeyada" },
-  { value: "font-custom-zillaslab-medium", label: "Zillaslab" },
-];
+//   { value: "font-custom-justanotherhand-regular", label: "Justanotherhand" },
+//   { value: "font-custom-lato-regular", label: "Lato" },
+//   { value: "font-custom-lato-thin", label: "Lato Thin" },
+//   { value: "font-custom-leckerlione-regular", label: "Leckerlione" },
+//   { value: "font-custom-libertinusmono-regular", label: "Libertinusmono" },
+//   { value: "font-custom-lobstertwo-regular", label: "Lobstertwo" },
+//   { value: "font-custom-manufacturingconsent-regular", label: "Manufacturingconsent" },
+//   { value: "font-custom-marcellus-regular", label: "Marcellus" },
+//   { value: "font-custom-marckscript-regular", label: "Marckscript" },
+//   { value: "font-custom-michroma-regular", label: "Michroma" },
+//   { value: "font-custom-monoton-regular", label: "Monoton" },
+//   { value: "font-custom-montserrat-italic-variablefont-wght", label: "Montserrat Italic Variablefont Wght" },
+//   { value: "font-custom-mrdafoe-regular", label: "Mrdafoe" },
+//   { value: "font-custom-mrssaintdelafield-regular", label: "Mrssaintdelafield" },
+//   { value: "font-custom-mysoul-regular", label: "Mysoul" },
+//   { value: "font-custom-nothingyoucoulddo-regular", label: "Nothingyoucoulddo" },
+//   { value: "font-custom-orbitron-variablefont-wght", label: "Orbitron Variablefont Wght" },
+//   { value: "font-custom-pacifico-regular", label: "Pacifico" },
+//   { value: "font-custom-parisienne-regular", label: "Parisienne" },
+//   { value: "font-custom-permanentmarker-regular", label: "Permanentmarker" },
+//   { value: "font-custom-pinyonscript-regular", label: "Pinyonscript" },
+//   { value: "font-custom-protestrevolution-regular", label: "Protestrevolution" },
+//   { value: "font-custom-reeniebeanie-regular", label: "Reeniebeanie" },
+//   { value: "font-custom-robotocondensed-italic-variablefont-wght", label: "Robotocondensed Italic Variablefont Wght" },
+//   { value: "font-custom-robotocondensed-variablefont-wght", label: "Robotocondensed Variablefont Wght" },
+//   { value: "font-custom-rocksalt-regular", label: "Rocksalt" },
+//   { value: "font-custom-rubikmonoone-regular", label: "Rubikmonoone" },
+//   { value: "font-custom-rubikmoonrocks-regular", label: "Rubikmoonrocks" },
+//   { value: "font-custom-rye-regular", label: "Rye" },
+//   { value: "font-custom-sacramento-regular", label: "Sacramento" },
+//   { value: "font-custom-satisfy-regular", label: "Satisfy" },
+//   { value: "font-custom-savate-variablefont-wght", label: "Savate Variablefont Wght" },
+//   { value: "font-custom-shadowsintolight-regular", label: "Shadowsintolight" },
+//   { value: "font-custom-smoochsans-variablefont-wght", label: "Smoochsans Variablefont Wght" },
+//   { value: "font-custom-sourceserif4-variablefont-opsz-wght", label: "Sourceserif4 Variablefont Opsz,wght" },
+//   { value: "font-custom-specialgothicexpandedone-regular", label: "Specialgothicexpandedone" },
+//   { value: "font-custom-squadaone-regular", label: "Squadaone" },
+//   { value: "font-custom-tangerine-bold", label: "Tangerine" },
+//   { value: "font-custom-titilliumweb-extralightitalic", label: "Titilliumweb Extralightitalic" },
+//   { value: "font-custom-titilliumweb-regular", label: "Titilliumweb" },
+//   { value: "font-custom-winkyrough-variablefont-wght", label: "Winkyrough Variablefont Wght" },
+//   { value: "font-custom-zeyada-regular", label: "Zeyada" },
+//   { value: "font-custom-zillaslab-medium", label: "Zillaslab" },
+// ];
+
+import { GOOGLE_FONTS, GoogleFont, FontVariant, loadGoogleFont, getFontFamilyString } from '../../../utils/google-fonts';
+
 
 /**
  * Props for the TextStylePanel component
@@ -125,6 +128,56 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   localOverlay,
   handleStyleChange,
 }) => {
+  const [fontsLoaded, setFontsLoaded] = React.useState(false);
+  const [selectedFont, setSelectedFont] = React.useState<GoogleFont | null>(null);
+  const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
+
+  // Load fonts when style panel opens
+  React.useEffect(() => {
+    if (!fontsLoaded) {
+      // Load a few default fonts immediately
+      const defaultFonts = ['Inter', 'Roboto', 'Dancing Script', 'Playfair Display'];
+      const loadPromises = defaultFonts.map(fontFamily => {
+        const font = GOOGLE_FONTS.find(f => f.family === fontFamily);
+        if (font) {
+          return loadGoogleFont(font.family, font.variants);
+        }
+        return Promise.resolve();
+      });
+      
+      Promise.all(loadPromises).then(() => {
+        setFontsLoaded(true);
+      });
+    }
+  }, [fontsLoaded]);
+
+  const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
+    try {
+      await loadGoogleFont(font.family, [variant]);
+      const fontFamilyString = getFontFamilyString(font.family);
+      handleStyleChange("fontFamily", fontFamilyString);
+      handleStyleChange("fontWeight", variant.weight);
+      handleStyleChange("fontStyle", variant.style);
+      setSelectedFont(null);
+    } catch (error) {
+      console.error('Failed to load font:', error);
+      // Fallback to Inter
+      handleStyleChange("fontFamily", getFontFamilyString("Inter"));
+      handleStyleChange("fontWeight", "400");
+      handleStyleChange("fontStyle", "normal");
+    }
+  };
+
+  const handleFontHover = async (font: GoogleFont) => {
+    if (!hoveredFont || hoveredFont !== font.family) {
+      setHoveredFont(font.family);
+      try {
+        await loadGoogleFont(font.family, font.variants);
+      } catch (error) {
+        console.error('Failed to preload font:', error);
+      }
+    }
+  };
   return (
     <div className="space-y-6">
       {/* Typography Settings */}
@@ -133,25 +186,61 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
 
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Font Family</label>
-          <Select
-            value={localOverlay.styles.fontFamily}
-            onValueChange={(value) => handleStyleChange("fontFamily", value)}
-          >
-            <SelectTrigger className="w-full text-xs">
-              <SelectValue placeholder="Select a font" />
-            </SelectTrigger>
-            <SelectContent>
-              {fonts.map((font) => (
-                <SelectItem
-                  key={font.value}
-                  value={font.value}
-                  className={`${font.value} text-xs`}
-                >
-                  {font.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <Select
+              value={selectedFont?.family || ""}
+              onValueChange={() => {}} // Handled by font selection
+            >
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue placeholder="Select a font" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {GOOGLE_FONTS.map((font) => (
+                  <div
+                    key={font.family}
+                    className="relative group"
+                    onMouseEnter={() => handleFontHover(font)}
+                  >
+                    <SelectItem
+                      value={font.family}
+                      className="text-xs cursor-pointer pr-8"
+                      style={{ fontFamily: getFontFamilyString(font.family) }}
+                      onClick={() => setSelectedFont(font)}
+                    >
+                      <div className="flex justify-between items-center w-full">
+                        <span>{font.family}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {font.category}
+                        </span>
+                      </div>
+                    </SelectItem>
+                    
+                    {/* Variants submenu */}
+                    {selectedFont?.family === font.family && (
+                      <div className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40">
+                        <div className="p-1">
+                          {font.variants.map((variant) => (
+                            <button
+                              key={`${variant.weight}-${variant.style}`}
+                              className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm"
+                              style={{ 
+                                fontFamily: getFontFamilyString(font.family),
+                                fontWeight: variant.weight,
+                                fontStyle: variant.style
+                              }}
+                              onClick={() => handleFontSelect(font, variant)}
+                            >
+                              {variant.displayName}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
