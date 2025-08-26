@@ -73,10 +73,15 @@ export const Layer: React.FC<{
     // Find the next overlay that starts after this one ends
     const nextOverlay = overlaysInSameRow.find(o => o.from >= currentEnd);
     
+    console.log(`[Layer ${overlay.id}] Type: ${overlay.type}, Current end: ${currentEnd}, Next overlay:`, nextOverlay?.from);
+    
     if (nextOverlay) {
-      // If there's a gap of 3 frames or less, extend to fill it
       const gap = nextOverlay.from - currentEnd;
+      console.log(`[Layer ${overlay.id}] Gap detected: ${gap} frames`);
+      
+      // If there's a gap of 3 frames or less, extend to fill it
       if (gap > 0 && gap <= 3) {
+        console.log(`[Layer ${overlay.id}] Extending duration from ${overlay.durationInFrames} to ${overlay.durationInFrames + gap}`);
         return overlay.durationInFrames + gap;
       }
     }
