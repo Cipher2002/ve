@@ -7,8 +7,9 @@ import {
 import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
 import { toAbsoluteUrl } from "../../../utils/url-helper";
+import { useVideoCache } from "../../../hooks/use-video-cache";
 import { FPS } from "../../../constants";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Interface defining the props for the VideoLayerContent component
@@ -40,35 +41,29 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   baseUrl,
 }) => {
   const frame = useCurrentFrame();
+  const { getCachedVideoUrl } = useVideoCache();
+  const [cachedSrc, setCachedSrc] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   const handle = delayRender("Loading video");
-
-  //   // Create a video element to preload the video
-  //   const video = document.createElement("video");
-  //   video.src = videoSrc;
-
-  //   const handleLoadedMetadata = () => {
-  //     continueRender(handle);
-  //   };
-
-  //   const handleError = (error: ErrorEvent) => {
-  //     console.error(`Error loading video ${overlay.src}:`, error);
-  //     continueRender(handle);
-  //   };
-
-  //   video.addEventListener("loadedmetadata", handleLoadedMetadata);
-  //   video.addEventListener("error", handleError);
-
-  //   return () => {
-  //     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-  //     video.removeEventListener("error", handleError);
-  //     // Ensure we don't leave hanging render delays
-  //     continueRender(handle);
-  //   };
-  // }, [overlay.src]);
-
-
+  // Preload and cache the video
+  useEffect(() => {
+    const loadVideo = async () => {
+      let processedVideoSrc = overlay.src;
+      if (overlay.src.startsWith("/") && baseUrl) {
+        processedVideoSrc = `${baseUrl}${overlay.src}`;
+      } else if (overlay.src.startsWith("/")) {
+        processedVideoSrc = toAbsoluteUrl(overlay.src);
+      }
+      
+      const cached = await getCachedVideoUrl(processedVideoSrc);
+      if (cached) {
+        setCachedSrc(cached);
+      } else {
+        setCachedSrc(processedVideoSrc);
+      }
+    };
+    
+    loadVideo();
+  }, [overlay.src, baseUrl, getCachedVideoUrl]);
 
   // Calculate if we're in the exit phase (last 30 frames)
   const isExitPhase = frame >= overlay.durationInFrames - 30;
@@ -115,16 +110,23 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     justifyContent: "center",
   };
 
-  // Determine the video source URL
-  let videoSrc = overlay.src;
+  // // Determine the video source URL
+  // let videoSrc = overlay.src;
 
-  // If it's a relative URL and baseUrl is provided, use baseUrl
-  if (overlay.src.startsWith("/") && baseUrl) {
-    videoSrc = `${baseUrl}${overlay.src}`;
-  }
-  // Otherwise use the toAbsoluteUrl helper for relative URLs
-  else if (overlay.src.startsWith("/")) {
-    videoSrc = toAbsoluteUrl(overlay.src);
+  // // If it's a relative URL and baseUrl is provided, use baseUrl
+  // if (overlay.src.startsWith("/") && baseUrl) {
+  //   videoSrc = `${baseUrl}${overlay.src}`;
+  // }
+  // // Otherwise use the toAbsoluteUrl helper for relative URLs
+  // else if (overlay.src.startsWith("/")) {
+  //   videoSrc = toAbsoluteUrl(overlay.src);
+  // }
+  // Use cached video source if available
+  const videoSrc = cachedSrc || overlay.src;
+  
+  // Don't render until we have a video source
+  if (!videoSrc) {
+    return <div style={containerStyle} />;
   }
 
   return (
