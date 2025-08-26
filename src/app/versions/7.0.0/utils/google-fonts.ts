@@ -459,8 +459,9 @@ export const loadGoogleFont = (family: string, variants: FontVariant[]): Promise
       return;
     }
 
-    // Build a simple URL - just load all common weights
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family.replace(/\s+/g, '+'))}:wght@300;400;500;700&display=swap`;
+    // Build a simple URL with proper encoding
+    const familyName = family.replace(/\s+/g, '+');
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${familyName}:wght@400;700&display=swap`;
     
     console.log('Loading font URL:', fontUrl); // Debug log
     

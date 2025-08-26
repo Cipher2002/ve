@@ -37,7 +37,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1",
       textAlign: "center",
       letterSpacing: "0.02em",
-      textTransform: "uppercase",
+      textTransform: "none",
       textShadow: "2px 2px 0px rgba(0, 0, 0, 0.2)",
     },
   },
@@ -57,7 +57,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       textShadow: "6px 6px 0px #FF2D55, -6px -6px 0px #5E5CE6",
     },
   },
@@ -77,7 +77,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1",
       textAlign: "center",
       letterSpacing: "0.25em",
-      textTransform: "lowercase",
+      textTransform: "none",
       border: "1px solid rgba(255, 255, 255, 0.3)",
       padding: "24px 48px",
     },
@@ -165,7 +165,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1",
       textAlign: "center",
       letterSpacing: "0.12em",
-      textTransform: "uppercase",
+      textTransform: "none",
       textShadow: "2px 2px 0px #FF0080, -2px -2px 0px #0080FF, 4px 4px 10px rgba(255, 0, 128, 0.3)",
       filter: "blur(0.5px)",
       padding: "16px",
@@ -186,7 +186,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.2",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "striped-shadow",
         params: {
@@ -213,7 +213,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.1",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "3d-layered",
         params: {
@@ -268,7 +268,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.2",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "pink-outline",
         params: {
@@ -318,7 +318,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.2",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "stacked-contrast",
         params: {
@@ -347,7 +347,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.1",
       textAlign: "center",
       letterSpacing: "0.02em",
-      textTransform: "lowercase",
+      textTransform: "none",
       effect: {
         type: "red-pink-outline",
         params: {
@@ -373,7 +373,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.2",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "hero-outline",
         params: {
@@ -399,7 +399,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.1",
       textAlign: "center",
       letterSpacing: "0.05em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "ripple-contour",
         params: {
@@ -425,7 +425,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.1",
       textAlign: "center",
       letterSpacing: "0.02em",
-      textTransform: "uppercase",
+      textTransform: "none",
       transform: "skew(-5deg)",
       effect: {
         type: "brush-paint",
@@ -451,7 +451,7 @@ export const textOverlayTemplates: Record<string, any> = {
       lineHeight: "1.1",
       textAlign: "center",
       letterSpacing: "0.08em",
-      textTransform: "uppercase",
+      textTransform: "none",
       effect: {
         type: "neon-outline",
         params: {

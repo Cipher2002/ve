@@ -158,14 +158,8 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   };
 
   const handleFontHover = async (font: GoogleFont) => {
-    if (!hoveredFont || hoveredFont !== font.family) {
-      setHoveredFont(font.family);
-      try {
-        await loadGoogleFont(font.family, font.variants);
-      } catch (error) {
-        console.error('Failed to preload font:', error);
-      }
-    }
+    // Don't preload on hover to avoid errors
+    // Font will load when actually selected
   };
   return (
     <div className="space-y-6">
@@ -185,23 +179,31 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
               </button>
               
               {selectedFont && (
-                <div className="absolute top-full left-0 mt-1 w-full bg-popover border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 mt-1 w-full bg-popover border rounded-md shadow-lg z-40 max-h-60 overflow-y-auto">
                   <div className="p-1">
                     {GOOGLE_FONTS.map((font) => (
-                      <div key={font.family} className="relative group">
+                      <div key={font.family} className="relative">
                         <div
-                          className="px-2 py-1 text-xs cursor-pointer hover:bg-accent rounded-sm flex justify-between items-center"
+                          className="px-2 py-1 text-xs cursor-pointer hover:bg-accent rounded-sm flex justify-between items-center group"
                           style={{ fontFamily: getFontFamilyString(font.family) }}
-                          onMouseEnter={() => handleFontHover(font)}
-                          onClick={() => setSelectedFont(font)}
+                          onMouseEnter={() => {
+                            handleFontHover(font);
+                            setHoveredFont(font.family);
+                          }}
+                          onMouseLeave={() => setHoveredFont(null)}
                         >
                           <span>{font.family}</span>
                           <span className="text-xs opacity-50">→</span>
                         </div>
                         
-                        {/* Variants submenu */}
-                        {selectedFont?.family === font.family && (
-                          <div className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40">
+                        {/* Variants submenu - positioned outside main dropdown */}
+                        {hoveredFont === font.family && (
+                          <div 
+                            className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40"
+                            style={{ position: 'fixed', transform: 'translateX(100%)' }}
+                            onMouseEnter={() => setHoveredFont(font.family)}
+                            onMouseLeave={() => setHoveredFont(null)}
+                          >
                             <div className="p-1">
                               {font.variants.map((variant) => (
                                 <button
