@@ -39,6 +39,7 @@
     "@remotion/google-fonts": "4.0.332",
     "@remotion/lambda": "4.0.332",
     "@remotion/player": "4.0.332",
+    "@remotion/preload": "^4.0.340",
     "@remotion/renderer": "4.0.332",
     "@remotion/studio": "4.0.332",
     "aos": "^2.3.4",

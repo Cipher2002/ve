@@ -8,6 +8,7 @@ import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
 import { toAbsoluteUrl } from "../../../utils/url-helper";
 import { useVideoCache } from "../../../hooks/use-video-cache";
+import { preloadVideo } from "@remotion/preload";
 import { FPS } from "../../../constants";
 import { useEffect, useState } from "react";
 
@@ -41,6 +42,20 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   baseUrl,
 }) => {
   const frame = useCurrentFrame();
+
+  // Preload video effect
+  useEffect(() => {
+    let processedVideoSrc = overlay.src;
+    if (overlay.src.startsWith("/") && baseUrl) {
+      processedVideoSrc = `${baseUrl}${overlay.src}`;
+    } else if (overlay.src.startsWith("/")) {
+      processedVideoSrc = toAbsoluteUrl(overlay.src);
+    }
+    
+    const cleanup = preloadVideo(processedVideoSrc);
+    
+    return cleanup; // preloadVideo returns the cleanup function directly
+  }, [overlay.src, baseUrl]);
   const { getCachedVideoUrl } = useVideoCache();
   const [cachedSrc, setCachedSrc] = useState<string | null>(null);
 
