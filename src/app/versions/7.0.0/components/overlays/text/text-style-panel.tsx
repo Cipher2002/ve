@@ -161,8 +161,8 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
       setSelectedFont(null);
     } catch (error) {
       console.error('Failed to load font:', error);
-      // Fallback to Inter
-      handleStyleChange("fontFamily", getFontFamilyString("Inter"));
+      // Fallback to system fonts
+      handleStyleChange("fontFamily", "Arial, sans-serif");
       handleStyleChange("fontWeight", "400");
       handleStyleChange("fontStyle", "normal");
     }
@@ -188,7 +188,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
           <label className="text-xs text-muted-foreground">Font Family</label>
           <div className="relative">
             <Select
-              value={selectedFont?.family || ""}
+              value={localOverlay.styles.fontFamily || ""}
               onValueChange={() => {}} // Handled by font selection
             >
               <SelectTrigger className="w-full text-xs">
@@ -203,16 +203,11 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
                   >
                     <SelectItem
                       value={font.family}
-                      className="text-xs cursor-pointer pr-8"
+                      className="text-xs cursor-pointer"
                       style={{ fontFamily: getFontFamilyString(font.family) }}
                       onClick={() => setSelectedFont(font)}
                     >
-                      <div className="flex justify-between items-center w-full">
-                        <span>{font.family}</span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {font.category}
-                        </span>
-                      </div>
+                      {font.family}
                     </SelectItem>
                     
                     {/* Variants submenu */}

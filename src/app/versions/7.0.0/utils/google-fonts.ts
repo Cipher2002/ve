@@ -460,16 +460,17 @@ export const loadGoogleFont = (family: string, variants: FontVariant[]): Promise
     }
 
     // Create weight:style pairs for the URL
-    const weightStylePairs = variants.map(variant => {
-      if (variant.style === 'italic') {
-        return `ital,wght@1,${variant.weight}`;
-      } else {
-        return `wght@${variant.weight}`;
-      }
-    });
-
-    // Build Google Fonts URL
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${weightStylePairs.join(';')}&display=swap`;
+    const weights = variants.map(variant => variant.weight).join(';');
+    const hasItalic = variants.some(variant => variant.style === 'italic');
+    
+    let fontUrl;
+    if (hasItalic) {
+      const italicWeights = variants.filter(v => v.style === 'italic').map(v => v.weight).join(';');
+      const normalWeights = variants.filter(v => v.style === 'normal').map(v => v.weight).join(';');
+      fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:ital,wght@0,${normalWeights};1,${italicWeights}&display=swap`;
+    } else {
+      fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weights}&display=swap`;
+    }
 
     // Create link element
     const link = document.createElement('link');
