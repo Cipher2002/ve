@@ -70,36 +70,6 @@ export const useTimelineDragAndDrop = ({
     return Math.round(value / GRID_SIZE) * GRID_SIZE;
   }, []);
 
-  // Helper function to find adjacent overlays and snap to them
-  const snapToAdjacentOverlay = useCallback((
-    targetFrom: number,
-    targetDuration: number,
-    targetRow: number,
-    excludeId: number
-  ) => {
-    const adjacentOverlays = overlays.filter(
-      overlay => overlay.row === targetRow && overlay.id !== excludeId
-    );
-
-    // Check if we're close to the end of any overlay (within 3 frames)
-    for (const overlay of adjacentOverlays) {
-      const overlayEnd = overlay.from + overlay.durationInFrames;
-      if (Math.abs(targetFrom - overlayEnd) <= 3) {
-        return overlayEnd; // Snap to exact end position
-      }
-    }
-
-    // Check if we're close to the start of any overlay
-    for (const overlay of adjacentOverlays) {
-      const targetEnd = targetFrom + targetDuration;
-      if (Math.abs(overlay.from - targetEnd) <= 3) {
-        return overlay.from - targetDuration; // Snap so our end meets their start
-      }
-    }
-
-    return targetFrom; // No snapping needed
-  }, [overlays]);
-
   // --- Move calculatePush logic back inside ---
   const calculatePush = useCallback(
     (
@@ -295,23 +265,8 @@ export const useTimelineDragAndDrop = ({
       const snappedEndFrame = snapToGrid(newEndFrame);
       newDurationFrames = Math.max(1, snappedEndFrame - snappedStartFrame);
 
-      // For video and audio, try to snap to adjacent overlays to eliminate gaps
       let finalStartFrame = snappedStartFrame;
-      
-      if (dragInfo.current) {
-        const draggedOverlay = overlays.find(o => o.id === dragInfo.current!.id);
-        
-        if (draggedOverlay && (draggedOverlay.type === "video" || draggedOverlay.type === "sound")) {
-          finalStartFrame = snapToAdjacentOverlay(
-            snappedStartFrame,
-            newDurationFrames,
-            newRow,
-            dragInfo.current.id
-          );
-        }
-      }
-      
-      let finalEndFrame = finalStartFrame + newDurationFrames;
+      let finalEndFrame = snappedStartFrame + newDurationFrames;
 
       if (
         dragInfo.current.action === "resize-start" &&
