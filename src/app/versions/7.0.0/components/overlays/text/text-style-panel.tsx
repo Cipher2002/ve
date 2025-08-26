@@ -147,6 +147,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
       handleStyleChange("fontWeight", variant.weight);
       handleStyleChange("fontStyle", variant.style);
       setSelectedFont(null);
+      setHoveredFont(null);
     } catch (error) {
       console.error('Failed to load font:', error);
       // Fallback to system fonts
@@ -154,6 +155,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
       handleStyleChange("fontWeight", "400");
       handleStyleChange("fontStyle", "normal");
       setSelectedFont(null);
+      setHoveredFont(null);
     }
   };
 
@@ -181,49 +183,50 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
               {selectedFont && (
                 <div className="absolute top-full left-0 mt-1 w-full bg-popover border rounded-md shadow-lg z-40 max-h-60 overflow-y-auto">
                   <div className="p-1">
-                    {GOOGLE_FONTS.map((font) => (
-                      <div key={font.family} className="relative">
+                    {hoveredFont ? (
+                      // Show variants view with back button
+                      <div>
+                        <button
+                          className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm mb-1 border-b"
+                          onClick={() => setHoveredFont(null)}
+                        >
+                          ← Back to fonts
+                        </button>
+                        <div className="font-medium px-2 py-1 text-xs mb-1" style={{ fontFamily: getFontFamilyString(hoveredFont) }}>
+                          {hoveredFont}
+                        </div>
+                        {GOOGLE_FONTS.find(f => f.family === hoveredFont)?.variants.map((variant) => (
+                          <button
+                            key={`${variant.weight}-${variant.style}`}
+                            className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm"
+                            style={{ 
+                              fontFamily: getFontFamilyString(hoveredFont),
+                              fontWeight: variant.weight,
+                              fontStyle: variant.style
+                            }}
+                            onClick={() => {
+                              const font = GOOGLE_FONTS.find(f => f.family === hoveredFont);
+                              if (font) handleFontSelect(font, variant);
+                            }}
+                          >
+                            {variant.displayName}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      // Show fonts list
+                      GOOGLE_FONTS.map((font) => (
                         <div
-                          className="px-2 py-1 text-xs cursor-pointer hover:bg-accent rounded-sm flex justify-between items-center group"
+                          key={font.family}
+                          className="px-2 py-1 text-xs cursor-pointer hover:bg-accent rounded-sm flex justify-between items-center"
                           style={{ fontFamily: getFontFamilyString(font.family) }}
-                          onMouseEnter={() => {
-                            handleFontHover(font);
-                            setHoveredFont(font.family);
-                          }}
-                          onMouseLeave={() => setHoveredFont(null)}
+                          onClick={() => setHoveredFont(font.family)}
                         >
                           <span>{font.family}</span>
                           <span className="text-xs opacity-50">→</span>
                         </div>
-                        
-                        {/* Variants submenu - positioned outside main dropdown */}
-                        {hoveredFont === font.family && (
-                          <div 
-                            className="absolute left-full top-0 ml-1 bg-popover border rounded-md shadow-lg z-50 min-w-40"
-                            style={{ position: 'fixed', transform: 'translateX(100%)' }}
-                            onMouseEnter={() => setHoveredFont(font.family)}
-                            onMouseLeave={() => setHoveredFont(null)}
-                          >
-                            <div className="p-1">
-                              {font.variants.map((variant) => (
-                                <button
-                                  key={`${variant.weight}-${variant.style}`}
-                                  className="w-full text-left px-2 py-1 text-xs hover:bg-accent rounded-sm"
-                                  style={{ 
-                                    fontFamily: getFontFamilyString(font.family),
-                                    fontWeight: variant.weight,
-                                    fontStyle: variant.style
-                                  }}
-                                  onClick={() => handleFontSelect(font, variant)}
-                                >
-                                  {variant.displayName}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}
