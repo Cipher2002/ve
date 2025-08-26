@@ -173,13 +173,18 @@ interface TextLayerContentProps {
 
 
 const getFontFamily = (fontFamilyString: string) => {
-  // If it's already a font family string, return as is
+  // If it's already a font family string (contains quotes or comma), return as is
+  if (fontFamilyString && (fontFamilyString.includes('"') || fontFamilyString.includes(','))) {
+    return fontFamilyString;
+  }
+  
+  // If it's a simple font name, wrap it properly
   if (fontFamilyString && !fontFamilyString.startsWith('font-')) {
     return fontFamilyString;
   }
   
-  // Legacy fallback for old font classes - default to Inter
-  return getFontFamilyString("Inter");
+  // Legacy fallback for old font classes - default to system font
+  return "Arial, sans-serif";
 };
 
 export const TextLayerContent: React.FC<TextLayerContentProps> = ({
@@ -288,11 +293,14 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   const { ...restStyles } = overlay.styles;
 
   
+  const resolvedFontFamily = getFontFamily(overlay.styles.fontFamily);
+  console.log('Text layer font:', overlay.styles.fontFamily, '→', resolvedFontFamily); // Debug log
+
   const textStyle: React.CSSProperties = {
     ...restStyles,
     animation: undefined,
     fontSize: `${calculateFontSize()}px`,
-    fontFamily: getFontFamily(overlay.styles.fontFamily),
+    fontFamily: resolvedFontFamily,
     maxWidth: "100%",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",
