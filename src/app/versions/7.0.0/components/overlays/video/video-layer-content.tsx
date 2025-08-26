@@ -1,8 +1,6 @@
 import {
-  OffthreadVideo,
+  Video,
   useCurrentFrame,
-  delayRender,
-  continueRender,
 } from "remotion";
 import { ClipOverlay } from "../../../types";
 import { animationTemplates } from "../../../templates/animation-templates";
@@ -44,18 +42,18 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
   const frame = useCurrentFrame();
 
   // Preload video effect
-  useEffect(() => {
-    let processedVideoSrc = overlay.src;
-    if (overlay.src.startsWith("/") && baseUrl) {
-      processedVideoSrc = `${baseUrl}${overlay.src}`;
-    } else if (overlay.src.startsWith("/")) {
-      processedVideoSrc = toAbsoluteUrl(overlay.src);
-    }
+  // useEffect(() => {
+  //   let processedVideoSrc = overlay.src;
+  //   if (overlay.src.startsWith("/") && baseUrl) {
+  //     processedVideoSrc = `${baseUrl}${overlay.src}`;
+  //   } else if (overlay.src.startsWith("/")) {
+  //     processedVideoSrc = toAbsoluteUrl(overlay.src);
+  //   }
     
-    const cleanup = preloadVideo(processedVideoSrc);
+  //   const cleanup = preloadVideo(processedVideoSrc);
     
-    return cleanup; // preloadVideo returns the cleanup function directly
-  }, [overlay.src, baseUrl]);
+  //   return cleanup; // preloadVideo returns the cleanup function directly
+  // }, [overlay.src, baseUrl]);
   const { getCachedVideoUrl } = useVideoCache();
   const [cachedSrc, setCachedSrc] = useState<string | null>(null);
 
@@ -146,12 +144,13 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
 
   return (
     <div style={containerStyle}>
-      <OffthreadVideo
+      <Video
         src={videoSrc}
         startFrom={overlay.videoStartTime || 0}
         style={videoStyle}
         volume={overlay.styles.volume ?? 1}
         playbackRate={overlay.speed ?? 1}
+        // pauseWhenBuffering={true}
       />
     </div>
   );
