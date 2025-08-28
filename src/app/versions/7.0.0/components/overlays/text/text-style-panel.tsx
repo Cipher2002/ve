@@ -23,6 +23,17 @@ import { useEditorContext } from "../../../contexts/editor-context";
 
 import { GOOGLE_FONTS, GoogleFont, FontVariant, loadGoogleFont, getFontFamilyString } from '../../../utils/google-fonts';
 
+// Helper function to extract just the font name from font family string
+const extractFontName = (fontFamily: string | undefined): string => {
+  if (!fontFamily) return '';
+  
+  // Remove quotes and everything after the first comma
+  return fontFamily
+    .split(',')[0]  // Take only the first part before comma
+    .replace(/['"]/g, '')  // Remove all quotes
+    .trim();  // Remove any whitespace
+};
+
 
 /**
  * Props for the TextStylePanel component
@@ -109,7 +120,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                 className="w-full text-left px-3 py-2 text-xs border rounded-md bg-background hover:bg-accent"
                 onClick={() => setSelectedFont(selectedFont ? null : GOOGLE_FONTS[0])}
               >
-                {localOverlay.styles.fontFamily || "Select a font"}
+                {extractFontName(localOverlay.styles.fontFamily) || "Select a font"}
               </button>
               
               {selectedFont && (
