@@ -75,15 +75,24 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
     field: keyof TextOverlay["styles"],
     value: string
   ) => {
+    console.log(`Updating ${field} to:`, value); // Debug log
     setLocalOverlay({
       ...localOverlay,
       styles: { ...localOverlay.styles, [field]: value },
     });
 
-    // Debounce the actual overlay update if an overlay is selected
+    // Update immediately AND debounce for performance
     if (selectedOverlayId !== null) {
       const overlay = overlays.find((o) => o.id === selectedOverlayId);
       if (overlay) {
+        console.log('Updating overlay immediately with:', field, value); // Debug log
+        // Immediate update
+        changeOverlay(selectedOverlayId, {
+          ...overlay,
+          styles: { ...overlay.styles, [field]: value },
+        } as TextOverlay);
+        
+        // Also call debounced for backup
         debouncedUpdateOverlay(selectedOverlayId, {
           ...overlay,
           styles: { ...overlay.styles, [field]: value },

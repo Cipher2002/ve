@@ -369,9 +369,7 @@ export default function SavedProjects() {
       const width = window.innerWidth;
       let newItemsPerPage;
       let newFilesPerPage;
-      
-      console.log('Window width:', width); // Debug log
-      
+            
       if (width < 580) {
         // Mobile: 1 card
         newItemsPerPage = 1;
@@ -389,9 +387,7 @@ export default function SavedProjects() {
         newItemsPerPage = 4;
         newFilesPerPage = 4;
       }
-      
-      console.log('Items per page:', newItemsPerPage); // Debug log
-      
+            
       setItemsPerPage(newItemsPerPage);
       setFilesPerPage(newFilesPerPage);
       
@@ -453,14 +449,6 @@ export default function SavedProjects() {
 
   // Debug UID values
   React.useEffect(() => {
-    console.log('🔍 Saved Projects UID Debug:', {
-      fromFunction: getUidFromUrl(),
-      fromURL: new URLSearchParams(window.location.search).get('uid'),
-      selectedProjectId: selectedProject?.id,
-      fullThumbnailURL: selectedProject ? 
-        `${apiBaseUrl}/user-files/${getUidFromUrl()}/${selectedProject.id}/thumbnail-example.webp` : 
-        'No project selected'
-    });
   }, [selectedProject]);
 
   // Fetch user projects
