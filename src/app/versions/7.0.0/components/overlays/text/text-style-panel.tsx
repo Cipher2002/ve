@@ -135,9 +135,9 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                         >
                           ← Back to fonts
                         </button>
-                        <div className="font-medium px-2 py-1 text-xs mb-1" style={{ fontFamily: getFontFamilyString(hoveredFont) }}>
+                        {/* <div className="font-medium px-2 py-1 text-xs mb-1" style={{ fontFamily: getFontFamilyString(hoveredFont) }}>
                           {hoveredFont}
-                        </div>
+                        </div> */}
                         {GOOGLE_FONTS.find(f => f.family === hoveredFont)?.variants.map((variant) => (
                           <button
                             key={`${variant.weight}-${variant.style}`}
