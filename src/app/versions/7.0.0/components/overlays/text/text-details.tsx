@@ -87,7 +87,7 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
     // Update the global state immediately
     if (selectedOverlayId !== null) {
       console.log('Updating overlay immediately with:', field, value); // Debug log
-      changeOverlay(selectedOverlayId, updatedLocalOverlay as TextOverlay);
+      changeOverlay(selectedOverlayId, (overlay) => updatedLocalOverlay as TextOverlay);
     }
   };
 
