@@ -143,6 +143,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
       await loadGoogleFont(font.family, [variant]);
       const fontFamilyString = getFontFamilyString(font.family);
       console.log('Setting font family to:', fontFamilyString); // Debug log
+      console.log('handleStyleChange function available:', typeof handleStyleChange); // Debug log
       handleStyleChange("fontFamily", fontFamilyString);
       handleStyleChange("fontWeight", variant.weight);
       handleStyleChange("fontStyle", variant.style);
