@@ -294,7 +294,8 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
 
   
   const resolvedFontFamily = getFontFamily(overlay.styles.fontFamily);
-  console.log('Text layer font:', overlay.styles.fontFamily, '→', resolvedFontFamily); // Debug log
+  console.log('Text layer overlay ID:', overlay.id, 'font:', overlay.styles.fontFamily, '→', resolvedFontFamily); // Debug log
+  console.log('Full overlay styles:', overlay.styles); // Debug log
 
   const textStyle: React.CSSProperties = {
     ...restStyles,
