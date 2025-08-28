@@ -20,86 +20,6 @@ import { useEditorContext } from "../../../contexts/editor-context";
 /**
  * Available font options for text overlays
  */
-// const fonts = [
-
-//   // Custom fonts from public/fonts
-//   { value: "font-custom-alexbrush-regular", label: "Alexbrush" },
-//   { value: "font-custom-allertastencil-regular", label: "Allertastencil" },
-//   { value: "font-custom-allison-regular", label: "Allison" },
-//   { value: "font-custom-allura-regular", label: "Allura" },
-//   { value: "font-custom-alumnisans-variablefont-wght", label: "Alumnisans Variablefont Wght" },
-//   { value: "font-custom-berkshireswash-regular", label: "Berkshireswash" },
-//   { value: "font-custom-bitcountpropsingle-variablefont-crsv-elsh-elxp-slnt-wght", label: "Bitcountpropsingle Variablefont Crsv,elsh,elxp,slnt,wght" },
-//   { value: "font-custom-bitcountpropsingle-cursive-regular", label: "Bitcountpropsingle Cursive" },
-//   { value: "font-custom-bodonimoda-variablefont-opsz-wght", label: "Bodonimoda Variablefont Opsz,wght" },
-//   { value: "font-custom-bungeeinline-regular", label: "Bungeeinline" },
-//   { value: "font-custom-bungeetint-regular", label: "Bungeetint" },
-//   { value: "font-custom-caesardressing-regular", label: "Caesardressing" },
-//   { value: "font-custom-caveat-variablefont-wght", label: "Caveat Variablefont Wght" },
-//   { value: "font-custom-cinzel-variablefont-wght", label: "Cinzel Variablefont Wght" },
-//   { value: "font-custom-courgette-regular", label: "Courgette" },
-//   { value: "font-custom-creepster-regular", label: "Creepster" },
-//   { value: "font-custom-damion-regular", label: "Damion" },
-//   { value: "font-custom-dancingscript-variablefont-wght", label: "Dancingscript Variablefont Wght" },
-//   { value: "font-custom-eduqldhand-variablefont-wght", label: "Eduqldhand Variablefont Wght" },
-//   { value: "font-custom-eduvicwanthand-variablefont-wght", label: "Eduvicwanthand Variablefont Wght" },
-//   { value: "font-custom-exile-regular", label: "Exile" },
-//   { value: "font-custom-exo-variablefont-wght", label: "Exo Variablefont Wght" },
-//   { value: "font-custom-frederickathegreat-regular", label: "Frederickathegreat" },
-//   { value: "font-custom-gloriahallelujah-regular", label: "Gloriahallelujah" },
-//   { value: "font-custom-goldman-bold", label: "Goldman" },
-//   { value: "font-custom-goldman-regular", label: "Goldman" },
-//   { value: "font-custom-gravitasone-regular", label: "Gravitasone" },
-//   { value: "font-custom-greatvibes-regular", label: "Greatvibes" },
-//   { value: "font-custom-homemadeapple-regular", label: "Homemadeapple" },
-//   { value: "font-custom-indieflower-regular", label: "Indieflower" },
-//   // Original fonts
-//   { value: "font-sans", label: "Inter (Sans-serif)" },
-  
-//   { value: "font-custom-justanotherhand-regular", label: "Justanotherhand" },
-//   { value: "font-custom-lato-regular", label: "Lato" },
-//   { value: "font-custom-lato-thin", label: "Lato Thin" },
-//   { value: "font-custom-leckerlione-regular", label: "Leckerlione" },
-//   { value: "font-custom-libertinusmono-regular", label: "Libertinusmono" },
-//   { value: "font-custom-lobstertwo-regular", label: "Lobstertwo" },
-//   { value: "font-custom-manufacturingconsent-regular", label: "Manufacturingconsent" },
-//   { value: "font-custom-marcellus-regular", label: "Marcellus" },
-//   { value: "font-custom-marckscript-regular", label: "Marckscript" },
-//   { value: "font-custom-michroma-regular", label: "Michroma" },
-//   { value: "font-custom-monoton-regular", label: "Monoton" },
-//   { value: "font-custom-montserrat-italic-variablefont-wght", label: "Montserrat Italic Variablefont Wght" },
-//   { value: "font-custom-mrdafoe-regular", label: "Mrdafoe" },
-//   { value: "font-custom-mrssaintdelafield-regular", label: "Mrssaintdelafield" },
-//   { value: "font-custom-mysoul-regular", label: "Mysoul" },
-//   { value: "font-custom-nothingyoucoulddo-regular", label: "Nothingyoucoulddo" },
-//   { value: "font-custom-orbitron-variablefont-wght", label: "Orbitron Variablefont Wght" },
-//   { value: "font-custom-pacifico-regular", label: "Pacifico" },
-//   { value: "font-custom-parisienne-regular", label: "Parisienne" },
-//   { value: "font-custom-permanentmarker-regular", label: "Permanentmarker" },
-//   { value: "font-custom-pinyonscript-regular", label: "Pinyonscript" },
-//   { value: "font-custom-protestrevolution-regular", label: "Protestrevolution" },
-//   { value: "font-custom-reeniebeanie-regular", label: "Reeniebeanie" },
-//   { value: "font-custom-robotocondensed-italic-variablefont-wght", label: "Robotocondensed Italic Variablefont Wght" },
-//   { value: "font-custom-robotocondensed-variablefont-wght", label: "Robotocondensed Variablefont Wght" },
-//   { value: "font-custom-rocksalt-regular", label: "Rocksalt" },
-//   { value: "font-custom-rubikmonoone-regular", label: "Rubikmonoone" },
-//   { value: "font-custom-rubikmoonrocks-regular", label: "Rubikmoonrocks" },
-//   { value: "font-custom-rye-regular", label: "Rye" },
-//   { value: "font-custom-sacramento-regular", label: "Sacramento" },
-//   { value: "font-custom-satisfy-regular", label: "Satisfy" },
-//   { value: "font-custom-savate-variablefont-wght", label: "Savate Variablefont Wght" },
-//   { value: "font-custom-shadowsintolight-regular", label: "Shadowsintolight" },
-//   { value: "font-custom-smoochsans-variablefont-wght", label: "Smoochsans Variablefont Wght" },
-//   { value: "font-custom-sourceserif4-variablefont-opsz-wght", label: "Sourceserif4 Variablefont Opsz,wght" },
-//   { value: "font-custom-specialgothicexpandedone-regular", label: "Specialgothicexpandedone" },
-//   { value: "font-custom-squadaone-regular", label: "Squadaone" },
-//   { value: "font-custom-tangerine-bold", label: "Tangerine" },
-//   { value: "font-custom-titilliumweb-extralightitalic", label: "Titilliumweb Extralightitalic" },
-//   { value: "font-custom-titilliumweb-regular", label: "Titilliumweb" },
-//   { value: "font-custom-winkyrough-variablefont-wght", label: "Winkyrough Variablefont Wght" },
-//   { value: "font-custom-zeyada-regular", label: "Zeyada" },
-//   { value: "font-custom-zillaslab-medium", label: "Zillaslab" },
-// ];
 
 import { GOOGLE_FONTS, GoogleFont, FontVariant, loadGoogleFont, getFontFamilyString } from '../../../utils/google-fonts';
 
@@ -140,11 +60,9 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   }, []);
 
 const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
-    console.log('Font selected:', font.family, variant); // Debug log
     try {
       await loadGoogleFont(font.family, [variant]);
       const fontFamilyString = getFontFamilyString(font.family);
-      console.log('Setting font family to:', fontFamilyString); // Debug log
       
       // Update all font properties together
       if (selectedOverlayId !== null) {
@@ -177,10 +95,6 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
     }
   };
 
-  const handleFontHover = async (font: GoogleFont) => {
-    // Don't preload on hover to avoid errors
-    // Font will load when actually selected
-  };
   return (
     <div className="space-y-6">
       {/* Typography Settings */}
