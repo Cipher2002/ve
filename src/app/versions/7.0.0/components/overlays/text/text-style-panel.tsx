@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import ColorPicker from "react-best-gradient-color-picker";
+import { useEditorContext } from "../../../contexts/editor-context";
 
 /**
  * Available font options for text overlays
@@ -128,6 +129,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   localOverlay,
   handleStyleChange,
 }) => {
+  const { selectedOverlayId, changeOverlay, overlays } = useEditorContext();
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [selectedFont, setSelectedFont] = React.useState<GoogleFont | null>(null);
   const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
@@ -137,16 +139,31 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
     setFontsLoaded(true); // Skip initial loading for now
   }, []);
 
-  const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
+const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
     console.log('Font selected:', font.family, variant); // Debug log
     try {
       await loadGoogleFont(font.family, [variant]);
       const fontFamilyString = getFontFamilyString(font.family);
       console.log('Setting font family to:', fontFamilyString); // Debug log
-      console.log('handleStyleChange function available:', typeof handleStyleChange); // Debug log
-      handleStyleChange("fontFamily", fontFamilyString);
-      handleStyleChange("fontWeight", variant.weight);
-      handleStyleChange("fontStyle", variant.style);
+      
+      // Update all font properties together
+      if (selectedOverlayId !== null) {
+        const overlay = overlays.find((o) => o.id === selectedOverlayId);
+        if (overlay) {
+          const updatedOverlay = {
+            ...overlay,
+            styles: { 
+              ...overlay.styles, 
+              fontFamily: fontFamilyString,
+              fontWeight: variant.weight,
+              fontStyle: variant.style
+            },
+          };
+          
+          changeOverlay(selectedOverlayId, (currentOverlay) => updatedOverlay as TextOverlay);
+        }
+      }
+      
       setSelectedFont(null);
       setHoveredFont(null);
     } catch (error) {
