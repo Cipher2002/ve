@@ -41,27 +41,9 @@ export const SelectStickerOverlay: React.FC<SelectStickerOverlayProps> = ({
               </svg>
             </div>
           </div>
-          <h3 className="text-lg font-semibold mb-2">No stickers on canvas</h3>
-          <p className="text-sm text-muted-foreground">
-            Add stickers from the Stickers panel to customize their properties here.
-          </p>
         </>
       ) : (
         <>
-          <h3 className="text-lg font-semibold mb-4">Select a sticker to edit</h3>
-          <div className="grid grid-cols-2 gap-2 w-full max-w-xs">
-            {stickerOverlays.map((sticker) => (
-              <button
-                key={sticker.id}
-                onClick={() => handleStickerClick(sticker)}
-                className="p-3 border rounded-lg hover:bg-accent transition-colors"
-              >
-                <div className="text-xs font-medium truncate">
-                  {sticker.category === "Shapes" ? "Shape" : "Sticker"} {sticker.id}
-                </div>
-              </button>
-            ))}
-          </div>
         </>
       )}
     </div>
