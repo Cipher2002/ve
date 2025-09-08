@@ -68,6 +68,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "use-debounce": "^10.0.6",
     "utf-8-validate": "^6.0.5",
     "uuid": "^10.0.0"
   },

@@ -1,327 +1,595 @@
 import React from "react";
-import { StickerTemplate } from "../base-template";
+import { StickerTemplate, StickerTemplateProps } from "../base-template";
 import { interpolate, useCurrentFrame } from "remotion";
 
-const CenteredWrapper: React.FC<{ children: React.ReactNode }> = ({
+interface SimpleShapeProps extends StickerTemplateProps {
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  strokeStyle?: "solid" | "dashed" | "dotted";
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+}
+
+const ShapeWrapper: React.FC<{ children: React.ReactNode; overlay: any; shadow?: string }> = ({
   children,
-}) => (
-  <div
-    style={{
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    {children}
-  </div>
-);
+  overlay,
+  shadow,
+}) => {
+  const frame = useCurrentFrame();
+  
+  // Simple entrance animation
+  const opacity = interpolate(frame, [0, 15], [0, 1], {
+    extrapolateRight: "clamp",
+  });
+  
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity,
+        filter: shadow || "none",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
-const pulsingCircle: StickerTemplate = {
+// Helper function to create shadow filter string
+const createShadowFilter = (color: string, blur: number, offsetX: number, offsetY: number): string => {
+  if (blur === 0 && offsetX === 0 && offsetY === 0) return "none";
+  return `drop-shadow(${offsetX}px ${offsetY}px ${blur}px ${color})`;
+};
+
+// Helper function to create stroke style
+const getStrokeStyle = (style: string): string => {
+  switch (style) {
+    case "dashed": return "5,5";
+    case "dotted": return "2,2";
+    default: return "none";
+  }
+};
+
+// BASIC SHAPES
+const createBasicShapeTemplate = (
+  id: string,
+  name: string,
+  ShapeComponent: React.FC<SimpleShapeProps>
+): StickerTemplate => ({
   config: {
-    id: "pulsing-circle",
-    name: "Pulsing Circle",
+    id: `shape-${id}`,
+    name,
     category: "Shapes",
     isPro: false,
     defaultProps: {
-      size: 64,
-      color: "#FF4081",
-      pulseSpeed: "normal",
+      fillColor: "#3B82F6",
+      strokeColor: "#1E40AF",
+      strokeWidth: 0,
+      strokeStyle: "solid",
+      shadowColor: "rgba(0,0,0,0.2)",
+      shadowBlur: 0,
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
     },
   },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const scale = interpolate(frame % 60, [0, 30, 60], [1, 1.2, 1], {
-      extrapolateRight: "clamp",
-    });
+  Component: ShapeComponent,
+});
 
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            width: `${overlay.height || 64}px`,
-            height: `${overlay.height || 64}px`,
-            backgroundColor: "#FF4081",
-            borderRadius: "50%",
-            transform: `scale(${scale})`,
-          }}
+// Circle
+const CircleComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={(size / 2) - (strokeWidth / 2)}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const spinningSquare: StickerTemplate = {
-  config: {
-    id: "spinning-square",
-    name: "Spinning Square",
-    category: "Shapes",
-    isPro: true,
-    defaultProps: {
-      size: 48,
-      color: "#2196F3",
-      borderWidth: 4,
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const rotation = interpolate(frame, [0, 60], [0, 360], {
-      extrapolateRight: "clamp",
-    });
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            width: `${overlay.height || 48}px`,
-            height: `${overlay.height || 48}px`,
-            borderWidth: "10px",
-            borderStyle: "solid",
-            borderColor: "#2196F3",
-            borderRadius: "4px",
-            transform: `rotate(${rotation}deg)`,
-          }}
+// Square
+const SquareComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <rect
+          x={strokeWidth / 2}
+          y={strokeWidth / 2}
+          width={size - strokeWidth}
+          height={size - strokeWidth}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const bouncingTriangle: StickerTemplate = {
-  config: {
-    id: "bouncing-triangle",
-    name: "Bouncing Triangle",
-    category: "Shapes",
-    isPro: true,
-    defaultProps: {
-      size: 56,
-      color: "#4CAF50",
-      bounceHeight: 10,
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const translateY = interpolate(frame % 45, [0, 22.5, 45], [0, -15, 0], {
-      extrapolateRight: "clamp",
-    });
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            width: 0,
-            height: 0,
-            borderLeft: `${(overlay.height || 56) / 2}px solid transparent`,
-            borderRight: `${(overlay.height || 56) / 2}px solid transparent`,
-            borderBottom: `${overlay.height || 56}px solid #4CAF50`,
-            transform: `translateY(${translateY}px)`,
-          }}
+// Rectangle
+const RectangleComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 150;
+  const height = overlay.height || 100;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <rect
+          x={strokeWidth / 2}
+          y={strokeWidth / 2}
+          width={width - strokeWidth}
+          height={height - strokeWidth}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const expandingHexagon: StickerTemplate = {
-  config: {
-    id: "expanding-hexagon",
-    name: "Expanding Hexagon",
-    category: "Shapes",
-    isPro: false,
-    defaultProps: {
-      size: 52,
-      color: "#9C27B0",
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const scale = interpolate(frame % 75, [0, 37.5, 75], [0.8, 1.1, 0.8], {
-      extrapolateRight: "clamp",
-    });
-
-    const size = overlay.height || 52;
-    const color = "#9C27B0";
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: `${size}px`,
-            height: `${size * 0.866}px`,
-            backgroundColor: color,
-            clipPath:
-              "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-            transform: `translate(-50%, -50%) scale(${scale})`,
-          }}
+// Triangle
+const TriangleComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points={`${size/2},${strokeWidth/2} ${size-strokeWidth/2},${size-strokeWidth/2} ${strokeWidth/2},${size-strokeWidth/2}`}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const morphingStar: StickerTemplate = {
-  config: {
-    id: "morphing-star",
-    name: "Star",
-    category: "Shapes",
-    isPro: true,
-    defaultProps: {
-      size: 60,
-      color: "#FFC107",
-    },
-  },
-  Component: ({ overlay }) => {
-    const size = overlay.height || 60;
-    const color = "#FFC107";
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: `${size}px`,
-            height: `${size}px`,
-            backgroundColor: color,
-            clipPath:
-              "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-            transform: "translate(-50%, -50%)",
-          }}
+// Diamond
+const DiamondComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points={`${size/2},${strokeWidth/2} ${size-strokeWidth/2},${size/2} ${size/2},${size-strokeWidth/2} ${strokeWidth/2},${size/2}`}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const rotatingOctagon: StickerTemplate = {
-  config: {
-    id: "rotating-octagon",
-    name: "Rotating Octagon",
-    category: "Shapes",
-    isPro: true,
-    defaultProps: {
-      size: 58,
-      color: "#009688",
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const rotation = interpolate(frame, [0, 120], [0, 360], {
-      extrapolateRight: "clamp",
-    });
-
-    const size = overlay.height || 58;
-    const color = "#009688";
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: `${size}px`,
-            height: `${size}px`,
-            backgroundColor: color,
-            clipPath:
-              "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
-            transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-          }}
+// Pentagon
+const PentagonComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points="50,5 95,35 80,90 20,90 5,35"
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+          transform={`scale(${(size-strokeWidth)/100})`}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const zigzagDiamond: StickerTemplate = {
-  config: {
-    id: "zigzag-diamond",
-    name: "Zigzag Diamond",
-    category: "Shapes",
-    isPro: false,
-    defaultProps: {
-      size: 54,
-      color: "#673AB7",
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const skew = interpolate(frame % 45, [0, 22.5, 45], [-15, 15, -15], {
-      extrapolateRight: "clamp",
-    });
-
-    const size = overlay.height || 54;
-    const color = "#673AB7";
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            backgroundColor: color,
-            clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-            transform: `skew(${skew}deg)`,
-          }}
+// Hexagon
+const HexagonComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points="25,10 75,10 90,50 75,90 25,90 10,50"
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+          transform={`scale(${(size-strokeWidth)/100})`}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
-const flashingPentagon: StickerTemplate = {
-  config: {
-    id: "flashing-pentagon",
-    name: "Flashing Pentagon",
-    category: "Shapes",
-    isPro: false,
-    defaultProps: {
-      size: 56,
-      color: "#E91E63",
-    },
-  },
-  Component: ({ overlay }) => {
-    const frame = useCurrentFrame();
-    const opacity = interpolate(frame % 30, [0, 15, 30], [1, 0.4, 1], {
-      extrapolateRight: "clamp",
-    });
-
-    const size = overlay.height || 56;
-    const color = "#E91E63";
-
-    return (
-      <CenteredWrapper>
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            width: `${size}px`,
-            height: `${size}px`,
-            backgroundColor: color,
-            opacity: opacity,
-            clipPath: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
-            transform: "translate(-50%, -50%)",
-          }}
+// Octagon
+const OctagonComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30"
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+          transform={`scale(${(size-strokeWidth)/100})`}
         />
-      </CenteredWrapper>
-    );
-  },
+      </svg>
+    </ShapeWrapper>
+  );
 };
 
+// Oval
+const OvalComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 150;
+  const height = overlay.height || 100;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <ellipse
+          cx={width / 2}
+          cy={height / 2}
+          rx={(width / 2) - (strokeWidth / 2)}
+          ry={(height / 2) - (strokeWidth / 2)}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+// Rounded Rectangle
+const RoundedRectangleComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 150;
+  const height = overlay.height || 100;
+  const radius = Math.min(width, height) * 0.2;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <rect
+          x={strokeWidth / 2}
+          y={strokeWidth / 2}
+          width={width - strokeWidth}
+          height={height - strokeWidth}
+          rx={radius}
+          ry={radius}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+// LINES & ARROWS
+const HorizontalLineComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  strokeColor = "#1E40AF",
+  strokeWidth = 2,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 150;
+  const height = overlay.height || 20;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <line
+          x1={strokeWidth / 2}
+          y1={height / 2}
+          x2={width - strokeWidth / 2}
+          y2={height / 2}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinecap="round"
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+const VerticalLineComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  strokeColor = "#1E40AF",
+  strokeWidth = 2,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 20;
+  const height = overlay.height || 150;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <line
+          x1={width / 2}
+          y1={strokeWidth / 2}
+          x2={width / 2}
+          y2={height - strokeWidth / 2}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinecap="round"
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+const ArrowRightComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const width = overlay.width || 150;
+  const height = overlay.height || 60;
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <polygon
+          points={`0,${height*0.3} ${width*0.7},${height*0.3} ${width*0.7},${height*0.1} ${width},${height*0.5} ${width*0.7},${height*0.9} ${width*0.7},${height*0.7} 0,${height*0.7}`}
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+// Star (5-point)
+const Star5Component: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#3B82F6",
+  strokeColor = "#1E40AF",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <polygon
+          points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+          transform={`scale(${(size-strokeWidth)/100})`}
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+// Heart
+const HeartComponent: React.FC<SimpleShapeProps> = ({
+  overlay,
+  fillColor = "#DC2626",
+  strokeColor = "#991B1B",
+  strokeWidth = 0,
+  strokeStyle = "solid",
+  shadowColor = "rgba(0,0,0,0.2)",
+  shadowBlur = 0,
+  shadowOffsetX = 0,
+  shadowOffsetY = 0,
+}) => {
+  const size = Math.min(overlay.width || 100, overlay.height || 100);
+  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  
+  return (
+    <ShapeWrapper overlay={overlay} shadow={shadow}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <path
+          d="M50,25 C50,25 37.5,12.5 25,25 C12.5,37.5 25,50 50,75 C75,50 87.5,37.5 75,25 C62.5,12.5 50,25 50,25 Z"
+          fill={fillColor}
+          stroke={strokeWidth > 0 ? strokeColor : "none"}
+          strokeWidth={strokeWidth}
+          strokeDasharray={getStrokeStyle(strokeStyle)}
+          strokeLinejoin="round"
+          transform={`scale(${(size-strokeWidth)/100})`}
+        />
+      </svg>
+    </ShapeWrapper>
+  );
+};
+
+// Export all shape templates
 export const shapeStickers = [
-  pulsingCircle,
-  spinningSquare,
-  bouncingTriangle,
-  expandingHexagon,
-  morphingStar,
-
-  rotatingOctagon,
-  zigzagDiamond,
-  flashingPentagon,
+  // Basic Shapes
+  createBasicShapeTemplate("circle", "Circle", CircleComponent),
+  createBasicShapeTemplate("square", "Square", SquareComponent),
+  createBasicShapeTemplate("rectangle", "Rectangle", RectangleComponent),
+  createBasicShapeTemplate("triangle", "Triangle", TriangleComponent),
+  createBasicShapeTemplate("diamond", "Diamond", DiamondComponent),
+  createBasicShapeTemplate("pentagon", "Pentagon", PentagonComponent),
+  createBasicShapeTemplate("hexagon", "Hexagon", HexagonComponent),
+  createBasicShapeTemplate("octagon", "Octagon", OctagonComponent),
+  createBasicShapeTemplate("oval", "Oval", OvalComponent),
+  createBasicShapeTemplate("rounded-rectangle", "Rounded Rectangle", RoundedRectangleComponent),
+  
+  // Lines & Arrows
+  createBasicShapeTemplate("horizontal-line", "Horizontal Line", HorizontalLineComponent),
+  createBasicShapeTemplate("vertical-line", "Vertical Line", VerticalLineComponent),
+  createBasicShapeTemplate("arrow-right", "Arrow Right", ArrowRightComponent),
+  
+  // Symbols
+  createBasicShapeTemplate("star-5", "Star", Star5Component),
+  createBasicShapeTemplate("heart", "Heart", HeartComponent),
 ];

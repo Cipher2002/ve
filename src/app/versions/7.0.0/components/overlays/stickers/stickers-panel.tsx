@@ -1,8 +1,10 @@
-import React, { memo, useCallback, useRef } from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorContext } from "../../../contexts/editor-context";
-import { Overlay, OverlayType, StickerCategory } from "../../../types";
+import { Overlay, OverlayType, StickerCategory, StickerOverlay } from "../../../types";
+import { StickerDetails } from "./sticker-details";
+import { SelectStickerOverlay } from "./select-sticker-overlay";
 import {
   templatesByCategory,
   getStickerCategories,
@@ -111,11 +113,36 @@ const StickerPreview = memo(
 StickerPreview.displayName = "StickerPreview";
 
 export function StickersPanel() {
-  const { addOverlay, overlays, durationInFrames } = useEditorContext();
+  const { addOverlay, overlays, durationInFrames, selectedOverlayId } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
   const stickerCategories = getStickerCategories();
   const isMobile = useIsMobile();
+  const [localOverlay, setLocalOverlay] = useState<StickerOverlay | null>(null);
+
+  // Update local overlay when selected overlay changes or when overlays change
+  React.useEffect(() => {
+    if (selectedOverlayId === null) {
+      setLocalOverlay(null);
+      return;
+    }
+
+    const selectedOverlay = overlays.find(
+      (overlay) => overlay.id === selectedOverlayId
+    );
+
+    if (selectedOverlay?.type === OverlayType.STICKER) {
+      setLocalOverlay(selectedOverlay as StickerOverlay);
+    } else {
+      setLocalOverlay(null);
+    }
+  }, [selectedOverlayId, overlays]);
+
+  const handleSetLocalOverlay = (overlay: StickerOverlay) => {
+    setLocalOverlay(overlay);
+  };
+
+  const isValidStickerOverlay = localOverlay && selectedOverlayId !== null;
 
   const handleStickerClick = useCallback(
     (templateId: string) => {
@@ -183,37 +210,50 @@ export function StickersPanel() {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
-      <Tabs defaultValue={stickerCategories[0]} className="w-full">
-        <TabsList className="w-full flex space-x-1 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
-          {stickerCategories.map((category) => (
-            <TabsTrigger
-              key={category}
-              value={category}
-              className="flex-1 px-3 py-1.5 text-sm font-medium
-                data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800
-                data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400
-                data-[state=active]:shadow-sm
-                rounded-md transition-all duration-200
-                text-gray-600 dark:text-gray-400"
-            >
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+    <div className="p-2 h-full bg-background">
+      {!isValidStickerOverlay ? (
+        <div className="flex flex-col gap-4 p-2 bg-white dark:bg-gray-900/50 h-full">
+          <Tabs defaultValue={stickerCategories[0]} className="w-full">
+            <TabsList className="w-full flex space-x-1 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
+              {stickerCategories.map((category) => (
+                <TabsTrigger
+                  key={category}
+                  value={category}
+                  className="flex-1 px-3 py-1.5 text-sm font-medium
+                    data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800
+                    data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400
+                    data-[state=active]:shadow-sm
+                    rounded-md transition-all duration-200
+                    text-gray-600 dark:text-gray-400"
+                >
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        {stickerCategories.map((category) => (
-          <TabsContent key={category} value={category} className="mt-2">
-            {isMobile ? (
-              renderStickerContent(category)
-            ) : (
-              <ScrollArea className="h-[calc(100vh-140px)]">
-                {renderStickerContent(category)}
-              </ScrollArea>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+            {stickerCategories.map((category) => (
+              <TabsContent key={category} value={category} className="mt-2">
+                {isMobile ? (
+                  renderStickerContent(category)
+                ) : (
+                  <ScrollArea className="h-[calc(100vh-140px)]">
+                    {renderStickerContent(category)}
+                  </ScrollArea>
+                )}
+              </TabsContent>
+            ))}
+          </Tabs>
+          
+          <div className="mt-4">
+            <SelectStickerOverlay setLocalOverlay={handleSetLocalOverlay} />
+          </div>
+        </div>
+      ) : (
+        <StickerDetails
+          localOverlay={localOverlay}
+          setLocalOverlay={handleSetLocalOverlay}
+        />
+      )}
     </div>
   );
 }

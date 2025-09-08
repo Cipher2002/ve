@@ -21,6 +21,7 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
     const MemoizedComponent = memo(Component);
     const props = {
       ...template.config.defaultProps,
+      ...overlay, // Pass through shape properties like fillColor, strokeColor, etc.
       overlay,
       isSelected,
       onUpdate,
