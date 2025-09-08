@@ -39,7 +39,19 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
 
     const handleInput = () => {
       if (editorRef.current) {
-        onChange(editorRef.current.innerHTML);
+        let content = editorRef.current.innerHTML;
+        
+        // Clean up empty content and standalone br tags
+        if (content === '<br>' || content === '<div><br></div>' || content.trim() === '') {
+          content = '';
+          editorRef.current.innerHTML = '';
+        }
+        
+        // Replace <div> tags with line breaks for cleaner HTML
+        content = content.replace(/<div>/g, '\n').replace(/<\/div>/g, '');
+        content = content.replace(/\n\n/g, '\n'); // Remove double line breaks
+        
+        onChange(content);
       }
     };
 

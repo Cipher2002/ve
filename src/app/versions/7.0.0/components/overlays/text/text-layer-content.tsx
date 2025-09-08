@@ -194,6 +194,23 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
 
   const { createEffect } = useTextEffects(frame);
 
+  // Helper function to strip HTML tags and get plain text
+  const stripHtmlTags = (html: string): string => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  };
+
+  // Helper function to render HTML content
+  const renderHtmlContent = (html: string, style: React.CSSProperties) => {
+    return (
+      <div 
+        style={style}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  };
+
   // Parse effect from cssClass or effect config
   const getEffectConfig = (): EffectConfig | null => {
     if (overlay.styles.cssClass === 'striped-shadow') {
@@ -339,8 +356,9 @@ return (
         </span>
       ))
     ) : effectConfig ? (() => {
-      // Apply dynamic effect
-      const effect = createEffect(effectConfig, textStyle, textContent);
+      // Apply dynamic effect - use plain text for effects
+      const plainTextContent = overlay.styles.isRichText ? stripHtmlTags(textContent) : textContent;
+      const effect = createEffect(effectConfig, textStyle, plainTextContent);
       if (!effect) return null;
 
       if (effect.container) {
@@ -360,8 +378,11 @@ return (
           </div>
         ));
       }
-    })() : (
-      // Fallback to regular text
+    })() : overlay.styles.isRichText ? (
+      // Rich text - render HTML
+      renderHtmlContent(textContent, textStyle)
+    ) : (
+      // Plain text - render as text
       <div 
         style={textStyle}
         className={overlay.styles.cssClass || ''}

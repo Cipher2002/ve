@@ -173,18 +173,26 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
               }
               
               // Fallback for non-effect styles
-              return (
-                <span
-                  style={{
-                    color: localOverlay.styles.color || '#000000',
-                    fontSize: '16px',
-                    fontWeight: localOverlay.styles.fontWeight,
-                    fontFamily: localOverlay.styles.fontFamily || 'Arial, sans-serif',
-                    fontStyle: localOverlay.styles.fontStyle,
-                    textDecoration: localOverlay.styles.textDecoration
-                  }}
-                >
-                  {typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview"}
+              const previewContent = typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview";
+              const previewStyle = {
+                color: localOverlay.styles.color || '#000000',
+                fontSize: '16px',
+                fontWeight: localOverlay.styles.fontWeight,
+                fontFamily: localOverlay.styles.fontFamily || 'Arial, sans-serif',
+                fontStyle: localOverlay.styles.fontStyle,
+                textDecoration: localOverlay.styles.textDecoration,
+                lineHeight: localOverlay.styles.lineHeight,
+                letterSpacing: localOverlay.styles.letterSpacing
+              };
+              
+              return localOverlay.styles.isRichText ? (
+                <div 
+                  style={previewStyle}
+                  dangerouslySetInnerHTML={{ __html: previewContent }}
+                />
+              ) : (
+                <span style={previewStyle}>
+                  {previewContent}
                 </span>
               );
             })()}
