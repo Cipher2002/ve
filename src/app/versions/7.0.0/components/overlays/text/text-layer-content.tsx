@@ -230,6 +230,7 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
       : {};
 
   const calculateFontSize = () => {
+    const multiplier = overlay.styles.fontSizeMultiplier || 1;
     const aspectRatio = overlay.width / overlay.height;
     
     // Handle multi-element content
@@ -249,9 +250,9 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
       maxLineLength = Math.max(...lines.map((line) => line.length));
     }
 
-    // Base size on container dimensions
+    // Base size on container dimensions - adjust for multiplier
     const areaBasedSize = Math.sqrt(
-      (overlay.width * overlay.height) / (maxLineLength * numLines)
+      (overlay.width * overlay.height) / (maxLineLength * numLines * multiplier)
     );
     let fontSize = areaBasedSize * 1.2; // Scaling factor
 
@@ -270,8 +271,9 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
       fontSize *= 0.8;
     }
 
-    // Set minimum and maximum bounds
-    return Math.max(12, Math.min(fontSize, (overlay.height / numLines) * 0.8));
+    // Apply multiplier and set bounds
+    const finalFontSize = fontSize * multiplier;
+    return Math.max(12, Math.min(finalFontSize, (overlay.height / numLines) * 0.8));
   };
 
   const containerStyle: React.CSSProperties = {
@@ -295,9 +297,7 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   
   const resolvedFontFamily = getFontFamily(overlay.styles.fontFamily);
 
-  const baseFontSize = calculateFontSize();
-  const multiplier = overlay.styles.fontSizeMultiplier || 1;
-  const finalFontSize = baseFontSize * multiplier;
+  const finalFontSize = calculateFontSize();
 
   const textStyle: React.CSSProperties = {
     ...restStyles,
