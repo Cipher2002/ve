@@ -458,6 +458,176 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Drop Shadow</label>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Offset X (px)</label>
+                  <input
+                    type="range"
+                    min="-10"
+                    max="10"
+                    step="1"
+                    value={(() => {
+                      const shadow = localOverlay.styles.textShadow;
+                      if (!shadow || shadow === 'none') return 0;
+                      const match = shadow.match(/(-?\d+)px\s+(-?\d+)px/);
+                      return match ? parseInt(match[1]) : 0;
+                    })()}
+                    onChange={(e) => {
+                      const currentShadow = localOverlay.styles.textShadow || 'none';
+                      const offsetX = e.target.value;
+                      let offsetY = '0', blur = '0', color = 'rgba(0,0,0,0.5)';
+                      
+                      if (currentShadow !== 'none') {
+                        const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+(.+)/);
+                        if (match) {
+                          offsetY = match[2];
+                          blur = match[3];
+                          color = match[4];
+                        }
+                      }
+                      
+                      const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+                      handleStyleChange("textShadow", newShadow);
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Offset Y (px)</label>
+                  <input
+                    type="range"
+                    min="-10"
+                    max="10"
+                    step="1"
+                    value={(() => {
+                      const shadow = localOverlay.styles.textShadow;
+                      if (!shadow || shadow === 'none') return 0;
+                      const match = shadow.match(/(-?\d+)px\s+(-?\d+)px/);
+                      return match ? parseInt(match[2]) : 0;
+                    })()}
+                    onChange={(e) => {
+                      const currentShadow = localOverlay.styles.textShadow || 'none';
+                      const offsetY = e.target.value;
+                      let offsetX = '0', blur = '0', color = 'rgba(0,0,0,0.5)';
+                      
+                      if (currentShadow !== 'none') {
+                        const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+(.+)/);
+                        if (match) {
+                          offsetX = match[1];
+                          blur = match[3];
+                          color = match[4];
+                        }
+                      }
+                      
+                      const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+                      handleStyleChange("textShadow", newShadow);
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Blur (px)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    step="1"
+                    value={(() => {
+                      const shadow = localOverlay.styles.textShadow;
+                      if (!shadow || shadow === 'none') return 0;
+                      const match = shadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px/);
+                      return match ? parseInt(match[3]) : 0;
+                    })()}
+                    onChange={(e) => {
+                      const currentShadow = localOverlay.styles.textShadow || 'none';
+                      const blur = e.target.value;
+                      let offsetX = '0', offsetY = '0', color = 'rgba(0,0,0,0.5)';
+                      
+                      if (currentShadow !== 'none') {
+                        const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px\s+(.+)/);
+                        if (match) {
+                          offsetX = match[1];
+                          offsetY = match[2];
+                          color = match[4];
+                        }
+                      }
+                      
+                      const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+                      handleStyleChange("textShadow", newShadow);
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-1">
+                  <label className="text-[10px] text-muted-foreground">Color</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div
+                        className="h-6 w-full rounded border cursor-pointer"
+                        style={{ 
+                          backgroundColor: (() => {
+                            const shadow = localOverlay.styles.textShadow;
+                            if (!shadow || shadow === 'none') return 'rgba(0,0,0,0.5)';
+                            const match = shadow.match(/rgba?\([^)]+\)|#[a-fA-F0-9]{3,6}|[a-zA-Z]+/);
+                            return match ? match[0] : 'rgba(0,0,0,0.5)';
+                          })()
+                        }}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                      side="right"
+                    >
+                      <ColorPicker
+                        value={(() => {
+                          const shadow = localOverlay.styles.textShadow;
+                          if (!shadow || shadow === 'none') return 'rgba(0,0,0,0.5)';
+                          const match = shadow.match(/rgba?\([^)]+\)|#[a-fA-F0-9]{3,6}|[a-zA-Z]+/);
+                          return match ? match[0] : 'rgba(0,0,0,0.5)';
+                        })()}
+                        onChange={(color) => {
+                          const currentShadow = localOverlay.styles.textShadow || 'none';
+                          let offsetX = '0', offsetY = '0', blur = '0';
+                          
+                          if (currentShadow !== 'none') {
+                            const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px/);
+                            if (match) {
+                              offsetX = match[1];
+                              offsetY = match[2];
+                              blur = match[3];
+                            }
+                          }
+                          
+                          const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+                          handleStyleChange("textShadow", newShadow);
+                        }}
+                        hideInputs
+                        hideHue
+                        hideControls
+                        hideColorTypeBtns
+                        hideAdvancedSliders
+                        hideColorGuide
+                        hideInputType
+                        height={200}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => handleStyleChange("textShadow", "none")}
+                className="w-full px-2 py-1 text-xs border rounded hover:bg-accent"
+              >
+                Remove Shadow
+              </button>
+            </div>
+
           </div>
         )}
       </div>

@@ -345,6 +345,7 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     whiteSpace: "pre-wrap",
     lineHeight: overlay.styles.lineHeight || "1.2",
     letterSpacing: overlay.styles.letterSpacing || "0px",
+    textShadow: overlay.styles.textShadow && overlay.styles.textShadow !== 'none' ? overlay.styles.textShadow : undefined,
     padding: "0.1em",
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
