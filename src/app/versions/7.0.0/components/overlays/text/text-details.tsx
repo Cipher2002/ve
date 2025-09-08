@@ -61,7 +61,12 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 }) => {
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
   const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<{ 
+    applyFormatting: (command: string, value?: string) => void; 
+    applyInlineStyle: (property: string, value: string) => void;
+    toggleInlineFormat: (command: string) => void;
+    focus: () => void 
+  }>(null);
   const [isUserTyping, setIsUserTyping] = useState(false);
 
   /**
@@ -213,6 +218,86 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 
         {/* Editor */}
         <div className="relative w-full overflow-hidden rounded-b-sm border border-border bg-muted/40">
+          {/* Formatting Toolbar */}
+          {selectedText.selectedText && (
+            <div className="flex items-center gap-1 p-2 border-b border-border bg-background/80 backdrop-blur-sm">
+              <button
+                onClick={() => editorRef.current?.toggleInlineFormat('bold')}
+                className="px-2 py-1 text-xs border rounded font-bold hover:bg-accent"
+                title="Bold"
+              >
+                B
+              </button>
+              <button
+                onClick={() => editorRef.current?.toggleInlineFormat('italic')}
+                className="px-2 py-1 text-xs border rounded italic hover:bg-accent"
+                title="Italic"
+              >
+                I
+              </button>
+              <button
+                onClick={() => editorRef.current?.toggleInlineFormat('underline')}
+                className="px-2 py-1 text-xs border rounded underline hover:bg-accent"
+                title="Underline"
+              >
+                U
+              </button>
+              
+              <div className="w-px h-4 bg-border mx-1" />
+              
+              <select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    editorRef.current?.applyInlineStyle('font-family', e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+                className="text-xs border rounded px-1 py-1 bg-background"
+                defaultValue=""
+              >
+                <option value="">Font</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Times New Roman, serif">Times</option>
+                <option value="Helvetica, sans-serif">Helvetica</option>
+                <option value="Courier New, monospace">Courier</option>
+              </select>
+              
+              <input
+                type="range"
+                min="0.8"
+                max="2"
+                step="0.1"
+                onChange={(e) => {
+                  editorRef.current?.applyInlineStyle('font-size', `${parseFloat(e.target.value)}em`);
+                }}
+                className="w-16 h-2"
+                title="Font Size"
+              />
+              
+              <input
+                type="range"
+                min="-2"
+                max="10"
+                step="0.5"
+                onChange={(e) => {
+                  editorRef.current?.applyInlineStyle('letter-spacing', `${e.target.value}px`);
+                }}
+                className="w-16 h-2"
+                title="Letter Spacing"
+              />
+              
+              <input
+                type="color"
+                onChange={(e) => {
+                  editorRef.current?.applyInlineStyle('color', e.target.value);
+                }}
+                className="w-6 h-6 border rounded cursor-pointer"
+                title="Text Color"
+              />
+            </div>
+          )}
+          
           <RichTextEditor
             ref={editorRef}
             content={localOverlay.styles.isRichText 
