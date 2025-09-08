@@ -64,7 +64,7 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [selectedFont, setSelectedFont] = React.useState<GoogleFont | null>(null);
   const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
-  const [isTypographyOpen, setIsTypographyOpen] = React.useState(true);
+  const [isTypographyOpen, setIsTypographyOpen] = React.useState(false);
   const [isSpacingOpen, setIsSpacingOpen] = React.useState(false);
 
   // Load fonts when style panel opens
