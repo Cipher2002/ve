@@ -285,88 +285,87 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
             </ToggleGroup>
           </div>
         </div>
-      </div>
 
-      {/* Colors */}
-      <div className="space-y-4 rounded-md bg-background/50 p-4 border">
-        <h3 className="text-sm font-medium">Colors</h3>
+        {/* Colors */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium">Colors</h4>
+          <div className="grid grid-cols-3 gap-4">
+            {!localOverlay.styles.WebkitBackgroundClip ? (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">
+                    Text Color
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div
+                        className="h-8 w-8 rounded-md border cursor-pointer"
+                        style={{ backgroundColor: localOverlay.styles.color }}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                      side="right"
+                    >
+                      <ColorPicker
+                        value={localOverlay.styles.color}
+                        onChange={(color) => handleStyleChange("color", color)}
+                        // hideInputs
+                        hideHue
+                        hideControls
+                        hideColorTypeBtns
+                        hideAdvancedSliders
+                        hideColorGuide
+                        hideInputType
+                        height={200}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          {!localOverlay.styles.WebkitBackgroundClip ? (
-            <>
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">
-                  Text Color
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div
-                      className="h-8 w-8 rounded-md border cursor-pointer"
-                      style={{ backgroundColor: localOverlay.styles.color }}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                    side="right"
-                  >
-                    <ColorPicker
-                      value={localOverlay.styles.color}
-                      onChange={(color) => handleStyleChange("color", color)}
-                      // hideInputs
-                      hideHue
-                      hideControls
-                      hideColorTypeBtns
-                      hideAdvancedSliders
-                      hideColorGuide
-                      hideInputType
-                      height={200}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">
+                    Highlight
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div
+                        className="h-8 w-8 rounded-md border cursor-pointer"
+                        style={{
+                          backgroundColor: localOverlay.styles.backgroundColor,
+                        }}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                      side="right"
+                    >
+                      <ColorPicker
+                        value={localOverlay.styles.backgroundColor}
+                        onChange={(color) => {
+                          handleStyleChange("backgroundColor", color);
+                        }}
+                        hideInputs
+                        hideHue
+                        hideControls
+                        hideColorTypeBtns
+                        hideAdvancedSliders
+                        hideColorGuide
+                        hideInputType
+                        height={200}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </>
+            ) : (
+              <div className="col-span-3">
+                <p className="text-xs text-muted-foreground">
+                  Color settings are not available for gradient text styles
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">
-                  Highlight
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div
-                      className="h-8 w-8 rounded-md border cursor-pointer"
-                      style={{
-                        backgroundColor: localOverlay.styles.backgroundColor,
-                      }}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                    side="right"
-                  >
-                    <ColorPicker
-                      value={localOverlay.styles.backgroundColor}
-                      onChange={(color) => {
-                        handleStyleChange("backgroundColor", color);
-                      }}
-                      hideInputs
-                      hideHue
-                      hideControls
-                      hideColorTypeBtns
-                      hideAdvancedSliders
-                      hideColorGuide
-                      hideInputType
-                      height={200}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </>
-          ) : (
-            <div className="col-span-3">
-              <p className="text-xs text-muted-foreground">
-                Color settings are not available for gradient text styles
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
