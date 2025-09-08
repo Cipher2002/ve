@@ -67,8 +67,12 @@ export const TimelineItemLabel: React.FC<TimelineItemLabelProps> = ({
       return "Loading...";
     }
     if (item.type === OverlayType.TEXT && typeof item.content === "string") {
-      return item.content;
+      // Strip HTML tags for display in timeline
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = item.content;
+      return tempDiv.textContent || tempDiv.innerText || item.content;
     }
+
     if ("src" in item && item.src) {
       const filename = item.src.split("/").pop() || "";
       return filename.split("?")[0];
