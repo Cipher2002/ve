@@ -98,3 +98,5 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
     );
   }
 );
+
+RichTextEditor.displayName = 'RichTextEditor';
