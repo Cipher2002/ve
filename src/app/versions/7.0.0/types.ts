@@ -48,6 +48,7 @@ export type TextOverlay = BaseOverlay & {
   styles: BaseStyles & {
     fontSize: string;
     fontWeight: string;
+    fontSizeMultiplier?: number;
     color: string;
     backgroundColor: string;
     fontFamily: string;

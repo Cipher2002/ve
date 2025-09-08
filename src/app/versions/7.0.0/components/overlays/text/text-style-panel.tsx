@@ -177,6 +177,78 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
           </div>
         </div>
 
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Font Size</label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="range"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={localOverlay.styles.fontSizeMultiplier || 1}
+                onChange={(e) => handleStyleChange("fontSizeMultiplier", parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <input
+                type="number"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={localOverlay.styles.fontSizeMultiplier || 1}
+                onChange={(e) => handleStyleChange("fontSizeMultiplier", parseFloat(e.target.value))}
+                className="w-16 px-2 py-1 text-xs border rounded"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Text Style</label>
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  const currentWeight = localOverlay.styles.fontWeight;
+                  const isBold = currentWeight === 'bold' || currentWeight === '700';
+                  handleStyleChange("fontWeight", isBold ? "400" : "700");
+                }}
+                className={`px-3 py-1 text-xs border rounded font-bold ${
+                  localOverlay.styles.fontWeight === 'bold' || localOverlay.styles.fontWeight === '700'
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-background'
+                }`}
+              >
+                B
+              </button>
+              <button
+                onClick={() => {
+                  const isItalic = localOverlay.styles.fontStyle === 'italic';
+                  handleStyleChange("fontStyle", isItalic ? "normal" : "italic");
+                }}
+                className={`px-3 py-1 text-xs border rounded italic ${
+                  localOverlay.styles.fontStyle === 'italic'
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-background'
+                }`}
+              >
+                I
+              </button>
+              <button
+                onClick={() => {
+                  const hasUnderline = localOverlay.styles.textDecoration?.includes('underline');
+                  handleStyleChange("textDecoration", hasUnderline ? "none" : "underline");
+                }}
+                className={`px-3 py-1 text-xs border rounded underline ${
+                  localOverlay.styles.textDecoration?.includes('underline')
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-background'
+                }`}
+              >
+                U
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Alignment</label>

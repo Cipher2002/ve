@@ -295,10 +295,14 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   
   const resolvedFontFamily = getFontFamily(overlay.styles.fontFamily);
 
+  const baseFontSize = calculateFontSize();
+  const multiplier = overlay.styles.fontSizeMultiplier || 1;
+  const finalFontSize = baseFontSize * multiplier;
+
   const textStyle: React.CSSProperties = {
     ...restStyles,
     animation: undefined,
-    fontSize: `${calculateFontSize()}px`,
+    fontSize: `${finalFontSize}px`,
     fontFamily: resolvedFontFamily,
     maxWidth: "100%",
     wordWrap: "break-word",

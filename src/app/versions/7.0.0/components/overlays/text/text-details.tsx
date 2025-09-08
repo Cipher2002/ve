@@ -8,6 +8,32 @@ import { TextSettingsPanel } from "./text-settings-panel";
 import { TextStylePanel } from "./text-style-panel";
 import { createEffectPreview } from './text-effect-preview';
 
+// Helper function to calculate text dimensions
+const calculateTextDimensions = (overlay: TextOverlay): { width: number; height: number } => {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  
+  if (!context) return { width: overlay.width, height: overlay.height };
+  
+  const multiplier = overlay.styles.fontSizeMultiplier || 1;
+  const baseFontSize = Math.sqrt((overlay.width * overlay.height) / 100) * 1.2; // Simplified base calculation
+  const fontSize = baseFontSize * multiplier;
+  
+  context.font = `${overlay.styles.fontWeight || '400'} ${fontSize}px ${overlay.styles.fontFamily || 'Arial'}`;
+  
+  const textContent = typeof overlay.content === 'string' ? overlay.content : 
+    (overlay.content?.elements?.map(el => el.text).join(' ') || '');
+  
+  const lines = textContent.split('\n');
+  const maxWidth = Math.max(...lines.map(line => context.measureText(line).width));
+  const height = lines.length * fontSize * 1.2; // Line height factor
+  
+  return {
+    width: Math.max(50, maxWidth + 20), // Add padding
+    height: Math.max(30, height + 10)   // Add padding
+  };
+};
+
 /**
  * Props for the TextDetails component
  * @interface TextDetailsProps
@@ -73,7 +99,7 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
    */
   const handleStyleChange = (
     field: keyof TextOverlay["styles"],
-    value: string
+    value: string | number
   ) => {
     
     const updatedLocalOverlay = {
@@ -86,7 +112,20 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
     // Update the global state immediately
     if (selectedOverlayId !== null) {
       changeOverlay(selectedOverlayId, (overlay) => {
-        return updatedLocalOverlay as TextOverlay;
+        const updatedOverlay = updatedLocalOverlay as TextOverlay;
+        
+        // If font size multiplier changed, trigger text box resize
+        if (field === 'fontSizeMultiplier' || field === 'fontWeight' || field === 'fontStyle') {
+          // Calculate new dimensions based on text content and font size
+          const textMetrics = calculateTextDimensions(updatedOverlay);
+          return {
+            ...updatedOverlay,
+            width: Math.max(updatedOverlay.width, textMetrics.width),
+            height: Math.max(updatedOverlay.height, textMetrics.height)
+          };
+        }
+        
+        return updatedOverlay;
       });
     }
   };
