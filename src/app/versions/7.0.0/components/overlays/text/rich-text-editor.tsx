@@ -18,8 +18,15 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
     const editorRef = useRef<HTMLDivElement>(null);
     const [lastSelection, setLastSelection] = useState<Range | null>(null);
 
-    useEffect(() => {
-        if (editorRef.current && content !== editorRef.current.innerHTML) {
+    const isTypingRef = useRef(false);
+  
+  useEffect(() => {
+    // Don't update content if user is actively typing
+    if (isTypingRef.current) {
+      return;
+    }
+    
+    if (editorRef.current && content !== editorRef.current.innerHTML) {
         const selection = window.getSelection();
         let savedRange: Range | null = null;
         
@@ -77,9 +84,12 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
 
     const handleInput = () => {
       if (editorRef.current) {
-        // Save cursor position before processing
-        const selection = window.getSelection();
-        const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+        isTypingRef.current = true;
+        
+        // Clear typing flag after a short delay
+        setTimeout(() => {
+          isTypingRef.current = false;
+        }, 100);
         
         let content = editorRef.current.innerHTML;
         
@@ -94,8 +104,6 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
         }
         
         onChange(content);
-        
-        // Don't restore selection here - let the useEffect handle it
       }
     };
 
@@ -139,14 +147,28 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
       focus: () => editorRef.current?.focus()
     }));
 
+     const handleKeyDown = () => {
+    isTypingRef.current = true;
+  };
+
+  const handleKeyUp = () => {
+    // Keep typing flag for a bit longer on keyup
+    setTimeout(() => {
+      isTypingRef.current = false;
+    }, 200);
+    
+    handleSelectionChange();
+  };
+
     return (
       <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
         onMouseUp={handleSelectionChange}
-        onKeyUp={handleSelectionChange}
         onFocus={handleFocus}
         className={`min-h-[60px] bg-transparent p-2 text-foreground outline-none focus:outline-none ${className}`}
         style={{ whiteSpace: 'pre-wrap' }}

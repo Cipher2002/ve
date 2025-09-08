@@ -61,7 +61,8 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 }) => {
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
   const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
-  const editorRef = useRef<{ applyFormatting: (command: string, value?: string) => void; focus: () => void }>(null);
+  const editorRef = useRef<any>(null);
+  const [isUserTyping, setIsUserTyping] = useState(false);
 
   /**
    * Debounced function to update the overlay in the global state
@@ -82,6 +83,16 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   const handleInputChange = (field: keyof TextOverlay, value: string) => {
     // Update local state immediately for responsive UI
     setLocalOverlay({ ...localOverlay, [field]: value });
+
+    // For content changes, mark user as typing
+    if (field === 'content') {
+      setIsUserTyping(true);
+      
+      // Clear typing state after user stops typing
+      setTimeout(() => {
+        setIsUserTyping(false);
+      }, 1000);
+    }
 
     // Debounce the actual overlay update if an overlay is selected
     if (selectedOverlayId !== null) {
