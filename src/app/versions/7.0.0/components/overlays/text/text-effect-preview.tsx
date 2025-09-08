@@ -20,6 +20,8 @@ export const createEffectPreview = (config: EffectConfig, textStyle: any, conten
           {
               style: {
               ...textStyle,
+              lineHeight: textStyle.lineHeight || '1.2',
+              letterSpacing: textStyle.letterSpacing || '0px',
               position: 'absolute',
               top: `${offsetPx}px`,
               left: `${offsetPx}px`,
@@ -31,8 +33,6 @@ export const createEffectPreview = (config: EffectConfig, textStyle: any, conten
               // Force exact same text rendering
               whiteSpace: textStyle.whiteSpace,
               wordWrap: textStyle.wordWrap,
-              lineHeight: textStyle.lineHeight,
-              letterSpacing: textStyle.letterSpacing
               },
               content
           },

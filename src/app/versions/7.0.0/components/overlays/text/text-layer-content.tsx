@@ -203,10 +203,29 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
 
   // Helper function to render HTML content
   const renderHtmlContent = (html: string, style: React.CSSProperties) => {
+    // Apply styles directly to the HTML content
+    const styledHtml = html.replace(
+      /<([^>]+)>/g, 
+      (match, tagContent) => {
+        if (tagContent.startsWith('/')) return match; // Don't modify closing tags
+        
+        // Add style attributes to opening tags
+        const styleAttr = `style="line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`;
+        
+        if (tagContent.includes('style=')) {
+          // If style already exists, merge it
+          return match.replace(/style="([^"]*)"/, `style="$1 line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`);
+        } else {
+          // Add style attribute
+          return `<${tagContent} ${styleAttr}>`;
+        }
+      }
+    );
+
     return (
       <div 
         style={style}
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: styledHtml }}
       />
     );
   };
@@ -324,7 +343,8 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     maxWidth: "100%",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",
-    lineHeight: "1.2",
+    lineHeight: overlay.styles.lineHeight || "1.2",
+    letterSpacing: overlay.styles.letterSpacing || "0px",
     padding: "0.1em",
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
@@ -358,7 +378,15 @@ return (
     ) : effectConfig ? (() => {
       // Apply dynamic effect - use plain text for effects
       const plainTextContent = overlay.styles.isRichText ? stripHtmlTags(textContent) : textContent;
-      const effect = createEffect(effectConfig, textStyle, plainTextContent);
+      
+      // Ensure textStyle includes all spacing properties for effects
+      const effectTextStyle = {
+        ...textStyle,
+        lineHeight: overlay.styles.lineHeight || textStyle.lineHeight || "1.2",
+        letterSpacing: overlay.styles.letterSpacing || textStyle.letterSpacing || "0px"
+      };
+      
+      const effect = createEffect(effectConfig, effectTextStyle, plainTextContent);
       if (!effect) return null;
 
       if (effect.container) {

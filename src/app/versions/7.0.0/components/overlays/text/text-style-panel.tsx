@@ -434,7 +434,11 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   min="-2"
                   max="10"
                   step="0.1"
-                  value={parseFloat(localOverlay.styles.letterSpacing?.replace('px', '') || "0")}
+                  value={(() => {
+                    const spacing = localOverlay.styles.letterSpacing;
+                    if (!spacing || spacing === 'normal') return 0;
+                    return parseFloat(spacing.replace('px', ''));
+                  })()}
                   onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
@@ -443,12 +447,17 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   min="-2"
                   max="10"
                   step="0.1"
-                  value={parseFloat(localOverlay.styles.letterSpacing?.replace('px', '') || "0")}
+                  value={(() => {
+                    const spacing = localOverlay.styles.letterSpacing;
+                    if (!spacing || spacing === 'normal') return 0;
+                    return parseFloat(spacing.replace('px', ''));
+                  })()}
                   onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
                   className="w-16 px-2 py-1 text-xs border rounded"
                 />
               </div>
             </div>
+
           </div>
         )}
       </div>
