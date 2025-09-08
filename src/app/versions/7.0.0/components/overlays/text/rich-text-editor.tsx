@@ -2,8 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 
 interface RichTextEditorMethods {
   applyFormatting: (command: string, value?: string) => void;
-  applyInlineStyle: (property: string, value: string) => void;
-  toggleInlineFormat: (command: string) => void;
   focus: () => void;
 }
 
@@ -126,7 +124,7 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
       }
     };
 
-const applyFormatting = (command: string, value?: string) => {
+    const applyFormatting = (command: string, value?: string) => {
       // Restore selection if we have one
       if (lastSelection) {
         const selection = window.getSelection();
@@ -143,48 +141,9 @@ const applyFormatting = (command: string, value?: string) => {
       }
     };
 
-    const applyInlineStyle = (property: string, value: string) => {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      const range = selection.getRangeAt(0);
-      if (range.collapsed) return; // No text selected
-
-      // Create a span with the desired style
-      const span = document.createElement('span');
-      span.style.setProperty(property, value);
-      
-      try {
-        range.surroundContents(span);
-        if (editorRef.current) {
-          onChange(editorRef.current.innerHTML);
-        }
-      } catch (e) {
-        // If surroundContents fails, extract and wrap the content
-        const content = range.extractContents();
-        span.appendChild(content);
-        range.insertNode(span);
-        if (editorRef.current) {
-          onChange(editorRef.current.innerHTML);
-        }
-      }
-    };
-
-    const toggleInlineFormat = (command: string) => {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      document.execCommand(command, false);
-      if (editorRef.current) {
-        onChange(editorRef.current.innerHTML);
-      }
-    };
-
     // Expose formatting methods to parent component
     React.useImperativeHandle(ref, () => ({
       applyFormatting,
-      applyInlineStyle,
-      toggleInlineFormat,
       focus: () => editorRef.current?.focus()
     }));
 
