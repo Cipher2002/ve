@@ -119,6 +119,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button 
                 className="w-full text-left px-3 py-2 text-xs border rounded-md bg-background hover:bg-accent"
                 onClick={() => setSelectedFont(selectedFont ? null : GOOGLE_FONTS[0])}
+                style={{ fontFamily: localOverlay.styles.fontFamily || 'Arial, sans-serif' }}
               >
                 {extractFontName(localOverlay.styles.fontFamily) || "Select a font"}
               </button>
@@ -152,7 +153,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                               if (font) handleFontSelect(font, variant);
                             }}
                           >
-                            {variant.displayName}
+                            {hoveredFont} {variant.displayName}
                           </button>
                         ))}
                       </div>
