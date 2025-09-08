@@ -1,7 +1,7 @@
 import React from "react";
 import { TextOverlay } from "../../../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -64,6 +64,8 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [selectedFont, setSelectedFont] = React.useState<GoogleFont | null>(null);
   const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
+  const [isTypographyOpen, setIsTypographyOpen] = React.useState(true);
+  const [isSpacingOpen, setIsSpacingOpen] = React.useState(false);
 
   // Load fonts when style panel opens
   React.useEffect(() => {
@@ -107,10 +109,23 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Typography Settings */}
-      <div className="space-y-4 rounded-md bg-background/50 p-4 border">
-        <h3 className="text-sm font-medium">Typography</h3>
+      <div className="rounded-md bg-background/50 border">
+        <button
+          onClick={() => setIsTypographyOpen(!isTypographyOpen)}
+          className="w-full flex items-center justify-between p-4 text-sm font-medium hover:bg-accent/50 rounded-t-md"
+        >
+          <span>Typography</span>
+          {isTypographyOpen ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </button>
+        
+        {isTypographyOpen && (
+          <div className="space-y-4 p-4 pt-0">
 
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Font Family</label>
@@ -367,6 +382,75 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
             )}
           </div>
         </div>
+          </div>
+        )}
+      </div>
+
+      {/* Spacing Settings */}
+      <div className="rounded-md bg-background/50 border">
+        <button
+          onClick={() => setIsSpacingOpen(!isSpacingOpen)}
+          className="w-full flex items-center justify-between p-4 text-sm font-medium hover:bg-accent/50 rounded-t-md"
+        >
+          <span>Spacing</span>
+          {isSpacingOpen ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </button>
+        
+        {isSpacingOpen && (
+          <div className="space-y-4 p-4 pt-0">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Line Height</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="0.8"
+                  max="3"
+                  step="0.1"
+                  value={parseFloat(localOverlay.styles.lineHeight || "1.2")}
+                  onChange={(e) => handleStyleChange("lineHeight", e.target.value)}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="number"
+                  min="0.8"
+                  max="3"
+                  step="0.1"
+                  value={parseFloat(localOverlay.styles.lineHeight || "1.2")}
+                  onChange={(e) => handleStyleChange("lineHeight", e.target.value)}
+                  className="w-16 px-2 py-1 text-xs border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Letter Spacing (px)</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="-2"
+                  max="10"
+                  step="0.1"
+                  value={parseFloat(localOverlay.styles.letterSpacing?.replace('px', '') || "0")}
+                  onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="number"
+                  min="-2"
+                  max="10"
+                  step="0.1"
+                  value={parseFloat(localOverlay.styles.letterSpacing?.replace('px', '') || "0")}
+                  onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
+                  className="w-16 px-2 py-1 text-xs border rounded"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

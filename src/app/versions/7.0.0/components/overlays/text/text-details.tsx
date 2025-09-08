@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { TextOverlay } from "../../../types";
 import { PaintBucket, Settings } from "lucide-react";
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextSettingsPanel } from "./text-settings-panel";
 import { TextStylePanel } from "./text-style-panel";
 import { createEffectPreview } from './text-effect-preview';
+import { RichTextEditor } from './rich-text-editor';
 
 // // Helper function to calculate text dimensions
 // const calculateTextDimensions = (overlay: TextOverlay): { width: number; height: number } => {
@@ -59,6 +60,8 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   setLocalOverlay,
 }) => {
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
+  const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
+  const editorRef = useRef<{ applyFormatting: (command: string, value?: string) => void; focus: () => void }>(null);
 
   /**
    * Debounced function to update the overlay in the global state
@@ -191,26 +194,22 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 
         {/* Editor */}
         <div className="relative w-full overflow-hidden rounded-b-sm border border-border bg-muted/40">
-          <textarea
-            value={typeof localOverlay.content === 'string' ? localOverlay.content : 
-                  (localOverlay.content?.elements?.map(el => el.text).join(' ') || "")}
-            onChange={(e) => {
-              if (localOverlay.templateType === "multi-element" && typeof localOverlay.content === 'object') {
-                // For multi-element, update the first element for now
-                const newContent = { 
-                  ...localOverlay.content,
-                  elements: localOverlay.content.elements?.map((el, index) => 
-                    index === 0 ? { ...el, text: e.target.value } : el
-                  ) || []
-                };
-                handleInputChange("content", newContent as any);
-              } else {
-                handleInputChange("content", e.target.value);
+          <RichTextEditor
+            ref={editorRef}
+            content={localOverlay.styles.isRichText 
+              ? (typeof localOverlay.content === 'string' ? localOverlay.content : '') 
+              : (typeof localOverlay.content === 'string' ? localOverlay.content : '')
+            }
+            onChange={(content) => {
+              handleInputChange("content", content);
+              // Enable rich text mode when HTML content is detected
+              if (content.includes('<') && !localOverlay.styles.isRichText) {
+                handleStyleChange("isRichText", true as any);
               }
             }}
+            onSelectionChange={setSelectedText}
             placeholder="Enter your text here..."
-            className="w-full min-h-[60px] bg-transparent p-2 text-foreground placeholder:text-muted-foreground outline-none focus:outline-none"
-            spellCheck="false"
+            className="w-full min-h-[60px]"
           />
         </div>
       </div>
