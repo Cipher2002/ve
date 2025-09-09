@@ -22,7 +22,7 @@ export const SelectStickerOverlay: React.FC<SelectStickerOverlayProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center p-4">
-      {stickerOverlays.length === 0 ? (
+      {/* {stickerOverlays.length === 0 ? (
         <>
           <div className="mb-4">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
@@ -45,7 +45,7 @@ export const SelectStickerOverlay: React.FC<SelectStickerOverlayProps> = ({
       ) : (
         <>
         </>
-      )}
+      )} */}
     </div>
   );
 };

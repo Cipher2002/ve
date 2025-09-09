@@ -585,8 +585,8 @@ export const shapeStickers = [
   createBasicShapeTemplate("rounded-rectangle", "Rounded Rectangle", RoundedRectangleComponent),
   
   // Lines & Arrows
-  createBasicShapeTemplate("horizontal-line", "Horizontal Line", HorizontalLineComponent),
-  createBasicShapeTemplate("vertical-line", "Vertical Line", VerticalLineComponent),
+  // createBasicShapeTemplate("horizontal-line", "Horizontal Line", HorizontalLineComponent),
+  // createBasicShapeTemplate("vertical-line", "Vertical Line", VerticalLineComponent),
   createBasicShapeTemplate("arrow-right", "Arrow Right", ArrowRightComponent),
   
   // Symbols
