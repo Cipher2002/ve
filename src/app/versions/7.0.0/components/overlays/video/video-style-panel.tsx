@@ -147,6 +147,37 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
           </div>
         </div>
 
+        {/* Crop Controls */}
+        <div className="space-y-2 mt-6">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-gray-400">Crop</label>
+            <button
+              onClick={() => {
+                // Toggle crop mode - you'll need to implement this in the parent component
+                console.log('Crop mode toggle');
+              }}
+              className="px-3 py-1.5 text-xs bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/25 rounded-md transition-colors"
+            >
+              Crop Video
+            </button>
+          </div>
+          {localOverlay?.styles?.crop && (
+            <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-md border">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  Crop Applied: {Math.round(localOverlay.styles.crop.width)}×{Math.round(localOverlay.styles.crop.height)}
+                </span>
+                <button
+                  onClick={() => handleStyleChange({ crop: undefined })}
+                  className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Media Padding Controls */}
         <div className="mt-6">
           <MediaPaddingControls

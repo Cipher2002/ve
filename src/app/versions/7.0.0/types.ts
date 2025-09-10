@@ -143,6 +143,12 @@ export type ClipOverlay = BaseOverlay & {
     padding?: string;
     paddingBackgroundColor?: string;
     videoOpacity?: number;
+    crop?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
     animation?: AnimationConfig; // Using shared type
     cssClass?: string;
     customCSS?: string;
@@ -472,6 +478,12 @@ export interface ImageStyles extends BaseStyles {
   padding?: string;
   paddingBackgroundColor?: string;
   imageOpacity?: number;
+  crop?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   animation?: AnimationConfig;
   cssClass?: string;
   customCSS?: string;
