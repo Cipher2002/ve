@@ -125,21 +125,12 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
         </div>
 
         {/* Video Opacity */}
-        <div className="space-y-2">
+        <div className="space-y-2 mt-6">
           <div className="flex items-center justify-between">
             <label className="text-xs text-gray-400">Video Opacity</label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={Math.round((localOverlay?.styles?.videoOpacity ?? 1) * 100)}
-              onChange={(e) => {
-                const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                handleStyleChange({ videoOpacity: value / 100 });
-              }}
-              className="w-12 text-xs text-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-1 py-0.5 text-gray-900 dark:text-gray-100"
-            />
-            <span className="text-xs text-gray-400">%</span>
+            <span className="text-xs text-gray-400 min-w-[40px] text-right">
+              {Math.round((localOverlay?.styles?.videoOpacity ?? 1) * 100)}%
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <input
@@ -157,10 +148,12 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
         </div>
 
         {/* Media Padding Controls */}
-        <MediaPaddingControls
-          localOverlay={localOverlay}
-          handleStyleChange={handleStyleChange}
-        />
+        <div className="mt-6">
+          <MediaPaddingControls
+            localOverlay={localOverlay}
+            handleStyleChange={handleStyleChange}
+          />
+        </div>
       </div>
     </div>
   );

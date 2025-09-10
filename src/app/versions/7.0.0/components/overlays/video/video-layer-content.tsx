@@ -103,7 +103,7 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     width: "100%",
     height: "100%",
     objectFit: overlay.styles.objectFit || "cover",
-    opacity: overlay.styles.opacity,
+    opacity: overlay.styles.videoOpacity ?? 1,
     transform: overlay.styles.transform || "none",
     borderRadius: overlay.styles.borderRadius || "0px",
     filter: overlay.styles.filter || "none",
@@ -118,6 +118,7 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     height: "100%",
     padding: overlay.styles.padding || "0px",
     backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    opacity: overlay.styles.opacity, // This is for padding background opacity
     display: "flex", // Use flexbox for centering
     alignItems: "center",
     justifyContent: "center",
