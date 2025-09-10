@@ -67,8 +67,6 @@ export const ImageOverlayPanel: React.FC = () => {
     durationInFrames,
     selectedOverlayId,
     changeOverlay,
-    setCropMode,
-    setActiveCropOverlayId,
   } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
@@ -893,10 +891,6 @@ export const ImageOverlayPanel: React.FC = () => {
           <ImageDetails
             localOverlay={localOverlay as ImageOverlay}
             setLocalOverlay={handleUpdateOverlay}
-            onStartCrop={() => {
-              setCropMode(true);
-              setActiveCropOverlayId(localOverlay!.id);
-            }}
           />
         </div>
       )}

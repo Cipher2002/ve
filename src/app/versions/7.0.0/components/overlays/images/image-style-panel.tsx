@@ -11,8 +11,6 @@ interface ImageStylePanelProps {
   localOverlay: ImageOverlay;
   /** Callback to update the overlay's style properties */
   handleStyleChange: (updates: Partial<ImageOverlay["styles"]>) => void;
-  /** Callback function to start crop mode */
-  onStartCrop?: () => void;
 }
 
 /**
@@ -34,7 +32,6 @@ interface ImageStylePanelProps {
 export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
   localOverlay,
   handleStyleChange,
-  onStartCrop,
 }) => {
   return (
     <div className="space-y-6">
@@ -142,38 +139,6 @@ export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
               className="flex-1 accent-primary h-1.5 rounded-full bg-muted"
             />
           </div>
-        </div>
-
-        {/* Crop Controls */}
-        <div className="space-y-2 mt-6">
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-muted-foreground">Crop</label>
-            <button
-              onClick={() => {
-                if (onStartCrop) {
-                  onStartCrop();
-                }
-              }}
-              className="px-3 py-1.5 text-xs bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/25 rounded-md transition-colors"
-            >
-              Crop Image
-            </button>
-          </div>
-          {localOverlay?.styles?.crop && (
-            <div className="space-y-2 p-3 bg-muted/50 rounded-md border">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  Crop Applied: {Math.round(localOverlay.styles.crop.width)}×{Math.round(localOverlay.styles.crop.height)}
-                </span>
-                <button
-                  onClick={() => handleStyleChange({ crop: undefined })}
-                  className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Media Padding Controls */}
