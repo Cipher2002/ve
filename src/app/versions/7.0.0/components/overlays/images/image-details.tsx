@@ -19,6 +19,7 @@ import { ImageSettingsPanel } from "./image-settings-panel";
 interface ImageDetailsProps {
   localOverlay: ImageOverlay;
   setLocalOverlay: (overlay: ImageOverlay) => void;
+  onStartCrop?: () => void;
 }
 
 /**
@@ -47,6 +48,7 @@ interface ImageDetailsProps {
 export const ImageDetails: React.FC<ImageDetailsProps> = ({
   localOverlay,
   setLocalOverlay,
+  onStartCrop,
 }) => {
   const handleStyleChange = (updates: Partial<ImageOverlay["styles"]>) => {
     const updatedOverlay = {
@@ -98,6 +100,7 @@ export const ImageDetails: React.FC<ImageDetailsProps> = ({
           <ImageStylePanel
             localOverlay={localOverlay}
             handleStyleChange={handleStyleChange}
+            onStartCrop={onStartCrop}
           />
         </TabsContent>
 

@@ -11,6 +11,8 @@ interface ImageStylePanelProps {
   localOverlay: ImageOverlay;
   /** Callback to update the overlay's style properties */
   handleStyleChange: (updates: Partial<ImageOverlay["styles"]>) => void;
+  /** Callback function to start crop mode */
+  onStartCrop?: () => void;
 }
 
 /**
@@ -32,6 +34,7 @@ interface ImageStylePanelProps {
 export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
   localOverlay,
   handleStyleChange,
+  onStartCrop,
 }) => {
   return (
     <div className="space-y-6">
@@ -147,8 +150,9 @@ export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
             <label className="text-xs text-muted-foreground">Crop</label>
             <button
               onClick={() => {
-                // Toggle crop mode - you'll need to implement this in the parent component
-                console.log('Crop mode toggle');
+                if (onStartCrop) {
+                  onStartCrop();
+                }
               }}
               className="px-3 py-1.5 text-xs bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/25 rounded-md transition-colors"
             >

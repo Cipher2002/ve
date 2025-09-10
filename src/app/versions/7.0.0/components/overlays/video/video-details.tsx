@@ -31,6 +31,8 @@ interface VideoDetailsProps {
   localOverlay: ClipOverlay;
   /** Callback function to update the video overlay state */
   setLocalOverlay: (overlay: ClipOverlay) => void;
+  /** Callback function to start crop mode */
+  onStartCrop?: () => void;
 }
 
 /**
@@ -39,6 +41,7 @@ interface VideoDetailsProps {
 export const VideoDetails: React.FC<VideoDetailsProps> = ({
   localOverlay,
   setLocalOverlay,
+  onStartCrop,
 }) => {
   const { checkAndAdjustOverlaps } = useOverlayOverlapCheck();
   const { overlays, setOverlays } = useEditorContext();
@@ -150,6 +153,7 @@ export const VideoDetails: React.FC<VideoDetailsProps> = ({
           <VideoStylePanel
             localOverlay={localOverlay}
             handleStyleChange={handleStyleChange}
+            onStartCrop={onStartCrop}
           />
         </TabsContent>
 
