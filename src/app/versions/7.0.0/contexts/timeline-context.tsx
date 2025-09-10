@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useMemo } from "react";
+import React, { createContext, useContext, useRef, useMemo, useEffect } from "react";
 import { useTimelineZoom } from "../hooks/use-timeline-zoom";
 import { useVisibleRows } from "../hooks/use-visible-rows";
 import { useOverlays } from "../hooks/use-overlays";
@@ -63,6 +63,19 @@ export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
     handleZoom,
     handleWheelZoom,
   } = useTimelineZoom(timelineRef);
+
+  // Listen for timeline row adjustment events
+    useEffect(() => {
+      const handleAdjustRows = (event: CustomEvent) => {
+        const { requiredRows } = event.detail;
+        if (requiredRows > visibleRows && requiredRows <= 11) {
+          setVisibleRows(requiredRows);
+        }
+      };
+
+      window.addEventListener('adjustTimelineRows', handleAdjustRows as EventListener);
+      return () => window.removeEventListener('adjustTimelineRows', handleAdjustRows as EventListener);
+    }, [visibleRows, setVisibleRows]);
 
   const value = useMemo(
     () => ({

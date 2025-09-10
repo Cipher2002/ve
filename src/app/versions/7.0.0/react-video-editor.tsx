@@ -588,6 +588,10 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         setTemplateLoadingProgress({ current, total });
       });
       
+      // Calculate required rows before applying overlays
+      const maxRowNeeded = Math.max(...processedOverlays.map(overlay => overlay.row || 0));
+      const requiredRows = Math.min(Math.max(5, maxRowNeeded + 1), 11); // Min 5, max 11 rows
+      
       // Apply the processed overlays
       setOverlays(processedOverlays);
       setSelectedOverlayId(null);
@@ -595,6 +599,11 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       if (template.aspectRatio) {
         setAspectRatio(template.aspectRatio);
       }
+
+      // Auto-adjust timeline rows to accommodate template content
+      window.dispatchEvent(new CustomEvent('adjustTimelineRows', { 
+        detail: { requiredRows } 
+      }));
 
       // Trigger project saved event to refresh saved projects with new name
       setTimeout(() => {
