@@ -30,7 +30,8 @@ export const Layer: React.FC<{
   const style: React.CSSProperties = useMemo(() => {
     // Higher row numbers should be at the bottom
     // e.g. row 4 = z-index 60, row 0 = z-index 100
-    const zIndex = 100 - (overlay.row || 0) * 10;
+    // Ensure z-index never goes negative by using Math.max with 1
+    const zIndex = Math.max(1, 100 - (overlay.row || 0) * 10);
     const isSelected = overlay.id === selectedOverlayId;
 
     return {
