@@ -109,6 +109,12 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     filter: overlay.styles.filter || "none",
     boxShadow: overlay.styles.boxShadow || "none",
     border: overlay.styles.border || "none",
+    // Apply crop if present
+    ...(overlay.styles.crop && {
+      objectPosition: `${-overlay.styles.crop.x}px ${-overlay.styles.crop.y}px`,
+      width: `${(overlay.width / overlay.styles.crop.width) * 100}%`,
+      height: `${(overlay.height / overlay.styles.crop.height) * 100}%`,
+    }),
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 

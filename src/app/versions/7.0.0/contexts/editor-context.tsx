@@ -114,6 +114,12 @@ interface EditorContextProps {
   handleAutoLoadVideo: () => Promise<void>;
   isAutoLoadingVideo: boolean;
 
+  // Crop functionality
+  cropMode: boolean;
+  setCropMode: (mode: boolean) => void;
+  activeCropOverlayId: number | null;
+  setActiveCropOverlayId: (id: number | null) => void;
+
 
 }
 

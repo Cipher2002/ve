@@ -3,6 +3,7 @@ import { Player, PlayerRef } from "@remotion/player";
 import { Main } from "../../remotion/main";
 import { useEditorContext } from "../../contexts/editor-context";
 import { FPS } from "../../constants";
+import { CropOverlay } from "../shared/crop-overlay";
 
 /**
  * Props for the VideoPlayer component
@@ -29,6 +30,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     getAspectRatioDimensions,
     durationInFrames,
     isAutoLoadingVideo,
+    cropMode,
+    setCropMode,
+    activeCropOverlayId,
+    setActiveCropOverlayId,
   } = useEditorContext();
 
   /**
@@ -123,6 +128,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
               errorFallback={() => <></>}
               overflowVisible
             />
+            {/* Crop Overlay */}
+            {cropMode && activeCropOverlayId && selectedOverlayId === activeCropOverlayId && (
+              <div className="absolute inset-0">
+                <CropOverlay
+                  containerWidth={Math.min(playerDimensions.width, compositionWidth)}
+                  containerHeight={Math.min(playerDimensions.height, compositionHeight)}
+                  initialCrop={
+                    (overlays.find(o => o.id === activeCropOverlayId)?.styles as any)?.crop
+                  }
+                  onCropChange={(crop) => {
+                    // Preview crop changes
+                  }}
+                  onCropComplete={(crop) => {
+                    const overlay = overlays.find(o => o.id === activeCropOverlayId);
+                    if (overlay) {
+                      changeOverlay(overlay.id, {
+                        ...overlay,
+                        styles: {
+                          ...overlay.styles,
+                          crop,
+                        } as any,
+                      });
+                    }
+                    setCropMode(false);
+                    setActiveCropOverlayId(null);
+                  }}
+                  onCancel={() => {
+                    setCropMode(false);
+                    setActiveCropOverlayId(null);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

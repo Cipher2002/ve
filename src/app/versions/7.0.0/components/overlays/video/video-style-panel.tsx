@@ -153,8 +153,10 @@ export const VideoStylePanel: React.FC<VideoStylePanelProps> = ({
             <label className="text-xs text-gray-400">Crop</label>
             <button
               onClick={() => {
-                // Toggle crop mode - you'll need to implement this in the parent component
-                console.log('Crop mode toggle');
+                // You'll need to access these from context
+                // setCropMode(true);
+                // setActiveCropOverlayId(localOverlay.id);
+                console.log('Start crop mode for video:', localOverlay.id);
               }}
               className="px-3 py-1.5 text-xs bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/25 rounded-md transition-colors"
             >

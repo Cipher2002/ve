@@ -74,7 +74,9 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [templateLoadingProgress, setTemplateLoadingProgress] = useState({ current: 0, total: 0 });
   const [isAutoLoadingVideo, setIsAutoLoadingVideo] = useState(false);
 
-
+  // Crop state
+  const [cropMode, setCropMode] = useState(false);
+  const [activeCropOverlayId, setActiveCropOverlayId] = useState<number | null>(null);
 
   // Overlay management hooks
   const {
@@ -766,6 +768,12 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Auto-load video from URL parameters
     handleAutoLoadVideo,
     isAutoLoadingVideo,
+
+    // Crop functionality
+    cropMode,
+    setCropMode,
+    activeCropOverlayId,
+    setActiveCropOverlayId,
     
   };
 
