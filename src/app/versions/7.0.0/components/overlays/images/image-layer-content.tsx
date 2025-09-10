@@ -88,7 +88,7 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     height: "100%",
     objectFit: overlay.styles.objectFit || "cover",
     objectPosition: overlay.styles.objectPosition,
-    opacity: overlay.styles.opacity,
+    opacity: overlay.styles.imageOpacity ?? 1,
     transform: overlay.styles.transform || "none",
     filter: overlay.styles.filter || "none",
     borderRadius: overlay.styles.borderRadius || "0px",
@@ -105,6 +105,7 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     height: "100%",
     padding: overlay.styles.padding || "0px",
     backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    opacity: overlay.styles.opacity ?? 1,
     display: "flex", // Use flexbox for centering
     alignItems: "center",
     justifyContent: "center",

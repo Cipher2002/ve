@@ -118,23 +118,12 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     height: "100%",
     padding: overlay.styles.padding || "0px",
     backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
-    opacity: overlay.styles.opacity, // This is for padding background opacity
+    opacity: overlay.styles.opacity ?? 1, // This is for padding background opacity
     display: "flex", // Use flexbox for centering
     alignItems: "center",
     justifyContent: "center",
   };
 
-  // // Determine the video source URL
-  // let videoSrc = overlay.src;
-
-  // // If it's a relative URL and baseUrl is provided, use baseUrl
-  // if (overlay.src.startsWith("/") && baseUrl) {
-  //   videoSrc = `${baseUrl}${overlay.src}`;
-  // }
-  // // Otherwise use the toAbsoluteUrl helper for relative URLs
-  // else if (overlay.src.startsWith("/")) {
-  //   videoSrc = toAbsoluteUrl(overlay.src);
-  // }
   // Use cached video source if available
   const videoSrc = cachedSrc || overlay.src;
   

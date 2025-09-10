@@ -118,6 +118,29 @@ export const ImageStylePanel: React.FC<ImageStylePanelProps> = ({
           </div>
         </div>
 
+        {/* Image Opacity */}
+        <div className="space-y-2 mt-6">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Image Opacity</label>
+            <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+              {Math.round((localOverlay?.styles?.imageOpacity ?? 1) * 100)}%
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={Math.round((localOverlay?.styles?.imageOpacity ?? 1) * 100)}
+              onChange={(e) => {
+                handleStyleChange({ imageOpacity: parseInt(e.target.value) / 100 });
+              }}
+              className="flex-1 accent-primary h-1.5 rounded-full bg-muted"
+            />
+          </div>
+        </div>
+
         {/* Media Padding Controls */}
         <MediaPaddingControls
           localOverlay={localOverlay}

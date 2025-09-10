@@ -471,6 +471,7 @@ export interface ImageStyles extends BaseStyles {
   border?: string;
   padding?: string;
   paddingBackgroundColor?: string;
+  imageOpacity?: number;
   animation?: AnimationConfig;
   cssClass?: string;
   customCSS?: string;

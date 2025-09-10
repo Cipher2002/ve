@@ -68,9 +68,9 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
               Padding Transparency
             </label>
             <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[40px] text-right">
-              {paddingBackgroundColor === "transparent" ? "100%" : 
-              `${Math.round((1 - (paddingBackgroundColor.includes("rgba") ? 
-                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1)) * 100)}%`}
+              {paddingBackgroundColor === "transparent" ? "0%" : 
+              `${Math.round((paddingBackgroundColor.includes("rgba") ? 
+                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1) * 100)}%`}
             </span>
           </div>
           <input
@@ -78,14 +78,13 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
             min="0"
             max="100"
             step="5"
-            value={paddingBackgroundColor === "transparent" ? 100 : 
-              Math.round((1 - (paddingBackgroundColor.includes("rgba") ? 
-                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1)) * 100)}
+            value={paddingBackgroundColor === "transparent" ? 0 : 
+              Math.round((paddingBackgroundColor.includes("rgba") ? 
+                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1) * 100)}
             onChange={(e) => {
-              const transparency = parseInt(e.target.value);
-              const opacity = (100 - transparency) / 100;
+              const opacity = parseInt(e.target.value) / 100;
               
-              if (transparency === 100) {
+              if (opacity === 0) {
                 handleStyleChange({ paddingBackgroundColor: "transparent" });
               } else {
                 const currentColor = paddingBackgroundColor === "transparent" ? "#ffffff" : paddingBackgroundColor;
