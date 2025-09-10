@@ -51,6 +51,8 @@ export const VideoOverlayPanel: React.FC = () => {
     durationInFrames,
     selectedOverlayId,
     changeOverlay,
+    setCropMode,
+    setActiveCropOverlayId,
   } = useEditorContext();
   const { findNextAvailablePosition } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
@@ -666,6 +668,10 @@ export const VideoOverlayPanel: React.FC = () => {
         <VideoDetails
           localOverlay={localOverlay as ClipOverlay}
           setLocalOverlay={handleUpdateOverlay}
+          onStartCrop={() => {
+            setCropMode(true);
+            setActiveCropOverlayId(localOverlay!.id);
+          }}
         />
       )}
     </div>
