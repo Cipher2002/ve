@@ -42,6 +42,15 @@ export function LocalMediaGallery({
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState({
+    isUploading: false,
+    current: 0,
+    total: 0,
+    singleFileProgress: 0,
+    completedFiles: [] as string[],
+    failedFiles: [] as string[]
+  });
+  const [showResult, setShowResult] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
   const hasInitialized = useRef(false);
@@ -89,26 +98,83 @@ export function LocalMediaGallery({
     if (files && files.length > 0) {
       try {
         setUploadError(null);
-        const uploadedFile = await addMediaFile(files[0]);
+        const fileArray = Array.from(files);
         
-        // Auto-add to timeline if enabled and callback exists
-        if (autoAddToTimeline && onSelectMedia && uploadedFile) {
-          // For videos, we need to handle the download process
-          if (uploadedFile.type === 'video') {
-            await handleVideoClick(uploadedFile);
-          } else if (uploadedFile.type === 'image') {
-            await handleImageClick(uploadedFile);
-          } else if (uploadedFile.type === 'audio') {
-            handleAudioClick(uploadedFile);
+        setUploadProgress({
+          isUploading: true,
+          current: 0,
+          total: fileArray.length,
+          singleFileProgress: 0,
+          completedFiles: [],
+          failedFiles: []
+        });
+
+        if (fileArray.length === 1) {
+          // Single file upload with progress
+          try {
+            const uploadedFile = await addMediaFile(fileArray[0]);
+            setUploadProgress(prev => ({
+              ...prev,
+              current: 1,
+              completedFiles: [fileArray[0].name]
+            }));
+          } catch (error) {
+            setUploadProgress(prev => ({
+              ...prev,
+              current: 1,
+              failedFiles: [fileArray[0].name]
+            }));
           }
+        } else {
+          // Multiple file upload
+          const uploadPromises = fileArray.map(async (file, index) => {
+            try {
+              await addMediaFile(file);
+              setUploadProgress(prev => ({
+                ...prev,
+                current: prev.current + 1,
+                completedFiles: [...prev.completedFiles, file.name]
+              }));
+            } catch (error) {
+              setUploadProgress(prev => ({
+                ...prev,
+                current: prev.current + 1,
+                failedFiles: [...prev.failedFiles, file.name]
+              }));
+            }
+          });
+
+          await Promise.all(uploadPromises);
         }
+
+        // Show result for 2 seconds then reset
+        setShowResult(true);
+        setTimeout(() => {
+          setShowResult(false);
+          setUploadProgress({
+            isUploading: false,
+            current: 0,
+            total: 0,
+            singleFileProgress: 0,
+            completedFiles: [],
+            failedFiles: []
+          });
+        }, 2000);
         
         // Reset the input value to allow uploading the same file again
         event.target.value = "";
       } catch (error) {
-        console.error("Error uploading file:", error);
-        setUploadError("Failed to upload file. Please try again.");
+        console.error("Error uploading files:", error);
+        setUploadError("Failed to upload files. Please try again.");
         event.target.value = "";
+        setUploadProgress({
+          isUploading: false,
+          current: 0,
+          total: 0,
+          singleFileProgress: 0,
+          completedFiles: [],
+          failedFiles: []
+        });
       }
     }
   };
@@ -604,9 +670,9 @@ export function LocalMediaGallery({
             size="sm"
             className="gap-1"
             onClick={handleUploadClick}
-            disabled={isLoading}
+            disabled={isLoading || uploadProgress.isUploading}
           >
-            {isLoading ? (
+            {isLoading || uploadProgress.isUploading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Upload className="w-4 h-4" />
@@ -620,6 +686,7 @@ export function LocalMediaGallery({
             className="hidden"
             onChange={handleFileUpload}
             accept="image/*,video/*,audio/*"
+            multiple
             disabled={isLoading}
           />
         </div>
@@ -628,6 +695,47 @@ export function LocalMediaGallery({
       {uploadError && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
           {uploadError}
+        </div>
+      )}
+
+      {uploadProgress.isUploading && (
+        <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded mb-4">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+            <span className="text-blue-700 text-sm">
+              {uploadProgress.total === 1 
+                ? "Uploading file..." 
+                : `Uploading ${uploadProgress.current}/${uploadProgress.total} files...`
+              }
+            </span>
+          </div>
+        </div>
+      )}
+
+      {showResult && (
+        <div className={`border px-4 py-2 rounded mb-4 ${
+          uploadProgress.failedFiles.length > 0 
+            ? 'bg-yellow-50 border-yellow-200' 
+            : 'bg-green-50 border-green-200'
+        }`}>
+          <div className="text-sm">
+            {uploadProgress.completedFiles.length > 0 && (
+              <div className="text-green-700 mb-1">
+                {uploadProgress.completedFiles.length === 1 
+                  ? "File uploaded successfully!" 
+                  : `${uploadProgress.completedFiles.length} files uploaded successfully!`
+                }
+              </div>
+            )}
+            {uploadProgress.failedFiles.length > 0 && (
+              <div className="text-red-700">
+                {uploadProgress.failedFiles.length === 1 
+                  ? "1 file failed to upload" 
+                  : `${uploadProgress.failedFiles.length} files failed to upload`
+                }
+              </div>
+            )}
+          </div>
         </div>
       )}
 
