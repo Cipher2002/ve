@@ -98,17 +98,13 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
   };
 
   /**
-   * Create a container style that includes padding and background color
+   * Create a container style that applies proper padding
    */
   const containerStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
     padding: overlay.styles.padding || "0px",
-    backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
-    opacity: overlay.styles.opacity ?? 1,
-    display: "flex", // Use flexbox for centering
-    alignItems: "center",
-    justifyContent: "center",
+    boxSizing: "border-box",
   };
 
   // Determine the image source URL
