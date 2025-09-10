@@ -142,6 +142,7 @@ export type ClipOverlay = BaseOverlay & {
     border?: string;
     padding?: string;
     paddingBackgroundColor?: string;
+    videoOpacity?: number;
     animation?: AnimationConfig; // Using shared type
     cssClass?: string;
     customCSS?: string;
