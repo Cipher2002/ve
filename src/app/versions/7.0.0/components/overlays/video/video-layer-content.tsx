@@ -112,11 +112,12 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
-  // Create a container style that applies proper padding
+  // Create a container style with padding and background
   const containerStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
     padding: overlay.styles.padding || "0px",
+    backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
     boxSizing: "border-box",
   };
 
