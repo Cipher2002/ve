@@ -61,7 +61,7 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
           className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
         />
 
-        {/* Padding Transparency/Opacity Control */}
+        {/* Padding Transparency/Opacity Control
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs text-gray-600 dark:text-gray-400">
@@ -116,7 +116,7 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
             }}
             className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Padding Background Color */}
@@ -133,18 +133,7 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
                 : paddingBackgroundColor.replace(/rgba?\([^)]+\)/, "#ffffff")
             }
             onChange={(e) => {
-              const opacity = paddingBackgroundColor.includes("rgba") ? 
-                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1;
-              const hex = e.target.value;
-              const rgb = hex.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-              if (rgb) {
-                const r = parseInt(rgb[1], 16);
-                const g = parseInt(rgb[2], 16);
-                const b = parseInt(rgb[3], 16);
-                handleStyleChange({ 
-                  paddingBackgroundColor: `rgba(${r}, ${g}, ${b}, ${opacity})` 
-                });
-              }
+              handleStyleChange({ paddingBackgroundColor: e.target.value });
             }}
             className="w-8 h-8 border border-gray-200 dark:border-gray-700 rounded-md p-0.5 cursor-pointer"
           />

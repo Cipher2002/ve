@@ -112,12 +112,13 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
-  // Create a container style with padding and background
+  // Create a container style with padding and background that inherits video opacity
   const containerStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
     padding: overlay.styles.padding || "0px",
     backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    opacity: overlay.styles.videoOpacity ?? 1,
     boxSizing: "border-box",
   };
 

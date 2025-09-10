@@ -98,13 +98,14 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
   };
 
   /**
-   * Create a container style with padding and background
+   * Create a container style with padding and background that inherits image opacity
    */
   const containerStyle: React.CSSProperties = {
     width: "100%",
     height: "100%",
     padding: overlay.styles.padding || "0px",
     backgroundColor: overlay.styles.paddingBackgroundColor || "transparent",
+    opacity: overlay.styles.imageOpacity ?? 1,
     boxSizing: "border-box",
   };
 
