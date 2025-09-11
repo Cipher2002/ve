@@ -25,20 +25,17 @@ export const useVisibleRows = ({ overlays = [], setOverlays }: UseVisibleRowsPro
    * Adds the new row at the top and shifts all existing overlays down
    */
   const addRow = () => {
-    setVisibleRows((current) => {
-      if (current >= MAX_ROWS) return current;
-      
-      // If we have overlay management functions, shift all overlays down by 1 row
-      if (setOverlays && overlays) {
-        const updatedOverlays = overlays.map(overlay => ({
-          ...overlay,
-          row: overlay.row + 1
-        }));
-        setOverlays(updatedOverlays);
-      }
-      
-      return current + 1;
-    });
+    // First shift all overlays down by 1 row BEFORE increasing visible rows
+    if (setOverlays && overlays) {
+      const updatedOverlays = overlays.map(overlay => ({
+        ...overlay,
+        row: overlay.row + 1
+      }));
+      setOverlays(updatedOverlays);
+    }
+    
+    // Then increase the visible rows count
+    setVisibleRows((current) => Math.min(current + 1, MAX_ROWS));
   };
 
   /**
