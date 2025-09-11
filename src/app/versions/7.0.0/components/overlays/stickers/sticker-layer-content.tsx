@@ -37,7 +37,16 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
       prevProps.overlay.styles?.opacity === nextProps.overlay.styles?.opacity &&
       prevProps.overlay.rotation === nextProps.overlay.rotation &&
       prevProps.overlay.width === nextProps.overlay.width &&
-      prevProps.overlay.height === nextProps.overlay.height
+      prevProps.overlay.height === nextProps.overlay.height &&
+      // Add shape-specific properties to the comparison
+      prevProps.overlay.fillColor === nextProps.overlay.fillColor &&
+      prevProps.overlay.strokeColor === nextProps.overlay.strokeColor &&
+      prevProps.overlay.strokeWidth === nextProps.overlay.strokeWidth &&
+      prevProps.overlay.strokeStyle === nextProps.overlay.strokeStyle &&
+      prevProps.overlay.shadowColor === nextProps.overlay.shadowColor &&
+      prevProps.overlay.shadowBlur === nextProps.overlay.shadowBlur &&
+      prevProps.overlay.shadowOffsetX === nextProps.overlay.shadowOffsetX &&
+      prevProps.overlay.shadowOffsetY === nextProps.overlay.shadowOffsetY
     );
   }
 );
