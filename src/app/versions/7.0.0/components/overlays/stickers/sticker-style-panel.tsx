@@ -36,14 +36,14 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
   }
 
   // Get current style values with defaults for shapes
-  const fillColor = (localOverlay as any).fillColor || "#3B82F6";
-  const strokeColor = (localOverlay as any).strokeColor || "#1E40AF";
-  const strokeWidth = (localOverlay as any).strokeWidth || 0;
-  const strokeStyle = (localOverlay as any).strokeStyle || "solid";
-  const shadowColor = (localOverlay as any).shadowColor || "rgba(0,0,0,0.2)";
-  const shadowBlur = (localOverlay as any).shadowBlur || 0;
-  const shadowOffsetX = (localOverlay as any).shadowOffsetX || 0;
-  const shadowOffsetY = (localOverlay as any).shadowOffsetY || 0;
+  const fillColor = localOverlay.fillColor || "#3B82F6";
+  const strokeColor = localOverlay.strokeColor || "#1E40AF";
+  const strokeWidth = localOverlay.strokeWidth !== undefined ? localOverlay.strokeWidth : 0;
+  const strokeStyle = localOverlay.strokeStyle || "solid";
+  const shadowColor = localOverlay.shadowColor || "rgba(0,0,0,0.2)";
+  const shadowBlur = localOverlay.shadowBlur !== undefined ? localOverlay.shadowBlur : 0;
+  const shadowOffsetX = localOverlay.shadowOffsetX !== undefined ? localOverlay.shadowOffsetX : 0;
+  const shadowOffsetY = localOverlay.shadowOffsetY !== undefined ? localOverlay.shadowOffsetY : 0;
 
   return (
     <div className="space-y-4">

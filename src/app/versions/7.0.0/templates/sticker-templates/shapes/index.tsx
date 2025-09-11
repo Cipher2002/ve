@@ -18,13 +18,6 @@ const ShapeWrapper: React.FC<{ children: React.ReactNode; overlay: any; shadow?:
   overlay,
   shadow,
 }) => {
-  const frame = useCurrentFrame();
-  
-  // Simple entrance animation
-  const opacity = interpolate(frame, [0, 15], [0, 1], {
-    extrapolateRight: "clamp",
-  });
-  
   return (
     <div
       style={{
@@ -33,7 +26,6 @@ const ShapeWrapper: React.FC<{ children: React.ReactNode; overlay: any; shadow?:
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        opacity,
         filter: shadow || "none",
       }}
     >
@@ -85,17 +77,26 @@ const createBasicShapeTemplate = (
 // Circle
 const CircleComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  // Use overlay properties if available, otherwise fall back to defaults
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
@@ -103,11 +104,11 @@ const CircleComponent: React.FC<SimpleShapeProps> = ({
         <circle
           cx={size / 2}
           cy={size / 2}
-          r={(size / 2) - (strokeWidth / 2)}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          r={(size / 2) - (actualStrokeWidth / 2)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
         />
       </svg>
     </ShapeWrapper>
@@ -117,30 +118,39 @@ const CircleComponent: React.FC<SimpleShapeProps> = ({
 // Square
 const SquareComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <rect
-          x={strokeWidth / 2}
-          y={strokeWidth / 2}
-          width={size - strokeWidth}
-          height={size - strokeWidth}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          x={actualStrokeWidth / 2}
+          y={actualStrokeWidth / 2}
+          width={size - actualStrokeWidth}
+          height={size - actualStrokeWidth}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
         />
       </svg>
     </ShapeWrapper>
@@ -150,31 +160,40 @@ const SquareComponent: React.FC<SimpleShapeProps> = ({
 // Rectangle
 const RectangleComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 150;
   const height = overlay.height || 100;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <rect
-          x={strokeWidth / 2}
-          y={strokeWidth / 2}
-          width={width - strokeWidth}
-          height={height - strokeWidth}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          x={actualStrokeWidth / 2}
+          y={actualStrokeWidth / 2}
+          width={width - actualStrokeWidth}
+          height={height - actualStrokeWidth}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
         />
       </svg>
     </ShapeWrapper>
@@ -184,27 +203,36 @@ const RectangleComponent: React.FC<SimpleShapeProps> = ({
 // Triangle
 const TriangleComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
-          points={`${size/2},${strokeWidth/2} ${size-strokeWidth/2},${size-strokeWidth/2} ${strokeWidth/2},${size-strokeWidth/2}`}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          points={`${size/2},${actualStrokeWidth/2} ${size-actualStrokeWidth/2},${size-actualStrokeWidth/2} ${actualStrokeWidth/2},${size-actualStrokeWidth/2}`}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
         />
       </svg>
@@ -215,27 +243,36 @@ const TriangleComponent: React.FC<SimpleShapeProps> = ({
 // Diamond
 const DiamondComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
-          points={`${size/2},${strokeWidth/2} ${size-strokeWidth/2},${size/2} ${size/2},${size-strokeWidth/2} ${strokeWidth/2},${size/2}`}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          points={`${size/2},${actualStrokeWidth/2} ${size-actualStrokeWidth/2},${size/2} ${size/2},${size-actualStrokeWidth/2} ${actualStrokeWidth/2},${size/2}`}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
         />
       </svg>
@@ -246,29 +283,38 @@ const DiamondComponent: React.FC<SimpleShapeProps> = ({
 // Pentagon
 const PentagonComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
           points="50,5 95,35 80,90 20,90 5,35"
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
-          transform={`scale(${(size-strokeWidth)/100})`}
+          transform={`scale(${(size-actualStrokeWidth)/100})`}
         />
       </svg>
     </ShapeWrapper>
@@ -278,29 +324,39 @@ const PentagonComponent: React.FC<SimpleShapeProps> = ({
 // Hexagon
 const HexagonComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+  
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
           points="25,10 75,10 90,50 75,90 25,90 10,50"
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
-          transform={`scale(${(size-strokeWidth)/100})`}
+          transform={`scale(${(size-actualStrokeWidth)/100})`}
         />
       </svg>
     </ShapeWrapper>
@@ -310,29 +366,39 @@ const HexagonComponent: React.FC<SimpleShapeProps> = ({
 // Octagon
 const OctagonComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
           points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30"
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
-          transform={`scale(${(size-strokeWidth)/100})`}
+          transform={`scale(${(size-actualStrokeWidth)/100})`}
         />
       </svg>
     </ShapeWrapper>
@@ -342,31 +408,41 @@ const OctagonComponent: React.FC<SimpleShapeProps> = ({
 // Oval
 const OvalComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 150;
   const height = overlay.height || 100;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <ellipse
           cx={width / 2}
           cy={height / 2}
-          rx={(width / 2) - (strokeWidth / 2)}
-          ry={(height / 2) - (strokeWidth / 2)}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          rx={(width / 2) - (actualStrokeWidth / 2)}
+          ry={(height / 2) - (actualStrokeWidth / 2)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
         />
       </svg>
     </ShapeWrapper>
@@ -376,34 +452,44 @@ const OvalComponent: React.FC<SimpleShapeProps> = ({
 // Rounded Rectangle
 const RoundedRectangleComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 150;
   const height = overlay.height || 100;
   const radius = Math.min(width, height) * 0.2;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
   
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <rect
-          x={strokeWidth / 2}
-          y={strokeWidth / 2}
-          width={width - strokeWidth}
-          height={height - strokeWidth}
+          x={actualStrokeWidth / 2}
+          y={actualStrokeWidth / 2}
+          width={width - actualStrokeWidth}
+          height={height - actualStrokeWidth}
           rx={radius}
           ry={radius}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
         />
       </svg>
     </ShapeWrapper>
@@ -421,21 +507,30 @@ const HorizontalLineComponent: React.FC<SimpleShapeProps> = ({
   shadowOffsetX = 0,
   shadowOffsetY = 0,
 }) => {
+
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 150;
   const height = overlay.height || 20;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <line
-          x1={strokeWidth / 2}
+          x1={actualStrokeWidth / 2}
           y1={height / 2}
-          x2={width - strokeWidth / 2}
+          x2={width - actualStrokeWidth / 2}
           y2={height / 2}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          stroke={actualStrokeColor}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinecap="round"
         />
       </svg>
@@ -453,21 +548,30 @@ const VerticalLineComponent: React.FC<SimpleShapeProps> = ({
   shadowOffsetX = 0,
   shadowOffsetY = 0,
 }) => {
+
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 20;
   const height = overlay.height || 150;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <line
           x1={width / 2}
-          y1={strokeWidth / 2}
+          y1={actualStrokeWidth / 2}
           x2={width / 2}
-          y2={height - strokeWidth / 2}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          y2={height - actualStrokeWidth / 2}
+          stroke={actualStrokeColor}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinecap="round"
         />
       </svg>
@@ -477,28 +581,38 @@ const VerticalLineComponent: React.FC<SimpleShapeProps> = ({
 
 const ArrowRightComponent: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const width = overlay.width || 150;
   const height = overlay.height || 60;
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <polygon
           points={`0,${height*0.3} ${width*0.7},${height*0.3} ${width*0.7},${height*0.1} ${width},${height*0.5} ${width*0.7},${height*0.9} ${width*0.7},${height*0.7} 0,${height*0.7}`}
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
         />
       </svg>
@@ -509,29 +623,39 @@ const ArrowRightComponent: React.FC<SimpleShapeProps> = ({
 // Star (5-point)
 const Star5Component: React.FC<SimpleShapeProps> = ({
   overlay,
-  fillColor = "#3B82F6",
-  strokeColor = "#1E40AF",
-  strokeWidth = 0,
-  strokeStyle = "solid",
-  shadowColor = "rgba(0,0,0,0.2)",
-  shadowBlur = 0,
-  shadowOffsetX = 0,
-  shadowOffsetY = 0,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  strokeStyle,
+  shadowColor,
+  shadowBlur,
+  shadowOffsetX,
+  shadowOffsetY,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#3B82F6";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#1E40AF";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <polygon
           points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
-          transform={`scale(${(size-strokeWidth)/100})`}
+          transform={`scale(${(size-actualStrokeWidth)/100})`}
         />
       </svg>
     </ShapeWrapper>
@@ -550,20 +674,30 @@ const HeartComponent: React.FC<SimpleShapeProps> = ({
   shadowOffsetX = 0,
   shadowOffsetY = 0,
 }) => {
+
+  const actualFillColor = overlay.fillColor || fillColor || "#DC2626";
+  const actualStrokeColor = overlay.strokeColor || strokeColor || "#991B1B";
+  const actualStrokeWidth = overlay.strokeWidth !== undefined ? overlay.strokeWidth : (strokeWidth || 0);
+  const actualStrokeStyle = overlay.strokeStyle || strokeStyle || "solid";
+  const actualShadowColor = overlay.shadowColor || shadowColor || "rgba(0,0,0,0.2)";
+  const actualShadowBlur = overlay.shadowBlur !== undefined ? overlay.shadowBlur : (shadowBlur || 0);
+  const actualShadowOffsetX = overlay.shadowOffsetX !== undefined ? overlay.shadowOffsetX : (shadowOffsetX || 0);
+  const actualShadowOffsetY = overlay.shadowOffsetY !== undefined ? overlay.shadowOffsetY : (shadowOffsetY || 0);
+
   const size = Math.min(overlay.width || 100, overlay.height || 100);
-  const shadow = createShadowFilter(shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY);
-  
+  const shadow = createShadowFilter(actualShadowColor, actualShadowBlur, actualShadowOffsetX, actualShadowOffsetY);
+
   return (
     <ShapeWrapper overlay={overlay} shadow={shadow}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <path
           d="M50,25 C50,25 37.5,12.5 25,25 C12.5,37.5 25,50 50,75 C75,50 87.5,37.5 75,25 C62.5,12.5 50,25 50,25 Z"
-          fill={fillColor}
-          stroke={strokeWidth > 0 ? strokeColor : "none"}
-          strokeWidth={strokeWidth}
-          strokeDasharray={getStrokeStyle(strokeStyle)}
+          fill={actualFillColor}
+          stroke={actualStrokeWidth > 0 ? actualStrokeColor : "none"}
+          strokeWidth={actualStrokeWidth}
+          strokeDasharray={getStrokeStyle(actualStrokeStyle)}
           strokeLinejoin="round"
-          transform={`scale(${(size-strokeWidth)/100})`}
+          transform={`scale(${(size-actualStrokeWidth)/100})`}
         />
       </svg>
     </ShapeWrapper>

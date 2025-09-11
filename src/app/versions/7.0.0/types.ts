@@ -239,6 +239,15 @@ export type StickerOverlay = BaseOverlay & {
   type: OverlayType.STICKER;
   content: string;
   category: StickerCategory;
+  // Shape-specific properties (stored at root level for persistence)
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  strokeStyle?: string;
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
   styles: BaseStyles & {
     fill?: string;
     stroke?: string;

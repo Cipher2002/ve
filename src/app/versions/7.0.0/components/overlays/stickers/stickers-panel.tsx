@@ -177,6 +177,17 @@ export function StickersPanel() {
           zIndex: 1,
           ...template.config.defaultProps?.styles,
         },
+        // Add shape-specific default properties if it's a shape sticker
+        ...(template.config.category === "Shapes" ? {
+          fillColor: template.config.defaultProps?.fillColor || "#3B82F6",
+          strokeColor: template.config.defaultProps?.strokeColor || "#1E40AF",
+          strokeWidth: template.config.defaultProps?.strokeWidth || 0,
+          strokeStyle: template.config.defaultProps?.strokeStyle || "solid",
+          shadowColor: template.config.defaultProps?.shadowColor || "rgba(0,0,0,0.2)",
+          shadowBlur: template.config.defaultProps?.shadowBlur || 0,
+          shadowOffsetX: template.config.defaultProps?.shadowOffsetX || 0,
+          shadowOffsetY: template.config.defaultProps?.shadowOffsetY || 0,
+        } : {}),
       };
 
       addOverlay(newOverlay);
