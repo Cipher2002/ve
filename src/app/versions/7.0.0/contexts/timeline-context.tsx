@@ -50,8 +50,11 @@ export const TimelineContext = createContext<TimelineContextType | null>(null);
 export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows();
-  const { resetOverlays } = useOverlays();
+  const { resetOverlays, overlays, setOverlays } = useOverlays();
+  const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows({ 
+    overlays, 
+    setOverlays 
+  });
 
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +97,8 @@ export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       visibleRows,
+      addRow,
+      removeRow,
       timelineRef,
       zoomScale,
       setZoomScale,

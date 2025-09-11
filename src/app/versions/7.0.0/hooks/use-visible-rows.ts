@@ -12,14 +12,33 @@ import { INITIAL_ROWS, MAX_ROWS } from "../constants";
  *   - addRow: Function to increment visible rows (up to MAX_ROWS)
  *   - removeRow: Function to decrement visible rows (down to INITIAL_ROWS)
  */
-export const useVisibleRows = () => {
+interface UseVisibleRowsProps {
+  overlays?: any[];
+  setOverlays?: (overlays: any[]) => void;
+}
+
+export const useVisibleRows = ({ overlays = [], setOverlays }: UseVisibleRowsProps = {}) => {
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
 
   /**
    * Increments the number of visible rows by 1, up to MAX_ROWS
+   * Adds the new row at the top and shifts all existing overlays down
    */
   const addRow = () => {
-    setVisibleRows((current) => Math.min(current + 1, MAX_ROWS));
+    setVisibleRows((current) => {
+      if (current >= MAX_ROWS) return current;
+      
+      // If we have overlay management functions, shift all overlays down by 1 row
+      if (setOverlays && overlays) {
+        const updatedOverlays = overlays.map(overlay => ({
+          ...overlay,
+          row: overlay.row + 1
+        }));
+        setOverlays(updatedOverlays);
+      }
+      
+      return current + 1;
+    });
   };
 
   /**
