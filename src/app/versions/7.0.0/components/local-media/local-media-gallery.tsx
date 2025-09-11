@@ -127,7 +127,9 @@ export function LocalMediaGallery({
           }
         } else {
           // Multiple file upload
-          const uploadPromises = fileArray.map(async (file, index) => {
+          // Process files sequentially to avoid race conditions
+          for (let i = 0; i < fileArray.length; i++) {
+            const file = fileArray[i];
             try {
               await addMediaFile(file);
               setUploadProgress(prev => ({
@@ -136,15 +138,14 @@ export function LocalMediaGallery({
                 completedFiles: [...prev.completedFiles, file.name]
               }));
             } catch (error) {
+              console.error(`Failed to upload ${file.name}:`, error);
               setUploadProgress(prev => ({
                 ...prev,
                 current: prev.current + 1,
                 failedFiles: [...prev.failedFiles, file.name]
               }));
             }
-          });
-
-          await Promise.all(uploadPromises);
+          }
         }
 
         // Show result for 2 seconds then reset

@@ -98,22 +98,37 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
       const data = await response.json();
       
       if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
-        const files: LocalMediaFile[] = data.RESPONSE.map((item: any) => ({
-          id: item.file_id,
-          name: item.file_url.split('/').pop() || 'Unknown',
-          type: item.file_type,
-          path: item.file_url,
-          size: 0, // Not available from API
-          lastModified: new Date(item.file_timestamp).getTime(),
-          thumbnail: item.file_thumbnail_url || null, // Handle empty strings
-          duration: 0, // Not available from API
-        }));
+        const files: LocalMediaFile[] = data.RESPONSE
+          .map((item: any) => ({
+            id: item.file_id,
+            name: item.file_url.split('/').pop() || 'Unknown',
+            type: item.file_type,
+            path: item.file_url,
+            size: 0, // Not available from API
+            lastModified: new Date(item.file_timestamp).getTime(),
+            thumbnail: item.file_thumbnail_url || null, // Handle empty strings
+            duration: 0, // Not available from API
+          }))
+          .filter((file: any, index: any, self: any) => {
+            // Remove duplicates by file_id
+            return index === self.findIndex((f: any) => f.id === file.id);
+          });
 
         if (isInitial) {
           setLocalMediaFiles(files);
           setCurrentPage(1);
         } else {
-          setLocalMediaFiles(prev => [...prev, ...files]);
+          setLocalMediaFiles(prev => {
+            // Merge new files with existing, avoiding duplicates
+            const combined = [...prev];
+            files.forEach(newFile => {
+              const existingIndex = combined.findIndex(existing => existing.id === newFile.id);
+              if (existingIndex === -1) {
+                combined.push(newFile);
+              }
+            });
+            return combined;
+          });
           setCurrentPage(prev => prev + 1);
         }
         
@@ -146,6 +161,21 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setIsLoading(true);
       try {
+        // Validate file type before processing
+        const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
+        const validVideoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/mkv', 'video/flv', 'video/wmv'];
+        const validAudioTypes = ['audio/mp3', 'audio/wav', 'audio/aac', 'audio/flac', 'audio/ogg', 'audio/m4a'];
+        
+        let fileType: "image" | "video" | "audio";
+        if (validImageTypes.includes(file.type.toLowerCase())) {
+          fileType = "image";
+        } else if (validVideoTypes.includes(file.type.toLowerCase())) {
+          fileType = "video";
+        } else if (validAudioTypes.includes(file.type.toLowerCase())) {
+          fileType = "audio";
+        } else {
+          throw new Error(`Unsupported file type: ${file.type}`);
+        }
         // Upload file to server using existing API
         const formData = new FormData();
         formData.append('file', file);
@@ -162,8 +192,8 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const uploadResult = await uploadResponse.json();
         
-        // Get file metadata
-        const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio'; // Default to audio if not image or video
+        // // Get file metadata
+        // const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio'; // Default to audio if not image or video
 
         // Generate thumbnail for videos and get duration
         let thumbnailServerPath = '';
@@ -274,8 +304,19 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
           duration: duration,
         };
 
-        // Update state with the new media file (add to beginning)
-        setLocalMediaFiles((prev) => [newMediaFile, ...prev]);
+        // Update state with deduplication (add to beginning)
+        setLocalMediaFiles((prev) => {
+          // Check if file already exists by id
+          const existingIndex = prev.findIndex(item => item.id === newMediaFile.id);
+          if (existingIndex !== -1) {
+            // File already exists, update it instead of adding duplicate
+            const updated = [...prev];
+            updated[existingIndex] = newMediaFile;
+            return updated;
+          }
+          // File doesn't exist, add to beginning
+          return [newMediaFile, ...prev];
+        });
 
         return newMediaFile;
       } catch (error) {
