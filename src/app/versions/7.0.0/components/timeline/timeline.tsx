@@ -9,7 +9,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useTimeline, TimelineProvider } from "../../contexts/timeline-context";
+import { useTimeline } from "../../contexts/timeline-context";
 import { useTimelineDragAndDrop } from "../../hooks/use-timeline-drag-and-drop";
 import { useTimelineEventHandlers } from "../../hooks/use-timeline-event-handlers";
 import { useTimelineState } from "../../hooks/use-timeline-state";
@@ -89,7 +89,20 @@ const Timeline: React.FC<TimelineProps> = ({
     position: number;
   } | null>(null);
 
-  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow } = useTimeline();
+  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow: originalAddRow } = useTimeline();
+
+  // Custom addRow that adds row at top and shifts overlays down
+  const addRow = useCallback(() => {
+    // First shift all overlays down by 1 row
+    const updatedOverlays = overlays.map(overlay => ({
+      ...overlay,
+      row: overlay.row + 1
+    }));
+    setOverlays(updatedOverlays);
+    
+    // Then add the row using the original function
+    originalAddRow();
+  }, [overlays, setOverlays, originalAddRow]);
 
   // State for context menu visibility
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -516,8 +529,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
   // Render
   return (
-    <TimelineProvider overlays={overlays} setOverlays={setOverlays}>
-      <div className="flex flex-col">
+    <div className="flex flex-col">
       <div className="flex ">
         {/* Row Drag Handles Column */}
         <div className="hidden md:block w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
@@ -714,7 +726,6 @@ const Timeline: React.FC<TimelineProps> = ({
 
       <MobileNavBar />
     </div>
-    </TimelineProvider>
   );
 };
 
