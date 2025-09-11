@@ -528,10 +528,7 @@ const Timeline: React.FC<TimelineProps> = ({
             className="flex flex-col gap-2 pt-2 pb-2"
             style={{ height: `${visibleRows * ROW_HEIGHT}px` }}
           >
-            {Array.from({ length: visibleRows }).map((_, arrayIndex) => {
-              // Reverse the row order so new rows appear at top
-              const rowIndex = visibleRows - 1 - arrayIndex;
-              return (
+            {Array.from({ length: visibleRows }).map((_, rowIndex) => (
               <div
                 key={`drag-${rowIndex}`}
                 className={`flex-1 flex items-center justify-center transition-all duration-200 
@@ -572,8 +569,7 @@ const Timeline: React.FC<TimelineProps> = ({
                   />
                 </div>
               </div>
-            );
-            })}
+            ))}
           </div>
         </div>
 

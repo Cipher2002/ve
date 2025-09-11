@@ -191,9 +191,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
           ))}
 
         {/* Render Rows (existing code) */}
-        {Array.from({ length: visibleRows }).map((_, arrayIndex) => {
-          // Reverse the row order so new rows appear at top
-          const rowIndex = visibleRows - 1 - arrayIndex;
+        {Array.from({ length: visibleRows }).map((_, rowIndex) => {
           const rowItems = overlays.filter(
             (overlay) => overlay.row === rowIndex
           );
