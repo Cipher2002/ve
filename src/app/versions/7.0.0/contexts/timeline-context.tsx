@@ -47,10 +47,23 @@ export const TimelineContext = createContext<TimelineContextType | null>(null);
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - Child components that will have access to the timeline context
  */
-export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
+interface TimelineProviderProps {
+  children: React.ReactNode;
+  overlays?: any[];
+  setOverlays?: (overlays: any[]) => void;
+}
+
+export const TimelineProvider: React.FC<TimelineProviderProps> = ({
   children,
+  overlays: externalOverlays,
+  setOverlays: externalSetOverlays,
 }) => {
-  const { resetOverlays, overlays, setOverlays } = useOverlays();
+  const { resetOverlays, overlays: internalOverlays, setOverlays: internalSetOverlays } = useOverlays();
+  
+  // Use external overlays if provided, otherwise use internal ones
+  const overlays = externalOverlays || internalOverlays;
+  const setOverlays = externalSetOverlays || internalSetOverlays;
+  
   const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows({ 
     overlays, 
     setOverlays 

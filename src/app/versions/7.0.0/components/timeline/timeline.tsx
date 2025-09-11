@@ -9,7 +9,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useTimeline } from "../../contexts/timeline-context";
+import { useTimeline, TimelineProvider } from "../../contexts/timeline-context";
 import { useTimelineDragAndDrop } from "../../hooks/use-timeline-drag-and-drop";
 import { useTimelineEventHandlers } from "../../hooks/use-timeline-event-handlers";
 import { useTimelineState } from "../../hooks/use-timeline-state";
@@ -516,7 +516,8 @@ const Timeline: React.FC<TimelineProps> = ({
 
   // Render
   return (
-    <div className="flex flex-col">
+    <TimelineProvider overlays={overlays} setOverlays={setOverlays}>
+      <div className="flex flex-col">
       <div className="flex ">
         {/* Row Drag Handles Column */}
         <div className="hidden md:block w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
@@ -713,6 +714,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
       <MobileNavBar />
     </div>
+    </TimelineProvider>
   );
 };
 
