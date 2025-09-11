@@ -89,27 +89,7 @@ const Timeline: React.FC<TimelineProps> = ({
     position: number;
   } | null>(null);
 
-  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow: originalAddRow } = useTimeline();
-
-  // Custom addRow that adds row at top and shifts overlays down (like captions)
-  const addRow = useCallback(() => {
-    let updatedOverlays = [...overlays];
-    const targetRow = 0; // Always add at the top (row 0)
-    
-    // Shift all overlays at or above the target row down by 1
-    updatedOverlays = updatedOverlays.map(overlay => {
-      if (overlay.row >= targetRow) {
-        return { ...overlay, row: overlay.row + 1 };
-      }
-      return overlay;
-    });
-    
-    // Update overlays first
-    setOverlays(updatedOverlays);
-    
-    // Then add the row using the original function
-    originalAddRow();
-  }, [overlays, setOverlays, originalAddRow]);
+  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow } = useTimeline();
 
   // State for context menu visibility
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -548,7 +528,10 @@ const Timeline: React.FC<TimelineProps> = ({
             className="flex flex-col gap-2 pt-2 pb-2"
             style={{ height: `${visibleRows * ROW_HEIGHT}px` }}
           >
-            {Array.from({ length: visibleRows }).map((_, rowIndex) => (
+            {Array.from({ length: visibleRows }).map((_, arrayIndex) => {
+              // Reverse the row order so new rows appear at top
+              const rowIndex = visibleRows - 1 - arrayIndex;
+              return (
               <div
                 key={`drag-${rowIndex}`}
                 className={`flex-1 flex items-center justify-center transition-all duration-200 
@@ -589,7 +572,8 @@ const Timeline: React.FC<TimelineProps> = ({
                   />
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
 
