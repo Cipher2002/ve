@@ -91,13 +91,20 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow: originalAddRow } = useTimeline();
 
-  // Custom addRow that adds row at top and shifts overlays down
+  // Custom addRow that adds row at top and shifts overlays down (like captions)
   const addRow = useCallback(() => {
-    // First shift all overlays down by 1 row
-    const updatedOverlays = overlays.map(overlay => ({
-      ...overlay,
-      row: overlay.row + 1
-    }));
+    let updatedOverlays = [...overlays];
+    const targetRow = 0; // Always add at the top (row 0)
+    
+    // Shift all overlays at or above the target row down by 1
+    updatedOverlays = updatedOverlays.map(overlay => {
+      if (overlay.row >= targetRow) {
+        return { ...overlay, row: overlay.row + 1 };
+      }
+      return overlay;
+    });
+    
+    // Update overlays first
     setOverlays(updatedOverlays);
     
     // Then add the row using the original function
