@@ -76,11 +76,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
       >
         {/* Crop Handles Overlay */}
         {isCropMode && cropOverlayId && (
-          <div>
-            <div style={{position: 'absolute', top: 0, left: 0, zIndex: 1000, background: 'red', color: 'white', padding: '5px'}}>
+          <div className="absolute inset-0 z-[100]" style={{pointerEvents: 'none'}}>
+            <div style={{position: 'absolute', top: 0, left: 0, zIndex: 1000, background: 'red', color: 'white', padding: '5px', pointerEvents: 'auto'}}>
               CROP MODE ACTIVE: {cropOverlayId}
             </div>
-            <CropHandlesOverlay overlayId={cropOverlayId} />
+            <div style={{pointerEvents: 'auto'}}>
+              <CropHandlesOverlay overlayId={cropOverlayId} />
+            </div>
           </div>
         )}
 

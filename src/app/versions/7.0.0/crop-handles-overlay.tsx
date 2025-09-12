@@ -106,7 +106,20 @@ export const CropHandlesOverlay: React.FC<CropHandlesOverlayProps> = ({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  if (!overlay || selectedOverlayId !== overlayId) return null;
+  console.log('CropHandlesOverlay render check:', {
+    overlay: !!overlay,
+    selectedOverlayId,
+    overlayId,
+    playerDimensions,
+    aspectRatio: getAspectRatioDimensions()
+  });
+
+  if (!overlay || selectedOverlayId !== overlayId) {
+    console.log('CropHandlesOverlay early return:', { overlay: !!overlay, selectedOverlayId, overlayId });
+    return null;
+  }
+
+  console.log('CropHandlesOverlay rendering with cropRect:', cropRect);
 
   return (
     <div 
@@ -118,6 +131,8 @@ export const CropHandlesOverlay: React.FC<CropHandlesOverlayProps> = ({
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
+        border: '3px solid red', // Debug border
+        background: 'rgba(255, 0, 0, 0.1)', // Debug background
       }}
     >
       {/* Dark overlay outside crop area */}
