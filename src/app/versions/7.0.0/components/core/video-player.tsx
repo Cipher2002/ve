@@ -3,6 +3,7 @@ import { Player, PlayerRef } from "@remotion/player";
 import { Main } from "../../remotion/main";
 import { useEditorContext } from "../../contexts/editor-context";
 import { FPS } from "../../constants";
+import { CropHandlesOverlay } from "../../crop-handles-overlay";
 
 /**
  * Props for the VideoPlayer component
@@ -29,6 +30,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     getAspectRatioDimensions,
     durationInFrames,
     isAutoLoadingVideo,
+    isCropMode,
+    cropOverlayId,
   } = useEditorContext();
 
   /**
@@ -71,6 +74,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
         bg-[size:16px_16px] 
         shadow-lg"
       >
+        {/* Crop Handles Overlay */}
+        {isCropMode && cropOverlayId && (
+          <CropHandlesOverlay overlayId={cropOverlayId} />
+        )}
+
         {/* Auto-load Video Loader */}
         {isAutoLoadingVideo && (
           <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">

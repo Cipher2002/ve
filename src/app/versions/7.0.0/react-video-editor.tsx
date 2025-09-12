@@ -21,7 +21,7 @@ import { useCompositionDuration } from "./hooks/use-composition-duration";
 import { useHistory } from "./hooks/use-history";
 
 // Types
-import { Overlay, OverlayType, TemplateOverlay } from "./types";
+import { ImageOverlay, Overlay, OverlayType, TemplateOverlay, ClipOverlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
 import {
   AUTO_SAVE_INTERVAL,
@@ -42,6 +42,7 @@ import { clearAutosave } from "./utils/indexdb-helper";
 
 //Loading templates with downloaded videos
 import { useTemplateLoader } from "./hooks/use-template-loader";
+
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -187,15 +188,144 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   const applyCrop = useCallback(async (overlayId: number) => {
     const overlay = overlays.find(o => o.id === overlayId);
-    if (!overlay || (!overlay.cropData) || (overlay.type !== OverlayType.VIDEO && overlay.type !== OverlayType.IMAGE)) {
+    if (!overlay || (overlay.type !== OverlayType.VIDEO && overlay.type !== OverlayType.IMAGE)) {
       return;
     }
 
-    // TODO: Implement actual cropping logic here
-    // For now, we'll just exit crop mode
-    setIsCropMode(false);
-    setCropOverlayId(null);
-  }, [overlays]);
+    // Type assertion to access cropData
+    const cropableOverlay = overlay as ImageOverlay | ClipOverlay;
+    if (!cropableOverlay.cropData) {
+      return;
+    }
+
+    try {
+      // Create cropped version of the asset
+      const croppedSrc = await createCroppedAsset(cropableOverlay);
+      
+      if (croppedSrc) {
+        // Update the overlay with the cropped source
+        changeOverlay(overlayId, {
+          ...cropableOverlay,
+          src: croppedSrc,
+          // Keep the original URL for future cropping operations
+          originalUrl: cropableOverlay.originalUrl || cropableOverlay.src,
+          // Clear crop data since it's now "baked in"
+          cropData: undefined,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to apply crop:', error);
+    } finally {
+      setIsCropMode(false);
+      setCropOverlayId(null);
+    }
+  }, [overlays, changeOverlay]);
+
+  // Helper function to create cropped asset
+  const createCroppedAsset = async (overlay: ImageOverlay | ClipOverlay): Promise<string | null> => {
+    if (!overlay.cropData) return null;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    if (overlay.type === OverlayType.IMAGE) {
+      return await cropImage(overlay, canvas, ctx);
+    } else if (overlay.type === OverlayType.VIDEO) {
+      return await cropVideo(overlay, canvas, ctx);
+    }
+
+    return null;
+  };
+
+  // Crop image function
+  const cropImage = async (overlay: ImageOverlay, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        const { x, y, width, height } = overlay.cropData!;
+        
+        // Calculate actual crop dimensions
+        const cropX = x * img.naturalWidth;
+        const cropY = y * img.naturalHeight;
+        const cropWidth = width * img.naturalWidth;
+        const cropHeight = height * img.naturalHeight;
+        
+        // Set canvas size to crop dimensions
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        
+        // Draw cropped portion
+        ctx.drawImage(
+          img,
+          cropX, cropY, cropWidth, cropHeight, // Source rectangle
+          0, 0, cropWidth, cropHeight // Destination rectangle
+        );
+        
+        // Convert to blob URL
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(URL.createObjectURL(blob));
+          } else {
+            resolve(null);
+          }
+        }, 'image/png');
+      };
+      
+      img.onerror = () => resolve(null);
+      img.src = (overlay as ImageOverlay).originalUrl || overlay.src;
+    });
+  };
+
+  // Crop video function (extracts first frame and crops it - for preview)
+  const cropVideo = async (overlay: ClipOverlay, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      
+      video.onloadedmetadata = () => {
+        video.currentTime = overlay.videoStartTime || 0;
+      };
+      
+      video.onseeked = () => {
+        const { x, y, width, height } = overlay.cropData!;
+        
+        // Calculate actual crop dimensions
+        const cropX = x * video.videoWidth;
+        const cropY = y * video.videoHeight;
+        const cropWidth = width * video.videoWidth;
+        const cropHeight = height * video.videoHeight;
+        
+        // Set canvas size to crop dimensions
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        
+        // Draw cropped portion of video frame
+        ctx.drawImage(
+          video,
+          cropX, cropY, cropWidth, cropHeight, // Source rectangle
+          0, 0, cropWidth, cropHeight // Destination rectangle
+        );
+        
+        // For video, we'll create a thumbnail for now
+        // In a real implementation, you'd need server-side video processing
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(URL.createObjectURL(blob));
+          } else {
+            resolve(null);
+          }
+        }, 'image/png');
+      };
+      
+      video.onerror = () => resolve(null);
+      video.src = overlay.originalUrl || overlay.src;
+      video.load();
+    });
+  };
 
   const handleAutoLoadVideo = async () => {
     try {

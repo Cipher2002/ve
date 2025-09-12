@@ -501,6 +501,7 @@ export interface ImageOverlay extends BaseOverlay {
   type: OverlayType.IMAGE;
   src: string;
   content?: string; // Optional thumbnail/preview
+  originalUrl?: string;
   cropData?: {
     x: number;
     y: number;
