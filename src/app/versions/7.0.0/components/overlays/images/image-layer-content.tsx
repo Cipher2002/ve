@@ -81,7 +81,7 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
       : {};
 
   /**
-   * Combine base styles with current animation phase
+   * Combine base styles with current animation phase and cropping
    */
   const imageStyle: React.CSSProperties = {
     width: "100%",
@@ -96,6 +96,14 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     border: overlay.styles.border || "none",
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
+
+  // Apply cropping if cropData exists
+  if (overlay.cropData) {
+    const { x, y, width, height } = overlay.cropData;
+    imageStyle.clipPath = `inset(${y * 100}% ${(1 - x - width) * 100}% ${(1 - y - height) * 100}% ${x * 100}%)`;
+    imageStyle.objectFit = "cover";
+    imageStyle.objectPosition = `${(x + width / 2) * 100}% ${(y + height / 2) * 100}%`;
+  }
 
   /**
    * Create a container style with padding and background that inherits image opacity

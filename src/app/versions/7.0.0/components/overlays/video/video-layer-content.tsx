@@ -112,6 +112,14 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
+  // Apply cropping if cropData exists
+  if (overlay.cropData) {
+    const { x, y, width, height } = overlay.cropData;
+    videoStyle.clipPath = `inset(${y * 100}% ${(1 - x - width) * 100}% ${(1 - y - height) * 100}% ${x * 100}%)`;
+    videoStyle.objectFit = "cover";
+    videoStyle.objectPosition = `${(x + width / 2) * 100}% ${(y + height / 2) * 100}%`;
+  }
+
   // Create a container style with padding and background that inherits video opacity
   const containerStyle: React.CSSProperties = {
     width: "100%",
