@@ -5,7 +5,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Trash2, Copy, Scissors, Volume2, VolumeX, Volume, Crop } from "lucide-react";
+import { Trash2, Copy, Scissors, Volume2, VolumeX, Volume } from "lucide-react";
 
 /**
  * Props for the TimelineItemContextMenu component
@@ -22,7 +22,6 @@ interface TimelineItemContextMenuProps {
   /** Callback to split the timeline item */
   onSplitItem: (id: number) => void;
   onDetachAudio: (id: number) => void;
-  onCropItem?: (id: number) => void;
   itemType: string; // Add this
   isExtractingAudio?: boolean; // Add this
   audioDetached?: boolean; // Add this
@@ -53,14 +52,15 @@ interface TimelineItemContextMenuProps {
  * </TimelineItemContextMenu>
  * ```
  */
-export const TimelineItemContextMenu: React.FC<TimelineItemContextMenuProps> = ({
+export const TimelineItemContextMenu: React.FC<
+  TimelineItemContextMenuProps
+> = ({
   children,
   onOpenChange,
   onDeleteItem,
   onDuplicateItem,
   onSplitItem,
   onDetachAudio, // Add this
-  onCropItem, // Add this
   isExtractingAudio, // Add this
   audioDetached, // Add this
   isVideoMuted, // Add this
@@ -96,19 +96,6 @@ export const TimelineItemContextMenu: React.FC<TimelineItemContextMenuProps> = (
           <Scissors className="mr-4 h-4 w-4" />
           Split
         </ContextMenuItem>
-        {(itemType === 'video' || itemType === 'image') && onCropItem && (
-          <ContextMenuItem
-            className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => {
-              console.log('Crop menu item clicked for item:', itemId, 'type:', itemType);
-              onCropItem(itemId);
-            }}
-            data-no-timeline-seek="true"
-          >
-            <Crop className="mr-4 h-4 w-4" />
-            Crop
-          </ContextMenuItem>
-        )}
         {itemType === 'video' && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"

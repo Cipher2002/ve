@@ -14,14 +14,6 @@ interface EditorContextProps {
   ) => void;
   setOverlays: (overlays: Overlay[]) => void;
 
-  // Crop functionality
-  isCropMode: boolean;
-  cropOverlayId: number | null;
-  enterCropMode: (overlayId: number) => void;
-  exitCropMode: () => void;
-  updateCropData: (overlayId: number, cropData: { x: number; y: number; width: number; height: number }) => void;
-  applyCrop: (overlayId: number) => Promise<void>;
-
   dynamicDuration: number;
   setDynamicDuration: (duration: number) => void;
 
