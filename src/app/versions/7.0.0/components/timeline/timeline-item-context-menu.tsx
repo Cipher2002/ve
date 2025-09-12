@@ -99,7 +99,10 @@ export const TimelineItemContextMenu: React.FC<TimelineItemContextMenuProps> = (
         {(itemType === 'video' || itemType === 'image') && onCropItem && (
           <ContextMenuItem
             className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onCropItem(itemId)}
+            onClick={() => {
+              console.log('Crop menu item clicked for item:', itemId, 'type:', itemType);
+              onCropItem(itemId);
+            }}
             data-no-timeline-seek="true"
           >
             <Crop className="mr-4 h-4 w-4" />

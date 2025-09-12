@@ -164,6 +164,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
 
   // Crop mode functions
   const enterCropMode = useCallback((overlayId: number) => {
+    console.log('enterCropMode called with overlayId:', overlayId);
     setIsCropMode(true);
     setCropOverlayId(overlayId);
     setSelectedOverlayId(overlayId);
