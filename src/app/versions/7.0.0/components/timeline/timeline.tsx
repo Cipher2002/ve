@@ -82,7 +82,7 @@ const Timeline: React.FC<TimelineProps> = ({
   onMuteAudio,
   isExtractingAudio, // Add this
 }) => {
-  const { playerRef } = useEditorContext();
+  const { playerRef, enterCropMode } = useEditorContext();
   // State for tracking hover position during split operations
   const [lastKnownHoverInfo, setLastKnownHoverInfo] = useState<{
     itemId: number;
@@ -656,10 +656,10 @@ const Timeline: React.FC<TimelineProps> = ({
                 onAssetLoadingChange={handleAssetLoadingChange}
                 alignmentLines={alignmentLines}
                 onDetachAudio={handleDetachAudio}
+                onCropItem={enterCropMode}
                 isExtractingAudio={isExtractingAudio} // Add this
                 onMuteVideo={handleMuteVideo} // Add this line
                 onMuteAudio={handleMuteAudio} // Add this line
-
               />
 
               {/* Loading Indicator - Only shows during initial project load */}

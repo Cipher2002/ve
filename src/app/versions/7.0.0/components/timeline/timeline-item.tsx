@@ -82,6 +82,7 @@ export interface TimelineItemProps {
   /** Callback when asset loading state changes */
   onAssetLoadingChange?: (overlayId: number, isLoading: boolean) => void;
   onDetachAudio: (id: number) => void;
+  onCropItem?: (id: number) => void;
   /** Live push offset percentage during drag */
   livePushOffsetPercent?: number;
   isExtractingAudio?: boolean; // Add this
@@ -111,6 +112,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   zoomScale,
   onAssetLoadingChange,
   onDetachAudio,
+  onCropItem,
   isExtractingAudio, // Add this
   onMuteVideo,
   onMuteAudio,
@@ -434,6 +436,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       onDuplicateItem={onDuplicateItem}
       onSplitItem={onSplitItem}
       onDetachAudio={onDetachAudio} // Add this
+      onCropItem={onCropItem} // Add this
       onMuteVideo={onMuteVideo} // Add this line
       onMuteAudio={onMuteAudio} // Add this line
       isVideoMuted={item.type === 'video' ? (item.styles?.volume ?? 1) === 0 : false}

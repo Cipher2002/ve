@@ -132,6 +132,12 @@ export type ClipOverlay = BaseOverlay & {
   videoStartTime?: number;
   speed?: number;
   audioDetached?: boolean; // Add this line
+  cropData?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   styles: BaseStyles & {
     objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
     objectPosition?: string;
@@ -495,6 +501,12 @@ export interface ImageOverlay extends BaseOverlay {
   type: OverlayType.IMAGE;
   src: string;
   content?: string; // Optional thumbnail/preview
+  cropData?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   styles: ImageStyles;
 }
 

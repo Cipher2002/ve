@@ -21,7 +21,7 @@ import { useCompositionDuration } from "./hooks/use-composition-duration";
 import { useHistory } from "./hooks/use-history";
 
 // Types
-import { Overlay, TemplateOverlay } from "./types";
+import { Overlay, OverlayType, TemplateOverlay } from "./types";
 import { useRendering } from "./hooks/use-rendering";
 import {
   AUTO_SAVE_INTERVAL,
@@ -33,7 +33,7 @@ import { TimelineProvider } from "./contexts/timeline-context";
 
 // Autosave Components
 import { AutosaveStatus } from "./components/autosave/autosave-status";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAutosave } from "./hooks/use-autosave";
 import { LocalMediaProvider } from "./contexts/local-media-context";
 import { KeyframeProvider } from "./contexts/keyframe-context";
@@ -73,6 +73,10 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [templateLoadingProgress, setTemplateLoadingProgress] = useState({ current: 0, total: 0 });
   const [isAutoLoadingVideo, setIsAutoLoadingVideo] = useState(false);
+
+  // Crop mode state
+  const [isCropMode, setIsCropMode] = useState(false);
+  const [cropOverlayId, setCropOverlayId] = useState<number | null>(null);
 
 
 
@@ -157,106 +161,41 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
   // Captions generation state
   const [isGeneratingCaptions, setIsGeneratingCaptions] = useState(false);
 
-  // Auto-load video from URL parameters
-  // const handleAutoLoadVideo = async () => {
-  //   try {
-  //     const autoLoadData = sessionStorage.getItem('autoLoadVideo');
-  //     if (!autoLoadData) return;
+  // Crop mode functions
+  const enterCropMode = useCallback((overlayId: number) => {
+    setIsCropMode(true);
+    setCropOverlayId(overlayId);
+    setSelectedOverlayId(overlayId);
+    
+    // Pause player when entering crop mode
+    if (playerRef.current && isPlaying) {
+      togglePlayPause();
+    }
+  }, [setSelectedOverlayId, isPlaying, togglePlayPause]);
 
-  //     const { url, type } = JSON.parse(autoLoadData);
-      
-  //     // Clear the session storage to prevent re-loading
-  //     sessionStorage.removeItem('autoLoadVideo');
+  const exitCropMode = useCallback(() => {
+    setIsCropMode(false);
+    setCropOverlayId(null);
+  }, []);
 
-  //     // Download the video directly using fetch
-  //     const response = await fetch(`${apiBaseUrl}/video/download?url=${encodeURIComponent(url)}`);
-      
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to download video: ${response.status}`);
-  //     }
+  const updateCropData = useCallback((overlayId: number, cropData: { x: number; y: number; width: number; height: number }) => {
+    changeOverlay(overlayId, (overlay) => ({
+      ...overlay,
+      cropData,
+    }));
+  }, [changeOverlay]);
 
-  //     const blob = await response.blob();
-  //     const cachedVideoUrl = URL.createObjectURL(blob);
-      
-  //     if (cachedVideoUrl) {
-  //       // Get video dimensions
-  //       const getVideoNaturalDimensions = (videoUrl: string): Promise<{ width: number; height: number }> => {
-  //         return new Promise((resolve) => {
-  //           const video = document.createElement('video');
-  //           video.preload = 'metadata';
-            
-  //           video.onloadedmetadata = () => {
-  //             resolve({
-  //               width: video.videoWidth,
-  //               height: video.videoHeight
-  //             });
-  //           };
-            
-  //           video.onerror = () => {
-  //             // Fallback to composition dimensions
-  //             resolve(getAspectRatioDimensions());
-  //           };
-            
-  //           video.src = videoUrl;
-  //         });
-  //       };
+  const applyCrop = useCallback(async (overlayId: number) => {
+    const overlay = overlays.find(o => o.id === overlayId);
+    if (!overlay || (!overlay.cropData) || (overlay.type !== OverlayType.VIDEO && overlay.type !== OverlayType.IMAGE)) {
+      return;
+    }
 
-  //       const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
-  //         return new Promise((resolve) => {
-  //           const video = document.createElement('video');
-  //           video.preload = 'metadata';
-            
-  //           video.onloadedmetadata = () => {
-  //             const durationInSeconds = video.duration;
-  //             const durationInFrames = Math.round(durationInSeconds * 30);
-  //             resolve(durationInFrames);
-  //           };
-            
-  //           video.onerror = () => {
-  //             // Fallback to 300 frames (10 seconds)
-  //             resolve(300);
-  //           };
-            
-  //           video.src = videoUrl;
-  //         });
-  //       };
-
-  //       // Get video properties
-  //       const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
-  //       const videoDuration = await getVideoDurationInFrames(cachedVideoUrl);
-
-  //       // Create video overlay
-  //       const videoOverlay: Overlay = {
-  //         left: 0,
-  //         top: 0,
-  //         width,
-  //         height,
-  //         durationInFrames: videoDuration,
-  //         from: 0, // Place at beginning of timeline
-  //         id: Date.now(),
-  //         rotation: 0,
-  //         row: 0, // Place on first row
-  //         isDragging: false,
-  //         type: 'video' as any,
-  //         content: url, // Keep original URL for Remotion
-  //         src: cachedVideoUrl, // Keep blob URL for preview
-  //         originalUrl: url,
-  //         videoStartTime: 0,
-  //         styles: {
-  //           opacity: 1,
-  //           zIndex: 100,
-  //           transform: "none",
-  //           objectFit: "contain",
-  //         },
-  //       };
-
-  //       // Add the overlay to the timeline
-  //       addOverlay(videoOverlay);
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to auto-load video:', error);
-  //   }
-  // };
+    // TODO: Implement actual cropping logic here
+    // For now, we'll just exit crop mode
+    setIsCropMode(false);
+    setCropOverlayId(null);
+  }, [overlays]);
 
   const handleAutoLoadVideo = async () => {
     try {
@@ -775,6 +714,14 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Auto-load video from URL parameters
     handleAutoLoadVideo,
     isAutoLoadingVideo,
+
+    // Crop functionality
+    isCropMode,
+    cropOverlayId,
+    enterCropMode,
+    exitCropMode,
+    updateCropData,
+    applyCrop,
     
   };
 

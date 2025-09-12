@@ -50,6 +50,8 @@ interface TimelineGridProps {
   onDuplicateItem: (id: number) => void;
   /** Callback to split an overlay item at current position */
   onSplitItem: (id: number) => void;
+  /** Callback to crop an overlay item */
+  onCropItem: (id: number) => void;
   /** Callback when hovering over an item */
   onHover: (itemId: number, position: number) => void;
   /** Callback when context menu state changes */
@@ -92,6 +94,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   onDeleteItem,
   onDuplicateItem,
   onSplitItem,
+  onCropItem,
   onHover,
   onContextMenuChange,
   onRemoveGap,
@@ -254,6 +257,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                     onAssetLoadingChange={onAssetLoadingChange}
                     livePushOffsetPercent={livePushOffsetPercent}
                     onDetachAudio={onDetachAudio}
+                    onCropItem={onCropItem}
                     onMuteVideo={onMuteVideo} // Add this line
                     onMuteAudio={onMuteAudio} // Add this line
                     isExtractingAudio={isExtractingAudio} // Add this
