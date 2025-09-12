@@ -208,7 +208,7 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
         changeOverlay(overlayId, {
           ...cropableOverlay,
           src: croppedSrc,
-          // Keep the original URL for future cropping operations
+          // Keep the original URL for future cropping operations - use current src if no original exists
           originalUrl: cropableOverlay.originalUrl || cropableOverlay.src,
           // Clear crop data since it's now "baked in"
           cropData: undefined,
@@ -276,7 +276,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       };
       
       img.onerror = () => resolve(null);
-      img.src = (overlay as ImageOverlay).originalUrl || overlay.src;
+      // Use the current src as the source for cropping - this ensures we always have a valid URL
+      img.src = overlay.src;
     });
   };
 
@@ -323,7 +324,8 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
       };
       
       video.onerror = () => resolve(null);
-      video.src = overlay.originalUrl || overlay.src;
+      // Use the current src as the source for cropping
+      video.src = overlay.src;
       video.load();
     });
   };

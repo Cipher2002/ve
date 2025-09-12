@@ -121,18 +121,41 @@ export const CropHandlesOverlay: React.FC<CropHandlesOverlayProps> = ({
 
   console.log('CropHandlesOverlay rendering with cropRect:', cropRect);
 
+  // Calculate the actual image/video dimensions and position within the player
+  const { width: compositionWidth, height: compositionHeight } = getAspectRatioDimensions();
+  
+  // Find the actual rendered size of the image/video (it might be letterboxed)
+  const containerAspect = playerDimensions.width / playerDimensions.height;
+  const contentAspect = compositionWidth / compositionHeight;
+  
+  let actualContentWidth, actualContentHeight, offsetX, offsetY;
+  
+  if (contentAspect > containerAspect) {
+    // Content is wider - fit to width, letterbox top/bottom
+    actualContentWidth = Math.min(playerDimensions.width, compositionWidth);
+    actualContentHeight = actualContentWidth / contentAspect;
+    offsetX = 0;
+    offsetY = (playerDimensions.height - actualContentHeight) / 2;
+  } else {
+    // Content is taller - fit to height, letterbox left/right
+    actualContentHeight = Math.min(playerDimensions.height, compositionHeight);
+    actualContentWidth = actualContentHeight * contentAspect;
+    offsetX = (playerDimensions.width - actualContentWidth) / 2;
+    offsetY = 0;
+  }
+
   return (
     <div 
       ref={containerRef}
-      className="absolute inset-0 z-50"
+      className="absolute z-50"
       style={{
-        width: Math.min(playerDimensions.width, getAspectRatioDimensions().width),
-        height: Math.min(playerDimensions.height, getAspectRatioDimensions().height),
+        width: actualContentWidth,
+        height: actualContentHeight,
         left: '50%',
         top: '50%',
-        transform: 'translate(-50%, -50%)',
-        border: '3px solid red', // Debug border
-        background: 'rgba(255, 0, 0, 0.1)', // Debug background
+        transform: `translate(${-50 + (offsetX / playerDimensions.width) * 100}%, ${-50 + (offsetY / playerDimensions.height) * 100}%)`,
+        border: '2px solid yellow', // Debug border for content area
+        background: 'rgba(255, 255, 0, 0.1)', // Debug background
       }}
     >
       {/* Dark overlay outside crop area */}
