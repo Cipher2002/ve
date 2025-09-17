@@ -411,14 +411,22 @@ return (
       // Rich text - render HTML
       renderHtmlContent(textContent, textStyle)
     ) : (
-      // Plain text - render as text
-      <div 
-        style={textStyle}
-        className={overlay.styles.cssClass || ''}
-        data-text={textContent}
-      >
-        {textContent}
-      </div>
+      // Plain text or HTML - render appropriately
+      overlay.styles.isRichText || textContent.includes('<') ? (
+        <div 
+          style={textStyle}
+          className={overlay.styles.cssClass || ''}
+          dangerouslySetInnerHTML={{ __html: textContent }}
+        />
+      ) : (
+        <div 
+          style={textStyle}
+          className={overlay.styles.cssClass || ''}
+          data-text={textContent}
+        >
+          {textContent}
+        </div>
+      )
     )}
   </div>
 );

@@ -137,44 +137,74 @@ const applyFormatting = (command: string, value?: string) => {
       const selectedText = range.toString();
       if (!selectedText) return;
 
-      // Create wrapper element based on command
-      let wrapper: HTMLElement;
+      // Check if selection is already formatted
+      const commonAncestor = range.commonAncestorContainer;
+      const parentElement = commonAncestor.nodeType === Node.TEXT_NODE 
+        ? commonAncestor.parentElement 
+        : commonAncestor as Element;
+
+      let existingFormat: Element | null = null;
       
-      switch (command) {
-        case 'bold':
-          wrapper = document.createElement('strong');
-          break;
-        case 'italic':
-          wrapper = document.createElement('em');
-          break;
-        case 'underline':
-          wrapper = document.createElement('u');
-          break;
-        case 'foreColor':
-          wrapper = document.createElement('span');
-          wrapper.style.color = value || '#000000';
-          break;
-        case 'fontName':
-          wrapper = document.createElement('span');
-          wrapper.style.fontFamily = value || 'Arial';
-          break;
-        case 'fontSize':
-          wrapper = document.createElement('span');
-          wrapper.style.fontSize = value || '16px';
-          break;
-        default:
-          return;
+      // Check for existing formatting
+      if (parentElement) {
+        switch (command) {
+          case 'bold':
+            existingFormat = parentElement.closest('strong');
+            break;
+          case 'italic':
+            existingFormat = parentElement.closest('em');
+            break;
+          case 'underline':
+            existingFormat = parentElement.closest('u');
+            break;
+        }
       }
 
       try {
-        // Extract contents of the selection
-        const contents = range.extractContents();
-        
-        // Add contents to wrapper
-        wrapper.appendChild(contents);
-        
-        // Insert wrapper at selection point
-        range.insertNode(wrapper);
+        if (existingFormat && ['bold', 'italic', 'underline'].includes(command)) {
+          // Remove existing formatting
+          const textContent = existingFormat.textContent;
+          const textNode = document.createTextNode(textContent || '');
+          existingFormat.parentNode?.replaceChild(textNode, existingFormat);
+        } else {
+          // Apply new formatting
+          let wrapper: HTMLElement;
+          
+          switch (command) {
+            case 'bold':
+              wrapper = document.createElement('strong');
+              break;
+            case 'italic':
+              wrapper = document.createElement('em');
+              break;
+            case 'underline':
+              wrapper = document.createElement('u');
+              break;
+            case 'foreColor':
+              wrapper = document.createElement('span');
+              wrapper.style.color = value || '#000000';
+              break;
+            case 'fontName':
+              wrapper = document.createElement('span');
+              wrapper.style.fontFamily = value || 'Arial';
+              break;
+            case 'fontSize':
+              wrapper = document.createElement('span');
+              wrapper.style.fontSize = value || '16px';
+              break;
+            default:
+              return;
+          }
+
+          // Extract contents of the selection
+          const contents = range.extractContents();
+          
+          // Add contents to wrapper
+          wrapper.appendChild(contents);
+          
+          // Insert wrapper at selection point
+          range.insertNode(wrapper);
+        }
         
         // Clear selection
         selection.removeAllRanges();
