@@ -68,87 +68,151 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
         }
     }, [content]);
 
-    const handleFocus = () => {
-        // When the editor gains focus, ensure cursor is positioned properly
-        const selection = window.getSelection();
-        if (selection && editorRef.current) {
-        // If no selection exists, position cursor at the end
-        if (selection.rangeCount === 0) {
-            const range = document.createRange();
-            range.selectNodeContents(editorRef.current);
-            range.collapse(false); // Position at end
-            selection.addRange(range);
-        }
-        }
-    };
+  const handleFocus = () => {
+    // When the editor gains focus, ensure cursor is positioned properly
+    const selection = window.getSelection();
+    if (selection && editorRef.current) {
+    // If no selection exists, position cursor at the end
+    if (selection.rangeCount === 0) {
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false); // Position at end
+        selection.addRange(range);
+    }
+    }
+  };
 
-    const handleInput = () => {
-      if (editorRef.current) {
-        isTypingRef.current = true;
+const handleInput = () => {
+    if (editorRef.current) {
+      isTypingRef.current = true;
+      
+      // Clear typing flag after a short delay
+      setTimeout(() => {
+        isTypingRef.current = false;
+      }, 100);
+      
+      let content = editorRef.current.innerHTML;
+      
+      // Clean up empty content and standalone br tags
+      if (content === '<br>' || content === '<div><br></div>' || content.trim() === '') {
+        content = '';
+        editorRef.current.innerHTML = '';
+      } else {
+        // Replace <div> tags with <br> for line breaks
+        content = content.replace(/<div><br><\/div>/g, '<br>');
+        content = content.replace(/<div>/g, '<br>').replace(/<\/div>/g, '');
+        // Remove leading <br> if content starts with one
+        content = content.replace(/^<br>/, '');
+      }
+      
+      onChange(content);
+    }
+  };
+
+  const handleSelectionChange = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      setLastSelection(range.cloneRange());
+      
+      if (onSelectionChange) {
+        const selectedText = selection.toString();
+        onSelectionChange({
+          start: range.startOffset,
+          end: range.endOffset,
+          selectedText
+        });
+      }
+    }
+  };
+
+const applyFormatting = (command: string, value?: string) => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      
+      if (range.collapsed) return; // No text selected
+      
+      const selectedText = range.toString();
+      if (!selectedText) return;
+
+      // Create wrapper element based on command
+      let wrapper: HTMLElement;
+      
+      switch (command) {
+        case 'bold':
+          wrapper = document.createElement('strong');
+          break;
+        case 'italic':
+          wrapper = document.createElement('em');
+          break;
+        case 'underline':
+          wrapper = document.createElement('u');
+          break;
+        case 'foreColor':
+          wrapper = document.createElement('span');
+          wrapper.style.color = value || '#000000';
+          break;
+        case 'fontName':
+          wrapper = document.createElement('span');
+          wrapper.style.fontFamily = value || 'Arial';
+          break;
+        case 'fontSize':
+          wrapper = document.createElement('span');
+          wrapper.style.fontSize = value || '16px';
+          break;
+        default:
+          return;
+      }
+
+      try {
+        // Extract contents of the selection
+        const contents = range.extractContents();
         
-        // Clear typing flag after a short delay
-        setTimeout(() => {
-          isTypingRef.current = false;
-        }, 100);
+        // Add contents to wrapper
+        wrapper.appendChild(contents);
         
-        let content = editorRef.current.innerHTML;
+        // Insert wrapper at selection point
+        range.insertNode(wrapper);
         
-        // Clean up empty content and standalone br tags
-        if (content === '<br>' || content === '<div><br></div>' || content.trim() === '') {
-          content = '';
-          editorRef.current.innerHTML = '';
-        } else {
-          // Replace <div> tags with line breaks for cleaner HTML
-          content = content.replace(/<div>/g, '\n').replace(/<\/div>/g, '');
-          content = content.replace(/\n\n/g, '\n'); // Remove double line breaks
+        // Clear selection
+        selection.removeAllRanges();
+        
+        // Update content
+        if (editorRef.current) {
+          onChange(editorRef.current.innerHTML);
         }
-        
-        onChange(content);
+      } catch (error) {
+        console.error('Error applying formatting:', error);
       }
     };
 
-    const handleSelectionChange = () => {
+  // Expose formatting methods to parent component
+  React.useImperativeHandle(ref, () => ({
+    applyFormatting,
+    focus: () => editorRef.current?.focus()
+  }));
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+    isTypingRef.current = true;
+    
+    // Handle Enter key to insert <br> instead of <div>
+    if (e.key === 'Enter') {
+      e.preventDefault();
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        setLastSelection(range.cloneRange());
-        
-        if (onSelectionChange) {
-          const selectedText = selection.toString();
-          onSelectionChange({
-            start: range.startOffset,
-            end: range.endOffset,
-            selectedText
-          });
-        }
+        range.deleteContents();
+        const br = document.createElement('br');
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.setEndAfter(br);
+        selection.removeAllRanges();
+        selection.addRange(range);
       }
-    };
-
-    const applyFormatting = (command: string, value?: string) => {
-      // Restore selection if we have one
-      if (lastSelection) {
-        const selection = window.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          selection.addRange(lastSelection);
-        }
-      }
-
-      document.execCommand(command, false, value);
-      
-      if (editorRef.current) {
-        onChange(editorRef.current.innerHTML);
-      }
-    };
-
-    // Expose formatting methods to parent component
-    React.useImperativeHandle(ref, () => ({
-      applyFormatting,
-      focus: () => editorRef.current?.focus()
-    }));
-
-     const handleKeyDown = () => {
-    isTypingRef.current = true;
+      handleInput();
+    }
   };
 
   const handleKeyUp = () => {
@@ -160,22 +224,42 @@ export const RichTextEditor = React.forwardRef<RichTextEditorMethods, RichTextEd
     handleSelectionChange();
   };
 
-    return (
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={handleInput}
-        onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
-        onMouseUp={handleSelectionChange}
-        onFocus={handleFocus}
-        className={`min-h-[60px] bg-transparent p-2 text-foreground outline-none focus:outline-none ${className}`}
-        style={{ whiteSpace: 'pre-wrap' }}
-        data-placeholder={placeholder}
-      />
-    );
-  }
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    
+    handleInput();
+  };
+
+  return (
+    <div
+      ref={editorRef}
+      contentEditable
+      suppressContentEditableWarning
+      onInput={handleInput}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+      onMouseUp={handleSelectionChange}
+      onFocus={handleFocus}
+      onPaste={handlePaste}
+      className={`min-h-[60px] bg-transparent p-2 text-foreground outline-none focus:outline-none ${className}`}
+      style={{ whiteSpace: 'pre-wrap' }}
+      data-placeholder={placeholder}
+    />
+  );
+}
 );
 
 RichTextEditor.displayName = 'RichTextEditor';

@@ -37,6 +37,14 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
   const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
   const editorRef = useRef<any>(null);
+  // Pass editor ref to style panel
+  React.useEffect(() => {
+    if (editorRef.current) {
+      window.dispatchEvent(new CustomEvent('setEditorRef', { 
+        detail: { editorRef: editorRef.current } 
+      }));
+    }
+  }, [editorRef.current]);
   const [isUserTyping, setIsUserTyping] = useState(false);
 
   /**
@@ -168,18 +176,15 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
                 fontStyle: localOverlay.styles.fontStyle,
                 textDecoration: localOverlay.styles.textDecoration,
                 lineHeight: localOverlay.styles.lineHeight,
-                letterSpacing: localOverlay.styles.letterSpacing
+                letterSpacing: localOverlay.styles.letterSpacing,
+                textShadow: localOverlay.styles.textShadow && localOverlay.styles.textShadow !== 'none' ? localOverlay.styles.textShadow : undefined
               };
               
-              return localOverlay.styles.isRichText ? (
+              return (
                 <div 
                   style={previewStyle}
-                  dangerouslySetInnerHTML={{ __html: previewContent }}
+                  dangerouslySetInnerHTML={{ __html: previewContent || "Text Preview" }}
                 />
-              ) : (
-                <span style={previewStyle}>
-                  {previewContent}
-                </span>
               );
             })()}
           </div>
