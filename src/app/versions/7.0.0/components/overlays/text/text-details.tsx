@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextSettingsPanel } from "./text-settings-panel";
 import { TextStylePanel } from "./text-style-panel";
 import { createEffectPreview } from './text-effect-preview';
-import { RichTextEditor } from './rich-text-editor';
+import { LexicalTextEditor } from './lexical-text-editor';
 
 
 /**
@@ -193,12 +193,9 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 
         {/* Editor */}
         <div className="relative w-full overflow-hidden rounded-b-sm border border-border bg-muted/40">
-          <RichTextEditor
+          <LexicalTextEditor
             ref={editorRef}
-            content={localOverlay.styles.isRichText 
-              ? (typeof localOverlay.content === 'string' ? localOverlay.content : '') 
-              : (typeof localOverlay.content === 'string' ? localOverlay.content : '')
-            }
+            content={typeof localOverlay.content === 'string' ? localOverlay.content : ''}
             onChange={(content) => {
               handleInputChange("content", content);
               // Enable rich text mode when HTML content is detected

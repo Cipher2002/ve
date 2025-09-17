@@ -27,3 +27,28 @@
       0 0 15px #00ffff;
   }
 }
+
+/* Lexical Editor Styles */
+.editor-paragraph {
+  margin: 0;
+}
+
+.editor-text-bold {
+  font-weight: bold;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+/* Keep editor input clean */
+.lexical-editor [contenteditable] {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+}
