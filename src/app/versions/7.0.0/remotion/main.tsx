@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect } from "react";
 import { AbsoluteFill, continueRender, delayRender, staticFile } from "remotion";
 
-import { Overlay } from "../types";
+import { Overlay, ClipOverlay, OverlayType } from "../types";
 import { SortedOutlines } from "../components/selection/sorted-outlines";
 import { Layer } from "../components/core/layer";
+import { CropOverlay } from "../components/overlays/video/crop-overlay";
 
 import "./text-styles.css";
 
@@ -102,6 +103,64 @@ export const Main: React.FC<MainProps> = ({
           );
         })}
       </AbsoluteFill>
+
+      {/* Crop overlays positioned absolutely */}
+      {overlays.map((overlay) => {
+        const isVideoOverlay = overlay.type === OverlayType.VIDEO;
+        const isSelected = overlay.id === selectedOverlayId;
+        const cropEnabled = (overlay as ClipOverlay).styles?.crop?.enabled === true;
+        
+        console.log('Checking crop overlay for overlay:', overlay.id, {
+          isVideoOverlay,
+          isSelected,
+          cropEnabled,
+          cropData: (overlay as ClipOverlay).styles?.crop
+        });
+        
+        if (isVideoOverlay && isSelected && cropEnabled) {
+          return (
+            <div
+              key={`crop-${overlay.id}`}
+              data-crop-container={overlay.id}
+              style={{
+                position: "absolute",
+                left: overlay.left,
+                top: overlay.top,
+                width: overlay.width,
+                height: overlay.height,
+                transform: `rotate(${overlay.rotation || 0}deg)`,
+                transformOrigin: "center center",
+                pointerEvents: "none",
+                zIndex: 2000,
+              }}
+            >
+              <CropOverlay
+                overlay={overlay as ClipOverlay}
+                onCropChange={(crop) => {
+                  changeOverlay(overlay.id, (prevOverlay) => {
+                    if (prevOverlay.type === OverlayType.VIDEO) {
+                      const clipOverlay = prevOverlay as ClipOverlay;
+                      return {
+                        ...clipOverlay,
+                        styles: {
+                          ...clipOverlay.styles,
+                          crop: {
+                            ...clipOverlay.styles.crop,
+                            ...crop,
+                          },
+                        },
+                      } as ClipOverlay;
+                    }
+                    return prevOverlay;
+                  });
+                }}
+              />
+            </div>
+          );
+        }
+        return null;
+      })}
+
       <SortedOutlines
         selectedOverlayId={selectedOverlayId}
         overlays={overlays}

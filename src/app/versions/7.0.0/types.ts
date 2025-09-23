@@ -150,6 +150,13 @@ export type ClipOverlay = BaseOverlay & {
       type: string;
       params?: Record<string, any>;
     };
+    crop?: {
+        enabled: boolean;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      };
   };
 };
 
