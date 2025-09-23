@@ -287,12 +287,12 @@ const cropStyle: React.CSSProperties = {
       <div
         style={{
           position: "absolute",
-          top: "-24px",
+          top: "-18px",
           left: "0",
           backgroundColor: "#490972",
           color: "white",
           padding: "2px 6px",
-          fontSize: "24px",
+          fontSize: "20px",
           borderRadius: "4px",
           whiteSpace: "nowrap",
         }}

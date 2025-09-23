@@ -453,12 +453,12 @@ export const VideoOverlayPanel: React.FC = () => {
                       >
                       {downloadingCards.has(project.id) ? (
                         <div className="h-full flex flex-col items-center justify-center p-4">
-                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
-                          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Downloading...</p>
-                          <p className="text-xs text-blue-500 dark:text-blue-300">{downloadProgress.get(project.id) || 0}%</p>
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(41,0,156)] border-t-transparent mb-3"></div>
+                          <p className="text-sm font-medium text-[rgb(41,0,156)] dark:text-blue-400">Downloading...</p>
+                          <p className="text-xs font-medium text-[rgb(41,0,156)] dark:text-blue-400">{downloadProgress.get(project.id) || 0}%</p>
                           <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
                             <div 
-                              className="h-full bg-blue-500 transition-all duration-300"
+                              className="h-full bg-[rgb(41,0,156)] transition-all duration-300"
                               style={{ width: `${downloadProgress.get(project.id) || 0}%` }}
                             ></div>
                           </div>

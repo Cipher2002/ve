@@ -338,7 +338,7 @@ const SoundsPanel: React.FC = () => {
         >
           <div className="flex items-center justify-center h-6 w-6">
             {isLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[rgb(41,0,156)] border-t-transparent" />
             ) : isPlaying ? (
               <Pause className="h-4 w-4 text-gray-700 dark:text-gray-300" />
             ) : (
@@ -346,7 +346,7 @@ const SoundsPanel: React.FC = () => {
             )}
           </div>
           <span className="text-[10px] mt-1 text-gray-700 dark:text-gray-300 select-none">
-            {isLoading ? "Loading" : isPlaying ? "Pause" : "Play"}
+            {isLoading ? "Downloading..." : isPlaying ? "Pause" : "Play"}
           </span>
         </div>
 
