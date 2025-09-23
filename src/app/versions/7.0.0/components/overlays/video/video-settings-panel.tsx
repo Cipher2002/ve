@@ -517,55 +517,56 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
             Crop
           </h3>
           <Toggle
-            pressed={localOverlay?.styles?.crop?.enabled ?? false}
-            onPressedChange={(pressed) => {
-              const currentCrop = localOverlay?.styles?.crop;
+  pressed={localOverlay?.styles?.crop?.enabled ?? false}
+  onPressedChange={(pressed) => {
+    const currentCrop = localOverlay?.styles?.crop;
 
-              if (pressed) {
-                handleStyleChange({
-                  crop: {
-                    enabled: true,
-                    x: currentCrop?.x ?? 0,
-                    y: currentCrop?.y ?? 0,
-                    width: currentCrop?.width ?? 1,
-                    height: currentCrop?.height ?? 1,
-                  },
-                });
-              } else {
-                if (currentCrop) {
-                  handleStyleChange({
-                    crop: {
-                      enabled: false,
-                      x: currentCrop.x,
-                      y: currentCrop.y,
-                      width: currentCrop.width,
-                      height: currentCrop.height,
-                    },
-                  });
-                } else {
-                  handleStyleChange({
-                    crop: {
-                      enabled: false,
-                      x: 0,
-                      y: 0,
-                      width: 1,
-                      height: 1,
-                    },
-                  });
-                }
-              }
-            }}
-            className={`
-              flex items-center justify-between w-full p-2 text-left text-xs
-              bg-gray-50 dark:bg-gray-700/50 rounded-md
-              hover:bg-gray-100 dark:hover:bg-gray-700
-              transition-colors
-              text-gray-700 dark:text-gray-300
-              data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600
-            `}
-          >
-            {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
-          </Toggle>
+    if (pressed) {
+      handleStyleChange({
+        crop: {
+          enabled: true,
+          x: currentCrop?.x ?? 0,
+          y: currentCrop?.y ?? 0,
+          width: currentCrop?.width ?? 1,
+          height: currentCrop?.height ?? 1,
+        },
+      });
+    } else {
+      if (currentCrop) {
+        handleStyleChange({
+          crop: {
+            enabled: false,
+            x: currentCrop.x,
+            y: currentCrop.y,
+            width: currentCrop.width,
+            height: currentCrop.height,
+          },
+        });
+      } else {
+        handleStyleChange({
+          crop: {
+            enabled: false,
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1,
+          },
+        });
+      }
+    }
+  }}
+  className={`
+    px-3 py-1 text-xs
+    bg-gray-50 dark:bg-gray-700/50 rounded-md
+    hover:bg-gray-100 dark:hover:bg-gray-700
+    transition-colors
+    text-gray-700 dark:text-gray-300
+    data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600
+  `}
+>
+  {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
+</Toggle>
+
 
         </div>
 
