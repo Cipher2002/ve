@@ -12,14 +12,35 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
   const [resizeHandle, setResizeHandle] = useState<string>("");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resize", handle?: string) => {
+//   const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resize", handle?: string) => {
+//     e.preventDefault();
+//     e.stopPropagation();
+    
+//     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+//     setDragStart({
+//       x: e.clientX - rect.left,
+//       y: e.clientY - rect.top,
+//     });
+
+//     if (action === "drag") {
+//       setIsDragging(true);
+//     } else if (action === "resize" && handle) {
+//       setIsResizing(true);
+//       setResizeHandle(handle);
+//     }
+//   }, []);
+
+const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resize", handle?: string) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // Get the container rect instead of the current target rect
+    const containerRect = document.querySelector(`[data-crop-container="${overlay.id}"]`)?.getBoundingClientRect();
+    if (!containerRect) return;
+    
     setDragStart({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - containerRect.left,
+      y: e.clientY - containerRect.top,
     });
 
     if (action === "drag") {
@@ -28,7 +49,7 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
       setIsResizing(true);
       setResizeHandle(handle);
     }
-  }, []);
+  }, [overlay.id]);
 
 //   const handleMouseMove = useCallback((e: MouseEvent) => {
 //     if (!isDragging && !isResizing) return;
@@ -173,8 +194,8 @@ const cropStyle: React.CSSProperties = {
 
   const handleStyle: React.CSSProperties = {
     position: "absolute",
-    width: "8px",
-    height: "8px",
+    width: "12px",
+    height: "12px",
     backgroundColor: "#3b82f6",
     border: "1px solid white",
     cursor: "nw-resize",
@@ -197,25 +218,25 @@ const cropStyle: React.CSSProperties = {
     >
       {/* Resize handles */}
       <div
-        style={{ ...handleStyle, top: "-4px", left: "-4px", cursor: "nw-resize" }}
+        style={{ ...handleStyle, top: "-6px", left: "-6px", cursor: "nw-resize" }}
         onMouseDown={(e) => handleMouseDown(e, "resize", "top-left")}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       />
       <div
-        style={{ ...handleStyle, top: "-4px", right: "-4px", cursor: "ne-resize" }}
+        style={{ ...handleStyle, top: "-6px", right: "-6px", cursor: "ne-resize" }}
         onMouseDown={(e) => handleMouseDown(e, "resize", "top-right")}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       />
       <div
-        style={{ ...handleStyle, bottom: "-4px", left: "-4px", cursor: "sw-resize" }}
+        style={{ ...handleStyle, bottom: "-6px", left: "-6px", cursor: "sw-resize" }}
         onMouseDown={(e) => handleMouseDown(e, "resize", "bottom-left")}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       />
       <div
-        style={{ ...handleStyle, bottom: "-4px", right: "-4px", cursor: "se-resize" }}
+        style={{ ...handleStyle, bottom: "-6px", right: "-6px", cursor: "se-resize" }}
         onMouseDown={(e) => handleMouseDown(e, "resize", "bottom-right")}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
@@ -225,11 +246,11 @@ const cropStyle: React.CSSProperties = {
       <div
         style={{
           position: "absolute",
-          top: "-4px",
+          top: "-6px",
           left: "50%",
           transform: "translateX(-50%)",
-          width: "8px",
-          height: "8px",
+          width: "12px",
+          height: "12px",
           backgroundColor: "#3b82f6",
           border: "1px solid white",
           cursor: "n-resize",
@@ -242,11 +263,11 @@ const cropStyle: React.CSSProperties = {
       <div
         style={{
           position: "absolute",
-          bottom: "-4px",
+          bottom: "-6px",
           left: "50%",
           transform: "translateX(-50%)",
-          width: "8px",
-          height: "8px",
+          width: "12px",
+          height: "12px",
           backgroundColor: "#3b82f6",
           border: "1px solid white",
           cursor: "s-resize",
@@ -278,10 +299,10 @@ const cropStyle: React.CSSProperties = {
         style={{
           position: "absolute",
           top: "50%",
-          right: "-4px",
+          right: "-6px",
           transform: "translateY(-50%)",
-          width: "8px",
-          height: "8px",
+          width: "12px",
+          height: "12px",
           backgroundColor: "#3b82f6",
           border: "1px solid white",
           cursor: "e-resize",
