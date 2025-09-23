@@ -422,19 +422,17 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
     <div className="space-y-6">
 
       {/* Crop Settings */}
-      <div className="space-y-2 rounded-md bg-card p-4 border">
+      <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-light">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Crop
           </h3>
           <Toggle
             pressed={localOverlay?.styles?.crop?.enabled ?? false}
             onPressedChange={(pressed) => {
               const currentCrop = localOverlay?.styles?.crop;
-              
+
               if (pressed) {
-                // Enabling crop mode - initialize crop area
-                console.log('Enabling crop mode for overlay:', localOverlay?.id);
                 handleStyleChange({
                   crop: {
                     enabled: true,
@@ -445,13 +443,10 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                   },
                 });
               } else {
-                // Disabling crop mode - hide the crop overlay UI but keep crop settings active
-                console.log('Disabling crop UI for overlay:', localOverlay?.id, 'keeping crop settings:', currentCrop);
                 if (currentCrop) {
-                  // Keep the crop settings but mark it as not actively being edited
                   handleStyleChange({
                     crop: {
-                      enabled: false, // This just hides the crop overlay UI
+                      enabled: false,
                       x: currentCrop.x,
                       y: currentCrop.y,
                       width: currentCrop.width,
@@ -459,7 +454,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                     },
                   });
                 } else {
-                  // No existing crop, just disable
                   handleStyleChange({
                     crop: {
                       enabled: false,
@@ -472,8 +466,14 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                 }
               }
             }}
-            size="sm"
-            className="text-xs"
+            className={`
+              flex items-center justify-between w-full p-2 text-left text-xs
+              bg-gray-50 dark:bg-gray-700/50 rounded-md
+              hover:bg-gray-100 dark:hover:bg-gray-700
+              transition-colors
+              text-gray-700 dark:text-gray-300
+              data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600
+            `}
           >
             {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
           </Toggle>

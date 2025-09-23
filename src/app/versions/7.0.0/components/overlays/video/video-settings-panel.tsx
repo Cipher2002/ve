@@ -509,6 +509,100 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
 
   return (
     <div className="space-y-2">
+
+      {/* Crop Settings */}
+      <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Crop
+          </h3>
+          <Toggle
+            pressed={localOverlay?.styles?.crop?.enabled ?? false}
+            onPressedChange={(pressed) => {
+              const currentCrop = localOverlay?.styles?.crop;
+
+              if (pressed) {
+                handleStyleChange({
+                  crop: {
+                    enabled: true,
+                    x: currentCrop?.x ?? 0,
+                    y: currentCrop?.y ?? 0,
+                    width: currentCrop?.width ?? 1,
+                    height: currentCrop?.height ?? 1,
+                  },
+                });
+              } else {
+                if (currentCrop) {
+                  handleStyleChange({
+                    crop: {
+                      enabled: false,
+                      x: currentCrop.x,
+                      y: currentCrop.y,
+                      width: currentCrop.width,
+                      height: currentCrop.height,
+                    },
+                  });
+                } else {
+                  handleStyleChange({
+                    crop: {
+                      enabled: false,
+                      x: 0,
+                      y: 0,
+                      width: 1,
+                      height: 1,
+                    },
+                  });
+                }
+              }
+            }}
+            className={`
+              flex items-center justify-between w-full p-2 text-left text-xs
+              bg-gray-50 dark:bg-gray-700/50 rounded-md
+              hover:bg-gray-100 dark:hover:bg-gray-700
+              transition-colors
+              text-gray-700 dark:text-gray-300
+              data-[state=on]:bg-gray-200 dark:data-[state=on]:bg-gray-600
+            `}
+          >
+            {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
+          </Toggle>
+
+        </div>
+
+        {localOverlay?.styles?.crop?.enabled && (
+          <div className="space-y-2 pt-1">
+            <div className="text-xs text-muted-foreground">
+              Drag the crop area in the preview to adjust the crop region.
+            </div>
+          </div>
+        )}
+        
+        {!localOverlay?.styles?.crop?.enabled && localOverlay?.styles?.crop && (
+          <div className="space-y-2 pt-1">
+            <div className="text-xs text-muted-foreground">
+              Crop is active. Enable edit mode to modify the crop area.
+            </div>
+          </div>
+        )}
+        
+        {localOverlay?.styles?.crop && (
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                handleStyleChange({
+                  crop: undefined,
+                });
+              }}
+              className="w-full text-xs"
+            >
+              Clear Crop
+            </Button>
+          </div>
+        )}
+      </div>
+
       {/* Volume Settings */}
       <div className="space-y-4 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
@@ -603,96 +697,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         </div>
       </div>
 
-      {/* Crop Settings */}
-      <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Crop
-          </h3>
-          <Toggle
-            pressed={localOverlay?.styles?.crop?.enabled ?? false}
-            onPressedChange={(pressed) => {
-              const currentCrop = localOverlay?.styles?.crop;
-
-              if (pressed) {
-                // Enabling crop mode - initialize crop area
-                handleStyleChange({
-                  crop: {
-                    enabled: true,
-                    x: currentCrop?.x ?? 0,
-                    y: currentCrop?.y ?? 0,
-                    width: currentCrop?.width ?? 1,
-                    height: currentCrop?.height ?? 1,
-                  },
-                });
-              } else {
-                // Disabling crop mode - hide the crop overlay UI but keep crop settings active
-                if (currentCrop) {
-                  // Keep the crop settings but mark it as not actively being edited
-                  handleStyleChange({
-                    crop: {
-                      enabled: false, // This just hides the crop overlay UI
-                      x: currentCrop.x,
-                      y: currentCrop.y,
-                      width: currentCrop.width,
-                      height: currentCrop.height,
-                    },
-                  });
-                } else {
-                  // No existing crop, just disable
-                  handleStyleChange({
-                    crop: {
-                      enabled: false,
-                      x: 0,
-                      y: 0,
-                      width: 1,
-                      height: 1,
-                    },
-                  });
-                }
-              }
-            }}
-            size="sm"
-            className="text-xs"
-          >
-            {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
-          </Toggle>
-        </div>
-
-        {localOverlay?.styles?.crop?.enabled && (
-          <div className="space-y-2 pt-1">
-            <div className="text-xs text-muted-foreground">
-              Drag the crop area in the preview to adjust the crop region.
-            </div>
-          </div>
-        )}
-        
-        {!localOverlay?.styles?.crop?.enabled && localOverlay?.styles?.crop && (
-          <div className="space-y-2 pt-1">
-            <div className="text-xs text-muted-foreground">
-              Crop is active. Enable edit mode to modify the crop area.
-            </div>
-          </div>
-        )}
-        
-        {localOverlay?.styles?.crop && (
-          <div className="pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                console.log('Clearing crop for overlay:', localOverlay?.id);
-                handleStyleChange({
-                  crop: undefined,
-                });
-              }}
-              className="w-full text-xs"
-            >
-              Clear Crop
-            </Button>
-          </div>
-        )}
-      </div>
 
       {/* AI Audio Settings */}
       <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
