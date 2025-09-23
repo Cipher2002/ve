@@ -289,17 +289,17 @@ const cropStyle: React.CSSProperties = {
           position: "absolute",
           top: "-24px",
           left: "0",
-          backgroundColor: "#3b82f6",
+          backgroundColor: "#490972",
           color: "white",
           padding: "2px 6px",
-          fontSize: "12px",
+          fontSize: "24px",
           borderRadius: "4px",
           whiteSpace: "nowrap",
         }}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
-        Crop Area ({Math.round(crop.width * overlay.width)}x{Math.round(crop.height * overlay.height)})
+        Drag to Move
       </div>
     </div>
   );

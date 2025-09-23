@@ -287,12 +287,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
 
   // Add this function to upload the thumbnail
   const uploadThumbnail = async (thumbnailBlob: Blob, renderId: string, projectName: string) => {
-    console.log('📤 Uploading thumbnail:', {
-      renderId,
-      projectName,
-      blobSize: thumbnailBlob.size,
-      uid: getUidFromUrl()
-    });
     
     const formData = new FormData();
     formData.append('thumbnail', thumbnailBlob, `thumbnail-${renderId}.png`);
@@ -308,13 +302,10 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Thumbnail uploaded successfully:', result);
       } else {
         const error = await response.text();
-        console.error('❌ Failed to upload thumbnail:', response.status, error);
       }
     } catch (error) {
-      console.error('❌ Error uploading thumbnail:', error);
     }
   };
 
