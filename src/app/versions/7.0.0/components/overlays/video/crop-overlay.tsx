@@ -50,22 +50,33 @@ const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resi
     e.preventDefault();
     e.stopPropagation();
     
-    // Get the container rect instead of the current target rect
+    const crop = overlay.styles.crop;
+    if (!crop) return;
+    
+    // Get the container rect for mouse position calculation
     const containerRect = document.querySelector(`[data-crop-container="${overlay.id}"]`)?.getBoundingClientRect();
     if (!containerRect) return;
     
-    setDragStart({
-      x: e.clientX - containerRect.left,
-      y: e.clientY - containerRect.top,
-    });
-
+    const relativeX = e.clientX - containerRect.left;
+    const relativeY = e.clientY - containerRect.top;
+    
     if (action === "drag") {
+      // For dragging, store the offset from the current crop position
+      setDragStart({
+        x: relativeX - (crop.x * overlay.width),
+        y: relativeY - (crop.y * overlay.height),
+      });
       setIsDragging(true);
     } else if (action === "resize" && handle) {
+      // For resizing, store the current mouse position
+      setDragStart({
+        x: relativeX,
+        y: relativeY,
+      });
       setIsResizing(true);
       setResizeHandle(handle);
     }
-  }, [overlay.id]);
+  }, [overlay.id, overlay.styles.crop, overlay.width, overlay.height]);
 
 //   const handleMouseMove = useCallback((e: MouseEvent) => {
 //     if (!isDragging && !isResizing) return;
@@ -123,18 +134,16 @@ const handleMouseMove = useCallback((e: MouseEvent) => {
     const crop = overlay.styles.crop;
     if (!crop) return;
 
-    // Convert to percentages
-    const relativeXPercent = relativeX / overlay.width;
-    const relativeYPercent = relativeY / overlay.height;
-    const dragStartXPercent = dragStart.x / overlay.width;
-    const dragStartYPercent = dragStart.y / overlay.height;
-
     if (isDragging) {
-      const newX = Math.max(0, Math.min(1 - crop.width, relativeXPercent - dragStartXPercent));
-      const newY = Math.max(0, Math.min(1 - crop.height, relativeYPercent - dragStartYPercent));
+      // For dragging, dragStart contains the offset from crop position
+      const newX = Math.max(0, Math.min(1 - crop.width, (relativeX - dragStart.x) / overlay.width));
+      const newY = Math.max(0, Math.min(1 - crop.height, (relativeY - dragStart.y) / overlay.height));
       
       onCropChange({ x: newX, y: newY, width: crop.width, height: crop.height });
     } else if (isResizing) {
+      // For resizing, dragStart contains the initial mouse position
+      const relativeXPercent = relativeX / overlay.width;
+      const relativeYPercent = relativeY / overlay.height;
       let newWidth = crop.width;
       let newHeight = crop.height;
       let newX = crop.x;
