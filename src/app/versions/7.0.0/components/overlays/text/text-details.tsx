@@ -63,7 +63,7 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
    * @param {keyof TextOverlay} field - The field to update
    * @param {string} value - The new value
    */
-  const handleInputChange = (field: keyof TextOverlay, value: string) => {
+  const handleInputChange = (field: keyof TextOverlay, value: string | { editorState: any }) => {
     // Update local state immediately for responsive UI
     setLocalOverlay({ ...localOverlay, [field]: value });
 
@@ -128,6 +128,33 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
           >
           <div className="w-full break-words">
             {(() => {
+              // Get HTML content from Lexical editor state
+              const getPreviewContent = () => {
+                if (typeof localOverlay.content === 'object' && localOverlay.content !== null) {
+                  // Type guard to check for editorState
+                  if ('editorState' in localOverlay.content && localOverlay.content.editorState) {
+                    try {
+                      // Use the ref to get HTML if editor is available
+                      if (editorRef.current && editorRef.current.getHTML) {
+                        return editorRef.current.getHTML() || "Text Preview";
+                      }
+                      return "Text Preview";
+                    } catch (error) {
+                      return "Text Preview";
+                    }
+                  }
+                  // Handle multi-element content
+                  else if ('elements' in localOverlay.content && localOverlay.content.elements) {
+                    return localOverlay.content.elements.map(el => el.text).join(' ') || "Text Preview";
+                  }
+                } else if (typeof localOverlay.content === 'string') {
+                  return localOverlay.content;
+                }
+                return "Text Preview";
+              };
+
+              const previewContent = getPreviewContent();
+              
               const effectConfig = localOverlay.styles.effect || 
                                   (localOverlay.styles.cssClass === 'striped-shadow' ? { type: 'striped-shadow' } : null);
               
@@ -142,32 +169,26 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
                   lineHeight: localOverlay.styles.lineHeight
                 };
                 
-                const effect = createEffectPreview(effectConfig, previewStyle, 
-                  typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview");
+                const effect = createEffectPreview(effectConfig, previewStyle, previewContent);
                 
                 if (effect) {
                   if (effect.container) {
                     return (
                       <div style={effect.container as React.CSSProperties}>
                         {effect.layers.map((layer, index) => (
-                          <div key={index} style={layer.style}>
-                            {layer.content}
-                          </div>
+                          <div key={index} style={layer.style} dangerouslySetInnerHTML={{ __html: layer.content }} />
                         ))}
                       </div>
                     );
                   } else {
                     return effect.layers.map((layer, index) => (
-                      <div key={index} style={layer.style}>
-                        {layer.content}
-                      </div>
+                      <div key={index} style={layer.style} dangerouslySetInnerHTML={{ __html: layer.content }} />
                     ));
                   }
                 }
               }
               
               // Fallback for non-effect styles
-              const previewContent = typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview";
               const previewStyle = {
                 color: localOverlay.styles.color || '#000000',
                 fontSize: '16px',
@@ -183,7 +204,7 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
               return (
                 <div 
                   style={previewStyle}
-                  dangerouslySetInnerHTML={{ __html: previewContent || "Text Preview" }}
+                  dangerouslySetInnerHTML={{ __html: previewContent }}
                 />
               );
             })()}
@@ -195,11 +216,16 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
         <div className="relative w-full overflow-hidden rounded-b-sm border border-border bg-muted/40">
           <LexicalTextEditor
             ref={editorRef}
-            content={typeof localOverlay.content === 'string' ? localOverlay.content : ''}
+            content={
+              // Convert multi-element content to string for Lexical editor
+              typeof localOverlay.content === 'object' && 'elements' in localOverlay.content 
+                ? localOverlay.content.elements.map(el => el.text).join(' ')
+                : localOverlay.content
+            }
             onChange={(content) => {
               handleInputChange("content", content);
-              // Enable rich text mode when HTML content is detected
-              if (content.includes('<') && !localOverlay.styles.isRichText) {
+              // Always enable rich text mode for Lexical content
+              if (!localOverlay.styles.isRichText) {
                 handleStyleChange("isRichText", true as any);
               }
             }}

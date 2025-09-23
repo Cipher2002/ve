@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { $getRoot, $getSelection, $isRangeSelection } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, TextNode, $createTextNode, LexicalEditor } from 'lexical';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -8,36 +8,67 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
 
+interface TextElement {
+  id: string;
+  text: string;
+  editable: boolean;
+}
+
 interface LexicalTextEditorProps {
-  content: string;
-  onChange: (content: string) => void;
+  content: string | { elements: TextElement[] } | { editorState: any };
+  onChange: (content: { editorState: any }) => void;
   placeholder?: string;
   className?: string;
   onSelectionChange?: (selection: { start: number; end: number; selectedText: string }) => void;
 }
 
 // Plugin to handle content updates
-function UpdateContentPlugin({ content, onChange }: { content: string; onChange: (content: string) => void }) {
+function UpdateContentPlugin({ content, onChange, editorRef }: { 
+  content: string | { elements: TextElement[] } | { editorState: any }; 
+  onChange: (content: { editorState: any }) => void;
+  editorRef?: React.MutableRefObject<LexicalEditor | null>;
+}) {
   const [editor] = useLexicalComposerContext();
   const isUserTypingRef = useRef(false);
+
+  // Store editor reference for parent component
+  React.useEffect(() => {
+    if (editorRef) {
+      editorRef.current = editor;
+    }
+  }, [editor, editorRef]);
 
   // Update editor content when prop changes
   useEffect(() => {
     if (isUserTypingRef.current) return;
     
     editor.update(() => {
-      const root = $getRoot();
-      const currentHtml = $generateHtmlFromNodes(editor, null);
-      
-      if (currentHtml !== content) {
-        root.clear();
-        
-        if (content) {
+      try {
+        if (typeof content === 'object' && 'editorState' in content && content.editorState) {
+          const editorState = editor.parseEditorState(content.editorState);
+          editor.setEditorState(editorState);
+        } else if (typeof content === 'object' && 'elements' in content && content.elements) {
+          // Handle multi-element content - convert to plain text for now
+          const root = $getRoot();
+          root.clear();
+          const combinedText = content.elements.map(el => el.text).join(' ');
+          if (combinedText) {
+            const parser = new DOMParser();
+            const dom = parser.parseFromString(combinedText, 'text/html');
+            const nodes = $generateNodesFromDOM(editor, dom);
+            root.append(...nodes);
+          }
+        } else if (typeof content === 'string' && content) {
+          // Convert HTML string to Lexical nodes for backward compatibility
+          const root = $getRoot();
+          root.clear();
           const parser = new DOMParser();
           const dom = parser.parseFromString(content, 'text/html');
           const nodes = $generateNodesFromDOM(editor, dom);
           root.append(...nodes);
         }
+      } catch (error) {
+        console.error('Error updating editor content:', error);
       }
     });
   }, [content, editor]);
@@ -45,15 +76,15 @@ function UpdateContentPlugin({ content, onChange }: { content: string; onChange:
   // Handle content changes
   useEffect(() => {
     const removeUpdateListener = editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
+      if (!isUserTypingRef.current) {
         isUserTypingRef.current = true;
-        const html = $generateHtmlFromNodes(editor, null);
-        onChange(html);
+        const serializedState = editorState.toJSON();
+        onChange({ editorState: serializedState });
         
         setTimeout(() => {
           isUserTypingRef.current = false;
         }, 100);
-      });
+      }
     });
 
     return removeUpdateListener;
@@ -82,10 +113,37 @@ function FormattingPlugin() {
           selection.formatText('underline');
           break;
         case 'foreColor':
-          // Will implement custom color formatting
+          if (value) {
+            selection.getNodes().forEach(node => {
+              if (node instanceof TextNode) {
+                node.setStyle(`color: ${value}`);
+              }
+            });
+          }
           break;
         case 'fontFamily':
-          // Will implement custom font formatting
+          if (value) {
+            selection.getNodes().forEach(node => {
+              if (node instanceof TextNode) {
+                const currentStyle = node.getStyle() || '';
+                const newStyle = currentStyle.replace(/font-family:[^;]*(;|$)/, '') + 
+                  (currentStyle && !currentStyle.endsWith(';') ? ';' : '') + `font-family: ${value};`;
+                node.setStyle(newStyle);
+              }
+            });
+          }
+          break;
+        case 'fontSize':
+          if (value) {
+            selection.getNodes().forEach(node => {
+              if (node instanceof TextNode) {
+                const currentStyle = node.getStyle() || '';
+                const newStyle = currentStyle.replace(/font-size:[^;]*(;|$)/, '') + 
+                  (currentStyle && !currentStyle.endsWith(';') ? ';' : '') + `font-size: ${value};`;
+                node.setStyle(newStyle);
+              }
+            });
+          }
           break;
       }
     });
@@ -129,12 +187,24 @@ export const LexicalTextEditor = React.forwardRef<any, LexicalTextEditorProps>(
       }));
     }, []);
 
+    // Store editor reference for accessing it in imperative methods
+    const editorRef = React.useRef(null);
+
     // Expose methods to parent
     React.useImperativeHandle(ref, () => ({
       applyFormatting,
       focus: () => {
         // Will implement focus logic
+      },
+      getHTML: () => {
+      // Fallback method - get HTML from the contentEditable element
+      const contentEditableElement = document.querySelector('[contenteditable="true"]');
+      if (contentEditableElement) {
+        return contentEditableElement.innerHTML;
       }
+      return '';
+    },
+      editor: editorRef.current
     }));
 
     return (
@@ -155,7 +225,7 @@ export const LexicalTextEditor = React.forwardRef<any, LexicalTextEditorProps>(
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />
-          <UpdateContentPlugin content={content} onChange={onChange} />
+          <UpdateContentPlugin content={content} onChange={onChange} editorRef={editorRef} />
           <FormattingPlugin />
         </div>
       </LexicalComposer>

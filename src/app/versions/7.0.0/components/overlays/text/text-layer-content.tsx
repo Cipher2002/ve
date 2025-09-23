@@ -201,23 +201,35 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     return div.textContent || div.innerText || '';
   };
 
+  // Helper function to convert Lexical editor state to HTML
+  const convertLexicalToHtml = (editorState: any): string => {
+    try {
+      // This is a simplified conversion - in a real implementation you'd use Lexical's serialization
+      // For now, we'll assume the content has already been converted to HTML
+      return JSON.stringify(editorState);
+    } catch (error) {
+      console.error('Error converting Lexical state:', error);
+      return '';
+    }
+  };
+
   // Helper function to render HTML content
   const renderHtmlContent = (html: string, style: React.CSSProperties) => {
-    // Apply styles directly to the HTML content
+    // Apply global styles while preserving inline rich text styles
     const styledHtml = html.replace(
       /<([^>]+)>/g, 
       (match, tagContent) => {
         if (tagContent.startsWith('/')) return match; // Don't modify closing tags
         
-        // Add style attributes to opening tags
-        const styleAttr = `style="line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`;
+        // Merge global styles with existing inline styles, prioritizing inline styles
+        const globalStyles = `line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing}; font-family: ${style.fontFamily}; font-size: ${style.fontSize};`;
         
         if (tagContent.includes('style=')) {
-          // If style already exists, merge it
-          return match.replace(/style="([^"]*)"/, `style="$1 line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`);
+          // If style already exists, prepend global styles (inline takes precedence)
+          return match.replace(/style="([^"]*)"/, `style="${globalStyles} $1"`);
         } else {
-          // Add style attribute
-          return `<${tagContent} ${styleAttr}>`;
+          // Add global style attributes
+          return `<${tagContent} style="${globalStyles}">`;
         }
       }
     );
@@ -272,15 +284,21 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     // Handle multi-element content
     let lines, numLines, maxLineLength;
     
-    if (overlay.templateType === "multi-element" && typeof overlay.content === 'object') {
+    if (overlay.templateType === "multi-element" && typeof overlay.content === 'object' && overlay.content !== null && 'elements' in overlay.content) {
       // For multi-element, combine all text and calculate based on that
-      const combinedText = overlay.content.elements?.map(el => el.text).join(' ') || '';
+      const combinedText = overlay.content.elements?.map((el: any) => el.text).join(' ') || '';
       lines = combinedText.split("\n");
       numLines = lines.length;
-      maxLineLength = Math.max(...lines.map((line) => line.length));
+      maxLineLength = Math.max(...lines.map((line: any) => line.length));
     } else {
-      // For single element, use existing logic
-      const contentString = typeof overlay.content === 'string' ? overlay.content : '';
+      // For single element, use existing logic - handle Lexical content
+      let contentString = '';
+      if (typeof overlay.content === 'string') {
+        contentString = overlay.content;
+      } else if (typeof overlay.content === 'object' && overlay.content !== null && 'editorState' in overlay.content) {
+        // For Lexical content, we need to extract text length - use a simple approximation
+        contentString = 'Sample text for calculation'; // Placeholder for now
+      }
       lines = contentString.split("\n");
       numLines = lines.length;
       maxLineLength = Math.max(...lines.map((line) => line.length));
@@ -351,13 +369,31 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   };
 
 const effectConfig = getEffectConfig();
-const textContent = typeof overlay.content === 'string' ? overlay.content : '';
+
+// Get content based on type - handle Lexical editor state
+const getTextContent = () => {
+  if (typeof overlay.content === 'object' && overlay.content !== null) {
+    // Type guard for editorState
+    if ('editorState' in overlay.content && overlay.content.editorState) {
+      // Convert Lexical editor state to HTML
+      return convertLexicalToHtml(overlay.content.editorState);
+    }
+    // Type guard for elements
+    else if ('elements' in overlay.content && overlay.content.elements) {
+      // Multi-element content
+      return overlay.content.elements.map(el => el.text).join(' ');
+    }
+  }
+  return typeof overlay.content === 'string' ? overlay.content : '';
+};
+
+const textContent = getTextContent();
 
 return (
   <div style={containerStyle}>
-    {overlay.templateType === "multi-element" && typeof overlay.content === 'object' ? (
+    {overlay.templateType === "multi-element" && typeof overlay.content === 'object' && overlay.content !== null && 'elements' in overlay.content && overlay.content.elements ? (
       // Multi-element template (unchanged)
-      overlay.content.elements?.map((element, index) => (
+      overlay.content.elements?.map((element: any, index: any) => (
         <span 
           key={element.id || index}
           style={{
@@ -377,8 +413,17 @@ return (
         </span>
       ))
     ) : effectConfig ? (() => {
-      // Apply dynamic effect - use plain text for effects
-      const plainTextContent = overlay.styles.isRichText ? stripHtmlTags(textContent) : textContent;
+      // Apply dynamic effect - use plain text for effects but preserve rich formatting
+      let effectContent = textContent;
+      
+      // For effects, we want to preserve the rich text HTML but apply the effect styling
+      if (typeof overlay.content === 'object' && overlay.content !== null && 'editorState' in overlay.content && overlay.content.editorState) {
+        // For Lexical content with effects, render the rich HTML with effect applied
+        effectContent = textContent;
+      } else {
+        // For plain text effects, strip HTML
+        effectContent = overlay.styles.isRichText ? stripHtmlTags(textContent) : textContent;
+      }
       
       // Ensure textStyle includes all spacing properties for effects
       const effectTextStyle = {
@@ -387,32 +432,51 @@ return (
         letterSpacing: overlay.styles.letterSpacing || textStyle.letterSpacing || "0px"
       };
       
-      const effect = createEffect(effectConfig, effectTextStyle, plainTextContent);
+      const effect = createEffect(effectConfig, effectTextStyle, effectContent);
       if (!effect) return null;
 
       if (effect.container) {
         return (
           <div style={effect.container as React.CSSProperties}>
-            {effect.layers.map((layer, index) => (
-              <div key={index} style={layer.style}>
-                {layer.content}
-              </div>
-            ))}
+            {effect.layers.map((layer, index) => {
+              const isLexicalContent = typeof overlay.content === 'object' && overlay.content !== null && 'editorState' in overlay.content && overlay.content.editorState;
+              
+              return isLexicalContent ? (
+                <div 
+                  key={index} 
+                  style={layer.style}
+                  dangerouslySetInnerHTML={{ __html: layer.content || '' }}
+                />
+              ) : (
+                <div key={index} style={layer.style}>
+                  {layer.content}
+                </div>
+              );
+            })}
           </div>
         );
       } else {
-        return effect.layers.map((layer, index) => (
-          <div key={index} style={layer.style}>
-            {layer.content}
-          </div>
-        ));
+        return effect.layers.map((layer, index) => {
+          const isLexicalContent = typeof overlay.content === 'object' && overlay.content !== null && 'editorState' in overlay.content && overlay.content.editorState;
+          
+          return isLexicalContent ? (
+            <div 
+              key={index} 
+              style={layer.style}
+              dangerouslySetInnerHTML={{ __html: layer.content || '' }}
+            />
+          ) : (
+            <div key={index} style={layer.style}>
+              {layer.content}
+            </div>
+          );
+        });
       }
-    })() : overlay.styles.isRichText ? (
-      // Rich text - render HTML
-      renderHtmlContent(textContent, textStyle)
-    ) : (
-      // Plain text or HTML - render appropriately
-      overlay.styles.isRichText || textContent.includes('<') ? (
+    })() : (
+      // Always render as rich HTML for Lexical content, or fallback to plain text
+      (typeof overlay.content === 'object' && overlay.content !== null && 'editorState' in overlay.content && overlay.content.editorState) ? (
+        renderHtmlContent(textContent, textStyle)
+      ) : overlay.styles.isRichText || textContent.includes('<') ? (
         <div 
           style={textStyle}
           className={overlay.styles.cssClass || ''}

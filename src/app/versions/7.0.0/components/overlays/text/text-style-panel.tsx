@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import ColorPicker from "react-best-gradient-color-picker";
 import { useEditorContext } from "../../../contexts/editor-context";
-import { RichTextEditor } from './rich-text-editor';
 
 /**
  * Available font options for text overlays
@@ -98,21 +97,29 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
       await loadGoogleFont(font.family, [variant]);
       const fontFamilyString = getFontFamilyString(font.family);
       
-      // Update all font properties together
-      if (selectedOverlayId !== null) {
-        const overlay = overlays.find((o) => o.id === selectedOverlayId);
-        if (overlay) {
-          const updatedOverlay = {
-            ...overlay,
-            styles: { 
-              ...overlay.styles, 
-              fontFamily: fontFamilyString,
-              fontWeight: variant.weight,
-              fontStyle: variant.style
-            },
-          };
-          
-          changeOverlay(selectedOverlayId, (currentOverlay) => updatedOverlay as TextOverlay);
+      // Check if there's a selection - if yes, apply to selection, if no, apply globally
+      const hasSelection = (window.getSelection()?.toString() || '').length > 0;
+      
+      if (hasSelection && editorRef.current) {
+        // Apply to selection only
+        editorRef.current.applyFormatting('fontFamily', fontFamilyString);
+      } else {
+        // Update all font properties globally
+        if (selectedOverlayId !== null) {
+          const overlay = overlays.find((o) => o.id === selectedOverlayId);
+          if (overlay) {
+            const updatedOverlay = {
+              ...overlay,
+              styles: { 
+                ...overlay.styles, 
+                fontFamily: fontFamilyString,
+                fontWeight: variant.weight,
+                fontStyle: variant.style
+              },
+            };
+            
+            changeOverlay(selectedOverlayId, (currentOverlay) => updatedOverlay as TextOverlay);
+          }
         }
       }
       
@@ -245,7 +252,16 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   if (editorRef.current) {
-                    editorRef.current.applyFormatting('bold');
+                    // Check if there's a selection - if yes, apply to selection, if no, apply globally
+                    const hasSelection = (window.getSelection()?.toString() || '').length > 0;
+                    if (hasSelection) {
+                      editorRef.current.applyFormatting('bold');
+                    } else {
+                      // Apply globally by updating overlay styles
+                      const currentWeight = localOverlay.styles.fontWeight || '400';
+                      const newWeight = currentWeight === 'bold' || currentWeight === '700' ? '400' : 'bold';
+                      handleStyleChange('fontWeight', newWeight);
+                    }
                   }
                 }}
                 className="px-3 py-1 text-xs border rounded font-bold bg-background hover:bg-accent"
@@ -255,7 +271,15 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   if (editorRef.current) {
-                    editorRef.current.applyFormatting('italic');
+                    const hasSelection = (window.getSelection()?.toString() || '').length > 0;
+                    if (hasSelection) {
+                      editorRef.current.applyFormatting('italic');
+                    } else {
+                      // Apply globally by updating overlay styles
+                      const currentStyle = localOverlay.styles.fontStyle || 'normal';
+                      const newStyle = currentStyle === 'italic' ? 'normal' : 'italic';
+                      handleStyleChange('fontStyle', newStyle);
+                    }
                   }
                 }}
                 className="px-3 py-1 text-xs border rounded italic bg-background hover:bg-accent"
@@ -265,7 +289,15 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   if (editorRef.current) {
-                    editorRef.current.applyFormatting('underline');
+                    const hasSelection = (window.getSelection()?.toString() || '').length > 0;
+                    if (hasSelection) {
+                      editorRef.current.applyFormatting('underline');
+                    } else {
+                      // Apply globally by updating overlay styles
+                      const currentDecoration = localOverlay.styles.textDecoration || 'none';
+                      const newDecoration = currentDecoration === 'underline' ? 'none' : 'underline';
+                      handleStyleChange('textDecoration', newDecoration);
+                    }
                   }
                 }}
                 className="px-3 py-1 text-xs border rounded underline bg-background hover:bg-accent"
@@ -335,7 +367,16 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                     >
                       <ColorPicker
                         value={localOverlay.styles.color}
-                        onChange={(color) => handleStyleChange("color", color)}
+                        onChange={(color) => {
+                          // Check if there's a selection - if yes, apply to selection, if no, apply globally
+                          const hasSelection = (window.getSelection()?.toString() || '').length > 0;
+                          if (hasSelection && editorRef.current) {
+                            editorRef.current.applyFormatting('foreColor', color);
+                          } else {
+                            // Apply globally
+                            handleStyleChange("color", color);
+                          }
+                        }}
                         // hideInputs
                         hideHue
                         hideControls
