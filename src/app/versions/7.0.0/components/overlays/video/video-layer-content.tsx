@@ -122,12 +122,26 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
     boxSizing: "border-box",
   };
 
+  // // Apply crop if crop settings exist (regardless of enabled flag)
+  // // The enabled flag only controls whether the crop overlay UI is shown
+  // if (overlay.styles.crop && overlay.styles.crop.width > 0 && overlay.styles.crop.height > 0) {
+  //   const { x, y, width, height } = overlay.styles.crop;
+  //   // Use clip-path to crop the video content
+  //   containerStyle.clipPath = `inset(${y}px ${overlay.width - x - width}px ${overlay.height - y - height}px ${x}px)`;
+  //   containerStyle.overflow = "hidden";
+  // }
+
   // Apply crop if crop settings exist (regardless of enabled flag)
   // The enabled flag only controls whether the crop overlay UI is shown
   if (overlay.styles.crop && overlay.styles.crop.width > 0 && overlay.styles.crop.height > 0) {
     const { x, y, width, height } = overlay.styles.crop;
+    // Convert percentages to pixels for clip-path
+    const xPx = x * overlay.width;
+    const yPx = y * overlay.height;
+    const widthPx = width * overlay.width;
+    const heightPx = height * overlay.height;
     // Use clip-path to crop the video content
-    containerStyle.clipPath = `inset(${y}px ${overlay.width - x - width}px ${overlay.height - y - height}px ${x}px)`;
+    containerStyle.clipPath = `inset(${yPx}px ${overlay.width - xPx - widthPx}px ${overlay.height - yPx - heightPx}px ${xPx}px)`;
     containerStyle.overflow = "hidden";
   }
 

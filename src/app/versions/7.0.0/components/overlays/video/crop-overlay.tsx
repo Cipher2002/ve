@@ -30,7 +30,51 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
     }
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+//   const handleMouseMove = useCallback((e: MouseEvent) => {
+//     if (!isDragging && !isResizing) return;
+
+//     // Get the mouse position relative to the crop overlay's container
+//     const containerRect = document.querySelector(`[data-crop-container="${overlay.id}"]`)?.getBoundingClientRect();
+//     if (!containerRect) return;
+
+//     const relativeX = e.clientX - containerRect.left;
+//     const relativeY = e.clientY - containerRect.top;
+//     const crop = overlay.styles.crop;
+//     if (!crop) return;
+
+//     if (isDragging) {
+//       const newX = Math.max(0, Math.min(overlay.width - crop.width, relativeX - dragStart.x));
+//       const newY = Math.max(0, Math.min(overlay.height - crop.height, relativeY - dragStart.y));
+      
+//       onCropChange({ x: newX, y: newY, width: crop.width, height: crop.height });
+//     } else if (isResizing) {
+//       let newWidth = crop.width;
+//       let newHeight = crop.height;
+//       let newX = crop.x;
+//       let newY = crop.y;
+
+//       if (resizeHandle.includes("right")) {
+//         newWidth = Math.max(50, Math.min(overlay.width - crop.x, relativeX - crop.x));
+//       }
+//       if (resizeHandle.includes("left")) {
+//         const oldRight = crop.x + crop.width;
+//         newX = Math.max(0, Math.min(oldRight - 50, relativeX));
+//         newWidth = oldRight - newX;
+//       }
+//       if (resizeHandle.includes("bottom")) {
+//         newHeight = Math.max(50, Math.min(overlay.height - crop.y, relativeY - crop.y));
+//       }
+//       if (resizeHandle.includes("top")) {
+//         const oldBottom = crop.y + crop.height;
+//         newY = Math.max(0, Math.min(oldBottom - 50, relativeY));
+//         newHeight = oldBottom - newY;
+//       }
+
+//       onCropChange({ x: newX, y: newY, width: newWidth, height: newHeight });
+//     }
+//   }, [isDragging, isResizing, dragStart, overlay, resizeHandle, onCropChange]);
+
+const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging && !isResizing) return;
 
     // Get the mouse position relative to the crop overlay's container
@@ -42,9 +86,15 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
     const crop = overlay.styles.crop;
     if (!crop) return;
 
+    // Convert to percentages
+    const relativeXPercent = relativeX / overlay.width;
+    const relativeYPercent = relativeY / overlay.height;
+    const dragStartXPercent = dragStart.x / overlay.width;
+    const dragStartYPercent = dragStart.y / overlay.height;
+
     if (isDragging) {
-      const newX = Math.max(0, Math.min(overlay.width - crop.width, relativeX - dragStart.x));
-      const newY = Math.max(0, Math.min(overlay.height - crop.height, relativeY - dragStart.y));
+      const newX = Math.max(0, Math.min(1 - crop.width, relativeXPercent - dragStartXPercent));
+      const newY = Math.max(0, Math.min(1 - crop.height, relativeYPercent - dragStartYPercent));
       
       onCropChange({ x: newX, y: newY, width: crop.width, height: crop.height });
     } else if (isResizing) {
@@ -53,20 +103,22 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
       let newX = crop.x;
       let newY = crop.y;
 
+      const minSizePercent = 50 / Math.max(overlay.width, overlay.height); // Minimum 50px converted to percentage
+
       if (resizeHandle.includes("right")) {
-        newWidth = Math.max(50, Math.min(overlay.width - crop.x, relativeX - crop.x));
+        newWidth = Math.max(minSizePercent, Math.min(1 - crop.x, relativeXPercent - crop.x));
       }
       if (resizeHandle.includes("left")) {
         const oldRight = crop.x + crop.width;
-        newX = Math.max(0, Math.min(oldRight - 50, relativeX));
+        newX = Math.max(0, Math.min(oldRight - minSizePercent, relativeXPercent));
         newWidth = oldRight - newX;
       }
       if (resizeHandle.includes("bottom")) {
-        newHeight = Math.max(50, Math.min(overlay.height - crop.y, relativeY - crop.y));
+        newHeight = Math.max(minSizePercent, Math.min(1 - crop.y, relativeYPercent - crop.y));
       }
       if (resizeHandle.includes("top")) {
         const oldBottom = crop.y + crop.height;
-        newY = Math.max(0, Math.min(oldBottom - 50, relativeY));
+        newY = Math.max(0, Math.min(oldBottom - minSizePercent, relativeYPercent));
         newHeight = oldBottom - newY;
       }
 
@@ -94,12 +146,24 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
   const crop = overlay.styles.crop;
   if (!crop?.enabled) return null;
 
-  const cropStyle: React.CSSProperties = {
+//   const cropStyle: React.CSSProperties = {
+//     position: "absolute",
+//     left: `${crop.x}px`,
+//     top: `${crop.y}px`,
+//     width: `${crop.width}px`,
+//     height: `${crop.height}px`,
+//     border: "2px solid #3b82f6",
+//     backgroundColor: "rgba(59, 130, 246, 0.1)",
+//     cursor: isDragging ? "grabbing" : "grab",
+//     pointerEvents: "auto",
+//     zIndex: 1000,
+//   };
+const cropStyle: React.CSSProperties = {
     position: "absolute",
-    left: `${crop.x}px`,
-    top: `${crop.y}px`,
-    width: `${crop.width}px`,
-    height: `${crop.height}px`,
+    left: `${crop.x * overlay.width}px`,
+    top: `${crop.y * overlay.height}px`,
+    width: `${crop.width * overlay.width}px`,
+    height: `${crop.height * overlay.height}px`,
     border: "2px solid #3b82f6",
     backgroundColor: "rgba(59, 130, 246, 0.1)",
     cursor: isDragging ? "grabbing" : "grab",
@@ -229,7 +293,7 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
       />
 
       {/* Crop area label */}
-      <div
+      {/* <div
         style={{
           position: "absolute",
           top: "-24px",
@@ -245,6 +309,24 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
         onClick={(e) => e.stopPropagation()}
       >
         Crop Area ({Math.round(crop.width)}×{Math.round(crop.height)})
+      </div> */}
+
+      <div
+        style={{
+          position: "absolute",
+          top: "-24px",
+          left: "0",
+          backgroundColor: "#3b82f6",
+          color: "white",
+          padding: "2px 6px",
+          fontSize: "12px",
+          borderRadius: "4px",
+          whiteSpace: "nowrap",
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        Crop Area ({Math.round(crop.width * overlay.width)}×{Math.round(crop.height * overlay.height)})
       </div>
     </div>
   );

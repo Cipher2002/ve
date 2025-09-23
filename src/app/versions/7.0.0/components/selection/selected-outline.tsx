@@ -63,8 +63,14 @@ export const SelectionOutline: React.FC<{
       left: overlay.left,
       top: overlay.top,
       position: "absolute",
+      // outline:
+      //   (hovered && !isDragging) || isSelected
+      //     ? `${scaledBorder}px solid #3B8BF2`
+      //     : undefined,
+
       outline:
-        (hovered && !isDragging) || isSelected
+        ((hovered && !isDragging) || isSelected) && 
+        !(overlay.type === OverlayType.VIDEO && (overlay as any).styles?.crop?.enabled)
           ? `${scaledBorder}px solid #3B8BF2`
           : undefined,
       transform: `rotate(${overlay.rotation || 0}deg)`,
@@ -140,7 +146,7 @@ export const SelectionOutline: React.FC<{
         onPointerLeave={onMouseLeave}
         style={style}
       >
-        {isSelected ? (
+        {/* {isSelected ? (
           <>
             <ResizeHandle
               overlay={overlay}
@@ -167,6 +173,41 @@ export const SelectionOutline: React.FC<{
               setOverlay={changeOverlay}
               scale={scale}
             />
+          </>
+        ) : null} */}
+
+        {isSelected ? (
+          <>
+            {/* Hide handles when crop edit mode is active for video overlays */}
+            {!(overlay.type === OverlayType.VIDEO && (overlay as any).styles?.crop?.enabled) && (
+              <>
+                <ResizeHandle
+                  overlay={overlay}
+                  setOverlay={changeOverlay}
+                  type="top-left"
+                />
+                <ResizeHandle
+                  overlay={overlay}
+                  setOverlay={changeOverlay}
+                  type="top-right"
+                />
+                <ResizeHandle
+                  overlay={overlay}
+                  setOverlay={changeOverlay}
+                  type="bottom-left"
+                />
+                <ResizeHandle
+                  overlay={overlay}
+                  setOverlay={changeOverlay}
+                  type="bottom-right"
+                />
+                <RotateHandle
+                  overlay={overlay}
+                  setOverlay={changeOverlay}
+                  scale={scale}
+                />
+              </>
+            )}
           </>
         ) : null}
       </div>
