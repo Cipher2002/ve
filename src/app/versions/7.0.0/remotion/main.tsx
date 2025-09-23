@@ -130,8 +130,8 @@ export const Main: React.FC<MainProps> = ({
                 height: overlay.height,
                 transform: `rotate(${overlay.rotation || 0}deg)`,
                 transformOrigin: "center center",
-                pointerEvents: "none",
-                zIndex: 2000,
+                pointerEvents: "auto",
+                zIndex: 10000,
               }}
             >
               <CropOverlay

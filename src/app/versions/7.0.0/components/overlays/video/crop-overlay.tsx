@@ -205,7 +205,7 @@ const cropStyle: React.CSSProperties = {
     backgroundColor: "rgba(59, 130, 246, 0.1)",
     cursor: isDragging ? "grabbing" : "grab",
     pointerEvents: "auto",
-    zIndex: 3000,
+    zIndex: 10000,
   };
 
 //   const handleStyle: React.CSSProperties = {
