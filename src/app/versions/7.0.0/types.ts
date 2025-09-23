@@ -43,7 +43,7 @@ type AnimationConfig = {
 // Text overlay specific
 export type TextOverlay = BaseOverlay & {
   type: OverlayType.TEXT;
-  content: string | { elements: TextElement[] } | { editorState: any };
+  content: string | { elements: TextElement[] };
   templateType?: string;
   styles: BaseStyles & {
     fontSize: string;
