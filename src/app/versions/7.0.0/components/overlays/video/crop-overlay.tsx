@@ -28,24 +28,6 @@ export const CropOverlay: React.FC<CropOverlayProps> = ({ overlay, onCropChange 
   const [resizeHandle, setResizeHandle] = useState<string>("");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-//   const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resize", handle?: string) => {
-//     e.preventDefault();
-//     e.stopPropagation();
-    
-//     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-//     setDragStart({
-//       x: e.clientX - rect.left,
-//       y: e.clientY - rect.top,
-//     });
-
-//     if (action === "drag") {
-//       setIsDragging(true);
-//     } else if (action === "resize" && handle) {
-//       setIsResizing(true);
-//       setResizeHandle(handle);
-//     }
-//   }, []);
-
 const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resize", handle?: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,59 +50,36 @@ const handleMouseDown = useCallback((e: React.MouseEvent, action: "drag" | "resi
       });
       setIsDragging(true);
     } else if (action === "resize" && handle) {
-      // For resizing, store the current mouse position
+      // For resizing, store the offset from the handle's anchor point
+      let anchorX = 0;
+      let anchorY = 0;
+      
+      if (handle.includes("left")) {
+        anchorX = crop.x * overlay.width;
+      } else if (handle.includes("right")) {
+        anchorX = (crop.x + crop.width) * overlay.width;
+      } else {
+        // Middle handles (top/bottom only)
+        anchorX = (crop.x + crop.width / 2) * overlay.width;
+      }
+      
+      if (handle.includes("top")) {
+        anchorY = crop.y * overlay.height;
+      } else if (handle.includes("bottom")) {
+        anchorY = (crop.y + crop.height) * overlay.height;
+      } else {
+        // Middle handles (left/right only)
+        anchorY = (crop.y + crop.height / 2) * overlay.height;
+      }
+      
       setDragStart({
-        x: relativeX,
-        y: relativeY,
+        x: relativeX - anchorX,
+        y: relativeY - anchorY,
       });
       setIsResizing(true);
       setResizeHandle(handle);
     }
   }, [overlay.id, overlay.styles.crop, overlay.width, overlay.height]);
-
-//   const handleMouseMove = useCallback((e: MouseEvent) => {
-//     if (!isDragging && !isResizing) return;
-
-//     // Get the mouse position relative to the crop overlay's container
-//     const containerRect = document.querySelector(`[data-crop-container="${overlay.id}"]`)?.getBoundingClientRect();
-//     if (!containerRect) return;
-
-//     const relativeX = e.clientX - containerRect.left;
-//     const relativeY = e.clientY - containerRect.top;
-//     const crop = overlay.styles.crop;
-//     if (!crop) return;
-
-//     if (isDragging) {
-//       const newX = Math.max(0, Math.min(overlay.width - crop.width, relativeX - dragStart.x));
-//       const newY = Math.max(0, Math.min(overlay.height - crop.height, relativeY - dragStart.y));
-      
-//       onCropChange({ x: newX, y: newY, width: crop.width, height: crop.height });
-//     } else if (isResizing) {
-//       let newWidth = crop.width;
-//       let newHeight = crop.height;
-//       let newX = crop.x;
-//       let newY = crop.y;
-
-//       if (resizeHandle.includes("right")) {
-//         newWidth = Math.max(50, Math.min(overlay.width - crop.x, relativeX - crop.x));
-//       }
-//       if (resizeHandle.includes("left")) {
-//         const oldRight = crop.x + crop.width;
-//         newX = Math.max(0, Math.min(oldRight - 50, relativeX));
-//         newWidth = oldRight - newX;
-//       }
-//       if (resizeHandle.includes("bottom")) {
-//         newHeight = Math.max(50, Math.min(overlay.height - crop.y, relativeY - crop.y));
-//       }
-//       if (resizeHandle.includes("top")) {
-//         const oldBottom = crop.y + crop.height;
-//         newY = Math.max(0, Math.min(oldBottom - 50, relativeY));
-//         newHeight = oldBottom - newY;
-//       }
-
-//       onCropChange({ x: newX, y: newY, width: newWidth, height: newHeight });
-//     }
-//   }, [isDragging, isResizing, dragStart, overlay, resizeHandle, onCropChange]);
 
 const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging && !isResizing) return;
@@ -141,9 +100,12 @@ const handleMouseMove = useCallback((e: MouseEvent) => {
       
       onCropChange({ x: newX, y: newY, width: crop.width, height: crop.height });
     } else if (isResizing) {
-      // For resizing, dragStart contains the initial mouse position
-      const relativeXPercent = relativeX / overlay.width;
-      const relativeYPercent = relativeY / overlay.height;
+      // For resizing, adjust mouse position by the drag start offset
+      const adjustedX = relativeX - dragStart.x;
+      const adjustedY = relativeY - dragStart.y;
+      const adjustedXPercent = adjustedX / overlay.width;
+      const adjustedYPercent = adjustedY / overlay.height;
+
       let newWidth = crop.width;
       let newHeight = crop.height;
       let newX = crop.x;
@@ -152,19 +114,19 @@ const handleMouseMove = useCallback((e: MouseEvent) => {
       const minSizePercent = 50 / Math.max(overlay.width, overlay.height); // Minimum 50px converted to percentage
 
       if (resizeHandle.includes("right")) {
-        newWidth = Math.max(minSizePercent, Math.min(1 - crop.x, relativeXPercent - crop.x));
+        newWidth = Math.max(minSizePercent, Math.min(1 - crop.x, adjustedXPercent - crop.x));
       }
       if (resizeHandle.includes("left")) {
         const oldRight = crop.x + crop.width;
-        newX = Math.max(0, Math.min(oldRight - minSizePercent, relativeXPercent));
+        newX = Math.max(0, Math.min(oldRight - minSizePercent, adjustedXPercent));
         newWidth = oldRight - newX;
       }
       if (resizeHandle.includes("bottom")) {
-        newHeight = Math.max(minSizePercent, Math.min(1 - crop.y, relativeYPercent - crop.y));
+        newHeight = Math.max(minSizePercent, Math.min(1 - crop.y, adjustedYPercent - crop.y));
       }
       if (resizeHandle.includes("top")) {
         const oldBottom = crop.y + crop.height;
-        newY = Math.max(0, Math.min(oldBottom - minSizePercent, relativeYPercent));
+        newY = Math.max(0, Math.min(oldBottom - minSizePercent, adjustedYPercent));
         newHeight = oldBottom - newY;
       }
 
@@ -192,18 +154,6 @@ const handleMouseMove = useCallback((e: MouseEvent) => {
   const crop = overlay.styles.crop;
   if (!crop?.enabled) return null;
 
-//   const cropStyle: React.CSSProperties = {
-//     position: "absolute",
-//     left: `${crop.x}px`,
-//     top: `${crop.y}px`,
-//     width: `${crop.width}px`,
-//     height: `${crop.height}px`,
-//     border: "2px solid #3b82f6",
-//     backgroundColor: "rgba(59, 130, 246, 0.1)",
-//     cursor: isDragging ? "grabbing" : "grab",
-//     pointerEvents: "auto",
-//     zIndex: 1000,
-//   };
 const cropStyle: React.CSSProperties = {
     position: "absolute",
     left: `${crop.x * overlay.width}px`,
@@ -216,16 +166,6 @@ const cropStyle: React.CSSProperties = {
     pointerEvents: "auto",
     zIndex: 10000,
   };
-
-//   const handleStyle: React.CSSProperties = {
-//     position: "absolute",
-//     width: "12px",
-//     height: "12px",
-//     backgroundColor: "white",
-//     border: "1px solid #3B8BF2",
-//     cursor: "nw-resize",
-//     pointerEvents: "auto",
-//   };
 
   return (
     <div
@@ -343,25 +283,6 @@ const cropStyle: React.CSSProperties = {
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       />
-
-      {/* Crop area label */}
-      {/* <div
-        style={{
-          position: "absolute",
-          top: "-24px",
-          left: "0",
-          backgroundColor: "#3b82f6",
-          color: "white",
-          padding: "2px 6px",
-          fontSize: "12px",
-          borderRadius: "4px",
-          whiteSpace: "nowrap",
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
-        Crop Area ({Math.round(crop.width)}×{Math.round(crop.height)})
-      </div> */}
 
       <div
         style={{
