@@ -5,6 +5,8 @@ import { animationTemplates } from "../../../templates/animation-templates";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimeline } from "../../../contexts/timeline-context";
 import { useFFmpeg } from "../../../hooks/use-ffmpeg";
+import { Toggle } from "../../../../../../components/ui/toggle";
+import { Button } from "../../../../../../components/ui/button";
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -418,6 +420,100 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 
   return (
     <div className="space-y-6">
+
+      {/* Crop Settings */}
+      <div className="space-y-2 rounded-md bg-card p-4 border">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-light">
+            Crop
+          </h3>
+          <Toggle
+            pressed={localOverlay?.styles?.crop?.enabled ?? false}
+            onPressedChange={(pressed) => {
+              const currentCrop = localOverlay?.styles?.crop;
+              
+              if (pressed) {
+                // Enabling crop mode - initialize crop area
+                console.log('Enabling crop mode for overlay:', localOverlay?.id);
+                handleStyleChange({
+                  crop: {
+                    enabled: true,
+                    x: currentCrop?.x ?? 0,
+                    y: currentCrop?.y ?? 0,
+                    width: currentCrop?.width ?? 1,
+                    height: currentCrop?.height ?? 1,
+                  },
+                });
+              } else {
+                // Disabling crop mode - hide the crop overlay UI but keep crop settings active
+                console.log('Disabling crop UI for overlay:', localOverlay?.id, 'keeping crop settings:', currentCrop);
+                if (currentCrop) {
+                  // Keep the crop settings but mark it as not actively being edited
+                  handleStyleChange({
+                    crop: {
+                      enabled: false, // This just hides the crop overlay UI
+                      x: currentCrop.x,
+                      y: currentCrop.y,
+                      width: currentCrop.width,
+                      height: currentCrop.height,
+                    },
+                  });
+                } else {
+                  // No existing crop, just disable
+                  handleStyleChange({
+                    crop: {
+                      enabled: false,
+                      x: 0,
+                      y: 0,
+                      width: 1,
+                      height: 1,
+                    },
+                  });
+                }
+              }
+            }}
+            size="sm"
+            className="text-xs"
+          >
+            {localOverlay?.styles?.crop?.enabled ? "Edit Mode" : "View Mode"}
+          </Toggle>
+        </div>
+
+        {localOverlay?.styles?.crop?.enabled && (
+          <div className="space-y-2 pt-1">
+            <div className="text-xs text-muted-foreground">
+              Drag the crop area in the preview to adjust the crop region.
+            </div>
+          </div>
+        )}
+        
+        {!localOverlay?.styles?.crop?.enabled && localOverlay?.styles?.crop && (
+          <div className="space-y-2 pt-1">
+            <div className="text-xs text-muted-foreground">
+              Crop is active. Enable edit mode to modify the crop area.
+            </div>
+          </div>
+        )}
+        
+        {localOverlay?.styles?.crop && (
+          <div className="pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                console.log('Clearing crop for overlay:', localOverlay?.id);
+                handleStyleChange({
+                  crop: undefined,
+                });
+              }}
+              className="w-full text-xs"
+            >
+              Clear Crop
+            </Button>
+          </div>
+        )}
+      </div>    
+
       {/* AI Audio Settings */}
       <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">

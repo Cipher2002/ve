@@ -70,7 +70,7 @@ export const SelectionOutline: React.FC<{
 
       outline:
         ((hovered && !isDragging) || isSelected) && 
-        !(overlay.type === OverlayType.VIDEO && (overlay as any).styles?.crop?.enabled)
+        !((overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.IMAGE) && (overlay as any).styles?.crop?.enabled)
           ? `${scaledBorder}px solid #3B8BF2`
           : undefined,
       transform: `rotate(${overlay.rotation || 0}deg)`,
@@ -178,8 +178,8 @@ export const SelectionOutline: React.FC<{
 
         {isSelected ? (
           <>
-            {/* Hide handles when crop edit mode is active for video overlays */}
-            {!(overlay.type === OverlayType.VIDEO && (overlay as any).styles?.crop?.enabled) && (
+            {/* Hide handles when crop edit mode is active for video and image overlays */}
+            {!((overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.IMAGE) && (overlay as any).styles?.crop?.enabled) && (
               <>
                 <ResizeHandle
                   overlay={overlay}

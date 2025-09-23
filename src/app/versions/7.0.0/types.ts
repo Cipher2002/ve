@@ -495,6 +495,13 @@ export interface ImageStyles extends BaseStyles {
     type: string;
     params?: Record<string, any>;
   };
+  crop?: {
+        enabled: boolean;
+        x: number; // 0-1 percentage
+        y: number; // 0-1 percentage
+        width: number; // 0-1 percentage
+        height: number; // 0-1 percentage
+      };
 }
 
 // Update ImageOverlay to match ClipOverlay pattern

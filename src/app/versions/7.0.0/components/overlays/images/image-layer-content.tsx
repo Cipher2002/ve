@@ -109,6 +109,20 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
     boxSizing: "border-box",
   };
 
+  // Apply crop if crop settings exist (regardless of enabled flag)
+  // The enabled flag only controls whether the crop overlay UI is shown
+  if (overlay.styles.crop && overlay.styles.crop.width > 0 && overlay.styles.crop.height > 0) {
+    const { x, y, width, height } = overlay.styles.crop;
+    // Convert percentages to pixels for clip-path
+    const xPx = x * overlay.width;
+    const yPx = y * overlay.height;
+    const widthPx = width * overlay.width;
+    const heightPx = height * overlay.height;
+    // Use clip-path to crop the image content
+    containerStyle.clipPath = `inset(${yPx}px ${overlay.width - xPx - widthPx}px ${overlay.height - yPx - heightPx}px ${xPx}px)`;
+    containerStyle.overflow = "hidden";
+  }
+
   // Determine the image source URL
   let imageSrc = overlay.src;
 

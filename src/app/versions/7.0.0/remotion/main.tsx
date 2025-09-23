@@ -107,17 +107,19 @@ export const Main: React.FC<MainProps> = ({
       {/* Crop overlays positioned absolutely */}
       {overlays.map((overlay) => {
         const isVideoOverlay = overlay.type === OverlayType.VIDEO;
+        const isImageOverlay = overlay.type === OverlayType.IMAGE;
         const isSelected = overlay.id === selectedOverlayId;
-        const cropEnabled = (overlay as ClipOverlay).styles?.crop?.enabled === true;
+        const cropEnabled = (overlay as any).styles?.crop?.enabled === true;
         
         console.log('Checking crop overlay for overlay:', overlay.id, {
           isVideoOverlay,
+          isImageOverlay,
           isSelected,
           cropEnabled,
-          cropData: (overlay as ClipOverlay).styles?.crop
+          cropData: (overlay as any).styles?.crop
         });
         
-        if (isVideoOverlay && isSelected && cropEnabled) {
+        if ((isVideoOverlay || isImageOverlay) && isSelected && cropEnabled) {
           return (
             <div
               key={`crop-${overlay.id}`}
@@ -135,21 +137,20 @@ export const Main: React.FC<MainProps> = ({
               }}
             >
               <CropOverlay
-                overlay={overlay as ClipOverlay}
+                overlay={overlay as any}
                 onCropChange={(crop) => {
                   changeOverlay(overlay.id, (prevOverlay) => {
-                    if (prevOverlay.type === OverlayType.VIDEO) {
-                      const clipOverlay = prevOverlay as ClipOverlay;
+                    if (prevOverlay.type === OverlayType.VIDEO || prevOverlay.type === OverlayType.IMAGE) {
                       return {
-                        ...clipOverlay,
+                        ...prevOverlay,
                         styles: {
-                          ...clipOverlay.styles,
+                          ...prevOverlay.styles,
                           crop: {
-                            ...clipOverlay.styles.crop,
+                            ...prevOverlay.styles.crop,
                             ...crop,
                           },
                         },
-                      } as ClipOverlay;
+                      } as any;
                     }
                     return prevOverlay;
                   });

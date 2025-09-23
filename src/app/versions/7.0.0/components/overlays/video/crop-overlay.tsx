@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { useCurrentScale } from "remotion";
-import { ClipOverlay } from "../../../types";
+import { ClipOverlay, ImageOverlay } from "../../../types";
 
 interface CropOverlayProps {
-  overlay: ClipOverlay;
+  overlay: ClipOverlay | ImageOverlay;
   onCropChange: (crop: { x: number; y: number; width: number; height: number }) => void;
 }
 
