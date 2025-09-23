@@ -604,59 +604,18 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       </div>
 
       {/* Crop Settings */}
-      <div className="space-y-2 rounded-md bg-card p-4 border">
+      <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-light">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Crop
           </h3>
           <Toggle
             pressed={localOverlay?.styles?.crop?.enabled ?? false}
             onPressedChange={(pressed) => {
               const currentCrop = localOverlay?.styles?.crop;
-              
-              // if (pressed) {
-              //   // Enabling crop mode - initialize crop area
-              //   console.log('Enabling crop mode for overlay:', localOverlay?.id);
-              //   handleStyleChange({
-              //     crop: {
-              //       enabled: true,
-              //       x: currentCrop?.x ?? 0,
-              //       y: currentCrop?.y ?? 0,
-              //       width: currentCrop?.width ?? localOverlay?.width ?? 300,
-              //       height: currentCrop?.height ?? localOverlay?.height ?? 200,
-              //     },
-              //   });
-              // } else {
-              //   // Disabling crop mode - hide the crop overlay UI but keep crop settings active
-              //   console.log('Disabling crop UI for overlay:', localOverlay?.id, 'keeping crop settings:', currentCrop);
-              //   if (currentCrop) {
-              //     // Keep the crop settings but mark it as not actively being edited
-              //     handleStyleChange({
-              //       crop: {
-              //         enabled: false, // This just hides the crop overlay UI
-              //         x: currentCrop.x,
-              //         y: currentCrop.y,
-              //         width: currentCrop.width,
-              //         height: currentCrop.height,
-              //       },
-              //     });
-              //   } else {
-              //     // No existing crop, just disable
-              //     handleStyleChange({
-              //       crop: {
-              //         enabled: false,
-              //         x: 0,
-              //         y: 0,
-              //         width: localOverlay?.width ?? 300,
-              //         height: localOverlay?.height ?? 200,
-              //       },
-              //     });
-              //   }
-              // }
 
               if (pressed) {
                 // Enabling crop mode - initialize crop area
-                console.log('Enabling crop mode for overlay:', localOverlay?.id);
                 handleStyleChange({
                   crop: {
                     enabled: true,
@@ -668,7 +627,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
                 });
               } else {
                 // Disabling crop mode - hide the crop overlay UI but keep crop settings active
-                console.log('Disabling crop UI for overlay:', localOverlay?.id, 'keeping crop settings:', currentCrop);
                 if (currentCrop) {
                   // Keep the crop settings but mark it as not actively being edited
                   handleStyleChange({
