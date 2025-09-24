@@ -29,6 +29,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
     getAspectRatioDimensions,
     durationInFrames,
     isAutoLoadingVideo,
+    currentFrame,
+    premountFrames,
+    maxPremountedVideos,
   } = useEditorContext();
 
   /**
@@ -119,6 +122,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
                 fps: FPS,
                 width: compositionWidth,
                 height: compositionHeight,
+                currentFrame,
+                premountFrames,
+                maxPremountedVideos,
               }}
               errorFallback={() => <></>}
               overflowVisible

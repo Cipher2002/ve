@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Sequence } from "remotion";
 import { LayerContent } from "./layer-content";
-import { Overlay } from "../../types";
+import { Overlay, ClipOverlay } from "../../types";
 
 /**
  * Props for the Layer component
@@ -15,7 +15,10 @@ export const Layer: React.FC<{
   selectedOverlayId: number | null;
   baseUrl?: string;
   allOverlays?: Overlay[];
-}> = ({ overlay, selectedOverlayId, baseUrl, allOverlays = [] }) => {
+  currentFrame?: number;
+  premountFrames?: number;
+  maxPremountedVideos?: number;
+}> = ({ overlay, selectedOverlayId, baseUrl, allOverlays = [], currentFrame = 0, premountFrames = 100, maxPremountedVideos = 3 }) => {
   /**
    * Memoized style calculations for the layer
    * Handles positioning, dimensions, rotation, and z-index based on:
@@ -69,6 +72,35 @@ export const Layer: React.FC<{
   }, [overlay.type, overlay.durationInFrames]);
 
   /**
+   * Calculate premount settings for video overlays
+   */
+  const premountSettings = useMemo(() => {
+    if (overlay.type !== "video" || !currentFrame) {
+      return { shouldPremount: false, premountFor: 0 };
+    }
+
+    // Get all video overlays from allOverlays
+    const videoOverlays = allOverlays.filter(o => o.type === "video") as ClipOverlay[];
+    
+    // Find videos that should be premounted (starting soon)
+    const upcomingVideos = videoOverlays
+      .filter(video => {
+        const framesUntilStart = video.from - currentFrame;
+        return framesUntilStart > 0 && framesUntilStart <= premountFrames;
+      })
+      .sort((a, b) => a.from - b.from) // Sort by start time
+      .slice(0, maxPremountedVideos); // Limit to max premounted videos
+
+    // Check if current overlay should be premounted
+    const shouldPremount = upcomingVideos.some(video => video.id === overlay.id);
+    
+    return {
+      shouldPremount,
+      premountFor: shouldPremount ? premountFrames : 0
+    };
+  }, [overlay, currentFrame, premountFrames, maxPremountedVideos, allOverlays]);
+
+  /**
    * Special handling for sound overlays
    * Sound overlays don't need positioning or visual representation,
    * they just need to be sequenced correctly
@@ -97,6 +129,7 @@ export const Layer: React.FC<{
       from={overlay.from}
       durationInFrames={overlay.type === "video" ? getExtendedDuration : overlay.durationInFrames}
       layout="none"
+      {...(premountSettings.shouldPremount && { premountFor: premountSettings.premountFor })}
     >
       <div style={style}>
         <LayerContent overlay={overlay} baseUrl={baseUrl} />

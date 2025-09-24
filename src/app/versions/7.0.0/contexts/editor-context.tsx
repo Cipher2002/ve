@@ -114,6 +114,10 @@ interface EditorContextProps {
   handleAutoLoadVideo: () => Promise<void>;
   isAutoLoadingVideo: boolean;
 
+  // Premounting configuration
+  premountFrames: number;
+  maxPremountedVideos: number;
+
 
 }
 

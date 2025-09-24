@@ -70,3 +70,9 @@ export const RENDER_DURATION_LIMIT_FRAMES = 5 * 60 * FPS; // 5 minutes
 // This is where the default template is loaded
 export const DEFAULT_OVERLAYS: Overlay[] = [
 ];
+
+// Premounting configuration
+export const PREMOUNT_CONFIG = {
+  frames: 100, // Number of frames to premount before video starts
+  maxSimultaneous: 3, // Maximum number of videos to premount simultaneously
+};
