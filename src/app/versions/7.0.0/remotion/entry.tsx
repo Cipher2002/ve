@@ -7,6 +7,7 @@ import {
   DURATION_IN_FRAMES,
   VIDEO_WIDTH,
   VIDEO_HEIGHT,
+  PREMOUNT_CONFIG,
 } from "../constants";
 import { Main, MainProps } from "./main";
 
@@ -20,6 +21,9 @@ const defaultProps: MainProps = {
   fps: FPS,
   width: VIDEO_WIDTH,
   height: VIDEO_HEIGHT,
+  currentFrame: 0,
+  premountFrames: 100,
+  maxPremountedVideos: 3,
 };
 
 // Define the root component directly in this file
