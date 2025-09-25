@@ -135,19 +135,6 @@ const Timeline: React.FC<TimelineProps> = ({
   // Video cache hook
   const { downloadVideo, removeCachedVideo, shouldDeleteOnRemove } = useVideoCache();
 
-  // const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
-  //   {
-  //     overlays,
-  //     durationInFrames,
-  //     onOverlayChange,
-  //     updateGhostElement,
-  //     resetDragState,
-  //     timelineRef,
-  //     dragInfo,
-  //     maxRows: visibleRows,
-  //   }
-  // );
-
   // Update drag and drop hooks to use actual content duration for logic
   const { handleDragStart: hookHandleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
     {

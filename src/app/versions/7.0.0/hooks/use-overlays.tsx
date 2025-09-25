@@ -226,6 +226,19 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
     setSelectedOverlayId(null);
   }, []);
 
+  /**
+   * Shifts all overlays down by one row
+   * Used when adding a new row at the top
+   */
+  const shiftOverlaysDown = useCallback(() => {
+    setOverlays((prevOverlays) =>
+      prevOverlays.map((overlay) => ({
+        ...overlay,
+        row: overlay.row + 1,
+      }))
+    );
+  }, []);
+
   return {
     overlays,
     selectedOverlayId,
@@ -239,6 +252,7 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
     splitOverlay,
     updateOverlayStyles,
     resetOverlays,
+    shiftOverlaysDown,
   };
 };
 
