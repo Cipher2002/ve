@@ -537,6 +537,38 @@ const Timeline: React.FC<TimelineProps> = ({
     setInitialLoadComplete,
   ]);
 
+  // Handle add/remove row events and shift overlays accordingly
+useEffect(() => {
+  const handleAddRow = () => {
+    console.log('Handling add row event, current overlays:', overlays.length);
+    // Shift all overlays down by one row to create empty row 0
+    const updatedOverlays = overlays.map(overlay => ({
+      ...overlay,
+      row: overlay.row + 1,
+    }));
+    console.log('Updated overlays after shift:', updatedOverlays.map(o => `id:${o.id} row:${o.row}`));
+    setOverlays(updatedOverlays);
+  };
+
+  const handleRemoveRow = () => {
+    console.log('Handling remove row event');
+    // Shift all overlays up by one row after removing row 0
+    const updatedOverlays = overlays.map(overlay => ({
+      ...overlay,
+      row: Math.max(0, overlay.row - 1),
+    }));
+    setOverlays(updatedOverlays);
+  };
+
+  window.addEventListener('addRowRequested', handleAddRow);
+  window.addEventListener('removeRowRequested', handleRemoveRow);
+
+  return () => {
+    window.removeEventListener('addRowRequested', handleAddRow);
+    window.removeEventListener('removeRowRequested', handleRemoveRow);
+  };
+}, [overlays, setOverlays]);
+
   // Render
   return (
     <div className="flex flex-col">

@@ -30,8 +30,6 @@ interface TimelineContextType {
   handleZoom: (delta: number, clientX: number) => void;
   /** Handle zoom interactions from wheel events */
   handleWheelZoom: (event: WheelEvent) => void;
-  /** Reset all timeline overlays to their default state */
-  resetOverlays: () => void;
 }
 
 /**
@@ -50,16 +48,28 @@ export const TimelineContext = createContext<TimelineContextType | null>(null);
 export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { resetOverlays, shiftOverlaysDown, shiftOverlaysUp } = useOverlays();
+  // const { resetOverlays, shiftOverlaysDown, shiftOverlaysUp } = useOverlays();
   
+  // const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows(
+  //   () => {
+  //     // This callback will be called when a row is actually added
+  //     shiftOverlaysDown();
+  //   },
+  //   () => {
+  //     // This callback will be called when a row is actually removed
+  //     shiftOverlaysUp();
+  //   }
+  // );
   const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows(
     () => {
-      // This callback will be called when a row is actually added
-      shiftOverlaysDown();
+      // Dispatch custom event that the Timeline component will handle
+      console.log('Dispatching addRowRequested event');
+      window.dispatchEvent(new CustomEvent('addRowRequested'));
     },
     () => {
-      // This callback will be called when a row is actually removed
-      shiftOverlaysUp();
+      // Dispatch custom event for remove row
+      console.log('Dispatching removeRowRequested event');
+      window.dispatchEvent(new CustomEvent('removeRowRequested'));
     }
   );
 
@@ -100,7 +110,6 @@ export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
       setScrollPosition,
       handleZoom,
       handleWheelZoom,
-      resetOverlays,
     }),
     [
       visibleRows,
@@ -113,7 +122,6 @@ export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
       setScrollPosition,
       handleZoom,
       handleWheelZoom,
-      resetOverlays,
     ]
   );
 
