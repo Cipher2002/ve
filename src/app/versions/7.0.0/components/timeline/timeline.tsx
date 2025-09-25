@@ -113,6 +113,8 @@ const Timeline: React.FC<TimelineProps> = ({
   // Video cache hook
   const { downloadVideo, removeCachedVideo, shouldDeleteOnRemove } = useVideoCache();
 
+  const TIMELINE_GAP = 16; // Gap between drag handles and timeline content (in px)
+
   const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
     {
       overlays,
@@ -571,6 +573,17 @@ const Timeline: React.FC<TimelineProps> = ({
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Gap between drag handles and timeline content */}
+        <div 
+          className="hidden md:block flex-shrink-0 bg-white dark:bg-gray-900"
+          style={{ width: `${TIMELINE_GAP}px` }}
+        >
+          {/* Match TimeMarkers height */}
+          <div className="h-[1.3rem]" />
+          {/* Match timeline rows height */}
+          <div style={{ height: `${visibleRows * ROW_HEIGHT}px` }} />
         </div>
 
         {/* Timeline Content */}
