@@ -239,18 +239,18 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
     );
   }, []);
 
-  // /**
-  //  * Shifts all overlays up by one row
-  //  * Used when removing the top row
-  //  */
-  // const shiftOverlaysUp = useCallback(() => {
-  //   setOverlays((prevOverlays) =>
-  //     prevOverlays.map((overlay) => ({
-  //       ...overlay,
-  //       row: Math.max(0, overlay.row - 1),
-  //     }))
-  //   );
-  // }, []);
+  /**
+   * Shifts all overlays up by one row
+   * Used when removing the top row
+   */
+  const shiftOverlaysUp = useCallback(() => {
+    setOverlays((prevOverlays) =>
+      prevOverlays.map((overlay) => ({
+        ...overlay,
+        row: Math.max(0, overlay.row - 1),
+      }))
+    );
+  }, []);
 
   return {
     overlays,
@@ -266,6 +266,7 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
     updateOverlayStyles,
     resetOverlays,
     shiftOverlaysDown,
+    shiftOverlaysUp,
   };
 };
 

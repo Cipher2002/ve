@@ -164,8 +164,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   };
 
   const handleRemoveRow = () => {
-    // Delete overlays on the top row (highest row number) before removing it
-    deleteOverlaysByRow(visibleRows - 1);
+    // Delete overlays on the top row (row 0) before removing it
+    deleteOverlaysByRow(0);
     removeRow();
   };
 
