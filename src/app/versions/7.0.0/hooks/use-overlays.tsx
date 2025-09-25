@@ -228,14 +228,17 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
 
   /**
    * Shifts all overlays down by one row
-   * Used when adding a new row at the top
+   * Used when adding a new row at the top (row 0)
    */
   const shiftOverlaysDown = useCallback(() => {
+    const targetRow = 0; // Insert new empty row at position 0
     setOverlays((prevOverlays) =>
-      prevOverlays.map((overlay) => ({
-        ...overlay,
-        row: overlay.row + 1,
-      }))
+      prevOverlays.map((overlay) => {
+        if (overlay.row >= targetRow) {
+          return { ...overlay, row: overlay.row + 1 };
+        }
+        return overlay;
+      })
     );
   }, []);
 
