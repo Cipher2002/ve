@@ -588,11 +588,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
         {/* Timeline Content */}
         <div
-          className="relative overflow-x-auto scrollbar-hide flex-1 md:pl-0 pl-2"
-          style={{
-            scrollbarWidth: "none" /* Firefox */,
-            msOverflowStyle: "none" /* IE and Edge */,
-          }}
+          className="relative overflow-x-auto flex-1 md:pl-0 pl-2"
         >
           <div
             ref={timelineRef}
