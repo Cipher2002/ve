@@ -49,7 +49,7 @@ export type MainProps = {
 };
 
 const outer: React.CSSProperties = {
-  backgroundColor: "transparent", // Light background for testing
+  backgroundColor: "black",
 };
 
 const layerContainer: React.CSSProperties = {
