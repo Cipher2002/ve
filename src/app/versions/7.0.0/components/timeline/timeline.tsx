@@ -128,17 +128,31 @@ const Timeline: React.FC<TimelineProps> = ({
     updateGhostElement,
     resetDragState,
     setGhostMarkerPosition,
-  } = useTimelineState(durationInFrames, visibleRows, timelineRef);
+  } = useTimelineState(visualTimelineDuration, visibleRows, timelineRef);
 
   // FFmpeg hook for audio extraction
   const { extractAudio, isLoading: isFFmpegProcessing } = useFFmpeg();
   // Video cache hook
   const { downloadVideo, removeCachedVideo, shouldDeleteOnRemove } = useVideoCache();
 
-  const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
+  // const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
+  //   {
+  //     overlays,
+  //     durationInFrames,
+  //     onOverlayChange,
+  //     updateGhostElement,
+  //     resetDragState,
+  //     timelineRef,
+  //     dragInfo,
+  //     maxRows: visibleRows,
+  //   }
+  // );
+
+  // Update drag and drop hooks to use actual content duration for logic
+  const { handleDragStart: hookHandleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
     {
       overlays,
-      durationInFrames,
+      durationInFrames: actualContentDuration, // Use actual duration for drag logic
       onOverlayChange,
       updateGhostElement,
       resetDragState,
@@ -361,7 +375,7 @@ const Timeline: React.FC<TimelineProps> = ({
     draggedItem,
     dragInfo,
     overlays,
-    durationInFrames,
+    durationInFrames: visualTimelineDuration,
     visibleRows,
     snapThreshold: SNAPPING_CONFIG.thresholdFrames,
   });
@@ -375,9 +389,9 @@ const Timeline: React.FC<TimelineProps> = ({
       action: "move" | "resize-start" | "resize-end"
     ) => {
       timelineStateHandleDragStart(overlay, clientX, clientY, action);
-      handleDragStart(overlay, clientX, clientY, action);
+      hookHandleDragStart(overlay, clientX, clientY, action);
     },
-    [timelineStateHandleDragStart, handleDragStart]
+    [timelineStateHandleDragStart, hookHandleDragStart]
   );
 
   // Enhanced drag end handler that checks duration limit
@@ -631,21 +645,17 @@ const Timeline: React.FC<TimelineProps> = ({
                 return; // Don't handle timeline click for these actions
               }
               
-              // Create a modified event that limits seeking to actual content
-              const modifiedEvent = {
-                ...e,
-                currentTarget: {
-                  ...e.currentTarget,
-                  getBoundingClientRect: () => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    return {
-                      ...rect,
-                      width: rect.width * (actualContentDuration / visualTimelineDuration)
-                    };
-                  }
-                }
-              };
-              onTimelineClick(modifiedEvent as any);
+              // Calculate click position and convert to frame, limiting to actual content
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const clickPercentage = clickX / rect.width;
+              const targetFrame = Math.round(clickPercentage * visualTimelineDuration);
+              const limitedFrame = Math.min(targetFrame, actualContentDuration);
+              
+              setCurrentFrame(limitedFrame);
+              if (playerRef.current) {
+                playerRef.current.seekTo(limitedFrame);
+              }
             }}          >
             <div className="relative h-full">
               {/* Timeline header with frame markers */}
