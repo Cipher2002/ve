@@ -231,15 +231,19 @@ export const useOverlays = (initialOverlays?: Overlay[]) => {
    * Used when adding a new row at the top (row 0)
    */
   const shiftOverlaysDown = useCallback(() => {
+    console.log('shiftOverlaysDown called'); // Add this
     const targetRow = 0; // Insert new empty row at position 0
-    setOverlays((prevOverlays) =>
-      prevOverlays.map((overlay) => {
+    setOverlays((prevOverlays) => {
+      console.log('Before shift:', prevOverlays.map(o => `id:${o.id} row:${o.row}`)); // Add this
+      const updated = prevOverlays.map((overlay) => {
         if (overlay.row >= targetRow) {
           return { ...overlay, row: overlay.row + 1 };
         }
         return overlay;
-      })
-    );
+      });
+      console.log('After shift:', updated.map(o => `id:${o.id} row:${o.row}`)); // Add this
+      return updated;
+    });
   }, []);
 
   /**
