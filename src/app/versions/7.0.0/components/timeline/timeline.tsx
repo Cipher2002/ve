@@ -64,6 +64,20 @@ interface TimelineProps {
   isExtractingAudio?: boolean;
 }
 
+const TIMELINE_GAP = 16; // Gap between drag handles and timeline content (in px)
+
+// Helper functions for timeline duration management
+const calculateActualDuration = (overlays: Overlay[]): number => {
+  if (overlays.length === 0) return 0;
+  return Math.max(...overlays.map(overlay => overlay.from + overlay.durationInFrames));
+};
+
+const calculateVisualDuration = (overlays: Overlay[]): number => {
+  const actualDuration = calculateActualDuration(overlays);
+  return actualDuration + (3 * FPS); // Add 3 seconds of visual space
+};
+
+
 const Timeline: React.FC<TimelineProps> = ({
   overlays,
   durationInFrames,
@@ -82,6 +96,14 @@ const Timeline: React.FC<TimelineProps> = ({
   onMuteAudio,
   isExtractingAudio, // Add this
 }) => {
+
+  // Calculate different duration types
+  const actualContentDuration = calculateActualDuration(overlays);
+  const visualTimelineDuration = calculateVisualDuration(overlays);
+  
+  // Use visual duration for timeline display, but limit playback to actual content
+  const effectiveCurrentFrame = Math.min(currentFrame, actualContentDuration);
+
   const { playerRef } = useEditorContext();
   // State for tracking hover position during split operations
   const [lastKnownHoverInfo, setLastKnownHoverInfo] = useState<{
@@ -112,8 +134,6 @@ const Timeline: React.FC<TimelineProps> = ({
   const { extractAudio, isLoading: isFFmpegProcessing } = useFFmpeg();
   // Video cache hook
   const { downloadVideo, removeCachedVideo, shouldDeleteOnRemove } = useVideoCache();
-
-  const TIMELINE_GAP = 16; // Gap between drag handles and timeline content (in px)
 
   const { handleDragStart, handleDrag, handleDragEnd } = useTimelineDragAndDrop(
     {
@@ -610,26 +630,47 @@ const Timeline: React.FC<TimelineProps> = ({
               if (target.closest('[data-no-timeline-seek="true"]')) {
                 return; // Don't handle timeline click for these actions
               }
-              onTimelineClick(e);
+              
+              // Create a modified event that limits seeking to actual content
+              const modifiedEvent = {
+                ...e,
+                currentTarget: {
+                  ...e.currentTarget,
+                  getBoundingClientRect: () => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    return {
+                      ...rect,
+                      width: rect.width * (actualContentDuration / visualTimelineDuration)
+                    };
+                  }
+                }
+              };
+              onTimelineClick(modifiedEvent as any);
             }}          >
             <div className="relative h-full">
               {/* Timeline header with frame markers */}
               <div className="h-[1.3rem]">
                 <TimeMarkers
-                  durationInFrames={durationInFrames}
-                  handleTimelineClick={setCurrentFrame}
+                  durationInFrames={visualTimelineDuration}
+                  handleTimelineClick={(frame) => {
+                    // Limit seeking to actual content duration
+                    const limitedFrame = Math.min(frame, actualContentDuration);
+                    setCurrentFrame(limitedFrame);
+                  }}
                   zoomScale={zoomScale}
                 />
               </div>
 
               {/* Current frame indicator */}
               <TimelineMarker
-                currentFrame={currentFrame}
-                totalDuration={durationInFrames}
+                currentFrame={effectiveCurrentFrame}
+                totalDuration={visualTimelineDuration}
                 onSeek={(frame) => {
-                  setCurrentFrame(frame);
+                  // Limit seeking to actual content duration
+                  const limitedFrame = Math.min(frame, actualContentDuration);
+                  setCurrentFrame(limitedFrame);
                   if (playerRef.current) {
-                    playerRef.current.seekTo(frame);
+                    playerRef.current.seekTo(limitedFrame);
                   }
                 }}
               />
@@ -644,13 +685,13 @@ const Timeline: React.FC<TimelineProps> = ({
               {/* Main timeline grid with overlays */}
               <TimelineGrid
                 overlays={overlays}
-                currentFrame={currentFrame}
+                currentFrame={effectiveCurrentFrame}
                 isDragging={isDragging}
                 draggedItem={draggedItem}
                 selectedOverlayId={selectedOverlayId}
                 setSelectedOverlayId={setSelectedOverlayId}
                 handleDragStart={combinedHandleDragStart}
-                totalDuration={durationInFrames}
+                totalDuration={visualTimelineDuration}
                 ghostElement={snappedGhostElement}
                 livePushOffsets={livePushOffsets}
                 onDeleteItem={handleDeleteItem}

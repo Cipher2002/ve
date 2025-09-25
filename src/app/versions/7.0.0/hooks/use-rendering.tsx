@@ -71,18 +71,6 @@ export const useRendering = (
       status: "invoking",
     });
     try {
-      // const renderVideo =
-      //   renderType === "ssr" ? ssrRenderVideo : lambdaRenderVideo;
-      // const getProgress =
-      //   renderType === "ssr" ? ssrGetProgress : lambdaGetProgress;
-
-      // // Transform overlays for Lambda rendering if using Lambda
-      // const transformedInputProps = renderType === "lambda" 
-      //   ? {
-      //       ...inputProps,
-      //       overlays: transformOverlaysForLambda(inputProps.overlays)
-      //     }
-      //   : inputProps;
 
       // Transform overlays for Lambda rendering and enforce duration limit
       const transformedInputProps = {
@@ -91,13 +79,6 @@ export const useRendering = (
         durationInFrames: Math.min(inputProps.durationInFrames, RENDER_DURATION_LIMIT_FRAMES)
       };
 
-      // const response = await renderVideo({ 
-      //   id, 
-      //   inputProps: transformedInputProps, 
-      //   format, 
-      //   codec,
-      //   mediaType: "video" 
-      // });
       const response = await lambdaRenderVideo({ 
         id, 
         inputProps: transformedInputProps, 
@@ -109,12 +90,6 @@ export const useRendering = (
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
 
-      // if (renderType === "ssr") {
-      //   // Add a small delay for SSR rendering to ensure initialization
-      //   await wait(3000);
-      // }
-
-
       setState({
         status: "rendering",
         progress: 0,
@@ -125,10 +100,6 @@ export const useRendering = (
       let pending = true;
 
       while (pending) {
-        // const result = await getProgress({
-        //   id: renderId,
-        //   bucketName: typeof bucketName === "string" ? bucketName : "",
-        // });
         const result = await lambdaGetProgress({
           id: renderId,
           bucketName: typeof bucketName === "string" ? bucketName : "",
@@ -211,15 +182,6 @@ export const useRendering = (
       status: "invoking",
     });
     try {
-      // const renderAudioFn = renderType === "ssr" ? ssrRenderAudio : 
-      //   (renderType === "lambda" ? lambdaRenderAudio : ssrRenderAudio);
-      
-      // const transformedInputProps = renderType === "lambda" 
-      //   ? {
-      //       ...inputProps,
-      //       overlays: transformOverlaysForLambda(inputProps.overlays)
-      //     }
-      //   : inputProps;
       const transformedInputProps = {
         ...inputProps,
         overlays: transformOverlaysForLambda(inputProps.overlays),
@@ -232,9 +194,6 @@ export const useRendering = (
       const bucketName =
         "bucketName" in response ? response.bucketName : undefined;
 
-      // // Add a small delay for SSR rendering to ensure initialization
-      // await wait(3000);
-
       setState({
         status: "rendering",
         progress: 0,
@@ -245,10 +204,6 @@ export const useRendering = (
       let pending = true;
 
       while (pending) {
-        // const result = await ssrGetProgress({
-        //   id: renderId,
-        //   bucketName: "",
-        // });
         const result = await lambdaGetProgress({
           id: renderId,
           bucketName: typeof bucketName === "string" ? bucketName : "",
