@@ -445,9 +445,9 @@ export const VideoOverlayPanel: React.FC = () => {
                         key={project.id}
                         data-project-card
                         className={`relative group border rounded-md overflow-hidden cursor-pointer transition-all ${
-                          downloadingCards.has(project.id) 
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
+                          downloadingCards.has(project.id)  
+                            ? 'bg-[rgb(41,0,156)]/15 border-[rgb(41,0,156)]' 
+                            : 'border-gray-200 hover:border-[rgb(41,0,156)] dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
                         }`}
                         onClick={() => handleGeneratedVideoClick(project)}
                       >
@@ -566,83 +566,80 @@ export const VideoOverlayPanel: React.FC = () => {
                   {sortedRenderedVideos.map((video) => (
                     <div
                       key={video.id}
-                      className={`relative group/item border rounded-md overflow-hidden cursor-pointer transition-all ${
-                        downloadingCards.has(video.id) 
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                          : 'dark:border-gray-700 border-gray-200 hover:border-blue-500 dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
+                      data-project-card
+                      className={`relative group border rounded-md overflow-hidden cursor-pointer transition-all ${
+                        downloadingCards.has(video.id)  
+                          ? 'bg-[rgb(41,0,156)]/15 border-[rgb(41,0,156)]' 
+                          : 'border-gray-200 hover:border-[rgb(41,0,156)] dark:hover:border-blue-400 bg-white dark:bg-gray-800/80 shadow-sm hover:shadow-md'
                       }`}
                       onClick={() => handleRenderedVideoClick(video)}
                     >
-                      {/* Video thumbnail */}
-                      <div className="aspect-video relative bg-gray-50 dark:bg-gray-900">
-                        {video.thumbnailPath ? (
-                          <img
-                            src={`${apiBaseUrl}/user-files/${getUrlParams().uid}/${video.projectId}/${video.thumbnailPath}`}
-                            alt={video.filename}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Fallback to video frame if thumbnail fails
-                              const img = e.target as HTMLImageElement;
-                              img.style.display = 'none';
-                              const container = img.parentElement;
-                              if (container) {
-                                const videoElement = document.createElement('video');
-                                videoElement.src = video.url;
-                                videoElement.className = "w-full h-full object-cover";
-                                videoElement.muted = true;
-                                videoElement.preload = "metadata";
-                                videoElement.onloadeddata = () => {
-                                  videoElement.currentTime = 1;
-                                };
-                                container.appendChild(videoElement);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <video
-                            src={video.url}
-                            className="w-full h-full object-cover"
-                            muted
-                            preload="metadata"
-                            onLoadedData={(e) => {
-                              e.currentTarget.currentTime = 1;
-                            }}
-                          />
-                        )}
+                      {downloadingCards.has(video.id) ? (
+                        <div className="h-full flex flex-col items-center justify-center p-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[rgb(41,0,156)] border-t-transparent mb-3"></div>
+                          <p className="text-sm font-medium text-[rgb(41,0,156)] dark:text-blue-400">Downloading...</p>
+                          <p className="text-xs font-medium text-[rgb(41,0,156)] dark:text-blue-400">{downloadProgress.get(video.id) || 0}%</p>
+                          <div className="w-24 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
+                            <div 
+                              className="h-full bg-[rgb(41,0,156)] transition-all duration-300"
+                              style={{ width: `${downloadProgress.get(video.id) || 0}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Video thumbnail */}
+                          <div className="aspect-video relative bg-gray-50 dark:bg-gray-900">
+                            {video.thumbnailPath ? (
+                              <img
+                                src={`${apiBaseUrl}/user-files/${getUrlParams().uid}/${video.projectId}/${video.thumbnailPath}`}
+                                alt={video.filename}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = 'none';
+                                  const container = img.parentElement;
+                                  if (container) {
+                                    const videoElement = document.createElement('video');
+                                    videoElement.src = video.url;
+                                    videoElement.className = "w-full h-full object-cover";
+                                    videoElement.muted = true;
+                                    videoElement.preload = "metadata";
+                                    videoElement.onloadeddata = () => {
+                                      videoElement.currentTime = 1;
+                                    };
+                                    container.appendChild(videoElement);
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <video
+                                src={video.url}
+                                className="w-full h-full object-cover"
+                                muted
+                                preload="metadata"
+                                onLoadedData={(e) => {
+                                  e.currentTarget.currentTime = 1;
+                                }}
+                              />
+                            )}
 
-                        {/* Download Progress Overlay */}
-                        {downloadingCards.has(video.id) && (
-                          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                            <div className="text-white text-center">
-                              <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
-                              <p className="text-sm font-medium">Downloading...</p>
-                              <p className="text-xs">{downloadProgress.get(video.id) || 0}%</p>
-                              
-                              {/* Progress Bar */}
-                              <div className="w-24 h-1 bg-gray-600 rounded-full mt-2 overflow-hidden">
-                                <div 
-                                  className="h-full bg-white transition-all duration-300"
-                                  style={{ width: `${downloadProgress.get(video.id) || 0}%` }}
-                                ></div>
-                              </div>
+                            <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
+                              {video.format?.toUpperCase() || 'MP4'}
                             </div>
                           </div>
-                        )}
 
-                        <div className="absolute bottom-1.5 right-1.5 bg-black/75 dark:bg-black/90 text-white text-xs px-1.5 py-0.5 rounded-md">
-                          {video.format?.toUpperCase() || 'MP4'}
-                        </div>
-                      </div>
-
-                      {/* Video info */}
-                      <div className="p-2.5">
-                        <p className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">
-                          {video.filename}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {(video.size / (1024 * 1024)).toFixed(1)} MB • {formatDate(video.createdAt)}
-                        </p>
-                      </div>                      
+                          {/* Video info */}
+                          <div className="p-2.5">
+                            <p className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">
+                              {video.filename}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              {(video.size / (1024 * 1024)).toFixed(1)} MB • {formatDate(video.createdAt)}
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -660,6 +657,7 @@ export const VideoOverlayPanel: React.FC = () => {
                 </div>
               )}
             </TabsContent>
+
           </Tabs>
         </>
       ) : (

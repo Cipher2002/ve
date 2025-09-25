@@ -346,7 +346,7 @@ const SoundsPanel: React.FC = () => {
             )}
           </div>
           <span className="text-[10px] mt-1 text-gray-700 dark:text-gray-300 select-none">
-            {isLoading ? "Downloading..." : isPlaying ? "Pause" : "Play"}
+            {isLoading ? "Loading..." : isPlaying ? "Pause" : "Play"}
           </span>
         </div>
 
