@@ -12,24 +12,7 @@ import { INITIAL_ROWS, MAX_ROWS } from "../constants";
  *   - addRow: Function to increment visible rows (up to MAX_ROWS)
  *   - removeRow: Function to decrement visible rows (down to INITIAL_ROWS)
  */
-// export const useVisibleRows = (onAddRow?: () => void, onRemoveRow?: () => void) => {
-//   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
-
-//   /**
-//    * Increments the number of visible rows by 1, up to MAX_ROWS
-//    * Also triggers callback to shift overlays down
-//    */
-//   const addRow = () => {
-//     setVisibleRows((current) => {
-//       const newCount = Math.min(current + 1, MAX_ROWS);
-//       // Only trigger callback if we're actually adding a row
-//       if (newCount > current && onAddRow) {
-//         onAddRow();
-//       }
-//       return newCount;
-//     });
-//   };
-export const useVisibleRows = (onAddRow?: () => void, onRemoveRow?: () => void) => {
+export const useVisibleRows = (onAddRow?: () => void) => {
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
 
   /**
@@ -49,17 +32,9 @@ export const useVisibleRows = (onAddRow?: () => void, onRemoveRow?: () => void) 
 
   /**
    * Decrements the number of visible rows by 1, down to INITIAL_ROWS
-   * Calls onRemoveRow callback when a row is actually removed
    */
   const removeRow = () => {
-    setVisibleRows((current) => {
-      const newCount = Math.max(current - 1, INITIAL_ROWS);
-      // Only trigger callback if we're actually removing a row
-      if (newCount < current && onRemoveRow) {
-        onRemoveRow();
-      }
-      return newCount;
-    });
+    setVisibleRows((current) => Math.max(current - 1, INITIAL_ROWS));
   };
 
   return {

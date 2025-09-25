@@ -192,7 +192,7 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
 
         {/* Render Rows (existing code) */}
         {Array.from({ length: visibleRows }).map((_, visualIndex) => {
-          const rowIndex = visualIndex; // Row 0 at top, row 1 below it, etc.
+          const rowIndex = (visibleRows - 1) - visualIndex; // Row with highest number at top
           const rowItems = overlays.filter(
             (overlay) => overlay.row === rowIndex
           );
