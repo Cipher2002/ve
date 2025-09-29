@@ -136,7 +136,7 @@ export const Editor: React.FC = () => {
         totalDuration={durationInFrames}
         formatTime={formatTime}
       />
-      <TimelineSection />
+      {/* <TimelineSection /> */}
 
       {/* 
         Timeline Component
@@ -144,7 +144,7 @@ export const Editor: React.FC = () => {
         at the bottom with a scrollable interface similar to TimelineControls
         for easy access to content creation tools.
       */}
-      {/* <Timeline
+      <Timeline
         currentFrame={currentFrame}
         overlays={overlays}
         durationInFrames={durationInFrames}
@@ -168,7 +168,7 @@ export const Editor: React.FC = () => {
         }}
         onMuteVideo={handleMuteVideo}
         onMuteAudio={handleMuteAudio}
-      /> */}
+      />
       {/* Mobile Navigation Bar
        * Only shows on mobile devices (md:hidden)
        * Improved scrollable design inspired by TimelineControls
