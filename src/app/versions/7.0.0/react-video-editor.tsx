@@ -679,6 +679,36 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     // Premounting configuration
     premountFrames: PREMOUNT_CONFIG.frames,
     maxPremountedVideos: PREMOUNT_CONFIG.maxSimultaneous,
+
+    selectedOverlayIds: selectedOverlayId ? [selectedOverlayId] : [],
+    setSelectedOverlayIds: (ids: number[]) => setSelectedOverlayId(ids[0] || null),
+    
+    // Timeline configuration
+    initialRows: 5,
+    maxRows: 11,
+    
+    // Zoom constraints
+    zoomConstraints: {
+      min: 0.1,
+      max: 10,
+      step: 0.1,
+      default: 1,
+    },
+    
+    // Snapping configuration
+    snappingConfig: {
+      thresholdFrames: 5,
+      enableVerticalSnapping: true,
+    },
+    
+    // Feature flags
+    disableMobileLayout: false,
+    disableVideoKeyframes: false,
+    enablePushOnDrag: true,
+    
+    // Video dimensions
+    videoWidth: getAspectRatioDimensions().width,
+    videoHeight: getAspectRatioDimensions().height,
     
   };
 
