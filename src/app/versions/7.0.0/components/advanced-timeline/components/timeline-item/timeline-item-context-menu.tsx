@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../../../ui/context-menu';
+import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '../../../../../../../components/ui/context-menu';
 
 
 interface TimelineItemContextMenuProps {
