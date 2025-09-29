@@ -1,7 +1,7 @@
 import React from 'react';
 import { Overlay, OverlayType } from '../../../../types';
 import { TimelineTrack, TimelineItem } from '../../../advanced-timeline/types';
-import { FPS } from '../../../../../../constants';
+import { FPS } from '../../../../constants';
 
 /**
  * Hook to handle data transformation between overlays and timeline tracks
@@ -149,7 +149,9 @@ const getOverlayLabel = (overlay: Overlay): string => {
   // Try to get content from overlay
   let content = '';
   if ('content' in overlay && overlay.content) {
-    content = overlay.content;
+    if (typeof overlay.content === 'string') {
+      content = overlay.content;
+    }
   }
   
   switch (overlay.type) {

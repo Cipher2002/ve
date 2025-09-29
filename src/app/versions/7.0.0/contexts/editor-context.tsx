@@ -14,6 +14,9 @@ interface EditorContextProps {
   ) => void;
   setOverlays: (overlays: Overlay[]) => void;
 
+  selectedOverlayIds: number[]; // Array of currently selected overlay IDs
+  setSelectedOverlayIds: (ids: number[]) => void; // Function to set multiple selected overlays
+
   dynamicDuration: number;
   setDynamicDuration: (duration: number) => void;
 

@@ -8,8 +8,8 @@ import { useEditorContext } from '../../../contexts/editor-context';
 import { useTimelineTransforms } from './hooks/use-timeline-transforms';
 import { useTimelineHandlers } from './hooks/use-timeline-handlers';
 import { Overlay, TextOverlay, CaptionOverlay, OverlayType } from '../../../types';
-import { FPS } from '../../../../../constants';
-import { useEditorSidebar } from '../../../contexts/sidebar-context';
+import { FPS } from '../../../constants';
+import { useSidebar } from '../../../contexts/sidebar-context';
 
 interface TimelineSectionProps {
   className?: string;
@@ -55,7 +55,7 @@ export const TimelineSection: React.FC<TimelineSectionProps> = () => {
   } = useEditorContext();
 
   // Get sidebar context for setting active panel
-  const { setActivePanel, setIsOpen } = useEditorSidebar();
+  const { setActivePanel, setIsOpen } = useSidebar();
 
   // Get transformation functions
   const { transformOverlaysToTracks } = useTimelineTransforms();
@@ -166,7 +166,7 @@ export const TimelineSection: React.FC<TimelineSectionProps> = () => {
         onDeleteItems={handleDeleteItems}
         onDuplicateItems={handleDuplicateItems}
         onSplitItems={handleSplitItems}
-        selectedItemIds={selectedOverlayIds.filter((id): id is number => typeof id === 'number' && !isNaN(id)).map((id: number) => id.toString())}
+        selectedItemIds={selectedOverlayIds.filter((id: any): id is number => typeof id === 'number' && !isNaN(id)).map((id: number) => id.toString())}
         onTracksChange={handleTracksChange}
         showZoomControls={true}
         showTimelineGuidelines={true}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Overlay, OverlayType } from '../../../../types';
 import { TimelineTrack } from '../../../advanced-timeline/types';
-import { FPS } from '../../../../../../constants';
+import { FPS } from '../../../../constants';
 import { useTimelineTransforms } from './use-timeline-transforms';
 
 interface UseTimelineHandlersProps {
