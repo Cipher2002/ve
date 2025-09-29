@@ -291,7 +291,10 @@ function App() {
       {/* Centered content container */}
       <div className="w-full flex-1 flex flex-col">
         {/* Video Editor Card */}
-        <div className="bg-white border-b border-gray-200 mb-8 overflow-hidden">
+        <div className={cn(
+          "bg-white border-b border-gray-200 overflow-hidden",
+          !isFullscreen && "mb-8" // only add spacing if not fullscreen
+        )}>
           <div className={styles.generateVideoSection}>
             <div 
               className="relative w-full"
