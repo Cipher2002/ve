@@ -59,20 +59,31 @@ export const useTimelineTracks = ({
     setIsAutoRemoveEnabled(autoRemoveEmptyTracks);
   }, [autoRemoveEmptyTracks]);
 
-  // Helper function to remove empty tracks
+  // Helper function to remove empty tracks (DISABLED for now)
   const removeEmptyTracks = useCallback((tracks: TimelineTrack[], shouldRemove: boolean = isAutoRemoveEnabled): TimelineTrack[] => {
-    if (!shouldRemove) return tracks;
+    // Auto-remove functionality commented out - keeping all tracks including empty ones
+    // if (!shouldRemove) return tracks;
     
     // Always keep at least one track, even if empty
-    const filteredTracks = tracks.filter(track => track.items.length > 0);
-    return filteredTracks.length === 0 ? [tracks[0] || {
+    // const filteredTracks = tracks.filter(track => track.items.length > 0);
+    // return filteredTracks.length === 0 ? [tracks[0] || {
+    //   id: `track-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    //   name: undefined,
+    //   items: [],
+    //   magnetic: false,
+    //   visible: true,
+    //   muted: false,
+    // }] : filteredTracks;
+    
+    // Return tracks as-is, maintaining at least one track
+    return tracks.length === 0 ? [{
       id: `track-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: undefined,
       items: [],
       magnetic: false,
       visible: true,
       muted: false,
-    }] : filteredTracks;
+    }] : tracks;
   }, [isAutoRemoveEnabled]);
 
   // Add new item method with intelligent positioning

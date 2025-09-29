@@ -101,7 +101,7 @@ export const useTimelineTransforms = () => {
       });
     }
 
-    // If no tracks exist at all, create one empty track
+    // If no tracks exist at all, create one empty track (minimum requirement)
     if (tracks.length === 0) {
       tracks.push({
         id: 'track-0',

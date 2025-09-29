@@ -167,8 +167,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     // Delete overlays on the top row (row 0) before removing it
     deleteOverlaysByRow(0);
     removeRow();
-    // Dispatch event for new timeline
-    window.dispatchEvent(new CustomEvent('removeRowRequested'));
+    // The new timeline will automatically handle track removal through transformOverlaysToTracks
+    // No need to dispatch events anymore
   };
 
   const handleSliderChange = useCallback(
@@ -298,7 +298,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
               <TooltipTrigger asChild>
                 <Button
                   onClick={handleRemoveRow}
-                  disabled={visibleRows <= INITIAL_ROWS}
+                  disabled={visibleRows <= 1}
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7 text-gray-700 dark:text-zinc-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80"
@@ -321,8 +321,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
                 <Button
                   onClick={() => {
                     addRow();
-                    // Dispatch event for new timeline
-                    window.dispatchEvent(new CustomEvent('addRowRequested'));
+                    // The new timeline will automatically create tracks through transformOverlaysToTracks
+                    // No need to dispatch events anymore
                   }}
                   disabled={visibleRows >= MAX_ROWS}
                   size="icon"
