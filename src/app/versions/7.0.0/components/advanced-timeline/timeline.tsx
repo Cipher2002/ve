@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
-import { TimelineHeader, TimelineTrackHandles, TimelineContent } from './components';
+import { TimelineTrackHandles, TimelineContent } from './components';
 import { 
   useTimelineZoom, 
   useTimelineInteractions, 
@@ -335,36 +335,6 @@ export const Timeline = forwardRef<TimelineRef, TimelineProps>(({
 
   return (
     <div className="timeline-container bg-background">
-      <TimelineHeader 
-        totalDuration={compositionDuration}
-        currentTime={currentTime}
-        showZoomControls={showZoomControls}
-        zoomScale={zoomScale}
-        setZoomScale={setZoomScale}
-        isPlaying={isPlaying}
-        onPlay={onPlay}
-        onPause={onPause}
-        showPlaybackControls={showPlaybackControls}
-        playbackRate={playbackRate}
-        setPlaybackRate={setPlaybackRate}
-        autoRemoveEmptyTracks={isAutoRemoveEnabled}
-        onToggleAutoRemoveEmptyTracks={handleEnhancedToggleAutoRemoveEmptyTracks}
-        splittingEnabled={isSplittingEnabled}
-        onToggleSplitting={handleToggleSplitting}
-        onSplitAtSelection={handleSplitAtSelection}
-        hasSelectedItem={selectedItemIds.length === 1 && isPlayheadOverSelectedItem()}
-        selectedItemsCount={selectedItemIds.length}
-        showSplitAtSelection={true}
-        showUndoRedoControls={showUndoRedoControls}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onUndo={undo}
-        onRedo={redo}
-        aspectRatio={aspectRatio}
-        onAspectRatioChange={onAspectRatioChange}
-        showAspectRatioControls={showAspectRatioControls}
-        overlays={overlays}
-      />
       
       {/* Tracks container */}
       <div className="timeline-tracks-wrapper flex">
