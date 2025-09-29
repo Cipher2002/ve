@@ -38,6 +38,8 @@ type BaseStyles = {
 type AnimationConfig = {
   enter?: string;
   exit?: string;
+  enterDirection?: string;
+  exitDirection?: string;
 };
 
 // Text overlay specific

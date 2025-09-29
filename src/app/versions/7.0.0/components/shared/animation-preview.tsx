@@ -188,10 +188,14 @@ interface AnimationSettingsProps {
   selectedEnterAnimation?: string;
   /** Currently selected exit animation */
   selectedExitAnimation?: string;
+  /** Currently selected enter animation direction */
+  selectedEnterDirection?: string;
+  /** Currently selected exit animation direction */
+  selectedExitDirection?: string;
   /** Callback for when an enter animation is selected */
-  onEnterAnimationSelect: (key: string) => void;
+  onEnterAnimationSelect: (key: string, direction?: string) => void;
   /** Callback for when an exit animation is selected */
-  onExitAnimationSelect: (key: string) => void;
+  onExitAnimationSelect: (key: string, direction?: string) => void;
   /** Optional class name for additional styling */
   className?: string;
   /** Whether sections should start expanded */
@@ -206,6 +210,8 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
   animations,
   selectedEnterAnimation = "none",
   selectedExitAnimation = "none",
+  selectedEnterDirection,
+  selectedExitDirection,
   onEnterAnimationSelect,
   onExitAnimationSelect,
   className = "",
@@ -217,6 +223,12 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
     exit: false,
   });
 
+  // State to track if we're in direction selection mode
+  const [directionSelectMode, setDirectionSelectMode] = useState<{
+    type: 'enter' | 'exit' | null;
+    animationKey: string | null;
+  }>({ type: null, animationKey: null });
+
   // Calculate the count of animations (excluding the "None" option that we add)
   const animationCount = Object.keys(animations).length;
 
@@ -226,6 +238,10 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
       ...prev,
       [section]: !prev[section],
     }));
+    // Reset direction selection when collapsing
+    if (openSections[section]) {
+      setDirectionSelectMode({ type: null, animationKey: null });
+    }
   };
 
   // Create the "None" animation option
@@ -234,6 +250,64 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
     preview: "No animation",
     enter: () => ({}),
     exit: () => ({}),
+  };
+
+  // Handle animation click - check if it has directions
+  const handleAnimationClick = (type: 'enter' | 'exit', animationKey: string, animation: AnimationTemplate) => {
+    if (animationKey === 'none') {
+      onEnterAnimationSelect('none');
+      if (type === 'enter') {
+        onEnterAnimationSelect('none');
+      } else {
+        onExitAnimationSelect('none');
+      }
+      return;
+    }
+
+    if (animation.directions && animation.directions.length > 0) {
+      // Show direction selection
+      setDirectionSelectMode({ type, animationKey });
+    } else {
+      // Apply directly without direction
+      if (type === 'enter') {
+        onEnterAnimationSelect(animationKey);
+      } else {
+        onExitAnimationSelect(animationKey);
+      }
+    }
+  };
+
+  // Handle direction selection
+  const handleDirectionSelect = (direction: string) => {
+    if (!directionSelectMode.type || !directionSelectMode.animationKey) return;
+
+    if (directionSelectMode.type === 'enter') {
+      onEnterAnimationSelect(directionSelectMode.animationKey, direction);
+    } else {
+      onExitAnimationSelect(directionSelectMode.animationKey, direction);
+    }
+
+    // Reset to main view
+    setDirectionSelectMode({ type: null, animationKey: null });
+  };
+
+  // Get direction label for display
+  const getDirectionLabel = (direction: string): string => {
+    const labels: Record<string, string> = {
+      left: 'Left',
+      right: 'Right',
+      top: 'Top',
+      bottom: 'Bottom',
+      'top-left': 'Top Left',
+      'top-right': 'Top Right',
+      'bottom-left': 'Bottom Left',
+      'bottom-right': 'Bottom Right',
+      horizontal: 'Horizontal',
+      vertical: 'Vertical',
+      clockwise: 'Clockwise',
+      'counter-clockwise': 'Counter-CW',
+    };
+    return labels[direction] || direction;
   };
 
   return (
@@ -250,21 +324,72 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
           isOpen={openSections.enter}
           onToggle={() => toggleSection("enter")}
         >
-          <AnimationPreview
-            animationKey="none"
-            animation={noneAnimation}
-            isSelected={selectedEnterAnimation === "none"}
-            onClick={() => onEnterAnimationSelect("none")}
-          />
-          {Object.entries(animations).map(([key, animation]) => (
-            <AnimationPreview
-              key={`enter-${key}`}
-              animationKey={key}
-              animation={animation}
-              isSelected={selectedEnterAnimation === key}
-              onClick={() => onEnterAnimationSelect(key)}
-            />
-          ))}
+          {directionSelectMode.type === 'enter' && directionSelectMode.animationKey ? (
+            // Direction Selection View
+            <>
+              <div className="col-span-4 mb-2">
+                <button
+                  onClick={() => setDirectionSelectMode({ type: null, animationKey: null })}
+                  className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Back to animations
+                </button>
+              </div>
+              {animations[directionSelectMode.animationKey]?.directions?.map((direction) => (
+                <button
+                  key={direction}
+                  onClick={() => handleDirectionSelect(direction)}
+                  className={`relative aspect-square w-full rounded-lg border ${
+                    selectedEnterAnimation === directionSelectMode.animationKey && selectedEnterDirection === direction
+                      ? "border-blue-500 bg-blue-500/10 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
+                      : "border-border bg-background hover:border-muted-foreground/50 hover:bg-muted/10 dark:bg-muted/30 dark:hover:bg-muted/50"
+                  } p-3 transition-all duration-200 group backdrop-blur-sm`}
+                >
+                  <div className="flex h-full flex-col items-center justify-center gap-3">
+                    <div className="text-2xl">
+                      {direction === 'left' && '←'}
+                      {direction === 'right' && '→'}
+                      {direction === 'top' && '↑'}
+                      {direction === 'bottom' && '↓'}
+                      {direction === 'top-left' && '↖'}
+                      {direction === 'top-right' && '↗'}
+                      {direction === 'bottom-left' && '↙'}
+                      {direction === 'bottom-right' && '↘'}
+                      {direction === 'horizontal' && '↔'}
+                      {direction === 'vertical' && '↕'}
+                      {direction === 'clockwise' && '↻'}
+                      {direction === 'counter-clockwise' && '↺'}
+                    </div>
+                    <span className="text-[7px] tracking-wide text-muted-foreground/80 group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground">
+                      {getDirectionLabel(direction)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </>
+          ) : (
+            // Main Animation Selection View
+            <>
+              <AnimationPreview
+                animationKey="none"
+                animation={noneAnimation}
+                isSelected={selectedEnterAnimation === "none"}
+                onClick={() => handleAnimationClick('enter', 'none', noneAnimation)}
+              />
+              {Object.entries(animations).map(([key, animation]) => (
+                <AnimationPreview
+                  key={`enter-${key}`}
+                  animationKey={key}
+                  animation={animation}
+                  isSelected={selectedEnterAnimation === key}
+                  onClick={() => handleAnimationClick('enter', key, animation)}
+                />
+              ))}
+            </>
+          )}
         </AnimationSection>
 
         {/* Exit Animation Section */}
@@ -274,21 +399,72 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
           isOpen={openSections.exit}
           onToggle={() => toggleSection("exit")}
         >
-          <AnimationPreview
-            animationKey="none"
-            animation={noneAnimation}
-            isSelected={selectedExitAnimation === "none"}
-            onClick={() => onExitAnimationSelect("none")}
-          />
-          {Object.entries(animations).map(([key, animation]) => (
-            <AnimationPreview
-              key={`exit-${key}`}
-              animationKey={key}
-              animation={animation}
-              isSelected={selectedExitAnimation === key}
-              onClick={() => onExitAnimationSelect(key)}
-            />
-          ))}
+          {directionSelectMode.type === 'exit' && directionSelectMode.animationKey ? (
+            // Direction Selection View
+            <>
+              <div className="col-span-4 mb-2">
+                <button
+                  onClick={() => setDirectionSelectMode({ type: null, animationKey: null })}
+                  className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Back to animations
+                </button>
+              </div>
+              {animations[directionSelectMode.animationKey]?.directions?.map((direction) => (
+                <button
+                  key={direction}
+                  onClick={() => handleDirectionSelect(direction)}
+                  className={`relative aspect-square w-full rounded-lg border ${
+                    selectedExitAnimation === directionSelectMode.animationKey && selectedExitDirection === direction
+                      ? "border-blue-500 bg-blue-500/10 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]"
+                      : "border-border bg-background hover:border-muted-foreground/50 hover:bg-muted/10 dark:bg-muted/30 dark:hover:bg-muted/50"
+                  } p-3 transition-all duration-200 group backdrop-blur-sm`}
+                >
+                  <div className="flex h-full flex-col items-center justify-center gap-3">
+                    <div className="text-2xl">
+                      {direction === 'left' && '←'}
+                      {direction === 'right' && '→'}
+                      {direction === 'top' && '↑'}
+                      {direction === 'bottom' && '↓'}
+                      {direction === 'top-left' && '↖'}
+                      {direction === 'top-right' && '↗'}
+                      {direction === 'bottom-left' && '↙'}
+                      {direction === 'bottom-right' && '↘'}
+                      {direction === 'horizontal' && '↔'}
+                      {direction === 'vertical' && '↕'}
+                      {direction === 'clockwise' && '↻'}
+                      {direction === 'counter-clockwise' && '↺'}
+                    </div>
+                    <span className="text-[7px] tracking-wide text-muted-foreground/80 group-hover:text-foreground dark:text-muted-foreground dark:group-hover:text-foreground">
+                      {getDirectionLabel(direction)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </>
+          ) : (
+            // Main Animation Selection View
+            <>
+              <AnimationPreview
+                animationKey="none"
+                animation={noneAnimation}
+                isSelected={selectedExitAnimation === "none"}
+                onClick={() => handleAnimationClick('exit', 'none', noneAnimation)}
+              />
+              {Object.entries(animations).map(([key, animation]) => (
+                <AnimationPreview
+                  key={`exit-${key}`}
+                  animationKey={key}
+                  animation={animation}
+                  isSelected={selectedExitAnimation === key}
+                  onClick={() => handleAnimationClick('exit', key, animation)}
+                />
+              ))}
+            </>
+          )}
         </AnimationSection>
       </div>
     </div>

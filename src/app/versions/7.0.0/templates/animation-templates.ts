@@ -4,19 +4,26 @@ export type AnimationTemplate = {
   name: string;
   preview: string;
   isPro?: boolean;
+  directions?: string[]; // Add directions array
   enter: (
     frame: number,
-    durationInFrames: number
+    durationInFrames: number,
+    direction?: string
   ) => {
     transform?: string;
     opacity?: number;
+    filter?: string;
+    clipPath?: string;
   };
   exit: (
     frame: number,
-    durationInFrames: number
+    durationInFrames: number,
+    direction?: string
   ) => {
     transform?: string;
     opacity?: number;
+    filter?: string;
+    clipPath?: string;
   };
 };
 
@@ -35,29 +42,65 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       }),
     }),
   },
-  slideRight: {
+  slide: {
     name: "Slide",
-    preview: "Slide in from left",
+    preview: "Slide in from direction",
     isPro: true,
-    enter: (frame) => ({
-      transform: `translateX(${interpolate(frame, [0, 15], [-100, 0], {
-        extrapolateRight: "clamp",
-      })}%)`,
-      opacity: interpolate(frame, [0, 15], [0, 1], {
-        extrapolateRight: "clamp",
-      }),
-    }),
-    exit: (frame, duration) => ({
-      transform: `translateX(${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, 100],
-        { extrapolateLeft: "clamp" }
-      )}%)`,
-      opacity: interpolate(frame, [duration - 15, duration], [1, 0], {
-        extrapolateLeft: "clamp",
-      }),
-    }),
+    directions: ["left", "right", "top", "bottom"],
+    enter: (frame, duration, direction = "right") => {
+      const directions: Record<string, [number, number]> = {
+        left: [-100, 0],
+        right: [100, 0],
+        top: [0, -100],
+        bottom: [0, 100],
+      };
+      const [startX, startY] = direction === "left" || direction === "right" 
+        ? [directions[direction][0], 0]
+        : [0, directions[direction][1]];
+      
+      return {
+        transform: direction === "left" || direction === "right"
+          ? `translateX(${interpolate(frame, [0, 15], [startX, 0], {
+              extrapolateRight: "clamp",
+            })}%)`
+          : `translateY(${interpolate(frame, [0, 15], [startY, 0], {
+              extrapolateRight: "clamp",
+            })}%)`,
+        opacity: interpolate(frame, [0, 15], [0, 1], {
+          extrapolateRight: "clamp",
+        }),
+      };
+    },
+    exit: (frame, duration, direction = "right") => {
+      const directions: Record<string, [number, number]> = {
+        left: [0, 100],
+        right: [0, -100],
+        top: [0, 100],
+        bottom: [0, -100],
+      };
+      const [startPos, endPos] = direction === "left" || direction === "right"
+        ? [directions[direction][0], directions[direction][1]]
+        : [directions[direction][0], directions[direction][1]];
+      
+      return {
+        transform: direction === "left" || direction === "right"
+          ? `translateX(${interpolate(
+              frame,
+              [duration - 15, duration],
+              [startPos, endPos],
+              { extrapolateLeft: "clamp" }
+            )}%)`
+          : `translateY(${interpolate(
+              frame,
+              [duration - 15, duration],
+              [startPos, endPos],
+              { extrapolateLeft: "clamp" }
+            )}%)`,
+        opacity: interpolate(frame, [duration - 15, duration], [1, 0], {
+          extrapolateLeft: "clamp",
+        }),
+      };
+    },
   },
   scale: {
     name: "Scale",
@@ -86,51 +129,91 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
     name: "Bounce",
     preview: "Elastic bounce entrance",
     isPro: true,
-    enter: (frame) => ({
-      transform: `translateY(${interpolate(
-        frame,
-        [0, 10, 13, 15],
-        [100, -10, 5, 0],
-        { extrapolateRight: "clamp" }
-      )}px)`,
-      opacity: interpolate(frame, [0, 10], [0, 1], {
-        extrapolateRight: "clamp",
-      }),
-    }),
-    exit: (frame, duration) => ({
-      transform: `translateY(${interpolate(
-        frame,
-        [duration - 15, duration - 13, duration - 10, duration],
-        [0, 5, -10, 100],
-        { extrapolateLeft: "clamp" }
-      )}px)`,
-      opacity: interpolate(frame, [duration - 10, duration], [1, 0], {
-        extrapolateLeft: "clamp",
-      }),
-    }),
+    directions: ["left", "right", "top", "bottom"],
+    enter: (frame, duration, direction = "bottom") => {
+      const isHorizontal = direction === "left" || direction === "right";
+      const multiplier = direction === "left" || direction === "top" ? -1 : 1;
+      
+      return {
+        transform: isHorizontal
+          ? `translateX(${interpolate(
+              frame,
+              [0, 10, 13, 15],
+              [100 * multiplier, -10 * multiplier, 5 * multiplier, 0],
+              { extrapolateRight: "clamp" }
+            )}px)`
+          : `translateY(${interpolate(
+              frame,
+              [0, 10, 13, 15],
+              [100 * multiplier, -10 * multiplier, 5 * multiplier, 0],
+              { extrapolateRight: "clamp" }
+            )}px)`,
+        opacity: interpolate(frame, [0, 10], [0, 1], {
+          extrapolateRight: "clamp",
+        }),
+      };
+    },
+    exit: (frame, duration, direction = "bottom") => {
+      const isHorizontal = direction === "left" || direction === "right";
+      const multiplier = direction === "left" || direction === "top" ? -1 : 1;
+      
+      return {
+        transform: isHorizontal
+          ? `translateX(${interpolate(
+              frame,
+              [duration - 15, duration - 13, duration - 10, duration],
+              [0, 5 * multiplier, -10 * multiplier, 100 * multiplier],
+              { extrapolateLeft: "clamp" }
+            )}px)`
+          : `translateY(${interpolate(
+              frame,
+              [duration - 15, duration - 13, duration - 10, duration],
+              [0, 5 * multiplier, -10 * multiplier, 100 * multiplier],
+              { extrapolateLeft: "clamp" }
+            )}px)`,
+        opacity: interpolate(frame, [duration - 10, duration], [1, 0], {
+          extrapolateLeft: "clamp",
+        }),
+      };
+    },
   },
-  flipX: {
+  flip: {
     name: "Flip",
-    preview: "3D flip around X axis",
+    preview: "3D flip animation",
     isPro: true,
-    enter: (frame) => ({
-      transform: `perspective(400px) rotateX(${interpolate(
-        frame,
-        [0, 15],
-        [90, 0],
-        { extrapolateRight: "clamp" }
-      )}deg)`,
+    directions: ["horizontal", "vertical"],
+    enter: (frame, duration, direction = "horizontal") => ({
+      transform: direction === "horizontal"
+        ? `perspective(400px) rotateX(${interpolate(
+            frame,
+            [0, 15],
+            [90, 0],
+            { extrapolateRight: "clamp" }
+          )}deg)`
+        : `perspective(400px) rotateY(${interpolate(
+            frame,
+            [0, 15],
+            [90, 0],
+            { extrapolateRight: "clamp" }
+          )}deg)`,
       opacity: interpolate(frame, [0, 5, 15], [0, 0.7, 1], {
         extrapolateRight: "clamp",
       }),
     }),
-    exit: (frame, duration) => ({
-      transform: `perspective(400px) rotateX(${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, -90],
-        { extrapolateLeft: "clamp" }
-      )}deg)`,
+    exit: (frame, duration, direction = "horizontal") => ({
+      transform: direction === "horizontal"
+        ? `perspective(400px) rotateX(${interpolate(
+            frame,
+            [duration - 15, duration],
+            [0, -90],
+            { extrapolateLeft: "clamp" }
+          )}deg)`
+        : `perspective(400px) rotateY(${interpolate(
+            frame,
+            [duration - 15, duration],
+            [0, -90],
+            { extrapolateLeft: "clamp" }
+          )}deg)`,
       opacity: interpolate(
         frame,
         [duration - 15, duration - 5, duration],
@@ -171,56 +254,40 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       })}px)`,
     }),
   },
-  slideUp: {
-    name: "Slide",
-    preview: "Modern slide from bottom",
-    enter: (frame) => ({
-      transform: `translateY(${interpolate(frame, [0, 15], [30, 0], {
-        extrapolateRight: "clamp",
-      })}px)`,
-      opacity: interpolate(frame, [0, 15], [0, 1], {
-        extrapolateRight: "clamp",
-      }),
-    }),
-    exit: (frame, duration) => ({
-      transform: `translateY(${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, -30],
-        { extrapolateLeft: "clamp" }
-      )}px)`,
-      opacity: interpolate(frame, [duration - 15, duration], [1, 0], {
-        extrapolateLeft: "clamp",
-      }),
-    }),
-  },
   snapRotate: {
     name: "Snap",
     preview: "Quick rotate with snap",
     isPro: true,
-    enter: (frame) => ({
-      transform: `rotate(${interpolate(frame, [0, 8, 12, 15], [-10, 5, -2, 0], {
-        extrapolateRight: "clamp",
-      })}deg) scale(${interpolate(frame, [0, 15], [0.8, 1], {
-        extrapolateRight: "clamp",
-      })})`,
-      opacity: interpolate(frame, [0, 10], [0, 1], {
-        extrapolateRight: "clamp",
-      }),
-    }),
-    exit: (frame, duration) => ({
-      transform: `rotate(${interpolate(
-        frame,
-        [duration - 15, duration - 12, duration - 8, duration],
-        [0, -2, 5, -10],
-        { extrapolateLeft: "clamp" }
-      )}deg) scale(${interpolate(frame, [duration - 15, duration], [1, 0.8], {
-        extrapolateLeft: "clamp",
-      })})`,
-      opacity: interpolate(frame, [duration - 10, duration], [1, 0], {
-        extrapolateLeft: "clamp",
-      }),
-    }),
+    directions: ["clockwise", "counter-clockwise"],
+    enter: (frame, duration, direction = "clockwise") => {
+      const multiplier = direction === "clockwise" ? 1 : -1;
+      return {
+        transform: `rotate(${interpolate(frame, [0, 8, 12, 15], [-10 * multiplier, 5 * multiplier, -2 * multiplier, 0], {
+          extrapolateRight: "clamp",
+        })}deg) scale(${interpolate(frame, [0, 15], [0.8, 1], {
+          extrapolateRight: "clamp",
+        })})`,
+        opacity: interpolate(frame, [0, 10], [0, 1], {
+          extrapolateRight: "clamp",
+        }),
+      };
+    },
+    exit: (frame, duration, direction = "clockwise") => {
+      const multiplier = direction === "clockwise" ? 1 : -1;
+      return {
+        transform: `rotate(${interpolate(
+          frame,
+          [duration - 15, duration - 12, duration - 8, duration],
+          [0, -2 * multiplier, 5 * multiplier, -10 * multiplier],
+          { extrapolateLeft: "clamp" }
+        )}deg) scale(${interpolate(frame, [duration - 15, duration], [1, 0.8], {
+          extrapolateLeft: "clamp",
+        })})`,
+        opacity: interpolate(frame, [duration - 10, duration], [1, 0], {
+          extrapolateLeft: "clamp",
+        }),
+      };
+    },
   },
   glitch: {
     name: "Glitch",
@@ -230,7 +297,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       const progress = interpolate(frame, [0, 15], [0, 1], {
         extrapolateRight: "clamp",
       });
-      // Create glitchy movements at specific keyframes
       const xOffset =
         frame % 3 === 0 ? (Math.random() * 10 - 5) * (1 - progress) : 0;
       const yOffset =
@@ -252,7 +318,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       const progress = interpolate(frame, [duration - 15, duration], [0, 1], {
         extrapolateLeft: "clamp",
       });
-      // Create glitchy movements at specific keyframes
       const xOffset =
         (duration - frame) % 3 === 0 ? (Math.random() * 10 - 5) * progress : 0;
       const yOffset =
@@ -276,60 +341,122 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       };
     },
   },
-  swipeReveal: {
+  swipe: {
     name: "Swipe",
     preview: "Reveals content with a swipe",
     isPro: true,
-    enter: (frame) => ({
-      transform: `translateX(${interpolate(frame, [0, 15], [0, 0], {
-        extrapolateRight: "clamp",
-      })}px)`,
-      opacity: 1,
-      clipPath: `inset(0 ${interpolate(frame, [0, 15], [100, 0], {
-        extrapolateRight: "clamp",
-      })}% 0 0)`,
-    }),
-    exit: (frame, duration) => ({
-      transform: `translateX(${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, 0],
-        { extrapolateLeft: "clamp" }
-      )}px)`,
-      opacity: 1,
-      clipPath: `inset(0 0 0 ${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, 100],
-        { extrapolateLeft: "clamp" }
-      )}%)`,
-    }),
+    directions: ["left", "right", "top", "bottom"],
+    enter: (frame, duration, direction = "right") => {
+      const clipPaths: Record<string, string> = {
+        left: `inset(0 0 0 ${interpolate(frame, [0, 15], [100, 0], {
+          extrapolateRight: "clamp",
+        })}%)`,
+        right: `inset(0 ${interpolate(frame, [0, 15], [100, 0], {
+          extrapolateRight: "clamp",
+        })}% 0 0)`,
+        top: `inset(${interpolate(frame, [0, 15], [100, 0], {
+          extrapolateRight: "clamp",
+        })}% 0 0 0)`,
+        bottom: `inset(0 0 ${interpolate(frame, [0, 15], [100, 0], {
+          extrapolateRight: "clamp",
+        })}% 0)`,
+      };
+      
+      return {
+        transform: `translateX(0px)`,
+        opacity: 1,
+        clipPath: clipPaths[direction],
+      };
+    },
+    exit: (frame, duration, direction = "right") => {
+      const clipPaths: Record<string, string> = {
+        left: `inset(0 ${interpolate(
+          frame,
+          [duration - 15, duration],
+          [0, 100],
+          { extrapolateLeft: "clamp" }
+        )}% 0 0)`,
+        right: `inset(0 0 0 ${interpolate(
+          frame,
+          [duration - 15, duration],
+          [0, 100],
+          { extrapolateLeft: "clamp" }
+        )}%)`,
+        top: `inset(0 0 ${interpolate(
+          frame,
+          [duration - 15, duration],
+          [0, 100],
+          { extrapolateLeft: "clamp" }
+        )}% 0)`,
+        bottom: `inset(${interpolate(
+          frame,
+          [duration - 15, duration],
+          [0, 100],
+          { extrapolateLeft: "clamp" }
+        )}% 0 0 0)`,
+      };
+      
+      return {
+        transform: `translateX(0px)`,
+        opacity: 1,
+        clipPath: clipPaths[direction],
+      };
+    },
   },
-  floatIn: {
+  float: {
     name: "Float",
     preview: "Smooth floating entrance",
-    enter: (frame) => ({
-      transform: `translate(${interpolate(frame, [0, 15], [10, 0], {
-        extrapolateRight: "clamp",
-      })}px, ${interpolate(frame, [0, 15], [-20, 0], {
-        extrapolateRight: "clamp",
-      })}px)`,
-      opacity: interpolate(frame, [0, 15], [0, 1], {
-        extrapolateRight: "clamp",
-      }),
-    }),
-    exit: (frame, duration) => ({
-      transform: `translate(${interpolate(
-        frame,
-        [duration - 15, duration],
-        [0, -10],
-        { extrapolateLeft: "clamp" }
-      )}px, ${interpolate(frame, [duration - 15, duration], [0, -20], {
-        extrapolateLeft: "clamp",
-      })}px)`,
-      opacity: interpolate(frame, [duration - 15, duration], [1, 0], {
-        extrapolateLeft: "clamp",
-      }),
-    }),
+    directions: ["left", "right", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"],
+    enter: (frame, duration, direction = "bottom") => {
+      const movements: Record<string, [number, number]> = {
+        left: [-20, 0],
+        right: [20, 0],
+        top: [0, -20],
+        bottom: [0, 20],
+        "top-left": [-15, -15],
+        "top-right": [15, -15],
+        "bottom-left": [-15, 15],
+        "bottom-right": [15, 15],
+      };
+      const [x, y] = movements[direction];
+      
+      return {
+        transform: `translate(${interpolate(frame, [0, 15], [x, 0], {
+          extrapolateRight: "clamp",
+        })}px, ${interpolate(frame, [0, 15], [y, 0], {
+          extrapolateRight: "clamp",
+        })}px)`,
+        opacity: interpolate(frame, [0, 15], [0, 1], {
+          extrapolateRight: "clamp",
+        }),
+      };
+    },
+    exit: (frame, duration, direction = "bottom") => {
+      const movements: Record<string, [number, number]> = {
+        left: [0, 20],
+        right: [0, -20],
+        top: [0, 20],
+        bottom: [0, -20],
+        "top-left": [15, 15],
+        "top-right": [-15, 15],
+        "bottom-left": [15, -15],
+        "bottom-right": [-15, -15],
+      };
+      const [x, y] = movements[direction];
+      
+      return {
+        transform: `translate(${interpolate(
+          frame,
+          [duration - 15, duration],
+          [0, x],
+          { extrapolateLeft: "clamp" }
+        )}px, ${interpolate(frame, [duration - 15, duration], [0, y], {
+          extrapolateLeft: "clamp",
+        })}px)`,
+        opacity: interpolate(frame, [duration - 15, duration], [1, 0], {
+          extrapolateLeft: "clamp",
+        }),
+      };
+    },
   },
 };

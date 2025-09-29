@@ -400,20 +400,22 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   };
 
   // Handlers for animation selection
-  const handleEnterAnimationSelect = (animationKey: string) => {
+  const handleEnterAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange({
       animation: {
         ...localOverlay.styles.animation,
         enter: animationKey === "none" ? undefined : animationKey,
+        enterDirection: animationKey === "none" ? undefined : direction,
       },
     });
   };
 
-  const handleExitAnimationSelect = (animationKey: string) => {
+  const handleExitAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange({
       animation: {
         ...localOverlay.styles.animation,
         exit: animationKey === "none" ? undefined : animationKey,
+        exitDirection: animationKey === "none" ? undefined : direction,
       },
     });
   };
@@ -634,6 +636,8 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
         animations={animationTemplates}
         selectedEnterAnimation={localOverlay.styles.animation?.enter}
         selectedExitAnimation={localOverlay.styles.animation?.exit}
+        selectedEnterDirection={localOverlay.styles.animation?.enterDirection}
+        selectedExitDirection={localOverlay.styles.animation?.exitDirection}
         onEnterAnimationSelect={handleEnterAnimationSelect}
         onExitAnimationSelect={handleExitAnimationSelect}
       />

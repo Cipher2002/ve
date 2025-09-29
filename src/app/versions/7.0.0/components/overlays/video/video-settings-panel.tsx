@@ -145,20 +145,22 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
   };
 
   // Handlers for animation selection
-  const handleEnterAnimationSelect = (animationKey: string) => {
+  const handleEnterAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange({
       animation: {
         ...localOverlay?.styles?.animation,
         enter: animationKey,
+        enterDirection: direction,
       },
     });
   };
 
-  const handleExitAnimationSelect = (animationKey: string) => {
+  const handleExitAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange({
       animation: {
         ...localOverlay?.styles?.animation,
         exit: animationKey,
+        exitDirection: direction,
       },
     });
   };
@@ -819,6 +821,8 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         animations={animationTemplates}
         selectedEnterAnimation={localOverlay?.styles?.animation?.enter}
         selectedExitAnimation={localOverlay?.styles?.animation?.exit}
+        selectedEnterDirection={localOverlay?.styles?.animation?.enterDirection}
+        selectedExitDirection={localOverlay?.styles?.animation?.exitDirection}
         onEnterAnimationSelect={handleEnterAnimationSelect}
         onExitAnimationSelect={handleExitAnimationSelect}
       />

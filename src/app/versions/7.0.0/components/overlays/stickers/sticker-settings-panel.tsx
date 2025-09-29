@@ -13,17 +13,19 @@ export const StickerSettingsPanel: React.FC<StickerSettingsPanelProps> = ({
   handleStyleChange,
 }) => {
   // Handlers for animation selection
-  const handleEnterAnimationSelect = (animationKey: string) => {
+  const handleEnterAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange("animation", {
       ...((localOverlay.styles as any)?.animation || {}),
       enter: animationKey,
+      enterDirection: direction,
     });
   };
 
-  const handleExitAnimationSelect = (animationKey: string) => {
+  const handleExitAnimationSelect = (animationKey: string, direction?: string) => {
     handleStyleChange("animation", {
       ...((localOverlay.styles as any)?.animation || {}),
       exit: animationKey,
+      exitDirection: direction,
     });
   };
 
@@ -32,6 +34,8 @@ export const StickerSettingsPanel: React.FC<StickerSettingsPanelProps> = ({
       animations={animationTemplates}
       selectedEnterAnimation={(localOverlay.styles as any)?.animation?.enter}
       selectedExitAnimation={(localOverlay.styles as any)?.animation?.exit}
+      selectedEnterDirection={(localOverlay.styles as any)?.animation?.enterDirection}
+      selectedExitDirection={(localOverlay.styles as any)?.animation?.exitDirection}
       onEnterAnimationSelect={handleEnterAnimationSelect}
       onExitAnimationSelect={handleExitAnimationSelect}
     />
