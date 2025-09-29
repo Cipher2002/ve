@@ -26,10 +26,8 @@ interface TimelineSectionProps {
 export const TimelineSection: React.FC<TimelineSectionProps> = () => {
   /** State for timeline tracks derived from overlays */
   const [timelineTracks, setTimelineTracks] = React.useState<TimelineTrack[]>([]);
-  
-  /** Ref to track last processed overlays to prevent unnecessary re-renders */
-  const lastProcessedOverlaysRef = React.useRef<Overlay[]>([]);
 
+  
   /** Get editor context values */
   const {
     overlays,
@@ -53,6 +51,41 @@ export const TimelineSection: React.FC<TimelineSectionProps> = () => {
     aspectRatio,
     setAspectRatio,
   } = useEditorContext();
+
+  /** Ref to track last processed overlays to prevent unnecessary re-renders */
+  const lastProcessedOverlaysRef = React.useRef<Overlay[]>([]);
+
+  // Handle add/remove row events from timeline-context
+  React.useEffect(() => {
+    const handleAddRow = () => {
+      console.log('Timeline section: Handling add row event, current overlays:', overlays.length);
+      // Shift all overlays down by one row to create empty row 0
+      const updatedOverlays = overlays.map(overlay => ({
+        ...overlay,
+        row: overlay.row + 1,
+      }));
+      console.log('Timeline section: Updated overlays after shift:', updatedOverlays.map(o => `id:${o.id} row:${o.row}`));
+      setOverlays(updatedOverlays);
+    };
+
+    const handleRemoveRow = () => {
+      console.log('Timeline section: Handling remove row event');
+      // Shift all overlays up by one row after removing row 0
+      const updatedOverlays = overlays.map(overlay => ({
+        ...overlay,
+        row: Math.max(0, overlay.row - 1),
+      }));
+      setOverlays(updatedOverlays);
+    };
+
+    window.addEventListener('addRowRequested', handleAddRow);
+    window.addEventListener('removeRowRequested', handleRemoveRow);
+
+    return () => {
+      window.removeEventListener('addRowRequested', handleAddRow);
+      window.removeEventListener('removeRowRequested', handleRemoveRow);
+    };
+  }, [overlays, setOverlays]);
 
   // Get sidebar context for setting active panel
   const { setActivePanel, setIsOpen } = useSidebar();

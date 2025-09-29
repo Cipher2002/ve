@@ -34,12 +34,12 @@ export const useVisibleRows = (onAddRow?: () => void, onRemoveRow?: () => void) 
   };
 
   /**
-   * Decrements the number of visible rows by 1, down to INITIAL_ROWS
+   * Decrements the number of visible rows by 1, down to minimum of 1
    * Calls onRemoveRow callback when a row is actually removed
    */
   const removeRow = () => {
     setVisibleRows((current) => {
-      const newCount = Math.max(current - 1, INITIAL_ROWS);
+      const newCount = Math.max(current - 1, 1); // Changed from INITIAL_ROWS to 1
       // Only trigger callback if we're actually removing a row
       if (newCount < current && onRemoveRow) {
         onRemoveRow();
