@@ -10,27 +10,27 @@ import {
   Plus,
   X,
 } from "lucide-react";
-import { useEditorSidebar } from "../../contexts/sidebar-context";
+import { useSidebar } from "../../contexts/sidebar-context";
 import { OverlayType } from "../../types";
 import {
   Tooltip,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "../../../../../components/ui/tooltip";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetClose,
-} from "../ui/sheet";
-import { VideoOverlayPanel } from "../overlay/video/video-overlay-panel";
-import { TextOverlaysPanel } from "../overlay/text/text-overlays-panel";
-import SoundsOverlayPanel from "../overlay/sounds/sounds-overlay-panel";
-import { CaptionsOverlayPanel } from "../overlay/captions/captions-overlay-panel";
-import { ImageOverlayPanel } from "../overlay/images/image-overlay-panel";
-import { StickersPanel } from "../overlay/stickers/stickers-panel";
-import { LocalMediaPanel } from "../overlay/local-media/local-media-panel";
+} from "../../../../../components/ui/sheet";
+import { VideoOverlayPanel } from "../overlays/video/video-overlay-panel";
+import { TextOverlaysPanel } from "../overlays/text/text-overlays-panel";
+import SoundsOverlayPanel from "../overlays/sounds/sounds-panel";
+import { CaptionsPanel } from "../overlays/captions/captions-panel";
+import { ImageOverlayPanel } from "../overlays/images/image-overlay-panel";
+import { StickersPanel } from "../overlays/stickers/stickers-panel";
+import LocalMediaPanel from "../overlays/local-media/local-media-panel";
 
 
 /**
@@ -41,7 +41,7 @@ import { LocalMediaPanel } from "../overlay/local-media/local-media-panel";
  * visual style while remaining compact for mobile screens.
  */
 export function MobileNavBar() {
-  const { activePanel, setActivePanel } = useEditorSidebar();
+  const { activePanel, setActivePanel } = useSidebar();
   const [clickedItemId, setClickedItemId] = useState<string | null>(null);
   const scrollableRef = useRef<HTMLDivElement>(null);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
@@ -172,7 +172,7 @@ export function MobileNavBar() {
       case OverlayType.VIDEO:
         return <VideoOverlayPanel />;
       case OverlayType.CAPTION:
-        return <CaptionsOverlayPanel />;
+        return <CaptionsPanel />;
       case OverlayType.IMAGE:
         return <ImageOverlayPanel />;
       case OverlayType.STICKER:
