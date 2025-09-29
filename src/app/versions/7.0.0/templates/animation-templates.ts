@@ -413,10 +413,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
         right: [20, 0],
         top: [0, -20],
         bottom: [0, 20],
-        "top-left": [-15, -15],
-        "top-right": [15, -15],
-        "bottom-left": [-15, 15],
-        "bottom-right": [15, 15],
       };
       const [x, y] = movements[direction];
       
@@ -437,10 +433,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
         right: [0, -20],
         top: [0, 20],
         bottom: [0, -20],
-        "top-left": [15, 15],
-        "top-right": [-15, 15],
-        "bottom-left": [15, -15],
-        "bottom-right": [-15, -15],
       };
       const [x, y] = movements[direction];
       
