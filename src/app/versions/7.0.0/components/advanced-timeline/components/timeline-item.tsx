@@ -8,7 +8,7 @@ import {
   TimelineItemSplitLine,
   TimelineItemContextMenu,
 } from './timeline-item/';
-import { ContextMenu, ContextMenuTrigger } from '../../ui/context-menu';
+import { ContextMenu, ContextMenuTrigger } from '../../../../../../components/ui/context-menu';
 
 
 interface TimelineItemProps {

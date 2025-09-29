@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Scissors } from 'lucide-react';
 import { Button } from '@/components/ui/button';  
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../../../../../components/ui/tooltip';
 
 interface SplittingToggleProps {
   enabled: boolean;

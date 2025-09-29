@@ -108,7 +108,7 @@ export const TimelineTrack: React.FC<TimelineTrackProps> = ({
     >
       {shouldShowPreview ? (
         // Render preview items with shifted positions
-        magneticPreview.previewItems.map((previewItem) => {
+        magneticPreview.previewItems.map((previewItem: any) => {
           const originalItem = track.items.find(item => item.id === previewItem.id);
           if (!originalItem) return null;
           

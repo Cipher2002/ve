@@ -441,7 +441,7 @@ export const TimelineContent: React.FC<TimelineContentProps> = ({
         <div className="timeline-tracks-container">
           {tracks.map((track, index) => {
             // Find all ghost elements that belong to this track
-            const trackGhostElements = ghostElement?.filter(ghost => {
+            const trackGhostElements = ghostElement?.filter((ghost: any) => {
               // Use the same calculation as ghost creation to avoid floating-point precision issues
               // Ghost creation: trackIndex * (100 / tracks.length) = ghost.top
               // So: trackIndex = ghost.top / (100 / tracks.length) = ghost.top * tracks.length / 100

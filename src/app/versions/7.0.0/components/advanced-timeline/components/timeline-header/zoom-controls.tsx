@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
 
 import { ZOOM_CONSTRAINTS } from "../../constants";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../ui/tooltip";
-import { Slider } from "../../../ui/slider";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../../../../../components/ui/tooltip";
+import { Slider } from "../../../../../../../components/ui/slider";
 
 
 interface ZoomControlsProps {
