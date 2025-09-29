@@ -76,7 +76,7 @@ interface TimelineState {
   isDragging: boolean;
   isPlayheadDragging: boolean; // New state to track playhead dragging
   isContextMenuOpen: boolean;
-  timelineRef: React.RefObject<HTMLDivElement> | null;
+  timelineRef: React.RefObject<HTMLDivElement | null> | null;
   
   // Drag and drop state
   draggedItem: TimelineItem | null;
@@ -112,7 +112,7 @@ export interface ITimelineStore extends TimelineState {
   setIsDragging: (isDragging: boolean) => void;
   setIsPlayheadDragging: (isPlayheadDragging: boolean) => void;
   setIsContextMenuOpen: (isOpen: boolean) => void;
-  setTimelineRef: (ref: React.RefObject<HTMLDivElement>) => void;
+  setTimelineRef: (ref: React.RefObject<HTMLDivElement | null>) => void;
   
   // Drag and drop setters
   setDraggedItem: (item: TimelineItem | null) => void;
@@ -185,7 +185,7 @@ const useTimelineStore = create<ITimelineStore>()(
         set({ isContextMenuOpen: isOpen });
       },
 
-      setTimelineRef: (ref: React.RefObject<HTMLDivElement>) => {
+      setTimelineRef: (ref: React.RefObject<HTMLDivElement | null>) => {
         set({ timelineRef: ref });
       },
 

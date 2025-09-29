@@ -5,7 +5,7 @@ import { calculateMousePosition } from '../utils';
  * Custom hook to handle timeline mouse interactions
  * Uses CSS custom properties for ghost marker positioning to avoid React re-renders
  */
-export const useTimelineInteractions = (timelineRef: React.RefObject<HTMLDivElement>) => {
+export const useTimelineInteractions = (timelineRef: React.RefObject<HTMLDivElement | null>) => {
   // Keep only essential React state that actually needs to trigger re-renders
   const [isDragging, setIsDragging] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);

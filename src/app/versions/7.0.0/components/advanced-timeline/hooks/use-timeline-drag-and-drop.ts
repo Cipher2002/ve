@@ -14,7 +14,7 @@ interface UseTimelineDragAndDropProps {
   tracks: TimelineTrack[];
   onItemMove?: (itemId: string, newStart: number, newEnd: number, newTrackId: string) => void;
   onItemResize?: (itemId: string, newStart: number, newEnd: number) => void;
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   onInsertTrackAt?: (index: number) => string;
   onInsertMultipleTracksAt?: (index: number, count: number) => string[];
   onCreateTracksWithItems?: (

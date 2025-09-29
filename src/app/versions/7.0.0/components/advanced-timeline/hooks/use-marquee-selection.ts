@@ -3,7 +3,7 @@ import { TimelineTrack } from '../types';
 import { TIMELINE_CONSTANTS } from '../constants';
 
 interface UseMarqueeSelectionProps {
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   tracks: TimelineTrack[];
   totalDuration: number;
   selectedItemIds: string[];

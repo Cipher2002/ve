@@ -4,7 +4,7 @@ import { TIMELINE_CONSTANTS } from '../constants';
 import useTimelineStore from '../stores/use-timeline-store';
 
 interface UseNewItemDragProps {
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   totalDuration: number; // Total timeline duration in seconds
   tracks: TimelineTrack[];
   onNewItemDrop?: (

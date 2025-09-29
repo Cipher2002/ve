@@ -127,7 +127,7 @@ export interface TimelineContentProps {
       data?: any;
     }
   ) => void;
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   ghostMarkerPosition: number | null;
   isDragging: boolean;
   isContextMenuOpen: boolean;
