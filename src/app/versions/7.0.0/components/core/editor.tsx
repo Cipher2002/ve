@@ -8,6 +8,10 @@ import { TimelineControls } from "../timeline/timeline-controls";
 import { FPS } from "../../constants";
 import Timeline from "../timeline/timeline";
 import { VideoPlayer } from "./video-player";
+import { TimelineSection } from "./timeline-section";
+import { MobileNavBar } from "../shared/mobile-nav-bar";
+
+
 
 /**
  * Main Editor Component
@@ -89,6 +93,7 @@ export const Editor: React.FC = () => {
     isPlaying, // Current playback state
     currentFrame, // Current frame position
     playerRef, // Reference to video player
+    disableMobileLayout, // Configuration for mobile layout
     togglePlayPause, // Function to toggle play/pause
     formatTime, // Function to format time display
     handleOverlayChange, // Function to handle overlay modifications
@@ -112,7 +117,12 @@ export const Editor: React.FC = () => {
    */
   return (
     <div
-      className="flex flex-col h-full overflow-hidden"
+      // className="flex flex-col h-full overflow-hidden"
+      className="flex flex-col overflow-hidden"
+      style={{
+        height: "calc(var(--vh, 1vh) * 100)",
+        maxHeight: "-webkit-fill-available" /* Safari fix */,
+      }}
     >
       <EditorHeader />
       <div className="flex-grow flex flex-col lg:flex-row overflow-hidden">
@@ -126,6 +136,7 @@ export const Editor: React.FC = () => {
         totalDuration={durationInFrames}
         formatTime={formatTime}
       />
+      <TimelineSection />
 
       {/* 
         Timeline Component
@@ -133,7 +144,7 @@ export const Editor: React.FC = () => {
         at the bottom with a scrollable interface similar to TimelineControls
         for easy access to content creation tools.
       */}
-      <Timeline
+      {/* <Timeline
         currentFrame={currentFrame}
         overlays={overlays}
         durationInFrames={durationInFrames}
@@ -157,7 +168,15 @@ export const Editor: React.FC = () => {
         }}
         onMuteVideo={handleMuteVideo}
         onMuteAudio={handleMuteAudio}
-      />
+      /> */}
+      {/* Mobile Navigation Bar
+       * Only shows on mobile devices (md:hidden)
+       * Improved scrollable design inspired by TimelineControls
+       * Horizontal scrolling with fade indicators for better UX
+       * Touch-friendly buttons with tooltips for content creation
+       * Placed at the bottom of the timeline for easy access
+       */}
+      <MobileNavBar />
     </div>
   );
 };

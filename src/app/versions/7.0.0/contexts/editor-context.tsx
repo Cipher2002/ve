@@ -118,6 +118,24 @@ interface EditorContextProps {
   premountFrames: number;
   maxPremountedVideos: number;
 
+  // Configuration
+  initialRows: number;
+  maxRows: number;
+  zoomConstraints: {
+    min: number;
+    max: number;
+    step: number;
+    default: number;
+  };
+  snappingConfig: {
+    thresholdFrames: number;
+    enableVerticalSnapping: boolean;
+  };
+  disableMobileLayout: boolean;
+  disableVideoKeyframes: boolean;
+  enablePushOnDrag: boolean;
+  videoWidth: number;
+  videoHeight: number;
 
 }
 
