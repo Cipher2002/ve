@@ -1,7 +1,7 @@
 import { Overlay, OverlayType } from "./types";
 
 // Default and maximum number of rows to display in the editor
-export const INITIAL_ROWS = 5;
+export const INITIAL_ROWS = 1;
 export const MIN_ROWS = 1;
 export const MAX_ROWS = 11;
 // Frames per second for video rendering

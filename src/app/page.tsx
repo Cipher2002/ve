@@ -289,7 +289,7 @@ function App() {
       </div> */}
 
       {/* Centered content container */}
-      <div className="w-full flex-1 flex flex-col">
+      <div className="w-full flex-1 flex flex-col overflow-hidden">
         {/* Video Editor Card */}
         <div className={cn(
           "bg-white border-b border-gray-200 overflow-hidden",
