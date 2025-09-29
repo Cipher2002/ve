@@ -167,6 +167,8 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     // Delete overlays on the top row (row 0) before removing it
     deleteOverlaysByRow(0);
     removeRow();
+    // Dispatch event for new timeline
+    window.dispatchEvent(new CustomEvent('removeRowRequested'));
   };
 
   const handleSliderChange = useCallback(
@@ -317,7 +319,11 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  onClick={addRow}
+                  onClick={() => {
+                    addRow();
+                    // Dispatch event for new timeline
+                    window.dispatchEvent(new CustomEvent('addRowRequested'));
+                  }}
                   disabled={visibleRows >= MAX_ROWS}
                   size="icon"
                   variant="ghost"

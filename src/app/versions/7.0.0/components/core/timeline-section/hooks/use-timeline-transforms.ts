@@ -85,7 +85,23 @@ export const useTimelineTransforms = () => {
       });
     }
 
-    // If no tracks exist, create one empty track
+    // Ensure we always have at least the maximum row number + 1 tracks
+    const maxRowUsed = Math.max(-1, ...Array.from(rowMap.keys()));
+    const minTracksNeeded = Math.max(1, maxRowUsed + 1);
+    
+    // Fill in any missing tracks up to the minimum needed
+    for (let i = tracks.length; i < minTracksNeeded; i++) {
+      tracks.push({
+        id: `track-${i}`,
+        name: `Track ${i + 1}`,
+        items: [],
+        magnetic: false,
+        visible: true,
+        muted: false,
+      });
+    }
+
+    // If no tracks exist at all, create one empty track
     if (tracks.length === 0) {
       tracks.push({
         id: 'track-0',

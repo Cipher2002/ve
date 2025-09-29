@@ -86,6 +86,38 @@ export const TimelineSection: React.FC<TimelineSectionProps> = () => {
     setIsOpen,
   });
 
+  // Handle add/remove row events
+  React.useEffect(() => {
+    const handleAddRow = () => {
+      console.log('New timeline: Handling add row event, current overlays:', overlays.length);
+      // Shift all overlays down by one row to create empty row 0
+      const updatedOverlays = overlays.map(overlay => ({
+        ...overlay,
+        row: overlay.row + 1,
+      }));
+      console.log('New timeline: Updated overlays after shift:', updatedOverlays.map(o => `id:${o.id} row:${o.row}`));
+      setOverlays(updatedOverlays);
+    };
+
+    const handleRemoveRow = () => {
+      console.log('New timeline: Handling remove row event');
+      // Shift all overlays up by one row after removing row 0
+      const updatedOverlays = overlays.map(overlay => ({
+        ...overlay,
+        row: Math.max(0, overlay.row - 1),
+      }));
+      setOverlays(updatedOverlays);
+    };
+
+    window.addEventListener('addRowRequested', handleAddRow);
+    window.addEventListener('removeRowRequested', handleRemoveRow);
+
+    return () => {
+      window.removeEventListener('addRowRequested', handleAddRow);
+      window.removeEventListener('removeRowRequested', handleRemoveRow);
+    };
+  }, [overlays, setOverlays]);
+
   // Update timeline tracks when overlays change (but not during timeline updates)
   React.useEffect(() => {
     if (!isUpdatingFromTimelineRef.current) {
