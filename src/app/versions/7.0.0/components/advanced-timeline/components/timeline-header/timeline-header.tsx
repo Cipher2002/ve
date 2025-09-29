@@ -5,7 +5,6 @@ import { PlaybackControls } from './playback-controls';
 import { SplittingToggle } from './splitting-toggle';
 import { SplitAtSelectionButton } from './split-at-selection-button';
 import { UndoRedoControls } from './undo-redo-controls';
-import { AspectRatioDropdown } from './aspect-ratio-dropdown';
 import { AspectRatio } from '../../../../types';
 import { Overlay } from '../../../../types';
 
@@ -174,12 +173,6 @@ export const TimelineHeader: React.FC<TimelineHeaderProps> = ({
 
       {/* Right section: Aspect Ratio, Zoom Controls and Scale Display */}
       <div className="flex items-center gap-3 flex-1 justify-end">
-        {showAspectRatioControls && onAspectRatioChange && (
-          <AspectRatioDropdown
-            aspectRatio={aspectRatio}
-            onAspectRatioChange={onAspectRatioChange}
-          />
-        )}
         {showZoomControls && zoomScale !== undefined && setZoomScale && (
           <ZoomControls
             zoomScale={zoomScale}
