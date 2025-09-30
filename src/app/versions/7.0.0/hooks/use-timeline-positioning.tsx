@@ -103,5 +103,47 @@ export const useTimelinePositioning = () => {
     };
   };
 
-  return { findNextAvailablePosition };
+ /**
+   * Adds a new overlay at the current playhead position by creating a new row at the top
+   * All existing overlays are shifted down by one row
+   * @param currentFrame - Current playhead position in frames
+   * @param existingOverlays - Array of current overlays in the timeline
+   * @param placement - Where to add the overlay: 'top' (default) or 'bottom'
+   * @returns Object containing the starting position (from) and row number
+   */
+  const addAtPlayhead = (
+    currentFrame: number,
+    existingOverlays: Overlay[],
+    placement: 'top' | 'bottom' = 'top'
+  ): { from: number; row: number; updatedOverlays: Overlay[] } => {
+    if (placement === 'bottom') {
+      // Find the highest row number currently in use
+      const maxRow = existingOverlays.reduce(
+        (max, overlay) => Math.max(max, overlay.row),
+        -1
+      );
+      
+      // Add to the next row at the bottom (no shifting needed)
+      return {
+        from: currentFrame,
+        row: maxRow + 1,
+        updatedOverlays: existingOverlays
+      };
+    }
+
+    // Default behavior: add at top and shift all existing overlays down
+    const updatedOverlays = existingOverlays.map(overlay => ({
+      ...overlay,
+      row: overlay.row + 1
+    }));
+
+    // Return position at playhead on the new top row (row 0)
+    return {
+      from: currentFrame,
+      row: 0,
+      updatedOverlays
+    };
+  };
+
+  return { findNextAvailablePosition, addAtPlayhead };
 };

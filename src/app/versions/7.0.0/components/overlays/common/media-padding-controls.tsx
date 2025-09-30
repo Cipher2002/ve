@@ -60,63 +60,6 @@ export const MediaPaddingControls: React.FC<MediaPaddingControlsProps> = ({
           }
           className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
         />
-
-        {/* Padding Transparency/Opacity Control
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-gray-600 dark:text-gray-400">
-              Padding Transparency
-            </label>
-            <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[40px] text-right">
-              {paddingBackgroundColor === "transparent" ? "0%" : 
-              `${Math.round((paddingBackgroundColor.includes("rgba") ? 
-                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1) * 100)}%`}
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="5"
-            value={paddingBackgroundColor === "transparent" ? 0 : 
-              Math.round((paddingBackgroundColor.includes("rgba") ? 
-                parseFloat(paddingBackgroundColor.split(',')[3]?.replace(')', '') || "1") : 1) * 100)}
-            onChange={(e) => {
-              const opacity = parseInt(e.target.value) / 100;
-              
-              if (opacity === 0) {
-                handleStyleChange({ paddingBackgroundColor: "transparent" });
-              } else {
-                const currentColor = paddingBackgroundColor === "transparent" ? "#ffffff" : paddingBackgroundColor;
-                
-                if (currentColor.startsWith("#")) {
-                  const hex = currentColor;
-                  const rgb = hex.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-                  if (rgb) {
-                    const r = parseInt(rgb[1], 16);
-                    const g = parseInt(rgb[2], 16);
-                    const b = parseInt(rgb[3], 16);
-                    handleStyleChange({ 
-                      paddingBackgroundColor: `rgba(${r}, ${g}, ${b}, ${opacity})` 
-                    });
-                  }
-                } else if (currentColor.includes("rgb")) {
-                  const rgbMatch = currentColor.match(/rgba?\(([^)]+)\)/);
-                  if (rgbMatch) {
-                    const values = rgbMatch[1].split(',');
-                    const r = parseInt(values[0].trim());
-                    const g = parseInt(values[1].trim());
-                    const b = parseInt(values[2].trim());
-                    handleStyleChange({ 
-                      paddingBackgroundColor: `rgba(${r}, ${g}, ${b}, ${opacity})` 
-                    });
-                  }
-                }
-              }
-            }}
-            className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"
-          />
-        </div> */}
       </div>
 
       {/* Padding Background Color */}

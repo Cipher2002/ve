@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { OverlayType, TextOverlay } from "../../../types";
@@ -14,6 +12,7 @@ export const TextOverlaysPanel: React.FC = () => {
   // Update local overlay when selected overlay changes or when overlays change
   React.useEffect(() => {
     if (selectedOverlayId === null) {
+      setLocalOverlay(null);
       return;
     }
 
@@ -23,6 +22,9 @@ export const TextOverlaysPanel: React.FC = () => {
 
     if (selectedOverlay?.type === OverlayType.TEXT) {
       setLocalOverlay(selectedOverlay as TextOverlay);
+    } else {
+      // Reset localOverlay if selected overlay is not a text overlay
+      setLocalOverlay(null);
     }
   }, [selectedOverlayId, overlays]);
 
@@ -33,9 +35,9 @@ export const TextOverlaysPanel: React.FC = () => {
   const isValidTextOverlay = localOverlay && selectedOverlayId !== null;
 
   return (
-    <div className="p-2 h-full bg-background">
+    <div className="h-full">
       {!isValidTextOverlay ? (
-        <SelectTextOverlay setLocalOverlay={handleSetLocalOverlay} />
+        <SelectTextOverlay />
       ) : (
         <TextDetails
           localOverlay={localOverlay}
