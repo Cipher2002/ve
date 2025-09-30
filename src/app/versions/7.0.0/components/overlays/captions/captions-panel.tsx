@@ -4,7 +4,7 @@ import { Textarea } from "../../../../../../components/ui/textarea";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning";
 import { useTimeline } from "../../../contexts/timeline-context";
-import { CaptionOverlay, OverlayType, Caption } from "../../../types";
+import { CaptionOverlay, OverlayType, Caption, ClipOverlay } from "../../../types";
 import { CaptionSettings } from "./caption-settings";
 import { captionTemplates } from "../../../templates/caption-templates";
 import { useSidebar } from "../../../contexts/sidebar-context";
@@ -236,7 +236,10 @@ export const CaptionsPanel: React.FC = () => {
       }
       
       // Find video and audio overlays
-      const videoOverlays = overlays.filter(overlay => overlay.type === OverlayType.VIDEO);
+      // Filter out videos that have detached audio to avoid duplicate captions
+      const videoOverlays = overlays.filter(overlay => 
+        overlay.type === OverlayType.VIDEO && !overlay.audioDetached
+      );
       const audioOverlays = overlays.filter(overlay => overlay.type === OverlayType.SOUND);
       
       if (videoOverlays.length === 0 && audioOverlays.length === 0) {
@@ -247,15 +250,16 @@ export const CaptionsPanel: React.FC = () => {
       // Prepare audio data with overlay information
       const audioDataWithOverlays = [];
 
-      // Process video overlays
+      // Process video overlays (only those without detached audio)
       for (const overlay of videoOverlays) {
         try {
-          const audioUrl = await extractAndSaveAudio(overlay.src);
+          const videoOverlay = overlay as ClipOverlay;
+          const audioUrl = await extractAndSaveAudio(videoOverlay.src);
           audioDataWithOverlays.push({
             audioUrl,
-            overlayId: overlay.id,
-            fromFrame: overlay.from,
-            durationInFrames: overlay.durationInFrames,
+            overlayId: videoOverlay.id,
+            fromFrame: videoOverlay.from,
+            durationInFrames: videoOverlay.durationInFrames,
             type: 'video'
           });
         } catch (error) {
