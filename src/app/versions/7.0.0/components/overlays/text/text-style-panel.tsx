@@ -55,7 +55,7 @@ const extractFontName = (fontFamily: string | undefined): string => {
 interface TextStylePanelProps {
   localOverlay: TextOverlay;
   handleInputChange: (field: keyof TextOverlay, value: string) => void;
-  handleStyleChange: (field: keyof TextOverlay["styles"], value: any) => void;
+  handleStyleChange: (updates: Partial<TextOverlay["styles"]>) => void;
 }
 
 /**
@@ -71,6 +71,11 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   handleStyleChange,
 }) => {
   const { selectedOverlayId, changeOverlay, overlays } = useEditorContext();
+  
+// Helper function to update a single style field
+  const updateStyle = (field: keyof TextOverlay["styles"], value: any) => {
+    handleStyleChange({ [field]: value });
+  };
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
   const [selectedFont, setSelectedFont] = React.useState<GoogleFont | null>(null);
   const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
@@ -110,16 +115,16 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
     } catch (error) {
       console.error('Failed to load font:', error);
       // Fallback to system fonts
-      handleStyleChange("fontFamily", "Arial, sans-serif");
-      handleStyleChange("fontWeight", "400");
-      handleStyleChange("fontStyle", "normal");
+      updateStyle("fontFamily", "Arial, sans-serif");
+      updateStyle("fontWeight", "400");
+      updateStyle("fontStyle", "normal");
       setSelectedFont(null);
       setHoveredFont(null);
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-2">
       {/* Typography Settings */}
       <div className="rounded-md bg-background/50 border">
         <button
@@ -206,26 +211,25 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Font Size</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="range"
-                min="0.5"
-                max="3"
-                step="0.1"
-                value={localOverlay.styles.fontSizeMultiplier || 1}
-                onChange={(e) => handleStyleChange("fontSizeMultiplier", parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-              />
-              <input
-                type="number"
-                min="0.5"
-                max="3"
-                step="0.1"
-                value={localOverlay.styles.fontSizeMultiplier || 1}
-                onChange={(e) => handleStyleChange("fontSizeMultiplier", parseFloat(e.target.value))}
-                className="w-16 px-2 py-1 text-xs border rounded"
-              />
-            </div>
+            <Select
+              value={(localOverlay.styles.fontSizeMultiplier || 1).toString()}
+              onValueChange={(value) => updateStyle("fontSizeMultiplier", parseFloat(value))}
+            >
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0.5" className="text-xs">0.5x (Small)</SelectItem>
+                <SelectItem value="0.75" className="text-xs">0.75x</SelectItem>
+                <SelectItem value="1" className="text-xs">1x (Normal)</SelectItem>
+                <SelectItem value="1.25" className="text-xs">1.25x</SelectItem>
+                <SelectItem value="1.5" className="text-xs">1.5x</SelectItem>
+                <SelectItem value="1.75" className="text-xs">1.75x</SelectItem>
+                <SelectItem value="2" className="text-xs">2x (Large)</SelectItem>
+                <SelectItem value="2.5" className="text-xs">2.5x</SelectItem>
+                <SelectItem value="3" className="text-xs">3x (Extra Large)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -234,11 +238,13 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   const currentWeight = localOverlay.styles.fontWeight || '400';
-                  const isBold = parseInt(currentWeight) >= 700;
-                  handleStyleChange("fontWeight", isBold ? "400" : "700");
+                  const isBold = parseInt(currentWeight.toString()) >= 700;
+                  updateStyle("fontWeight", isBold ? "400" : "700");
                 }}
-                className={`px-3 py-1 text-xs border rounded font-bold bg-background hover:bg-accent ${
-                  parseInt(localOverlay.styles.fontWeight || '400') >= 700 ? 'bg-accent' : ''
+                className={`px-3 py-1 text-xs border rounded font-bold transition-colors ${
+                  parseInt((localOverlay.styles.fontWeight || '400').toString()) >= 700 
+                    ? 'bg-accent border-accent-foreground' 
+                    : 'bg-background hover:bg-accent'
                 }`}
               >
                 B
@@ -246,10 +252,12 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   const isItalic = localOverlay.styles.fontStyle === 'italic';
-                  handleStyleChange("fontStyle", isItalic ? "normal" : "italic");
+                  updateStyle("fontStyle", isItalic ? "normal" : "italic");
                 }}
-                className={`px-3 py-1 text-xs border rounded italic bg-background hover:bg-accent ${
-                  localOverlay.styles.fontStyle === 'italic' ? 'bg-accent' : ''
+                className={`px-3 py-1 text-xs border rounded italic transition-colors ${
+                  localOverlay.styles.fontStyle === 'italic' 
+                    ? 'bg-accent border-accent-foreground' 
+                    : 'bg-background hover:bg-accent'
                 }`}
               >
                 I
@@ -257,10 +265,12 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               <button
                 onClick={() => {
                   const isUnderlined = localOverlay.styles.textDecoration === 'underline';
-                  handleStyleChange("textDecoration", isUnderlined ? "none" : "underline");
+                  updateStyle("textDecoration", isUnderlined ? "none" : "underline");
                 }}
-                className={`px-3 py-1 text-xs border rounded underline bg-background hover:bg-accent ${
-                  localOverlay.styles.textDecoration === 'underline' ? 'bg-accent' : ''
+                className={`px-3 py-1 text-xs border rounded underline transition-colors ${
+                  localOverlay.styles.textDecoration === 'underline' 
+                    ? 'bg-accent border-accent-foreground' 
+                    : 'bg-background hover:bg-accent'
                 }`}
               >
                 U
@@ -277,7 +287,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               className="justify-start gap-1"
               value={localOverlay.styles.textAlign}
               onValueChange={(value) => {
-                if (value) handleStyleChange("textAlign", value);
+                if (value) updateStyle("textAlign", value);
               }}
             >
               <ToggleGroupItem
@@ -328,7 +338,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                     >
                       <ColorPicker
                         value={localOverlay.styles.color}
-                        onChange={(color) => handleStyleChange("color", color)}
+                        onChange={(color) => updateStyle("color", color)}
                         // hideInputs
                         hideHue
                         hideControls
@@ -362,7 +372,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                       <ColorPicker
                         value={localOverlay.styles.backgroundColor}
                         onChange={(color) => {
-                          handleStyleChange("backgroundColor", color);
+                          updateStyle("backgroundColor", color);
                         }}
                         hideInputs
                         hideHue
@@ -419,7 +429,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   }
                   
                   const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
-                  handleStyleChange("textShadow", newShadow);
+                  updateStyle("textShadow", newShadow);
                 }}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
@@ -453,7 +463,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   }
                   
                   const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
-                  handleStyleChange("textShadow", newShadow);
+                  updateStyle("textShadow", newShadow);
                 }}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
@@ -487,7 +497,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   }
                   
                   const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
-                  handleStyleChange("textShadow", newShadow);
+                  updateStyle("textShadow", newShadow);
                 }}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
@@ -534,7 +544,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                       }
                       
                       const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
-                      handleStyleChange("textShadow", newShadow);
+                      updateStyle("textShadow", newShadow);
                     }}
                     hideInputs
                     hideHue
@@ -551,7 +561,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
           </div>
           
           <button
-            onClick={() => handleStyleChange("textShadow", "none")}
+            onClick={() => updateStyle("textShadow", "none")}
             className="w-full px-2 py-1 text-xs border rounded hover:bg-accent"
           >
             Remove Shadow
@@ -586,7 +596,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   max="3"
                   step="0.1"
                   value={parseFloat(localOverlay.styles.lineHeight || "1.2")}
-                  onChange={(e) => handleStyleChange("lineHeight", e.target.value)}
+                  onChange={(e) => updateStyle("lineHeight", e.target.value)}
                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <input
@@ -595,7 +605,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   max="3"
                   step="0.1"
                   value={parseFloat(localOverlay.styles.lineHeight || "1.2")}
-                  onChange={(e) => handleStyleChange("lineHeight", e.target.value)}
+                  onChange={(e) => updateStyle("lineHeight", e.target.value)}
                   className="w-16 px-2 py-1 text-xs border rounded"
                 />
               </div>
@@ -614,7 +624,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                     if (!spacing || spacing === 'normal') return 0;
                     return parseFloat(spacing.replace('px', ''));
                   })()}
-                  onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
+                  onChange={(e) => updateStyle("letterSpacing", `${e.target.value}px`)}
                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <input
@@ -627,7 +637,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                     if (!spacing || spacing === 'normal') return 0;
                     return parseFloat(spacing.replace('px', ''));
                   })()}
-                  onChange={(e) => handleStyleChange("letterSpacing", `${e.target.value}px`)}
+                  onChange={(e) => updateStyle("letterSpacing", `${e.target.value}px`)}
                   className="w-16 px-2 py-1 text-xs border rounded"
                 />
               </div>

@@ -80,16 +80,14 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
 
   /**
    * Handles changes to nested style properties
-   * @param {keyof TextOverlay["styles"]} field - The style field to update
-   * @param {string} value - The new value
+   * @param {Partial<TextOverlay["styles"]>} updates - The style updates to apply
    */
   const handleStyleChange = (
-    field: keyof TextOverlay["styles"],
-    value: string | number
+    updates: Partial<TextOverlay["styles"]>
   ) => {
     const updatedLocalOverlay = {
       ...localOverlay,
-      styles: { ...localOverlay.styles, [field]: value },
+      styles: { ...localOverlay.styles, ...updates },
     };
     
     setLocalOverlay(updatedLocalOverlay);

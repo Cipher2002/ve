@@ -11,7 +11,7 @@ import { animationTemplates } from "../../../templates/animation-templates";
  */
 interface TextSettingsPanelProps {
   localOverlay: TextOverlay;
-  handleStyleChange: (field: keyof TextOverlay["styles"], value: any) => void;
+  handleStyleChange: (updates: Partial<TextOverlay["styles"]>) => void;
 }
 
 /**
@@ -27,27 +27,55 @@ export const TextSettingsPanel: React.FC<TextSettingsPanelProps> = ({
   handleStyleChange,
 }) => {
   // Handlers for animation selection
-  const handleEnterAnimationSelect = (animationKey: string) => {
-    handleStyleChange("animation", {
-      ...localOverlay.styles.animation,
-      enter: animationKey,
+  const handleEnterAnimationSelect = (animationKey: string, direction?: string) => {
+    handleStyleChange({
+      animation: {
+        ...localOverlay.styles.animation,
+        enter: animationKey === "none" ? undefined : animationKey,
+        enterDirection: animationKey === "none" ? undefined : direction,
+      },
     });
   };
 
-  const handleExitAnimationSelect = (animationKey: string) => {
-    handleStyleChange("animation", {
-      ...localOverlay.styles.animation,
-      exit: animationKey,
+  const handleExitAnimationSelect = (animationKey: string, direction?: string) => {
+    handleStyleChange({
+      animation: {
+        ...localOverlay.styles.animation,
+        exit: animationKey === "none" ? undefined : animationKey,
+        exitDirection: animationKey === "none" ? undefined : direction,
+      },
     });
   };
 
   return (
-    <AnimationSettings
-      animations={animationTemplates}
-      selectedEnterAnimation={localOverlay.styles.animation?.enter}
-      selectedExitAnimation={localOverlay.styles.animation?.exit}
-      onEnterAnimationSelect={handleEnterAnimationSelect}
-      onExitAnimationSelect={handleExitAnimationSelect}
-    />
+    <div className="px-2">
+      <AnimationSettings
+        animations={animationTemplates}
+        selectedEnterAnimation={localOverlay.styles.animation?.enter}
+        selectedExitAnimation={localOverlay.styles.animation?.exit}
+        selectedEnterDirection={localOverlay.styles.animation?.enterDirection}
+        selectedExitDirection={localOverlay.styles.animation?.exitDirection}
+        enterSpeed={localOverlay.styles.animation?.enterSpeed || 1}
+        exitSpeed={localOverlay.styles.animation?.exitSpeed || 1}
+        onEnterAnimationSelect={handleEnterAnimationSelect}
+        onExitAnimationSelect={handleExitAnimationSelect}
+        onEnterSpeedChange={(speed) => {
+          handleStyleChange({
+            animation: {
+              ...localOverlay.styles.animation,
+              enterSpeed: speed,
+            },
+          });
+        }}
+        onExitSpeedChange={(speed) => {
+          handleStyleChange({
+            animation: {
+              ...localOverlay.styles.animation,
+              exitSpeed: speed,
+            },
+          });
+        }}
+      />
+    </div>
   );
 };
