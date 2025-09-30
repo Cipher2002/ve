@@ -111,7 +111,7 @@ const Timeline: React.FC<TimelineProps> = ({
     position: number;
   } | null>(null);
 
-  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow } = useTimeline();
+  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow, removeRow } = useTimeline();
 
   // State for context menu visibility
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -471,6 +471,9 @@ const Timeline: React.FC<TimelineProps> = ({
   // Add visual feedback state
   const [isDraggingRow, setIsDraggingRow] = useState(false);
 
+  // Add state for row selection
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
   const handleRowDragStart = (e: React.DragEvent, rowIndex: number) => {
     setDraggedRowIndex(rowIndex);
     setIsDraggingRow(true);
@@ -495,6 +498,41 @@ const Timeline: React.FC<TimelineProps> = ({
     setDraggedRowIndex(null);
     setDragOverRowIndex(null);
     setIsDraggingRow(false);
+  };
+
+  // Handle row checkbox selection
+  const handleRowCheckboxChange = (rowIndex: number, checked: boolean) => {
+    setSelectedRows(prev => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(rowIndex);
+      } else {
+        newSet.delete(rowIndex);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle delete row
+  const handleDeleteRow = (rowIndex: number) => {
+    if (visibleRows <= 1) return; // Prevent deleting if only 1 row
+    
+    // Delete all overlays in this row
+    const overlaysToDelete = overlays.filter(overlay => overlay.row === rowIndex);
+    overlaysToDelete.forEach(overlay => onOverlayDelete(overlay.id));
+    
+    // Shift all rows below up by one
+    const updatedOverlays = overlays
+      .filter(overlay => overlay.row !== rowIndex)
+      .map(overlay => {
+        if (overlay.row > rowIndex) {
+          return { ...overlay, row: overlay.row - 1 };
+        }
+        return overlay;
+      });
+    
+    setOverlays(updatedOverlays);
+    removeRow();
   };
 
   useEffect(() => {
@@ -573,7 +611,7 @@ useEffect(() => {
     <div className="flex flex-col">
       <div className="flex ">
         {/* Row Drag Handles Column */}
-        <div className="hidden md:block w-7 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+        <div className="hidden md:block w-14 flex-shrink-0 border-l border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           {/* Match TimeMarkers height */}
           <div className="h-[1.3rem] bg-gray-100 dark:bg-gray-800/50" />
 
@@ -585,7 +623,7 @@ useEffect(() => {
             {Array.from({ length: visibleRows }).map((_, rowIndex) => (
               <div
                 key={`drag-${rowIndex}`}
-                className={`flex-1 flex items-center justify-center transition-all duration-200 
+                className={`flex-1 flex items-center justify-between px-1 gap-1 transition-all duration-200 
                   ${
                     dragOverRowIndex === rowIndex
                       ? "bg-blue-50 dark:bg-blue-900/20 border-2 border-dashed border-blue-300 dark:border-blue-500"
@@ -604,6 +642,16 @@ useEffect(() => {
                 onDragOver={(e) => handleRowDragOver(e, rowIndex)}
                 onDrop={() => handleRowDrop(rowIndex)}
               >
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  checked={selectedRows.has(rowIndex)}
+                  onChange={(e) => handleRowCheckboxChange(rowIndex, e.target.checked)}
+                  className="w-3 h-3 rounded border-gray-300 dark:border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                />
+
+                {/* Drag Handle */}
                 <div
                   className={`w-5 h-5 flex items-center justify-center rounded-md 
                     transition-all duration-150 
@@ -622,6 +670,28 @@ useEffect(() => {
                     transition-colors duration-150"
                   />
                 </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDeleteRow(rowIndex)}
+                  disabled={visibleRows <= 1}
+                  className="w-5 h-5 flex items-center justify-center rounded-md 
+                    hover:bg-red-100 dark:hover:bg-red-900/30 
+                    disabled:opacity-30 disabled:cursor-not-allowed
+                    transition-all duration-150 group"
+                  title={visibleRows <= 1 ? "Cannot delete last row" : "Delete row"}
+                >
+                  <svg 
+                    className="w-3 h-3 text-gray-400 dark:text-gray-500 
+                      group-hover:text-red-600 dark:group-hover:text-red-400
+                      transition-colors duration-150"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             ))}
           </div>

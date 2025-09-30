@@ -82,6 +82,9 @@ export const Editor: React.FC = () => {
     };
   }, []);
 
+  // State for selected rows
+  const [selectedRows, setSelectedRows] = React.useState<Set<number>>(new Set());
+
   /**
    * Destructure values and functions from the editor context
    * These provide core functionality for the editor's features
@@ -135,6 +138,10 @@ export const Editor: React.FC = () => {
         currentFrame={currentFrame}
         totalDuration={durationInFrames}
         formatTime={formatTime}
+        selectedRows={selectedRows}
+        onClearSelectedRows={() => setSelectedRows(new Set())}
+        overlays={overlays}
+        setOverlays={setOverlays}
       />
       {/* <TimelineSection /> */}
 

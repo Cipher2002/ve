@@ -60,6 +60,14 @@ interface TimelineControlsProps {
   totalDuration: number;
   /** Function to format frame numbers into a time string */
   formatTime: (frames: number) => string;
+  /** Set of selected row indices */
+  selectedRows?: Set<number>;
+  /** Function to clear selected rows */
+  onClearSelectedRows?: () => void;
+  /** All overlays in the timeline */
+  overlays?: any[];
+  /** Function to update overlays */
+  setOverlays?: (overlays: any[]) => void;
 }
 
 /**
@@ -90,6 +98,10 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   currentFrame,
   totalDuration,
   formatTime,
+  selectedRows = new Set(),
+  onClearSelectedRows,
+  overlays = [],
+  setOverlays,
 }) => {
   // Context
   const {
@@ -203,6 +215,29 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     setDropdownOpen(false);
   };
 
+  // Handle group rows
+  const handleGroupRows = () => {
+    if (selectedRows.size < 2 || !setOverlays) return;
+
+    const rowsArray = Array.from(selectedRows).sort((a, b) => a - b);
+    const topmostRow = rowsArray[0];
+
+    // Move all overlays from selected rows to the topmost row
+    const updatedOverlays = overlays.map(overlay => {
+      if (selectedRows.has(overlay.row)) {
+        return { ...overlay, row: topmostRow };
+      }
+      return overlay;
+    });
+
+    setOverlays(updatedOverlays);
+    
+    // Clear selections
+    if (onClearSelectedRows) {
+      onClearSelectedRows();
+    }
+  };
+
   // Handlers for zoom buttons
   const handleZoomOut = () => {
     const newScale = Math.max(
@@ -290,7 +325,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium select-none">
             Rows
           </span>
-          <div className="flex items-center gap-1"></div>
+          <div className="flex items-center gap-1">
           <TooltipProvider delayDuration={50}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -523,6 +558,21 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
         <Separator orientation="vertical" className="h-7" />
 
+        {/* Group Rows Button */}
+        <div>
+          <Button
+            onClick={handleGroupRows}
+            disabled={selectedRows.size < 2}
+            variant="outline"
+            size="sm"
+            className="w-full text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200
+              bg-white hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-700/80
+              border-gray-200 dark:border-gray-700 select-none
+              disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Group Rows
+          </Button>
+        </div>
 
         {/* Reset Timeline */}
         <div>
@@ -538,6 +588,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
           </Button>
         </div>
       </div>
+    </div>
     </div>
   );
 };
