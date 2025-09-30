@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import ColorPicker from "react-best-gradient-color-picker";
 import { useEditorContext } from "../../../contexts/editor-context";
-import { RichTextEditor } from './rich-text-editor';
+// import { RichTextEditor } from './rich-text-editor';
 
 /**
  * Available font options for text overlays
@@ -24,14 +24,14 @@ import { RichTextEditor } from './rich-text-editor';
 
 import { GOOGLE_FONTS, GoogleFont, FontVariant, loadGoogleFont, getFontFamilyString } from '../../../utils/google-fonts';
 
-interface TextFormatting {
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  fontSize?: string;
-  fontFamily?: string;
-  color?: string;
-}
+// interface TextFormatting {
+//   bold: boolean;
+//   italic: boolean;
+//   underline: boolean;
+//   fontSize?: string;
+//   fontFamily?: string;
+//   color?: string;
+// }
 
 // Helper function to extract just the font name from font family string
 const extractFontName = (fontFamily: string | undefined): string => {
@@ -76,17 +76,6 @@ export const TextStylePanel: React.FC<TextStylePanelProps> = ({
   const [hoveredFont, setHoveredFont] = React.useState<string | null>(null);
   const [isTypographyOpen, setIsTypographyOpen] = React.useState(false);
   const [isSpacingOpen, setIsSpacingOpen] = React.useState(false);
-  const editorRef = React.useRef<any>(null);
-
-  // Set editor ref from TextDetails
-  React.useEffect(() => {
-    const handleSetEditorRef = (event: CustomEvent) => {
-      editorRef.current = event.detail.editorRef;
-    };
-    
-    window.addEventListener('setEditorRef', handleSetEditorRef as EventListener);
-    return () => window.removeEventListener('setEditorRef', handleSetEditorRef as EventListener);
-  }, []);
 
   // Load fonts when style panel opens
   React.useEffect(() => {
@@ -244,31 +233,35 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
             <div className="flex gap-1">
               <button
                 onClick={() => {
-                  if (editorRef.current) {
-                    editorRef.current.applyFormatting('bold');
-                  }
+                  const currentWeight = localOverlay.styles.fontWeight || '400';
+                  const isBold = parseInt(currentWeight) >= 700;
+                  handleStyleChange("fontWeight", isBold ? "400" : "700");
                 }}
-                className="px-3 py-1 text-xs border rounded font-bold bg-background hover:bg-accent"
+                className={`px-3 py-1 text-xs border rounded font-bold bg-background hover:bg-accent ${
+                  parseInt(localOverlay.styles.fontWeight || '400') >= 700 ? 'bg-accent' : ''
+                }`}
               >
                 B
               </button>
               <button
                 onClick={() => {
-                  if (editorRef.current) {
-                    editorRef.current.applyFormatting('italic');
-                  }
+                  const isItalic = localOverlay.styles.fontStyle === 'italic';
+                  handleStyleChange("fontStyle", isItalic ? "normal" : "italic");
                 }}
-                className="px-3 py-1 text-xs border rounded italic bg-background hover:bg-accent"
+                className={`px-3 py-1 text-xs border rounded italic bg-background hover:bg-accent ${
+                  localOverlay.styles.fontStyle === 'italic' ? 'bg-accent' : ''
+                }`}
               >
                 I
               </button>
               <button
                 onClick={() => {
-                  if (editorRef.current) {
-                    editorRef.current.applyFormatting('underline');
-                  }
+                  const isUnderlined = localOverlay.styles.textDecoration === 'underline';
+                  handleStyleChange("textDecoration", isUnderlined ? "none" : "underline");
                 }}
-                className="px-3 py-1 text-xs border rounded underline bg-background hover:bg-accent"
+                className={`px-3 py-1 text-xs border rounded underline bg-background hover:bg-accent ${
+                  localOverlay.styles.textDecoration === 'underline' ? 'bg-accent' : ''
+                }`}
               >
                 U
               </button>

@@ -194,41 +194,41 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
 
   const { createEffect } = useTextEffects(frame);
 
-  // Helper function to strip HTML tags and get plain text
-  const stripHtmlTags = (html: string): string => {
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.textContent || div.innerText || '';
-  };
+  // // Helper function to strip HTML tags and get plain text
+  // const stripHtmlTags = (html: string): string => {
+  //   const div = document.createElement('div');
+  //   div.innerHTML = html;
+  //   return div.textContent || div.innerText || '';
+  // };
 
-  // Helper function to render HTML content
-  const renderHtmlContent = (html: string, style: React.CSSProperties) => {
-    // Apply styles directly to the HTML content
-    const styledHtml = html.replace(
-      /<([^>]+)>/g, 
-      (match, tagContent) => {
-        if (tagContent.startsWith('/')) return match; // Don't modify closing tags
+  // // Helper function to render HTML content
+  // const renderHtmlContent = (html: string, style: React.CSSProperties) => {
+  //   // Apply styles directly to the HTML content
+  //   const styledHtml = html.replace(
+  //     /<([^>]+)>/g, 
+  //     (match, tagContent) => {
+  //       if (tagContent.startsWith('/')) return match; // Don't modify closing tags
         
-        // Add style attributes to opening tags
-        const styleAttr = `style="line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`;
+  //       // Add style attributes to opening tags
+  //       const styleAttr = `style="line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`;
         
-        if (tagContent.includes('style=')) {
-          // If style already exists, merge it
-          return match.replace(/style="([^"]*)"/, `style="$1 line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`);
-        } else {
-          // Add style attribute
-          return `<${tagContent} ${styleAttr}>`;
-        }
-      }
-    );
+  //       if (tagContent.includes('style=')) {
+  //         // If style already exists, merge it
+  //         return match.replace(/style="([^"]*)"/, `style="$1 line-height: ${style.lineHeight}; letter-spacing: ${style.letterSpacing};"`);
+  //       } else {
+  //         // Add style attribute
+  //         return `<${tagContent} ${styleAttr}>`;
+  //       }
+  //     }
+  //   );
 
-    return (
-      <div 
-        style={style}
-        dangerouslySetInnerHTML={{ __html: styledHtml }}
-      />
-    );
-  };
+  //   return (
+  //     <div 
+  //       style={style}
+  //       dangerouslySetInnerHTML={{ __html: styledHtml }}
+  //     />
+  //   );
+  // };
 
   // Parse effect from cssClass or effect config
   const getEffectConfig = (): EffectConfig | null => {
@@ -356,7 +356,7 @@ const textContent = typeof overlay.content === 'string' ? overlay.content : '';
 return (
   <div style={containerStyle}>
     {overlay.templateType === "multi-element" && typeof overlay.content === 'object' ? (
-      // Multi-element template (unchanged)
+      // Multi-element template
       overlay.content.elements?.map((element, index) => (
         <span 
           key={element.id || index}
@@ -377,17 +377,14 @@ return (
         </span>
       ))
     ) : effectConfig ? (() => {
-      // Apply dynamic effect - use plain text for effects
-      const plainTextContent = overlay.styles.isRichText ? stripHtmlTags(textContent) : textContent;
-      
-      // Ensure textStyle includes all spacing properties for effects
+      // Apply dynamic effect
       const effectTextStyle = {
         ...textStyle,
         lineHeight: overlay.styles.lineHeight || textStyle.lineHeight || "1.2",
         letterSpacing: overlay.styles.letterSpacing || textStyle.letterSpacing || "0px"
       };
       
-      const effect = createEffect(effectConfig, effectTextStyle, plainTextContent);
+      const effect = createEffect(effectConfig, effectTextStyle, textContent);
       if (!effect) return null;
 
       if (effect.container) {
@@ -407,26 +404,15 @@ return (
           </div>
         ));
       }
-    })() : overlay.styles.isRichText ? (
-      // Rich text - render HTML
-      renderHtmlContent(textContent, textStyle)
-    ) : (
-      // Plain text or HTML - render appropriately
-      overlay.styles.isRichText || textContent.includes('<') ? (
-        <div 
-          style={textStyle}
-          className={overlay.styles.cssClass || ''}
-          dangerouslySetInnerHTML={{ __html: textContent }}
-        />
-      ) : (
-        <div 
-          style={textStyle}
-          className={overlay.styles.cssClass || ''}
-          data-text={textContent}
-        >
-          {textContent}
-        </div>
-      )
+    })() : (
+      // Plain text - no effects
+      <div 
+        style={textStyle}
+        className={overlay.styles.cssClass || ''}
+        data-text={textContent}
+      >
+        {textContent}
+      </div>
     )}
   </div>
 );

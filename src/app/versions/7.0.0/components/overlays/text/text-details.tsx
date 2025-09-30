@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextSettingsPanel } from "./text-settings-panel";
 import { TextStylePanel } from "./text-style-panel";
 import { createEffectPreview } from './text-effect-preview';
-import { LexicalTextEditor } from './lexical-text-editor';
 
 
 /**
@@ -35,17 +34,17 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   setLocalOverlay,
 }) => {
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
-  const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
-  const editorRef = useRef<any>(null);
-  // Pass editor ref to style panel
-  React.useEffect(() => {
-    if (editorRef.current) {
-      window.dispatchEvent(new CustomEvent('setEditorRef', { 
-        detail: { editorRef: editorRef.current } 
-      }));
-    }
-  }, [editorRef.current]);
-  const [isUserTyping, setIsUserTyping] = useState(false);
+  // const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
+  // const editorRef = useRef<any>(null);
+  // // Pass editor ref to style panel
+  // React.useEffect(() => {
+  //   if (editorRef.current) {
+  //     window.dispatchEvent(new CustomEvent('setEditorRef', { 
+  //       detail: { editorRef: editorRef.current } 
+  //     }));
+  //   }
+  // }, [editorRef.current]);
+  // const [isUserTyping, setIsUserTyping] = useState(false);
 
   /**
    * Debounced function to update the overlay in the global state
@@ -66,16 +65,6 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   const handleInputChange = (field: keyof TextOverlay, value: string) => {
     // Update local state immediately for responsive UI
     setLocalOverlay({ ...localOverlay, [field]: value });
-
-    // For content changes, mark user as typing
-    if (field === 'content') {
-      setIsUserTyping(true);
-      
-      // Clear typing state after user stops typing
-      setTimeout(() => {
-        setIsUserTyping(false);
-      }, 1000);
-    }
 
     // Debounce the actual overlay update if an overlay is selected
     if (selectedOverlayId !== null) {
@@ -98,7 +87,6 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
     field: keyof TextOverlay["styles"],
     value: string | number
   ) => {
-    
     const updatedLocalOverlay = {
       ...localOverlay,
       styles: { ...localOverlay.styles, [field]: value },
@@ -106,109 +94,26 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
     
     setLocalOverlay(updatedLocalOverlay);
 
-    // Update the global state immediately
+    // Debounce the actual overlay update if an overlay is selected
     if (selectedOverlayId !== null) {
-      changeOverlay(selectedOverlayId, (overlay) => {
-        return updatedLocalOverlay as TextOverlay;
-      });
+      debouncedUpdateOverlay(selectedOverlayId, updatedLocalOverlay as TextOverlay);
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Preview and Edit Section */}
-      <div className="flex flex-col gap-2 ">
-        {/* Preview */}
-        <div className="flex flex-col gap-2 bg-slate-100/90 dark:bg-gray-800">
-          <div
-            style={{
-              backgroundColor: localOverlay.styles.backgroundColor,
-            }}
-            className="relative w-full overflow-hidden rounded-t-sm border border-border p-4"
-          >
-          <div className="w-full break-words">
-            {(() => {
-              const effectConfig = localOverlay.styles.effect || 
-                                  (localOverlay.styles.cssClass === 'striped-shadow' ? { type: 'striped-shadow' } : null);
-              
-              if (effectConfig) {
-                const previewStyle = {
-                  fontFamily: localOverlay.styles.fontFamily,
-                  fontSize: '16px',
-                  fontWeight: localOverlay.styles.fontWeight,
-                  fontStyle: localOverlay.styles.fontStyle,
-                  textDecoration: localOverlay.styles.textDecoration,
-                  letterSpacing: localOverlay.styles.letterSpacing,
-                  lineHeight: localOverlay.styles.lineHeight
-                };
-                
-                const effect = createEffectPreview(effectConfig, previewStyle, 
-                  typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview");
-                
-                if (effect) {
-                  if (effect.container) {
-                    return (
-                      <div style={effect.container as React.CSSProperties}>
-                        {effect.layers.map((layer, index) => (
-                          <div key={index} style={layer.style}>
-                            {layer.content}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  } else {
-                    return effect.layers.map((layer, index) => (
-                      <div key={index} style={layer.style}>
-                        {layer.content}
-                      </div>
-                    ));
-                  }
-                }
-              }
-              
-              // Fallback for non-effect styles
-              const previewContent = typeof localOverlay.content === 'string' ? localOverlay.content : "Text Preview";
-              const previewStyle = {
-                color: localOverlay.styles.color || '#000000',
-                fontSize: '16px',
-                fontWeight: localOverlay.styles.fontWeight,
-                fontFamily: localOverlay.styles.fontFamily || 'Arial, sans-serif',
-                fontStyle: localOverlay.styles.fontStyle,
-                textDecoration: localOverlay.styles.textDecoration,
-                lineHeight: localOverlay.styles.lineHeight,
-                letterSpacing: localOverlay.styles.letterSpacing,
-                textShadow: localOverlay.styles.textShadow && localOverlay.styles.textShadow !== 'none' ? localOverlay.styles.textShadow : undefined
-              };
-              
-              return (
-                <div 
-                  style={previewStyle}
-                  dangerouslySetInnerHTML={{ __html: previewContent || "Text Preview" }}
-                />
-              );
-            })()}
-          </div>
-        </div>
-        </div>
-
+      <div className="flex flex-col gap-4 px-2 mt-2">
         {/* Editor */}
-        <div className="relative w-full overflow-hidden rounded-b-sm border border-border bg-muted/40">
-          <LexicalTextEditor
-            ref={editorRef}
-            content={typeof localOverlay.content === 'string' ? localOverlay.content : ''}
-            onChange={(content) => {
-              handleInputChange("content", content);
-              // Enable rich text mode when HTML content is detected
-              if (content.includes('<') && !localOverlay.styles.isRichText) {
-                handleStyleChange("isRichText", true as any);
-              }
-            }}
-            onSelectionChange={setSelectedText}
-            placeholder="Enter your text here..."
-            className="w-full min-h-[60px]"
-          />
-        </div>
+        <textarea
+          value={typeof localOverlay.content === 'string' ? localOverlay.content : ''}
+          onChange={(e) => handleInputChange("content", e.target.value)}
+          placeholder="Enter your text here..."
+          className="w-full min-h-[60px] resize-none text-sm bg-input border-gray-300 rounded-md border p-2"
+          spellCheck="false"
+        />
       </div>
+      <div className="border-t border-border mx-2" />
 
       {/* Settings Tabs */}
       <Tabs defaultValue="settings" className="w-full">

@@ -60,7 +60,6 @@ export type TextOverlay = BaseOverlay & {
     textDecoration: string;
     lineHeight?: string;
     letterSpacing?: string;
-    isRichText?: boolean;
     textAlign?: "left" | "center" | "right";
     textShadow?: string;
     padding?: string;
