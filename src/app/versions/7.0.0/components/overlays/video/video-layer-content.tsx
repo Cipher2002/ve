@@ -87,7 +87,8 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
       ? animationTemplates[overlay.styles.animation.enter]?.enter(
           frame,
           overlay.durationInFrames,
-          overlay.styles.animation.enterDirection
+          overlay.styles.animation.enterDirection,
+          overlay.styles.animation.speed || 1
         )
       : {};
 
@@ -97,7 +98,8 @@ export const VideoLayerContent: React.FC<VideoLayerContentProps> = ({
       ? animationTemplates[overlay.styles.animation.exit]?.exit(
           frame,
           overlay.durationInFrames,
-          overlay.styles.animation.exitDirection
+          overlay.styles.animation.exitDirection,
+          overlay.styles.animation.speed || 1
         )
       : {};
 

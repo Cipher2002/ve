@@ -816,6 +816,40 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         </div>
       </div>
 
+      {/* Animation Speed Control */}
+      <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Animation Speed
+          </h3>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {localOverlay?.styles?.animation?.speed || 1}x
+          </span>
+        </div>
+        <input
+          type="range"
+          min="0.25"
+          max="3"
+          step="0.25"
+          value={localOverlay?.styles?.animation?.speed || 1}
+          onChange={(e) => {
+            const speed = parseFloat(e.target.value);
+            handleStyleChange({
+              animation: {
+                ...localOverlay?.styles?.animation,
+                speed,
+              },
+            });
+          }}
+          className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"
+        />
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>Slower</span>
+          <span>Normal</span>
+          <span>Faster</span>
+        </div>
+      </div>
+
       {/* Animation Settings - Using the new AnimationSettings component */}
       <AnimationSettings
         animations={animationTemplates}

@@ -23,23 +23,23 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
     // Calculate if we're in the exit phase (last 30 frames)
     const isExitPhase = frame >= overlay.durationInFrames - 30;
 
-    // Apply enter animation only during entry phase
     const enterAnimation =
       !isExitPhase && overlay.styles?.animation?.enter
         ? animationTemplates[overlay.styles.animation.enter]?.enter(
             frame,
             overlay.durationInFrames,
-            overlay.styles.animation.enterDirection
+            overlay.styles.animation.enterDirection,
+            overlay.styles.animation.speed || 1
           )
         : {};
 
-    // Apply exit animation only during exit phase
     const exitAnimation =
       isExitPhase && overlay.styles?.animation?.exit
         ? animationTemplates[overlay.styles.animation.exit]?.exit(
             frame,
             overlay.durationInFrames,
-            overlay.styles.animation.exitDirection
+            overlay.styles.animation.exitDirection,
+            overlay.styles.animation.speed || 1
           )
         : {};
 
