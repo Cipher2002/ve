@@ -171,14 +171,14 @@ const Timeline: React.FC<TimelineProps> = ({
             
       const targetRow = videoOverlay.row + 1;
       
-      // Create a loading placeholder sound overlay immediately
+      // Create a loading placeholder sound overlay immediately with a temporary audio file
       const loadingSoundOverlay = {
         id: Date.now(),
         type: OverlayType.SOUND,
         row: targetRow,
         from: videoOverlay.from,
         durationInFrames: videoOverlay.durationInFrames,
-        src: '', // Empty src to indicate loading
+        src: '/sounds/Take Care Of Yourself Full Version.mp3', // Use a valid audio file as placeholder
         content: 'Extracting Audio...',
         startFromSound: 0,
         height: 100,
@@ -187,10 +187,10 @@ const Timeline: React.FC<TimelineProps> = ({
         width: 100,
         isDragging: false,
         rotation: 0,
-        isLoading: true, // Add this flag
+        isLoading: true, // Keep this flag
         styles: {
           opacity: 0.6, // Make it semi-transparent
-          volume: 0,
+          volume: 0, // Muted during loading
         },
       };
 
@@ -223,7 +223,11 @@ const Timeline: React.FC<TimelineProps> = ({
       // Add the loading overlay immediately
       const overlaysWithLoader = [...updatedOverlaysWithDetachedVideo, loadingSoundOverlay as any];
       setOverlays(overlaysWithLoader);
-      addRow();
+      
+      // Request timeline to adjust rows to accommodate all overlays
+      window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+        detail: { requiredRows: Math.max(...overlaysWithLoader.map(o => o.row)) + 1 }
+      }));
       
       try {
         let videoFile: File;

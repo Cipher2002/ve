@@ -451,24 +451,14 @@ export const CaptionsPanel: React.FC = () => {
       let updatedOverlays = [...overlays];
       const newCaptionOverlays = [];
       
-      // Find the topmost row with media content for positioning
-      const mediaOverlays = overlays.filter(overlay => 
-        overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.SOUND
-      );
+      // Always place captions at row 0 (top)
+      const targetRow = 0;
       
-      let targetRow = 0;
-      if (mediaOverlays.length > 0) {
-        const minMediaRow = Math.min(...mediaOverlays.map(overlay => overlay.row));
-        targetRow = Math.max(0, minMediaRow - 1);
-        
-        // Shift all overlays at or above the target row down by 1
-        updatedOverlays = updatedOverlays.map(overlay => {
-          if (overlay.row >= targetRow) {
-            return { ...overlay, row: overlay.row + 1 };
-          }
-          return overlay;
-        });
-      }
+      // Shift ALL existing overlays down by 1 to make room at the top
+      updatedOverlays = updatedOverlays.map(overlay => ({
+        ...overlay,
+        row: overlay.row + 1
+      }));
       
       // Process each completed caption
       for (const captionData of completedCaptions) {
@@ -523,6 +513,11 @@ export const CaptionsPanel: React.FC = () => {
       // Add all caption overlays
       const finalOverlays = [...updatedOverlays, ...newCaptionOverlays];
       setOverlays(finalOverlays);
+      
+      // Request timeline to add a new row at the top for captions
+      window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+        detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+      }));
       
       // Deduct credits for caption generation
       handleCaptionCreditDeduction();
