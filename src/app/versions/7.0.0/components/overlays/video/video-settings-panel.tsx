@@ -816,7 +816,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         </div>
       </div>
 
-      {/* Animation Speed Control */}
+      {/* Animation Speed Control
       <div className="space-y-2 rounded-md bg-gray-100/50 dark:bg-gray-800/50 p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -848,7 +848,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
           <span>Normal</span>
           <span>Faster</span>
         </div>
-      </div>
+      </div> */}
 
       {/* Animation Settings - Using the new AnimationSettings component */}
       <AnimationSettings
@@ -857,8 +857,26 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
         selectedExitAnimation={localOverlay?.styles?.animation?.exit}
         selectedEnterDirection={localOverlay?.styles?.animation?.enterDirection}
         selectedExitDirection={localOverlay?.styles?.animation?.exitDirection}
+        enterSpeed={localOverlay?.styles?.animation?.enterSpeed || 1}
+        exitSpeed={localOverlay?.styles?.animation?.exitSpeed || 1}
         onEnterAnimationSelect={handleEnterAnimationSelect}
         onExitAnimationSelect={handleExitAnimationSelect}
+        onEnterSpeedChange={(speed) => {
+          handleStyleChange({
+            animation: {
+              ...localOverlay?.styles?.animation,
+              enterSpeed: speed,
+            },
+          });
+        }}
+        onExitSpeedChange={(speed) => {
+          handleStyleChange({
+            animation: {
+              ...localOverlay?.styles?.animation,
+              exitSpeed: speed,
+            },
+          });
+        }}
       />
     </div>
   );

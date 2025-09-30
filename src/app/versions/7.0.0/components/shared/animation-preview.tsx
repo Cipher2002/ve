@@ -192,10 +192,18 @@ interface AnimationSettingsProps {
   selectedEnterDirection?: string;
   /** Currently selected exit animation direction */
   selectedExitDirection?: string;
+  /** Enter animation speed */
+  enterSpeed?: number;
+  /** Exit animation speed */
+  exitSpeed?: number;
   /** Callback for when an enter animation is selected */
   onEnterAnimationSelect: (key: string, direction?: string) => void;
   /** Callback for when an exit animation is selected */
   onExitAnimationSelect: (key: string, direction?: string) => void;
+  /** Callback for when enter animation speed changes */
+  onEnterSpeedChange?: (speed: number) => void;
+  /** Callback for when exit animation speed changes */
+  onExitSpeedChange?: (speed: number) => void;
   /** Optional class name for additional styling */
   className?: string;
   /** Whether sections should start expanded */
@@ -212,8 +220,12 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
   selectedExitAnimation = "none",
   selectedEnterDirection,
   selectedExitDirection,
+  enterSpeed = 1,
+  exitSpeed = 1,
   onEnterAnimationSelect,
   onExitAnimationSelect,
+  onEnterSpeedChange,
+  onExitSpeedChange,
   className = "",
   defaultExpanded = false,
 }) => {
@@ -324,6 +336,35 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
           isOpen={openSections.enter}
           onToggle={() => toggleSection("enter")}
         >
+          {/* Enter Animation Speed Control */}
+          {onEnterSpeedChange && (
+            <div className="col-span-4 mb-3 px-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Speed
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {enterSpeed}x
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.25"
+                  max="2"
+                  step="0.25"
+                  value={enterSpeed}
+                  onChange={(e) => onEnterSpeedChange(parseFloat(e.target.value))}
+                  className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"
+                />
+                <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
+                  <span>Slower</span>
+                  <span>Normal</span>
+                  <span>Faster</span>
+                </div>
+              </div>
+            </div>
+          )}
           {directionSelectMode.type === 'enter' && directionSelectMode.animationKey ? (
             // Direction Selection View
             <>
@@ -399,6 +440,35 @@ export const AnimationSettings: React.FC<AnimationSettingsProps> = ({
           isOpen={openSections.exit}
           onToggle={() => toggleSection("exit")}
         >
+          {/* Exit Animation Speed Control */}
+          {onExitSpeedChange && (
+            <div className="col-span-4 mb-3 px-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Speed
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {exitSpeed}x
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.25"
+                  max="2"
+                  step="0.25"
+                  value={exitSpeed}
+                  onChange={(e) => onExitSpeedChange(parseFloat(e.target.value))}
+                  className="w-full accent-blue-500 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"
+                />
+                <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
+                  <span>Slower</span>
+                  <span>Normal</span>
+                  <span>Faster</span>
+                </div>
+              </div>
+            </div>
+          )}
           {directionSelectMode.type === 'exit' && directionSelectMode.animationKey ? (
             // Direction Selection View
             <>

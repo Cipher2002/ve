@@ -40,7 +40,8 @@ type AnimationConfig = {
   exit?: string;
   enterDirection?: string;
   exitDirection?: string;
-  speed?: number; // Animation speed multiplier (0.5 = slower, 2 = faster)
+  enterSpeed?: number; // Enter animation speed multiplier (0.25 = slower, 2 = faster)
+  exitSpeed?: number;  // Exit animation speed multiplier (0.25 = slower, 2 = faster)
 };
 
 // Text overlay specific

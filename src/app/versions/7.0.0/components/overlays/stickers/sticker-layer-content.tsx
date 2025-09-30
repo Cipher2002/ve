@@ -29,7 +29,7 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
             frame,
             overlay.durationInFrames,
             overlay.styles.animation.enterDirection,
-            overlay.styles.animation.speed || 1
+            overlay.styles.animation.enterSpeed || 1
           )
         : {};
 
@@ -39,7 +39,7 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
             frame,
             overlay.durationInFrames,
             overlay.styles.animation.exitDirection,
-            overlay.styles.animation.speed || 1
+            overlay.styles.animation.exitSpeed || 1
           )
         : {};
 

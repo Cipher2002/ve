@@ -67,7 +67,7 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
           frame,
           overlay.durationInFrames,
           overlay.styles.animation.enterDirection,
-          overlay.styles.animation.speed || 1
+          overlay.styles.animation.enterSpeed || 1
         )
       : {};
 
@@ -80,7 +80,7 @@ export const ImageLayerContent: React.FC<ImageLayerContentProps> = ({
           frame,
           overlay.durationInFrames,
           overlay.styles.animation.exitDirection,
-          overlay.styles.animation.speed || 1
+          overlay.styles.animation.exitSpeed || 1
         )
       : {};
 
