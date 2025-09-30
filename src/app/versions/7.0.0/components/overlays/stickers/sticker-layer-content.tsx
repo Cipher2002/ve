@@ -1,6 +1,8 @@
 import React, { memo } from "react";
 import { StickerOverlay } from "../../../types";
 import { templateMap } from "../../../templates/sticker-templates/sticker-helpers";
+import { useCurrentFrame } from "remotion";
+import { animationTemplates } from "../../../templates/animation-templates";
 
 interface StickerLayerContentProps {
   overlay: StickerOverlay;
@@ -10,12 +12,36 @@ interface StickerLayerContentProps {
 
 export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
   ({ overlay, isSelected, onUpdate }) => {
+    const frame = useCurrentFrame();
     const template = templateMap[overlay.content];
 
     if (!template) {
       console.warn(`No sticker template found for id: ${overlay.content}`);
       return null;
     }
+
+    // Calculate if we're in the exit phase (last 30 frames)
+    const isExitPhase = frame >= overlay.durationInFrames - 30;
+
+    // Apply enter animation only during entry phase
+    const enterAnimation =
+      !isExitPhase && overlay.styles?.animation?.enter
+        ? animationTemplates[overlay.styles.animation.enter]?.enter(
+            frame,
+            overlay.durationInFrames,
+            overlay.styles.animation.enterDirection
+          )
+        : {};
+
+    // Apply exit animation only during exit phase
+    const exitAnimation =
+      isExitPhase && overlay.styles?.animation?.exit
+        ? animationTemplates[overlay.styles.animation.exit]?.exit(
+            frame,
+            overlay.durationInFrames,
+            overlay.styles.animation.exitDirection
+          )
+        : {};
 
     const { Component } = template;
     const MemoizedComponent = memo(Component);
@@ -27,7 +53,18 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
       onUpdate,
     };
 
-    return <MemoizedComponent {...props} />;
+    // Wrap the component with animation styles
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          ...(isExitPhase ? exitAnimation : enterAnimation),
+        }}
+      >
+        <MemoizedComponent {...props} />
+      </div>
+    );
   },
   (prevProps, nextProps) => {
     // Only re-render if these props change
