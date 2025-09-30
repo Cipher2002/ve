@@ -77,6 +77,8 @@ export const ImageOverlayPanel: React.FC = () => {
   const searchTimeoutShared = useRef<NodeJS.Timeout | null>(null);
   const searchTimeoutGenerated = useRef<NodeJS.Timeout | null>(null);
   const [activeTab, setActiveTab] = useState("generated-zanopy");
+
+  const { currentFrame, setOverlays } = useEditorContext();
   
   const aspectRatioOptions = [
     { label: "1:1", value: "1%3A1" },
@@ -583,10 +585,11 @@ export const ImageOverlayPanel: React.FC = () => {
    */
   const handleAddImage = async (image: ApiImage) => {
     const { width, height } = await getImageNaturalDimensions(image.url);
-    const { from, row } = findNextAvailablePosition(
+    const { addAtPlayhead } = useTimelinePositioning();
+    const { from, row, updatedOverlays } = addAtPlayhead(
+      currentFrame,
       overlays,
-      visibleRows,
-      durationInFrames
+      'top'
     );
 
     const newOverlay: Overlay = {
@@ -611,7 +614,13 @@ export const ImageOverlayPanel: React.FC = () => {
       },
     };
 
-    addOverlay(newOverlay);
+    // Update overlays with both shifted overlays and new overlay
+    setOverlays([...updatedOverlays, newOverlay]);
+    
+    // Request timeline to adjust rows
+    window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+      detail: { requiredRows: row + 1 }
+    }));
   };
 
   /**
