@@ -222,13 +222,30 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     const rowsArray = Array.from(selectedRows).sort((a, b) => a - b);
     const topmostRow = rowsArray[0];
 
-    // Move all overlays from selected rows to the topmost row
-    const updatedOverlays = overlays.map(overlay => {
-      if (selectedRows.has(overlay.row)) {
-        return { ...overlay, row: topmostRow };
-      }
-      return overlay;
-    });
+    // Sort overlays by their original row (preserving order), then by position within row
+    const overlaysFromSelectedRows = overlays
+      .filter(overlay => selectedRows.has(overlay.row))
+      .sort((a, b) => {
+        // First sort by row (to maintain stacking order)
+        if (a.row !== b.row) return a.row - b.row;
+        // Then by position within the same row
+        return a.from - b.from;
+      });
+
+    // Calculate stacking offset - add small top offset for each layer
+    const updatedSelectedOverlays = overlaysFromSelectedRows.map((overlay, index) => ({
+      ...overlay,
+      row: topmostRow,
+      // Add a small z-index hint via a custom property if needed for rendering
+      stackOrder: index,
+    }));
+
+    // Update all overlays - replace selected ones with new positions, keep others unchanged
+    const overlayIds = new Set(overlaysFromSelectedRows.map(o => o.id));
+    const updatedOverlays = [
+      ...overlays.filter(overlay => !overlayIds.has(overlay.id)),
+      ...updatedSelectedOverlays,
+    ];
 
     setOverlays(updatedOverlays);
     
