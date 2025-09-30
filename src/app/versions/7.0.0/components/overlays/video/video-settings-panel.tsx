@@ -640,11 +640,11 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
             min="0"
             max="1"
             step="0.1"
-            value={localOverlay?.styles?.volume ?? 1}
-              onChange={(e) =>
-                !localOverlay?.audioDetached && 
-                handleStyleChange({ volume: parseFloat(e.target.value) })
-              }
+            value={localOverlay?.audioDetached ? 0 : (localOverlay?.styles?.volume ?? 1)}
+            onChange={(e) =>
+              !localOverlay?.audioDetached && 
+              handleStyleChange({ volume: parseFloat(e.target.value) })
+            }
             disabled={localOverlay?.audioDetached}
             className={`flex-1 accent-blue-500 h-1.5 rounded-full ${
               localOverlay?.audioDetached 
@@ -653,7 +653,7 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
             }`}
           />
           <span className="text-xs text-gray-600 dark:text-gray-400 min-w-[40px] text-right">
-            {Math.round((localOverlay?.styles?.volume ?? 1) * 100) + "%"}
+            {localOverlay?.audioDetached ? '0%' : Math.round((localOverlay?.styles?.volume ?? 1) * 100) + "%"}
           </span>
         </div>
       </div>

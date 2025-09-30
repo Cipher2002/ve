@@ -98,12 +98,15 @@ export const TimelineItemContextMenu: React.FC<
         </ContextMenuItem>
         {itemType === 'video' && (
           <ContextMenuItem
-            className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-            onClick={() => onMuteVideo(itemId)}
+            className={`dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200 ${
+              audioDetached ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            onClick={() => !audioDetached && onMuteVideo(itemId)}
+            disabled={audioDetached}
             data-no-timeline-seek="true"
           >
             <VolumeX className="mr-4 h-4 w-4" />
-            {audioDetached ? 'Muted (Audio Detached)' : isVideoMuted ? 'Unmute Video' : 'Mute Video'}
+            {audioDetached ? 'Audio Detached' : isVideoMuted ? 'Unmute Video' : 'Mute Video'}
           </ContextMenuItem>
         )}
         {itemType === 'video' && !audioDetached && (
