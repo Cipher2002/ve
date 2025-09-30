@@ -222,21 +222,21 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     const rowsArray = Array.from(selectedRows).sort((a, b) => a - b);
     const topmostRow = rowsArray[0];
 
-    // Sort overlays by their original row (preserving order), then by position within row
+    // Sort overlays by their original row in REVERSE order (higher rows on top visually)
+    // Then by position within row
     const overlaysFromSelectedRows = overlays
       .filter(overlay => selectedRows.has(overlay.row))
       .sort((a, b) => {
-        // First sort by row (to maintain stacking order)
-        if (a.row !== b.row) return a.row - b.row;
+        // First sort by row in REVERSE (higher row numbers first = on top)
+        if (a.row !== b.row) return b.row - a.row;
         // Then by position within the same row
         return a.from - b.from;
       });
 
-    // Calculate stacking offset - add small top offset for each layer
+    // Move all to topmost row, maintaining the sorted order
     const updatedSelectedOverlays = overlaysFromSelectedRows.map((overlay, index) => ({
       ...overlay,
       row: topmostRow,
-      // Add a small z-index hint via a custom property if needed for rendering
       stackOrder: index,
     }));
 
