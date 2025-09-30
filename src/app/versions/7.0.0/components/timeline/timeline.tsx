@@ -9,6 +9,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { useTimeline } from "../../contexts/timeline-context";
 import { useTimelineDragAndDrop } from "../../hooks/use-timeline-drag-and-drop";
 import { useTimelineEventHandlers } from "../../hooks/use-timeline-event-handlers";
@@ -62,6 +63,10 @@ interface TimelineProps {
   onMuteVideo: (id: number) => void;
   onMuteAudio: (id: number) => void;
   isExtractingAudio?: boolean;
+
+  selectedRows?: Set<number>;
+  setSelectedRows?: Dispatch<SetStateAction<Set<number>>>;
+  
 }
 
 const TIMELINE_GAP = 16; // Gap between drag handles and timeline content (in px)
@@ -94,7 +99,9 @@ const Timeline: React.FC<TimelineProps> = ({
   onDetachAudio,
   onMuteVideo,
   onMuteAudio,
-  isExtractingAudio, // Add this
+  isExtractingAudio,
+  selectedRows: selectedRowsProp,
+  setSelectedRows: setSelectedRowsProp,
 }) => {
 
   // Calculate different duration types
@@ -111,7 +118,7 @@ const Timeline: React.FC<TimelineProps> = ({
     position: number;
   } | null>(null);
 
-  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow, removeRow } = useTimeline();
+  const { visibleRows, timelineRef, zoomScale, handleWheelZoom, addRow, setVisibleRows } = useTimeline();
 
   // State for context menu visibility
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -471,8 +478,10 @@ const Timeline: React.FC<TimelineProps> = ({
   // Add visual feedback state
   const [isDraggingRow, setIsDraggingRow] = useState(false);
 
-  // Add state for row selection
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  // Use prop state or fallback to local state
+  const [localSelectedRows, setLocalSelectedRows] = useState<Set<number>>(new Set());
+  const selectedRows = selectedRowsProp || localSelectedRows;
+  const setSelectedRows = setSelectedRowsProp || setLocalSelectedRows;
 
   const handleRowDragStart = (e: React.DragEvent, rowIndex: number) => {
     setDraggedRowIndex(rowIndex);
@@ -514,26 +523,31 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   // Handle delete row
-  const handleDeleteRow = (rowIndex: number) => {
-    if (visibleRows <= 1) return; // Prevent deleting if only 1 row
-    
-    // Delete all overlays in this row
-    const overlaysToDelete = overlays.filter(overlay => overlay.row === rowIndex);
-    overlaysToDelete.forEach(overlay => onOverlayDelete(overlay.id));
-    
-    // Shift all rows below up by one
-    const updatedOverlays = overlays
-      .filter(overlay => overlay.row !== rowIndex)
-      .map(overlay => {
-        if (overlay.row > rowIndex) {
-          return { ...overlay, row: overlay.row - 1 };
-        }
-        return overlay;
-      });
-    
-    setOverlays(updatedOverlays);
-    removeRow();
-  };
+  const handleDeleteRow = useCallback(
+    (rowIndex: number) => {
+      if (visibleRows <= 1) return; // Prevent deleting if only 1 row
+      
+      // Delete all overlays in this row
+      const overlaysToDelete = overlays.filter(overlay => overlay.row === rowIndex);
+      overlaysToDelete.forEach(overlay => onOverlayDelete(overlay.id));
+      
+      // Shift all rows below up by one
+      const updatedOverlays = overlays
+        .filter(overlay => overlay.row !== rowIndex)
+        .map(overlay => {
+          if (overlay.row > rowIndex) {
+            return { ...overlay, row: overlay.row - 1 };
+          }
+          return overlay;
+        });
+      
+      setOverlays(updatedOverlays);
+      
+      // Decrease visible rows count
+      setVisibleRows(visibleRows - 1);
+    },
+    [visibleRows, overlays, onOverlayDelete, setOverlays, setVisibleRows]
+  );
 
   useEffect(() => {
     const element = timelineRef.current;

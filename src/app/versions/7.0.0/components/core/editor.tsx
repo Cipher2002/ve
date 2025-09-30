@@ -175,6 +175,8 @@ export const Editor: React.FC = () => {
         }}
         onMuteVideo={handleMuteVideo}
         onMuteAudio={handleMuteAudio}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
       />
       {/* Mobile Navigation Bar
        * Only shows on mobile devices (md:hidden)
