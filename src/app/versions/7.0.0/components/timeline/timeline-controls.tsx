@@ -397,7 +397,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             className={`w-full select-none border-gray-200 dark:border-gray-700
               ${selectedRows.size < 2
                 ? "bg-gray-200 text-black cursor-not-allowed"
-                : "bg-[#490972] text-white hover:bg-[#3a0760]"}
+                : "bg-[#490972] text-white hover:bg-[#3a0760] hover:text-white"}
             `}
           >
             Group Rows
