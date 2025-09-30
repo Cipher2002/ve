@@ -384,6 +384,26 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             </span>
           </div>
         )}
+      
+        <Separator orientation="vertical" className="h-7" />
+
+        {/* Group Rows Button */}
+        <div>
+          <Button
+            onClick={handleGroupRows}
+            disabled={selectedRows.size < 2}
+            variant="outline"
+            size="sm"
+            className={`w-full select-none border-gray-200 dark:border-gray-700
+              ${selectedRows.size < 2
+                ? "bg-gray-200 text-black cursor-not-allowed"
+                : "bg-[#490972] text-white hover:bg-[#3a0760]"}
+            `}
+          >
+            Group Rows
+          </Button>
+        </div>
+      
       </div>
 
       {/* Center section: Play/Pause control and time display */}
@@ -555,24 +575,6 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        <Separator orientation="vertical" className="h-7" />
-
-        {/* Group Rows Button */}
-        <div>
-          <Button
-            onClick={handleGroupRows}
-            disabled={selectedRows.size < 2}
-            variant="outline"
-            size="sm"
-            className="w-full text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-200
-              bg-white hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-700/80
-              border-gray-200 dark:border-gray-700 select-none
-              disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Group Rows
-          </Button>
-        </div>
 
         {/* Reset Timeline */}
         <div>
