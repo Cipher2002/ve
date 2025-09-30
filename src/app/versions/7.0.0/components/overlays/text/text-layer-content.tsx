@@ -252,7 +252,9 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     !isExitPhase && overlay.styles.animation?.enter
       ? animationTemplates[overlay.styles.animation.enter]?.enter(
           frame,
-          overlay.durationInFrames
+          overlay.durationInFrames,
+          overlay.styles.animation.enterDirection,
+          overlay.styles.animation.enterSpeed || 1
         )
       : {};
 
@@ -261,7 +263,9 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
     isExitPhase && overlay.styles.animation?.exit
       ? animationTemplates[overlay.styles.animation.exit]?.exit(
           frame,
-          overlay.durationInFrames
+          overlay.durationInFrames,
+          overlay.styles.animation.exitDirection,
+          overlay.styles.animation.exitSpeed || 1
         )
       : {};
 
@@ -333,7 +337,10 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
   
   const resolvedFontFamily = getFontFamily(overlay.styles.fontFamily);
 
-  const finalFontSize = calculateFontSize();
+  // Use direct fontSize if set, otherwise calculate it
+  const finalFontSize = overlay.styles.fontSize 
+    ? parseInt(overlay.styles.fontSize) 
+    : calculateFontSize();
 
   const textStyle: React.CSSProperties = {
     ...restStyles,

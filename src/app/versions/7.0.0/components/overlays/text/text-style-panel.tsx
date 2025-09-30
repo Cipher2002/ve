@@ -211,25 +211,27 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Font Size</label>
-            <Select
-              value={(localOverlay.styles.fontSizeMultiplier || 1).toString()}
-              onValueChange={(value) => updateStyle("fontSizeMultiplier", parseFloat(value))}
-            >
-              <SelectTrigger className="w-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.5" className="text-xs">0.5x (Small)</SelectItem>
-                <SelectItem value="0.75" className="text-xs">0.75x</SelectItem>
-                <SelectItem value="1" className="text-xs">1x (Normal)</SelectItem>
-                <SelectItem value="1.25" className="text-xs">1.25x</SelectItem>
-                <SelectItem value="1.5" className="text-xs">1.5x</SelectItem>
-                <SelectItem value="1.75" className="text-xs">1.75x</SelectItem>
-                <SelectItem value="2" className="text-xs">2x (Large)</SelectItem>
-                <SelectItem value="2.5" className="text-xs">2.5x</SelectItem>
-                <SelectItem value="3" className="text-xs">3x (Extra Large)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center space-x-2">
+              <input
+                type="range"
+                min="12"
+                max="200"
+                step="1"
+                value={parseInt(localOverlay.styles.fontSize || "32")}
+                onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <input
+                type="number"
+                min="12"
+                max="200"
+                step="1"
+                value={parseInt(localOverlay.styles.fontSize || "32")}
+                onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
+                className="w-16 px-2 py-1 text-xs border rounded"
+              />
+              <span className="text-xs text-muted-foreground">px</span>
+            </div>
           </div>
 
           <div className="space-y-2">
