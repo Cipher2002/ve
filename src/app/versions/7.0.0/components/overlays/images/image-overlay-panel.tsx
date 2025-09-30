@@ -67,8 +67,10 @@ export const ImageOverlayPanel: React.FC = () => {
     durationInFrames,
     selectedOverlayId,
     changeOverlay,
+    currentFrame,
+    setOverlays,
   } = useEditorContext();
-  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   const [localOverlay, setLocalOverlay] = useState<Overlay | null>(null);
@@ -77,8 +79,6 @@ export const ImageOverlayPanel: React.FC = () => {
   const searchTimeoutShared = useRef<NodeJS.Timeout | null>(null);
   const searchTimeoutGenerated = useRef<NodeJS.Timeout | null>(null);
   const [activeTab, setActiveTab] = useState("generated-zanopy");
-
-  const { currentFrame, setOverlays } = useEditorContext();
   
   const aspectRatioOptions = [
     { label: "1:1", value: "1%3A1" },
@@ -583,9 +583,8 @@ export const ImageOverlayPanel: React.FC = () => {
    * @param image - The selected Pexels image to add
    * Creates a new overlay with default positioning and animation settings
    */
-  const handleAddImage = async (image: ApiImage) => {
+const handleAddImage = async (image: ApiImage) => {
     const { width, height } = await getImageNaturalDimensions(image.url);
-    const { addAtPlayhead } = useTimelinePositioning();
     const { from, row, updatedOverlays } = addAtPlayhead(
       currentFrame,
       overlays,
@@ -614,12 +613,13 @@ export const ImageOverlayPanel: React.FC = () => {
       },
     };
 
-    // Update overlays with both shifted overlays and new overlay
-    setOverlays([...updatedOverlays, newOverlay]);
+    // Create final overlays array with shifted overlays + new overlay
+    const finalOverlays = [...updatedOverlays, newOverlay];
+    setOverlays(finalOverlays);
     
-    // Request timeline to adjust rows
+    // Request timeline to adjust rows to accommodate all overlays
     window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
-      detail: { requiredRows: row + 1 }
+      detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
     }));
   };
 

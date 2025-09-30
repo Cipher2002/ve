@@ -113,8 +113,8 @@ const StickerPreview = memo(
 StickerPreview.displayName = "StickerPreview";
 
 export function StickersPanel() {
-  const { addOverlay, overlays, durationInFrames, selectedOverlayId } = useEditorContext();
-  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { addOverlay, overlays, durationInFrames, selectedOverlayId, currentFrame, setOverlays } = useEditorContext();
+  const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
   const stickerCategories = getStickerCategories();
   const isMobile = useIsMobile();
@@ -152,10 +152,10 @@ export function StickersPanel() {
 
       if (!template) return;
 
-      const { from, row } = findNextAvailablePosition(
+      const { from, row, updatedOverlays } = addAtPlayhead(
+        currentFrame,
         overlays,
-        visibleRows,
-        durationInFrames
+        'top'
       );
 
       const newOverlay: Overlay = {
@@ -190,14 +190,22 @@ export function StickersPanel() {
         } : {}),
       };
 
-      addOverlay(newOverlay);
+      // Create final overlays array
+      const finalOverlays = [...updatedOverlays, newOverlay];
+      setOverlays(finalOverlays);
+      
+      // Request timeline to adjust rows
+      window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+        detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+      }));
     },
     [
-      addOverlay,
       overlays,
       visibleRows,
       durationInFrames,
-      findNextAvailablePosition,
+      currentFrame,
+      setOverlays,
+      addAtPlayhead,
     ]
   );
 

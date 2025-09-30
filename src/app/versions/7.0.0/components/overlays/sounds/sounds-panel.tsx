@@ -75,8 +75,10 @@ const SoundsPanel: React.FC = () => {
     durationInFrames,
     selectedOverlayId,
     changeOverlay,
+    currentFrame,
+    setOverlays,
   } = useEditorContext();
-  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { visibleRows } = useTimeline();
   const [renderedAudio, setRenderedAudio] = useState<any[]>([]);
   const [renderedLoading, setRenderedLoading] = useState(true);
@@ -280,10 +282,10 @@ const SoundsPanel: React.FC = () => {
     // Clear loading state
     setLoadingTrack(null);
 
-    const { from, row } = findNextAvailablePosition(
+    const { from, row, updatedOverlays } = addAtPlayhead(
+      currentFrame,
       overlays,
-      visibleRows,
-      durationInFrames
+      'top'
     );
 
     const newSoundOverlay: SoundOverlay = {
@@ -305,7 +307,14 @@ const SoundsPanel: React.FC = () => {
       },
     };
 
-    addOverlay(newSoundOverlay);
+    // Create final overlays array
+    const finalOverlays = [...updatedOverlays, newSoundOverlay];
+    setOverlays(finalOverlays);
+    
+    // Request timeline to adjust rows
+    window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+      detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+    }));
   } catch (error) {
     console.error('Failed to download audio:', error);
     setLoadingTrack(null);
@@ -457,61 +466,68 @@ const SoundsPanel: React.FC = () => {
                   <div
                     key={audio.id}
                     onClick={async () => {
-                      // Set this audio as loading in the UI
-                      setLoadingTrack(audio.id);
+                        // Set this audio as loading in the UI
+                        setLoadingTrack(audio.id);
 
-                      try {
-                        // Download the audio file using proxy to avoid CORS
-                        const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
-                        const response = await fetch(proxyUrl);
-                        const blob = await response.blob();
-                        const blobUrl = URL.createObjectURL(blob);
+                        try {
+                          // Download the audio file using proxy to avoid CORS
+                          const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
+                          const response = await fetch(proxyUrl);
+                          const blob = await response.blob();
+                          const blobUrl = URL.createObjectURL(blob);
 
-                        // Get actual audio duration
-                        const audioDuration = await new Promise<number>((resolve) => {
-                          const audioElement = new Audio(blobUrl);
-                          audioElement.addEventListener('loadedmetadata', () => {
-                            resolve(audioElement.duration);
+                          // Get actual audio duration
+                          const audioDuration = await new Promise<number>((resolve) => {
+                            const audioElement = new Audio(blobUrl);
+                            audioElement.addEventListener('loadedmetadata', () => {
+                              resolve(audioElement.duration);
+                            });
+                            audioElement.addEventListener('error', () => {
+                              resolve(30); // Fallback to 30 seconds if duration can't be determined
+                            });
                           });
-                          audioElement.addEventListener('error', () => {
-                            resolve(30); // Fallback to 30 seconds if duration can't be determined
-                          });
-                        });
 
-                        // Clear loading state
-                        setLoadingTrack(null);
+                          // Clear loading state
+                          setLoadingTrack(null);
 
-                        const { from, row } = findNextAvailablePosition(
-                          overlays,
-                          visibleRows,
-                          durationInFrames
-                        );
+                          const { from, row, updatedOverlays } = addAtPlayhead(
+                            currentFrame,
+                            overlays,
+                            'top'
+                          );
 
-                        const newSoundOverlay: SoundOverlay = {
-                          id: Date.now(),
-                          type: OverlayType.SOUND,
-                          content: audio.filename,
-                          src: blobUrl,
-                          from,
-                          row,
-                          left: 0,
-                          top: 0,
-                          width: 1920,
-                          height: 100,
-                          rotation: 0,
-                          isDragging: false,
-                          durationInFrames: Math.round(audioDuration * 30), // Convert seconds to frames (30fps)
-                          styles: {
-                            opacity: 1,
-                          },
-                        };
+                          const newSoundOverlay: SoundOverlay = {
+                            id: Date.now(),
+                            type: OverlayType.SOUND,
+                            content: audio.filename,
+                            src: blobUrl,
+                            from,
+                            row,
+                            left: 0,
+                            top: 0,
+                            width: 1920,
+                            height: 100,
+                            rotation: 0,
+                            isDragging: false,
+                            durationInFrames: Math.round(audioDuration * 30), // Convert seconds to frames (30fps)
+                            styles: {
+                              opacity: 1,
+                            },
+                          };
 
-                        addOverlay(newSoundOverlay);
-                      } catch (error) {
-                        console.error('Failed to download rendered audio:', error);
-                        setLoadingTrack(null);
-                      }
-                    }}
+                          // Create final overlays array
+                          const finalOverlays = [...updatedOverlays, newSoundOverlay];
+                          setOverlays(finalOverlays);
+                          
+                          // Request timeline to adjust rows
+                          window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+                            detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+                          }));
+                        } catch (error) {
+                          console.error('Failed to download rendered audio:', error);
+                          setLoadingTrack(null);
+                        }
+                      }}
                     className="group flex items-center gap-3 p-2.5 bg-white dark:bg-gray-900 rounded-md 
                       border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900
                       transition-all duration-150 cursor-pointer relative"

@@ -51,8 +51,10 @@ export const VideoOverlayPanel: React.FC = () => {
     durationInFrames,
     selectedOverlayId,
     changeOverlay,
+    currentFrame,
+    setOverlays,
   } = useEditorContext();
-  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   const [localOverlay, setLocalOverlay] = useState<Overlay | null>(null);
@@ -266,10 +268,10 @@ export const VideoOverlayPanel: React.FC = () => {
         if (cachedVideoUrl) {
           // Get the video's natural dimensions instead of editor dimensions
           const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
-          const { from, row } = findNextAvailablePosition(
+          const { from, row, updatedOverlays } = addAtPlayhead(
+            currentFrame,
             overlays,
-            visibleRows,
-            durationInFrames
+            'top'
           );
 
           const videoOverlay: Overlay = {
@@ -296,7 +298,14 @@ export const VideoOverlayPanel: React.FC = () => {
             },
           };
 
-          addOverlay(videoOverlay);
+          // Create final overlays array
+          const finalOverlays = [...updatedOverlays, videoOverlay];
+          setOverlays(finalOverlays);
+          
+          // Request timeline to adjust rows
+          window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+            detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+          }));
         } else {
           console.error('Failed to download video');
         }
@@ -333,10 +342,10 @@ export const VideoOverlayPanel: React.FC = () => {
         if (cachedVideoUrl) {
           // Get the video's natural dimensions instead of editor dimensions
           const { width, height } = await getVideoNaturalDimensions(cachedVideoUrl);
-          const { from, row } = findNextAvailablePosition(
+          const { from, row, updatedOverlays } = addAtPlayhead(
+            currentFrame,
             overlays,
-            visibleRows,
-            durationInFrames
+            'top'
           );
 
           const videoOverlay: Overlay = {
@@ -363,7 +372,14 @@ export const VideoOverlayPanel: React.FC = () => {
             },
           };
 
-          addOverlay(videoOverlay);
+          // Create final overlays array
+          const finalOverlays = [...updatedOverlays, videoOverlay];
+          setOverlays(finalOverlays);
+          
+          // Request timeline to adjust rows
+          window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+            detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+          }));
         } else {
           console.error('Failed to download rendered video');
         }

@@ -20,9 +20,9 @@ import { useSidebar } from "../../../contexts/sidebar-context";
  * 3. Add uploaded media to the timeline
  */
 const LocalMediaPanel: React.FC = () => {
-  const { addOverlay, overlays, durationInFrames } = useEditorContext();
+  const { addOverlay, overlays, durationInFrames, currentFrame, setOverlays } = useEditorContext();
   const { setIsOpen, setActivePanel } = useSidebar();
-  const { findNextAvailablePosition } = useTimelinePositioning();
+  const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -73,10 +73,10 @@ const LocalMediaPanel: React.FC = () => {
    */
   const handleAddToTimeline = async (file: any) => {
     const { width, height } = getAspectRatioDimensions();
-    const { from, row } = findNextAvailablePosition(
+    const { from, row, updatedOverlays } = addAtPlayhead(
+      currentFrame,
       overlays,
-      visibleRows,
-      durationInFrames
+      'top'
     );
 
     let newOverlay: Overlay;
@@ -192,7 +192,14 @@ const LocalMediaPanel: React.FC = () => {
       return; // Unsupported file type
     }
 
-    addOverlay(newOverlay);
+    // Create final overlays array with shifted overlays + new overlay
+    const finalOverlays = [...updatedOverlays, newOverlay];
+    setOverlays(finalOverlays);
+    
+    // Request timeline to adjust rows
+    window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+      detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
+    }));
 
     // Close sidebar and reset active panel after successfully adding to timeline
     setActivePanel(OverlayType.NONE);
