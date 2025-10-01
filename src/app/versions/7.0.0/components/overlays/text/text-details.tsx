@@ -100,7 +100,7 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
           spellCheck="false"
         />
       </div>
-      <div className="border-t border-border mx-2" />
+      <div className="border-t border-border px-2 mt-2" />
 
       {/* Settings Tabs */}
       <Tabs defaultValue="settings" className="w-full">
