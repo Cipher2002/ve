@@ -154,10 +154,12 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
     setOverlays(finalOverlays);
     setSelectedOverlayId(newId);
     
-    // Dispatch event to request timeline row adjustment
-    window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
-      detail: { requiredRows: row + 1 }
-    }));
+    // Dispatch event to request timeline row adjustment after state update
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
+        detail: { requiredRows: row + 1 }
+      }));
+    }, 0);
   };
 
   return useMemo(
