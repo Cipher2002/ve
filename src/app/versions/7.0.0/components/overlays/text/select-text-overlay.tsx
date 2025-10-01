@@ -120,7 +120,8 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
   const handleAddOverlay = (option: (typeof textOverlayTemplates)[0]) => {
     const { from, row, updatedOverlays } = addAtPlayhead(
       currentFrame,
-      overlays
+      overlays,
+      'bottom'  // Add text overlays at the bottom instead of shifting everything
     );
 
     const newOverlay: Omit<TextOverlay, "id"> = {
