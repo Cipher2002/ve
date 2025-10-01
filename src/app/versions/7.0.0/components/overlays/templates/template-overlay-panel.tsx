@@ -409,7 +409,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                   className="cursor-pointer hover:bg-accent transition-colors duration-200"
                 >
                 {confirmingTemplateId === template.id ? (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
+                  <div className="p-4 bg-[rgb(41,0,156)]/15 dark:bg-[rgb(41,0,156)]/15 border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15 rounded-md">
                     <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
                     {isLoadingTemplate ? (
                       <div className="space-y-3">
@@ -447,7 +447,7 @@ export const TemplateOverlayPanel: React.FC = () => {
                             Cancel
                           </button>
                           <button 
-                            className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                            className="px-3 py-1.5 text-xs bg-[#490972] text-white rounded hover:bg-[#490972]/90"
                             onClick={() => handleApplyTemplate(template)}
                           >
                             Apply Template
