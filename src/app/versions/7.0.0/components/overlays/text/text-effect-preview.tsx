@@ -48,6 +48,8 @@ export const createEffectPreview = (config: EffectConfig, textStyle: any, conten
           }
           ]
       };
+
+      
     // Add more cases for your other effects...
 
 

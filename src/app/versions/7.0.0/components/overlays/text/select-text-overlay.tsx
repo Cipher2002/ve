@@ -3,6 +3,7 @@ import { useEditorContext } from "../../../contexts/editor-context";
 import { useTimelinePositioning } from "../../../hooks/use-timeline-positioning";
 import { OverlayType, TextOverlay } from "../../../types";
 import { textOverlayTemplates } from "../../../templates/text-overlay-templates";
+import { useTextEffects } from "./text-effects";
 
 /**
  * Interface for the SelectTextOverlay component props
@@ -10,6 +11,74 @@ import { textOverlayTemplates } from "../../../templates/text-overlay-templates"
 interface SelectTextOverlayProps {
   // No props needed - component manages its own overlay creation
 }
+
+/**
+ * Preview component that renders text with effects
+ */
+const TextPreview: React.FC<{ option: (typeof textOverlayTemplates)[0] }> = ({ option }) => {
+  const { createEffect } = useTextEffects(0); // frame 0 for static preview
+  
+  const baseStyle: React.CSSProperties = {
+    fontSize: "1.25rem",
+    padding: option.styles.padding || undefined,
+    fontFamily: option.styles.fontFamily,
+    fontWeight: option.styles.fontWeight,
+    fontStyle: option.styles.fontStyle,
+    textDecoration: option.styles.textDecoration,
+    lineHeight: option.styles.lineHeight || "1.2",
+    letterSpacing: option.styles.letterSpacing || "0px",
+    textAlign: option.styles.textAlign as "left" | "center" | "right",
+    color: option.styles.color,
+    backgroundColor: option.styles.backgroundColor,
+    textShadow: option.styles.textShadow,
+    textTransform: option.styles.textTransform as any,
+    border: option.styles.border,
+    borderRadius: option.styles.borderRadius,
+    boxShadow: option.styles.boxShadow,
+    backdropFilter: option.styles.backdropFilter,
+    transform: option.styles.transform,
+    filter: option.styles.filter,
+    background: option.styles.background,
+    WebkitBackgroundClip: option.styles.WebkitBackgroundClip as any,
+    WebkitTextFillColor: option.styles.WebkitTextFillColor,
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
+  };
+
+  // Check if this template has an effect
+  if (option.styles.effect) {
+    const effect = createEffect(option.styles.effect, baseStyle, option.content);
+    
+    if (effect && effect.container) {
+      return (
+        <div style={{ ...effect.container as React.CSSProperties, fontSize: "1.25rem", maxWidth: "100%", maxHeight: "100%" }}>
+          {effect.layers.map((layer, index) => (
+            <div key={index} style={{ ...layer.style, fontSize: "1.25rem" }}>
+              {layer.content}
+            </div>
+          ))}
+        </div>
+      );
+    } else if (effect) {
+      return (
+        <>
+          {effect.layers.map((layer, index) => (
+            <div key={index} style={{ ...layer.style, fontSize: "1.25rem" }}>
+              {layer.content}
+            </div>
+          ))}
+        </>
+      );
+    }
+  }
+
+  // No effect - render normally
+  return (
+    <div style={baseStyle}>
+      {option.content}
+    </div>
+  );
+};
 
 /**
  * SelectTextOverlay Component
@@ -87,18 +156,9 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
             className="group relative overflow-hidden border-2  bg-card rounded-md transition-all duration-200 hover:border-secondary hover:bg-accent/30 cursor-pointer"
           >
             {/* Preview Container */}
-            <div className="aspect-[16/6] w-full flex items-center justify-center p-2 pb-12">
-              <div
-                className="text-base transform-gpu transition-transform duration-200 group-hover:scale-102 text-foreground"
-                style={{
-                  ...option.styles,
-                  fontSize: "1.25rem",
-                  padding: option.styles.padding || undefined,
-                  fontFamily: undefined,
-                  color: undefined,
-                }}
-              >
-                {option.content}
+            <div className="aspect-[16/6] w-full flex items-center justify-center p-2 pb-12 overflow-hidden">
+              <div className="text-base transform-gpu transition-transform duration-200 group-hover:scale-102 text-foreground max-w-full">
+                <TextPreview option={option} />
               </div>
             </div>
 
