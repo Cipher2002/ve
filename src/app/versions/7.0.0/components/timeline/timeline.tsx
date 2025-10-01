@@ -688,7 +688,6 @@ useEffect(() => {
                     transition-colors duration-150"
                   />
                 </div>
-
                 {/* Delete Button */}
                 <button
                   onClick={() => handleDeleteRow(rowIndex)}
@@ -700,14 +699,14 @@ useEffect(() => {
                   title={visibleRows <= 1 ? "Cannot delete last row" : "Delete row"}
                 >
                   <svg 
-                    className="w-3 h-3 text-gray-400 dark:text-gray-500 
+                    className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 
                       group-hover:text-red-600 dark:group-hover:text-red-400
                       transition-colors duration-150"
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a1 1 0 00-1 1v1h6V4a1 1 0 00-1-1m-4 0h4" />
                   </svg>
                 </button>
               </div>
