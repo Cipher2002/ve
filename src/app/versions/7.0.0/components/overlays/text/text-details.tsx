@@ -34,17 +34,6 @@ export const TextDetails: React.FC<TextDetailsProps> = ({
   setLocalOverlay,
 }) => {
   const { changeOverlay, selectedOverlayId, overlays } = useEditorContext();
-  // const [selectedText, setSelectedText] = useState({ start: 0, end: 0, selectedText: '' });
-  // const editorRef = useRef<any>(null);
-  // // Pass editor ref to style panel
-  // React.useEffect(() => {
-  //   if (editorRef.current) {
-  //     window.dispatchEvent(new CustomEvent('setEditorRef', { 
-  //       detail: { editorRef: editorRef.current } 
-  //     }));
-  //   }
-  // }, [editorRef.current]);
-  // const [isUserTyping, setIsUserTyping] = useState(false);
 
   /**
    * Debounced function to update the overlay in the global state

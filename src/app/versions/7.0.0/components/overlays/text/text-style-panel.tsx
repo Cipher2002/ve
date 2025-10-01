@@ -3,13 +3,6 @@ import { TextOverlay } from "../../../types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AlignLeft, AlignCenter, AlignRight, ChevronDown, ChevronRight } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -23,15 +16,6 @@ import { useEditorContext } from "../../../contexts/editor-context";
  */
 
 import { GOOGLE_FONTS, GoogleFont, FontVariant, loadGoogleFont, getFontFamilyString } from '../../../utils/google-fonts';
-
-// interface TextFormatting {
-//   bold: boolean;
-//   italic: boolean;
-//   underline: boolean;
-//   fontSize?: string;
-//   fontFamily?: string;
-//   color?: string;
-// }
 
 // Helper function to extract just the font name from font family string
 const extractFontName = (fontFamily: string | undefined): string => {

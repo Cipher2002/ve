@@ -4,7 +4,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "Add a heading",
     preview: "Primary Title",
     styles: {
-      fontSize: "10rem",
+      fontSize: "70px",
       fontWeight: "700",
       color: "#000000",
       backgroundColor: "transparent",
@@ -27,7 +27,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "MAKE AN IMPACT",
     preview: "Bold & Commanding",
     styles: {
-      fontSize: "3.5rem",
+      fontSize: "70px",
       fontWeight: "900",
       color: "#FFFFFF",
       backgroundColor: "",
@@ -47,7 +47,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "SLICED",
     preview: "Edgy & Modern",
     styles: {
-      fontSize: "4.2rem",
+      fontSize: "70px",
       fontWeight: "900",
       color: "#FFFFFF",
       backgroundColor: "",
@@ -67,7 +67,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "less is more",
     preview: "Ultra Minimal",
     styles: {
-      fontSize: "3rem",
+      fontSize: "70px",
       fontWeight: "200",
       color: "#FFFFFF",
       backgroundColor: "",
@@ -88,7 +88,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "Highlighted Text",
     preview: "Modern & Distinctive",
     styles: {
-      fontSize: "2.4rem",
+      fontSize: "70px",
       fontWeight: "700",
       color: "#FFFFFF",
       backgroundColor: "rgba(79, 70, 229, 0.85)",
@@ -112,7 +112,7 @@ export const textOverlayTemplates: Record<string, any> = {
     preview: "Dynamic & Modern",
     isPro: true,
     styles: {
-      fontSize: "3.2rem",
+      fontSize: "70px",
       fontWeight: "800",
       background:
         "linear-gradient(135deg, #6366F1 0%, #EC4899 50%, #F59E0B 100%)",
@@ -132,7 +132,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "GLASS EFFECT",
     preview: "Modern Transparency",
     styles: {
-      fontSize: "3rem",
+      fontSize: "70px",
       fontWeight: "700",
       color: "#FFFFFF",
       backgroundColor: "rgba(255, 255, 255, 0.1)",
@@ -156,7 +156,7 @@ export const textOverlayTemplates: Record<string, any> = {
     preview: "Dimensional Shift",
     isPro: true,
     styles: {
-      fontSize: "3.6rem",
+      fontSize: "70px",
       fontWeight: "800",
       color: "#FFFFFF",
       fontFamily: "Inter, sans-serif",
@@ -177,7 +177,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "SHIPPING",
     preview: "Bold Striped Effect",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -204,7 +204,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "GAME\nCODE",
     preview: "Bold 3D Effect",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -232,7 +232,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "Live\nforever",
     preview: "3-Layer Script Effect",
     styles: {
-      fontSize: "4.5rem",
+      fontSize: "70px",
       fontWeight: "600",
       backgroundColor: "transparent",
       fontFamily: "Dancing Script, cursive",
@@ -259,7 +259,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "AWESOME",
     preview: "Pink Fill with Outline",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -285,7 +285,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "I Got You",
     preview: "Script Handwriting",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "400",
       backgroundColor: "transparent",
       fontFamily: "Dancing Script, cursive",
@@ -309,7 +309,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "CUT CAKE\nNOWWWW",
     preview: "Contrasting Backgrounds",
     styles: {
-      fontSize: "3.5rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -338,7 +338,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "cuty\npie",
     preview: "Red with Thick Pink Outline",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -364,7 +364,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "HERO",
     preview: "Beige with Green Rounded Outline",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -390,7 +390,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "SOLD",
     preview: "Layered Contour Effect",
     styles: {
-      fontSize: "4.5rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -416,7 +416,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "JUMPY",
     preview: "Hand-Painted Brush Style",
     styles: {
-      fontSize: "4.5rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Permanent Marker, cursive",
@@ -442,7 +442,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "JUMP\nJUMP",
     preview: "Bright Neon Hollow Effect",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "900",
       backgroundColor: "transparent",
       fontFamily: "Inter, sans-serif",
@@ -467,7 +467,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "Clapping",
     preview: "Glowing Neon Cursive",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "400",
       backgroundColor: "transparent",
       fontFamily: "Dancing Script, cursive",
@@ -493,7 +493,7 @@ export const textOverlayTemplates: Record<string, any> = {
     content: "Right Now",
     preview: "Gentle Cursive with Drop Shadow",
     styles: {
-      fontSize: "4rem",
+      fontSize: "70px",
       fontWeight: "500",
       backgroundColor: "transparent",
       fontFamily: "Dancing Script, cursive",
