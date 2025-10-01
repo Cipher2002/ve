@@ -43,6 +43,8 @@ const TextPreview: React.FC<{ option: (typeof textOverlayTemplates)[0] }> = ({ o
     WebkitTextFillColor: option.styles.WebkitTextFillColor,
     whiteSpace: 'pre-wrap',
     wordWrap: 'break-word',
+    width: 'fit-content',
+    margin: 'auto',
   };
 
   // Check if this template has an effect
@@ -51,7 +53,13 @@ const TextPreview: React.FC<{ option: (typeof textOverlayTemplates)[0] }> = ({ o
     
     if (effect && effect.container) {
       return (
-        <div style={{ ...effect.container as React.CSSProperties, fontSize: "1.25rem", maxWidth: "100%", maxHeight: "100%" }}>
+        <div style={{ 
+          ...effect.container as React.CSSProperties, 
+          fontSize: "1.25rem", 
+          maxWidth: "100%",
+          transform: 'scale(0.8)',
+          transformOrigin: 'center'
+        }}>
           {effect.layers.map((layer, index) => (
             <div key={index} style={{ ...layer.style, fontSize: "1.25rem" }}>
               {layer.content}
@@ -61,13 +69,19 @@ const TextPreview: React.FC<{ option: (typeof textOverlayTemplates)[0] }> = ({ o
       );
     } else if (effect) {
       return (
-        <>
+        <div style={{ 
+          position: 'relative', 
+          width: 'fit-content', 
+          margin: 'auto',
+          transform: 'scale(0.8)',
+          transformOrigin: 'center'
+        }}>
           {effect.layers.map((layer, index) => (
             <div key={index} style={{ ...layer.style, fontSize: "1.25rem" }}>
               {layer.content}
             </div>
           ))}
-        </>
+        </div>
       );
     }
   }
