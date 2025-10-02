@@ -22,7 +22,7 @@ type BaseOverlay = {
   top: number;
   width: number;
   isDragging: boolean;
-  rotation: boolean;
+  rotation: number;
   type: OverlayType;
   isLoading?: boolean;
   isSelected?: boolean; // Multi-selection visual state
