@@ -51,6 +51,10 @@ export interface TimelineItemProps {
   selectedItem: { id: number } | null;
   /** Callback to update the selected item */
   setSelectedItem: (item: { id: number }) => void;
+  /** Array of selected overlay IDs for multi-selection */
+  selectedOverlayIds?: number[];
+  /** Callback when multiple overlays are selected */
+  onSelectedOverlaysChange?: (ids: number[]) => void;
   /** Handler for mouse-based drag and resize operations */
   handleMouseDown: (
     action: "move" | "resize-start" | "resize-end",
@@ -99,6 +103,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   draggedItem,
   selectedItem,
   setSelectedItem,
+  selectedOverlayIds = [],
+  onSelectedOverlaysChange,
   handleMouseDown,
   handleTouchStart,
   totalDuration,
@@ -122,7 +128,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     item.durationInFrames
   );
 
-  const isSelected = selectedItem?.id === item.id;
+  const isSelected = selectedItem?.id === item.id || selectedOverlayIds.includes(item.id);
   const itemRef = useRef<HTMLDivElement>(null);
   const { setActivePanel, setIsOpen } = useSidebar();
   const keyframeContext = useKeyframeContext();
@@ -340,17 +346,43 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSelectedItem({ id: item.id });
 
-    if (
-      item.type === OverlayType.VIDEO ||
-      item.type === OverlayType.TEXT ||
-      item.type === OverlayType.SOUND ||
-      item.type === OverlayType.CAPTION ||
-      item.type === OverlayType.IMAGE
-    ) {
-      setActivePanel(item.type);
-      setIsOpen(true);
+    if (onSelectedOverlaysChange) {
+      // Multi-selection logic
+      if (e.metaKey || e.ctrlKey) {
+        // Cmd/Ctrl + Click: Toggle this item
+        if (selectedOverlayIds.includes(item.id)) {
+          onSelectedOverlaysChange(selectedOverlayIds.filter(id => id !== item.id));
+        } else {
+          onSelectedOverlaysChange([...selectedOverlayIds, item.id]);
+        }
+      } else if (e.shiftKey && selectedOverlayIds.length > 0) {
+        // Shift + Click: Add to selection (simple additive for now)
+        if (!selectedOverlayIds.includes(item.id)) {
+          onSelectedOverlaysChange([...selectedOverlayIds, item.id]);
+        }
+      } else {
+        // Regular click: Select only this item
+        onSelectedOverlaysChange([item.id]);
+        setSelectedItem({ id: item.id });
+      }
+    } else {
+      // Fallback to old single-selection behavior
+      setSelectedItem({ id: item.id });
+    }
+
+    // Open sidebar panel only for single selection
+    if (selectedOverlayIds.length <= 1 || !onSelectedOverlaysChange) {
+      if (
+        item.type === OverlayType.VIDEO ||
+        item.type === OverlayType.TEXT ||
+        item.type === OverlayType.SOUND ||
+        item.type === OverlayType.CAPTION ||
+        item.type === OverlayType.IMAGE
+      ) {
+        setActivePanel(item.type);
+        setIsOpen(true);
+      }
     }
   };
 
@@ -419,6 +451,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 
   return (
     <TimelineItemContextMenu
+      selectedCount={selectedOverlayIds.length || 1}
       onOpenChange={onContextMenuChange}
       onDeleteItem={(itemId) => {
         // Clear keyframe cache before deletion to prevent memory leaks
@@ -445,6 +478,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     >
       <div
         ref={itemRef}
+        data-timeline-item="true"
         className={`absolute inset-y-[0.9px] rounded-md shadow-md cursor-grab group 
         ${itemClasses} 
         ${isDragging && draggedItem?.id === item.id ? "opacity-50" : ""} 

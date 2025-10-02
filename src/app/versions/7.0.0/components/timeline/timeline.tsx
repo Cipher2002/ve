@@ -33,6 +33,9 @@ import { MobileNavBar } from "../mobile/mobile-nav-bar";
 import { useTimelineSnapping } from "../../hooks/use-timeline-snapping";
 import { useTimelineDurationWarning } from "../../hooks/use-timeline-duration-warning";
 import { TIMELINE_DURATION_LIMIT_FRAMES, FPS } from "../../constants";
+import { useMarqueeSelection } from "../../hooks/use-marquee-selection";
+import { TimelineMarqueeSelection } from "./timeline-marquee-selection";
+import { TimelineControls } from "../timeline/timeline-controls";
 
 interface TimelineProps {
   /** Array of overlay objects to be displayed on the timeline */
@@ -43,6 +46,10 @@ interface TimelineProps {
   selectedOverlayId: number | null;
   /** Callback to update the selected overlay */
   setSelectedOverlayId: (id: number | null) => void;
+  /** Array of selected overlay IDs for multi-selection */
+  selectedOverlayIds?: number[];
+  /** Callback when multiple overlays are selected */
+  onSelectedOverlaysChange?: (ids: number[]) => void;
   /** Current playhead position in frames */
   currentFrame: number;
   /** Callback when an overlay is modified */
@@ -88,6 +95,8 @@ const Timeline: React.FC<TimelineProps> = ({
   durationInFrames,
   selectedOverlayId,
   setSelectedOverlayId,
+  selectedOverlayIds = [],
+  onSelectedOverlaysChange,
   currentFrame,
   onOverlayChange,
   setCurrentFrame,
@@ -103,6 +112,28 @@ const Timeline: React.FC<TimelineProps> = ({
   selectedRows: selectedRowsProp,
   setSelectedRows: setSelectedRowsProp,
 }) => {
+
+  // Use selection handlers from parent (editor.tsx)
+  const handleSelectionChange = onSelectedOverlaysChange || ((ids: number[]) => {
+    // Fallback if not provided
+    setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
+  });
+
+  // Keyboard shortcut handlers
+  const handleSelectAll = React.useCallback(() => {
+    const allIds = overlays.map(o => o.id);
+    handleSelectionChange(allIds);
+  }, [overlays, handleSelectionChange]);
+
+  const handleDeselectAll = React.useCallback(() => {
+    handleSelectionChange([]);
+  }, [handleSelectionChange]);
+
+  const handleDeleteSelected = React.useCallback(() => {
+    if (selectedOverlayIds.length === 0) return;
+    selectedOverlayIds.forEach(id => onOverlayDelete(id));
+    handleSelectionChange([]);
+  }, [selectedOverlayIds, onOverlayDelete, handleSelectionChange]);
 
   // Calculate different duration types
   const actualContentDuration = calculateActualDuration(overlays);
@@ -377,6 +408,25 @@ const Timeline: React.FC<TimelineProps> = ({
     snapThreshold: SNAPPING_CONFIG.thresholdFrames,
   });
 
+  // Initialize marquee selection
+  const {
+    isMarqueeSelecting,
+    marqueeStartPoint,
+    marqueeEndPoint,
+    handleTimelineMouseDown: marqueeHandleMouseDown,
+    handleMarqueeMouseMove,
+    handleMarqueeMouseUp,
+  } = useMarqueeSelection({
+    timelineRef,
+    overlays,
+    totalDuration: visualTimelineDuration,
+    visibleRows,
+    selectedOverlayIds,
+    onSelectedOverlaysChange: handleSelectionChange,
+    isDragging,
+    isContextMenuOpen,
+  });
+
   // Event Handlers
   const combinedHandleDragStart = useCallback(
     (
@@ -404,13 +454,28 @@ const Timeline: React.FC<TimelineProps> = ({
   );
 
   const handleDeleteItem = useCallback(
-    (id: number) => onOverlayDelete(id),
-    [onOverlayDelete]
+    (id: number) => {
+      // If deleting a selected item and multiple are selected, delete all selected
+      if (selectedOverlayIds.includes(id) && selectedOverlayIds.length > 1) {
+        selectedOverlayIds.forEach(selectedId => onOverlayDelete(selectedId));
+        handleSelectionChange([]);
+      } else {
+        onOverlayDelete(id);
+      }
+    },
+    [onOverlayDelete, selectedOverlayIds, handleSelectionChange]
   );
 
   const handleDuplicateItem = useCallback(
-    (id: number) => onOverlayDuplicate(id),
-    [onOverlayDuplicate]
+    (id: number) => {
+      // If duplicating a selected item and multiple are selected, duplicate all selected
+      if (selectedOverlayIds.includes(id) && selectedOverlayIds.length > 1) {
+        selectedOverlayIds.forEach(selectedId => onOverlayDuplicate(selectedId));
+      } else {
+        onOverlayDuplicate(id);
+      }
+    },
+    [onOverlayDuplicate, selectedOverlayIds]
   );
 
   const handleItemHover = useCallback(
@@ -738,9 +803,16 @@ useEffect(() => {
               willChange: "width, transform",
               transform: `translateZ(0)`,
             }}
-            onMouseMove={handleMouseMove}
+            onMouseDown={marqueeHandleMouseDown}
+            onMouseMove={(e) => {
+              handleMouseMove(e);
+              handleMarqueeMouseMove(e);
+            }}
             onTouchMove={handleTouchMove}
-            onMouseUp={combinedHandleDragEnd}
+            onMouseUp={(e) => {
+              combinedHandleDragEnd();
+              handleMarqueeMouseUp();
+            }}
             onTouchEnd={combinedHandleDragEnd}
             onMouseLeave={handleTimelineMouseLeave}
             onClick={(e) => {
@@ -797,6 +869,13 @@ useEffect(() => {
                 isContextMenuOpen={isContextMenuOpen}
               />
 
+              {/* Marquee Selection Box */}
+              <TimelineMarqueeSelection
+                isMarqueeSelecting={isMarqueeSelecting}
+                marqueeStartPoint={marqueeStartPoint}
+                marqueeEndPoint={marqueeEndPoint}
+              />
+
               {/* Main timeline grid with overlays */}
               <TimelineGrid
                 overlays={overlays}
@@ -805,6 +884,8 @@ useEffect(() => {
                 draggedItem={draggedItem}
                 selectedOverlayId={selectedOverlayId}
                 setSelectedOverlayId={setSelectedOverlayId}
+                selectedOverlayIds={selectedOverlayIds}
+                onSelectedOverlaysChange={handleSelectionChange}
                 handleDragStart={combinedHandleDragStart}
                 totalDuration={visualTimelineDuration}
                 ghostElement={snappedGhostElement}

@@ -110,6 +110,49 @@ export const Editor: React.FC = () => {
     setOverlays, // Function to update overlays
   } = useEditorContext();
 
+    // Multi-selection state for overlays
+  const [selectedOverlayIds, setSelectedOverlayIds] = React.useState<number[]>(
+    selectedOverlayId !== null ? [selectedOverlayId] : []
+  );
+
+  // Sync with single selection when it changes externally
+  React.useEffect(() => {
+    if (selectedOverlayId !== null && !selectedOverlayIds.includes(selectedOverlayId)) {
+      setSelectedOverlayIds([selectedOverlayId]);
+    } else if (selectedOverlayId === null && selectedOverlayIds.length > 0) {
+      setSelectedOverlayIds([]);
+    }
+  }, [selectedOverlayId, selectedOverlayIds]);
+
+  // Keyboard shortcut handlers
+  const handleSelectAll = React.useCallback(() => {
+    const allIds = overlays.map(o => o.id);
+    setSelectedOverlayIds(allIds);
+    // Update primary selection to last item
+    if (allIds.length > 0) {
+      setSelectedOverlayId(allIds[allIds.length - 1]);
+    }
+  }, [overlays, setSelectedOverlayId]);
+
+  const handleDeselectAll = React.useCallback(() => {
+    setSelectedOverlayIds([]);
+    setSelectedOverlayId(null);
+  }, [setSelectedOverlayId]);
+
+  const handleDeleteSelected = React.useCallback(() => {
+    if (selectedOverlayIds.length === 0) return;
+    selectedOverlayIds.forEach(id => deleteOverlay(id));
+    setSelectedOverlayIds([]);
+    setSelectedOverlayId(null);
+  }, [selectedOverlayIds, deleteOverlay, setSelectedOverlayId]);
+
+  // Handler for selection changes from timeline
+  const handleSelectionChange = React.useCallback((ids: number[]) => {
+    setSelectedOverlayIds(ids);
+    // Update parent with primary selection (last selected item)
+    setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
+  }, [setSelectedOverlayId]);
+
   /**
    * Main editor layout - MODIFIED to work within container
    * Organized in a column layout with the following sections:
@@ -142,8 +185,14 @@ export const Editor: React.FC = () => {
         onClearSelectedRows={() => setSelectedRows(new Set())}
         overlays={overlays}
         setOverlays={setOverlays}
+        selectedOverlayIds={selectedOverlayIds}
+        onSelectAll={handleSelectAll}
+        onDeselectAll={handleDeselectAll}
+        onDeleteSelected={handleDeleteSelected}
       />
       {/* <TimelineSection /> */}
+
+      
 
       {/* 
         Timeline Component
@@ -157,6 +206,8 @@ export const Editor: React.FC = () => {
         durationInFrames={durationInFrames}
         selectedOverlayId={selectedOverlayId}
         setSelectedOverlayId={setSelectedOverlayId}
+        selectedOverlayIds={selectedOverlayIds}
+        onSelectedOverlaysChange={handleSelectionChange}
         onOverlayChange={handleOverlayChange}
         onOverlayDelete={deleteOverlay}
         onOverlayDuplicate={duplicateOverlay}

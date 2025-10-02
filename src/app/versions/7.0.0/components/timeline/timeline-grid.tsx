@@ -27,6 +27,10 @@ interface TimelineGridProps {
   selectedOverlayId: number | null;
   /** Callback to update the selected overlay ID */
   setSelectedOverlayId: (id: number | null) => void;
+  /** Array of selected overlay IDs for multi-selection */
+  selectedOverlayIds?: number[];
+  /** Callback when multiple overlays are selected */
+  onSelectedOverlaysChange?: (ids: number[]) => void;
   /** Callback triggered when dragging starts */
   handleDragStart: (
     overlay: Overlay,
@@ -85,6 +89,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
   draggedItem,
   selectedOverlayId,
   setSelectedOverlayId,
+  selectedOverlayIds = [],
+  onSelectedOverlaysChange,
   handleDragStart,
   totalDuration,
   ghostElement,
@@ -231,6 +237,8 @@ const TimelineGrid: React.FC<TimelineGridProps> = ({
                     draggedItem={draggedItem}
                     selectedItem={selectedItem}
                     setSelectedItem={(item) => setSelectedOverlayId(item.id)}
+                    selectedOverlayIds={selectedOverlayIds}
+                    onSelectedOverlaysChange={onSelectedOverlaysChange}
                     handleMouseDown={(action, e) =>
                       handleDragStart(overlay, e.clientX, e.clientY, action)
                     }

@@ -22,16 +22,17 @@ interface TimelineItemContextMenuProps {
   /** Callback to split the timeline item */
   onSplitItem: (id: number) => void;
   onDetachAudio: (id: number) => void;
-  itemType: string; // Add this
-  isExtractingAudio?: boolean; // Add this
-  audioDetached?: boolean; // Add this
-  isVideoMuted?: boolean; // Add this
-  isAudioMuted?: boolean; // Add this
+  itemType: string;
+  isExtractingAudio?: boolean;
+  audioDetached?: boolean;
+  isVideoMuted?: boolean;
+  isAudioMuted?: boolean;
   onMuteVideo: (id: number) => void;
   onMuteAudio: (id: number) => void;
-
   /** ID of the timeline item this menu belongs to */
   itemId: number;
+  /** Number of selected items for multi-selection context */
+  selectedCount?: number;
 }
 
 
@@ -60,16 +61,18 @@ export const TimelineItemContextMenu: React.FC<
   onDeleteItem,
   onDuplicateItem,
   onSplitItem,
-  onDetachAudio, // Add this
-  isExtractingAudio, // Add this
-  audioDetached, // Add this
-  isVideoMuted, // Add this
-  isAudioMuted, // Add this
-  onMuteVideo, // Add this
-  onMuteAudio, // Add this
+  onDetachAudio,
+  isExtractingAudio,
+  audioDetached,
+  isVideoMuted,
+  isAudioMuted,
+  onMuteVideo,
+  onMuteAudio,
   itemType,
   itemId,
+  selectedCount = 1,
 }) => {
+  const isMultiSelect = selectedCount > 1;
   return (
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger className="z-[100]">{children}</ContextMenuTrigger>
@@ -79,7 +82,7 @@ export const TimelineItemContextMenu: React.FC<
           onClick={() => onDeleteItem(itemId)}
         >
           <Trash2 className="mr-4 h-4 w-4" />
-          Delete
+          {isMultiSelect ? `Delete ${selectedCount} Items` : 'Delete'}
         </ContextMenuItem>
         <ContextMenuItem
           className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
@@ -87,15 +90,17 @@ export const TimelineItemContextMenu: React.FC<
           data-no-timeline-seek="true"
         >
           <Copy className="mr-4 h-4 w-4" />
-          Duplicate
+          {isMultiSelect ? `Duplicate ${selectedCount} Items` : 'Duplicate'}
         </ContextMenuItem>
-        <ContextMenuItem
-          className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
-          onClick={() => onSplitItem(itemId)}
-        >
-          <Scissors className="mr-4 h-4 w-4" />
-          Split
-        </ContextMenuItem>
+        {!isMultiSelect && (
+          <ContextMenuItem
+            className="dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200"
+            onClick={() => onSplitItem(itemId)}
+          >
+            <Scissors className="mr-4 h-4 w-4" />
+            Split
+          </ContextMenuItem>
+        )}
         {itemType === 'video' && (
           <ContextMenuItem
             className={`dark:hover:bg-slate-800 dark:focus:bg-slate-800 dark:text-slate-200 ${

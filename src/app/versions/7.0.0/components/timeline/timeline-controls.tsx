@@ -68,6 +68,14 @@ interface TimelineControlsProps {
   overlays?: any[];
   /** Function to update overlays */
   setOverlays?: (overlays: any[]) => void;
+  /** Array of selected overlay IDs */
+  selectedOverlayIds?: number[];
+  /** Select all overlays */
+  onSelectAll?: () => void;
+  /** Deselect all overlays */
+  onDeselectAll?: () => void;
+  /** Delete selected overlays */
+  onDeleteSelected?: () => void;
 }
 
 /**
@@ -102,6 +110,10 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   onClearSelectedRows,
   overlays = [],
   setOverlays,
+  selectedOverlayIds = [],
+  onSelectAll,
+  onDeselectAll,
+  onDeleteSelected,
 }) => {
   // Context
   const {
@@ -132,6 +144,10 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
     canRedo,
     zoomScale,
     setZoomScale,
+    onSelectAll,
+    onDeselectAll,
+    onDeleteSelected,
+    hasSelection: selectedOverlayIds.length > 0,
   });
 
   const { isLoadingAssets } = useAssetLoading();

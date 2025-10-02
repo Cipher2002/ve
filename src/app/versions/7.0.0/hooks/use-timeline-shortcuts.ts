@@ -9,6 +9,10 @@ interface UseTimelineShortcutsProps {
   canRedo: boolean;
   zoomScale: number;
   setZoomScale: (scale: number) => void;
+  onSelectAll?: () => void;
+  onDeselectAll?: () => void;
+  onDeleteSelected?: () => void;
+  hasSelection?: boolean;
 }
 
 /**
@@ -38,6 +42,10 @@ export const useTimelineShortcuts = ({
   canRedo,
   zoomScale,
   setZoomScale,
+  onSelectAll,
+  onDeselectAll,
+  onDeleteSelected,
+  hasSelection = false,
 }: UseTimelineShortcutsProps) => {
   useHotkeys(
     "alt+space",
@@ -82,4 +90,35 @@ export const useTimelineShortcuts = ({
       preventDefault: true,
     }
   );
+
+  // Select All (Cmd/Ctrl + A)
+  useHotkeys("meta+a, ctrl+a", (e) => {
+    e.preventDefault();
+    if (onSelectAll) onSelectAll();
+  });
+
+  // Deselect All (Escape)
+  useHotkeys("escape", (e) => {
+    e.preventDefault();
+    if (onDeselectAll) onDeselectAll();
+  });
+
+  // Delete selected items (Delete/Backspace)
+  useHotkeys("delete, backspace", (e) => {
+    // Don't trigger if user is typing in a form element
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable ||
+      target.closest('[contenteditable="true"]')
+    ) {
+      return;
+    }
+
+    e.preventDefault();
+    if (hasSelection && onDeleteSelected) {
+      onDeleteSelected();
+    }
+  });
 };
