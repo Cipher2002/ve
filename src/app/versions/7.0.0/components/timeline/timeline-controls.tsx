@@ -208,25 +208,28 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   const handleReset = () => {
-    // Clear all keyframes
+    // 1. Clear all keyframes first
     clearAllKeyframes();
     
-    // Reset overlays (clears timeline)
+    // 2. Reset overlays (clears all timeline items) BEFORE touching rows
     if (resetOverlays) {
       resetOverlays();
     }
     
-    // Reset aspect ratio to default
+    // 3. Reset aspect ratio to default
     setAspectRatio("16:9");
     
-    // Reset timeline rows to default (5 rows)
-    // Calculate how many rows to remove to get back to INITIAL_ROWS (5)
-    const rowsToRemove = visibleRows - INITIAL_ROWS;
-    for (let i = 0; i < rowsToRemove; i++) {
-      if (visibleRows > INITIAL_ROWS) {
-        removeRow();
+    // 4. Reset timeline rows to default (5 rows) AFTER overlays are cleared
+    // Small timeout to ensure overlays are fully cleared before adjusting rows
+    setTimeout(() => {
+      const currentRows = visibleRows;
+      if (currentRows > INITIAL_ROWS) {
+        const rowsToRemove = currentRows - INITIAL_ROWS;
+        for (let i = 0; i < rowsToRemove; i++) {
+          removeRow();
+        }
       }
-    }
+    }, 100);
     
     setDropdownOpen(false);
   };
