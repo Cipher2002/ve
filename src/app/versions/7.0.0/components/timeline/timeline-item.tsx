@@ -345,7 +345,6 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const itemClasses = useMemo(() => getItemClasses(item.type), [item.type]);
 
   const handleSelect = (e: React.MouseEvent) => {
-    console.log('🟡 handleSelect called, metaKey:', e.metaKey, 'ctrlKey:', e.ctrlKey);
     e.stopPropagation();
 
     if (onSelectedOverlaysChange) {
@@ -353,14 +352,25 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       if (e.metaKey || e.ctrlKey) {
         // Cmd/Ctrl + Click: Toggle this item
         if (selectedOverlayIds.includes(item.id)) {
-          onSelectedOverlaysChange(selectedOverlayIds.filter(id => id !== item.id));
+          const newSelection = selectedOverlayIds.filter(id => id !== item.id);
+          onSelectedOverlaysChange(newSelection);
+          // Update single selection to last remaining item or null
+          if (newSelection.length > 0) {
+            setSelectedItem({ id: newSelection[newSelection.length - 1] });
+          } else {
+            setSelectedItem({ id: item.id }); // Keep something selected
+          }
         } else {
-          onSelectedOverlaysChange([...selectedOverlayIds, item.id]);
+          const newSelection = [...selectedOverlayIds, item.id];
+          onSelectedOverlaysChange(newSelection);
+          setSelectedItem({ id: item.id });
         }
       } else if (e.shiftKey && selectedOverlayIds.length > 0) {
         // Shift + Click: Add to selection (simple additive for now)
         if (!selectedOverlayIds.includes(item.id)) {
-          onSelectedOverlaysChange([...selectedOverlayIds, item.id]);
+          const newSelection = [...selectedOverlayIds, item.id];
+          onSelectedOverlaysChange(newSelection);
+          setSelectedItem({ id: item.id });
         }
       } else {
         // Regular click: Select only this item
@@ -486,7 +496,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         ${isTouching ? "scale-[0.98] opacity-80" : ""} 
         ${
           isSelected
-            ? "border-2 border-black dark:border-white"
+            ? "border-2 border-black dark:border-white ring-2 ring-blue-400 dark:ring-blue-500 ring-offset-1"
             : "border-[0px]"
         } 
         select-none pointer-events-auto overflow-hidden`}

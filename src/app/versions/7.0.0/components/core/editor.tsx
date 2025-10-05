@@ -115,13 +115,12 @@ export const Editor: React.FC = () => {
     selectedOverlayId !== null ? [selectedOverlayId] : []
   );
 
-  // Sync with single selection when it changes externally
+  // Sync with single selection when it changes externally (only add, don't clear)
   React.useEffect(() => {
     if (selectedOverlayId !== null && !selectedOverlayIds.includes(selectedOverlayId)) {
       setSelectedOverlayIds([selectedOverlayId]);
-    } else if (selectedOverlayId === null && selectedOverlayIds.length > 0) {
-      setSelectedOverlayIds([]);
     }
+    // Removed the else-if that was clearing selection when selectedOverlayId becomes null
   }, [selectedOverlayId, selectedOverlayIds]);
 
   // Keyboard shortcut handlers

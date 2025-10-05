@@ -819,6 +819,16 @@ useEffect(() => {
                 return; // Don't handle timeline click for these actions
               }
               
+              // Don't seek timeline if we just finished a marquee selection
+              if (isMarqueeSelecting) {
+                return;
+              }
+              
+              // Don't seek if clicking on a timeline item
+              if (target.closest('[data-timeline-item]')) {
+                return;
+              }
+              
               // Calculate click position and convert to frame, limiting to actual content
               const rect = e.currentTarget.getBoundingClientRect();
               const clickX = e.clientX - rect.left;
