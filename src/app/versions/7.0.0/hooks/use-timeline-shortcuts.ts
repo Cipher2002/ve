@@ -48,7 +48,7 @@ export const useTimelineShortcuts = ({
   hasSelection = false,
 }: UseTimelineShortcutsProps) => {
   useHotkeys(
-    "alt+space",
+    "space",
     (e) => {
       // Don't trigger if user is typing in a form element
       const target = e.target as HTMLElement;
