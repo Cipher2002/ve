@@ -50,10 +50,21 @@ export const useTimelineShortcuts = ({
   useHotkeys(
     "alt+space",
     (e) => {
+      // Don't trigger if user is typing in a form element
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('[contenteditable="true"]')
+      ) {
+        return;
+      }
+      
       e.preventDefault();
       handlePlayPause();
     },
-    { enableOnFormTags: true }
+    { enableOnFormTags: false }
   );
 
   useHotkeys("meta+z, ctrl+z", (e) => {
