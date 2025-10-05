@@ -164,6 +164,7 @@ export const Editor: React.FC = () => {
       // - Timeline items or controls
       // - Sidebar/panels (AppSidebar component)
       // - Editor canvas overlays (selection outlines)
+      // - Video player canvas area (allow selection there)
       // - Any form controls (buttons, inputs, etc.)
       // - Dropdown menus, dialogs, popovers
       if (
@@ -172,6 +173,7 @@ export const Editor: React.FC = () => {
         target.closest('[data-selection-outline]') ||
         target.closest('[data-sidebar]') ||
         target.closest('aside') ||
+        target.closest('.video-container') || // ADD THIS - the video player area
         target.closest('[role="dialog"]') ||
         target.closest('[role="menu"]') ||
         target.closest('[role="menuitem"]') ||
