@@ -78,7 +78,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       const data = await response.json();
       
       if (data.success) {
-        console.log('Audio credits deducted successfully:', data.data);
       } else {
         console.error('Audio credit deduction failed:', data.error);
       }
@@ -504,7 +503,6 @@ export const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
               variant="outline"
               size="sm"
               onClick={() => {
-                console.log('Clearing crop for overlay:', localOverlay?.id);
                 handleStyleChange({
                   crop: undefined,
                 });

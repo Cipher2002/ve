@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
         try {
           if (progress.zipFilePath && fs.existsSync(progress.zipFilePath)) {
             fs.unlinkSync(progress.zipFilePath);
-            console.log(`Cleaned up zip file: ${progress.zipFilePath}`);
           }
           zipProgress.delete(jobId);
         } catch (error) {
@@ -173,9 +172,7 @@ async function processZipInBackground(
       });
 
       try {
-        if (render.s3Url && render.renderId && render.format) {
-          console.log(`Processing ${i + 1}/${renders.length}: ${render.renderId}`);
-          
+        if (render.s3Url && render.renderId && render.format) {          
           const response = await fetch(render.s3Url);
           
           if (response.ok) {
@@ -204,7 +201,6 @@ async function processZipInBackground(
     // Finalize the archive
     await new Promise<void>((resolve, reject) => {
       output.on('close', () => {
-        console.log(`Zip file created: ${zipFilePath}`);
         resolve();
       });
       

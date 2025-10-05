@@ -551,16 +551,13 @@ export const loadGoogleFont = (family: string, variants: FontVariant[]): Promise
     // Build a simple URL with proper encoding
     const familyName = family.replace(/\s+/g, '+');
     const fontUrl = `https://fonts.googleapis.com/css2?family=${familyName}:wght@400;700&display=swap`;
-    
-    console.log('Loading font URL:', fontUrl); // Debug log
-    
+        
     // Create link element
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = fontUrl;
     
     link.onload = () => {
-      console.log('Font loaded successfully:', family); // Debug log
       loadedFonts.add(fontKey);
       resolve();
     };

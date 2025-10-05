@@ -67,7 +67,6 @@ export const useMarqueeSelection = ({
         if (!e.shiftKey) {
           onSelectedItemsChange([]);
         } else {
-          console.log('Marquee selection preserving current selection (Shift key held)');
         }
       }
     },

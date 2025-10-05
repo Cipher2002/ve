@@ -117,7 +117,6 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error('Error updating projects list:', error);
         if (retries > 0) {
-          console.log(`Retrying projects list update. Retries left: ${retries}`);
           setTimeout(() => updateProjectsList(retries - 1), 100);
         } else {
           console.error('Failed to update projects list after all retries');

@@ -97,21 +97,13 @@ const RenderControls: React.FC<RenderControlsProps> = ({
         
         // Check if it's a video (not audio) by looking at file extension
         const isVideo = state.url.includes('.mp4') || state.url.includes('.webm') || state.url.includes('.mov') || state.url.includes('.mkv');
-        
-        console.log('🎬 Render completed:', {
-          url: state.url,
-          renderId,
-          isVideo,
-          projectName: getProjectName()
-        });
+
         
         // Generate and upload thumbnail for videos only
         if (isVideo && state.url && renderId) {
-          console.log('📸 Starting thumbnail generation...');
           generateClientThumbnail(state.url, renderId)
             .then(blob => {
               if (blob) {
-                console.log('✅ Thumbnail generated, uploading...');
                 uploadThumbnail(blob, renderId, getProjectName());
               } else {
                 console.error('❌ Failed to generate thumbnail blob');
@@ -121,7 +113,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
               console.error('❌ Failed to generate/upload thumbnail:', error);
             });
         } else {
-          console.log('⏭️ Skipping thumbnail generation (audio file or missing data)');
         }
         
         // Emit event to notify that rendering is complete
@@ -206,7 +197,6 @@ const RenderControls: React.FC<RenderControlsProps> = ({
       const data = await response.json();
       
       if (data.success) {
-        console.log('Credits deducted successfully:', data.data);
       } else {
         console.error('Credit deduction failed:', data.error);
       }

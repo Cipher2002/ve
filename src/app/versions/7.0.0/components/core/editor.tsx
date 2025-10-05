@@ -148,8 +148,8 @@ export const Editor: React.FC = () => {
 
   // Handler for selection changes from timeline
   const handleSelectionChange = React.useCallback((ids: number[]) => {
+    console.log('🔵 handleSelectionChange called with:', ids);
     setSelectedOverlayIds(ids);
-    // Update parent with primary selection (last selected item)
     setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
   }, [setSelectedOverlayId]);
 

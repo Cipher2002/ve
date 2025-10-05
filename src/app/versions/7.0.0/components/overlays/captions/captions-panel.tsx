@@ -346,7 +346,6 @@ export const CaptionsPanel: React.FC = () => {
       const data = await response.json();
       
       if (data.success) {
-        console.log('Caption credits deducted successfully:', data.data);
       } else {
         console.error('Caption credit deduction failed:', data.error);
       }

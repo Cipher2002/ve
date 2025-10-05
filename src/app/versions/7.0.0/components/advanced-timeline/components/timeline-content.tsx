@@ -261,7 +261,6 @@ export const TimelineContent: React.FC<TimelineContentProps> = ({
     (e: React.MouseEvent<HTMLDivElement>) => {
       // Handle marquee selection first
       const marqueeHandled = handleMarqueeMouseUp(e);
-      console.log('marqueeHandled', marqueeHandled);
       // Drag end is now handled globally, so we don't need to handle it here
     },
     [handleMarqueeMouseUp]

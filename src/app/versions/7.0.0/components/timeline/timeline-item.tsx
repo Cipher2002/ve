@@ -345,6 +345,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const itemClasses = useMemo(() => getItemClasses(item.type), [item.type]);
 
   const handleSelect = (e: React.MouseEvent) => {
+    console.log('🟡 handleSelect called, metaKey:', e.metaKey, 'ctrlKey:', e.ctrlKey);
     e.stopPropagation();
 
     if (onSelectedOverlaysChange) {

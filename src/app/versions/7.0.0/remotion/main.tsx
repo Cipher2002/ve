@@ -123,14 +123,6 @@ export const Main: React.FC<MainProps> = ({
         const isSelected = overlay.id === selectedOverlayId;
         const cropEnabled = (overlay as any).styles?.crop?.enabled === true;
         
-        console.log('Checking crop overlay for overlay:', overlay.id, {
-          isVideoOverlay,
-          isImageOverlay,
-          isSelected,
-          cropEnabled,
-          cropData: (overlay as any).styles?.crop
-        });
-        
         if ((isVideoOverlay || isImageOverlay) && isSelected && cropEnabled) {
           return (
             <div

@@ -20,13 +20,10 @@ export const useVisibleRows = (onAddRow?: () => void, onRemoveRow?: () => void) 
    * Calls onAddRow callback when a row is actually added (to shift overlays)
    */
   const addRow = () => {
-    console.log('addRow called'); // Add this
     setVisibleRows((current) => {
       const newCount = Math.min(current + 1, MAX_ROWS);
-      console.log(`visibleRows: ${current} -> ${newCount}`); // Add this
       // Only trigger callback if we're actually adding a row
       if (newCount > current && onAddRow) {
-        console.log('Calling onAddRow callback'); // Add this
         onAddRow();
       }
       return newCount;

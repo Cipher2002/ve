@@ -45,12 +45,6 @@ export async function POST(request: NextRequest) {
     const productId = exportData.product_code;
     const credits = exportData.product_credits_cost;
     
-    console.log('Credit deduction details:', {
-      productId,
-      credits,
-      productName: exportData.product_name
-    });
-    
     // Second API call - Use credits
     const useCreditUrl = `http://api.flickstree.com/oneclick_service_109v.php/?VERSION=1.09&ENCODING=JSON&METHOD=USE_CREDITS&PRODUCTNAME=oneclick&USERID=${userId}&SESSIONID=${sessionId}&product_id=${productId}&credits=${credits}&page_source=video_edit.php&auto_renew=&memo=&trans_id=&trans_type=&`;
     
@@ -67,7 +61,6 @@ export async function POST(request: NextRequest) {
     const useCreditData = await useCreditResponse.json();
     
     if (useCreditData.RESULT === 'SUCCESS') {
-      console.log('Credits deducted successfully:', useCreditData.RESPONSE);
       return NextResponse.json({
         success: true,
         data: {

@@ -106,7 +106,6 @@ export const VideoSettingsPanel: React.FC<VideoSettingsPanelProps> = ({
       const data = await response.json();
       
       if (data.success) {
-        console.log('Audio credits deducted successfully:', data.data);
       } else {
         console.error('Audio credit deduction failed:', data.error);
       }

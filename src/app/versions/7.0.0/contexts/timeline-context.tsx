@@ -63,12 +63,10 @@ export const TimelineProvider: React.FC<{ children: React.ReactNode }> = ({
   const { visibleRows, setVisibleRows, addRow, removeRow } = useVisibleRows(
     () => {
       // Dispatch custom event that the Timeline component will handle
-      console.log('Dispatching addRowRequested event');
       window.dispatchEvent(new CustomEvent('addRowRequested'));
     },
     () => {
       // Dispatch custom event for remove row
-      console.log('Dispatching removeRowRequested event');
       window.dispatchEvent(new CustomEvent('removeRowRequested'));
     }
   );

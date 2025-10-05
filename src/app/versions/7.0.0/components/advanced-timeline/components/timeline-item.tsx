@@ -260,7 +260,6 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({
         onSelect?.(item.id);
       }
     } else {
-      console.log('Right-clicked selected item, preserving current selection');
     }
   };
 

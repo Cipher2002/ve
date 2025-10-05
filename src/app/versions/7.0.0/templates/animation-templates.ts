@@ -34,7 +34,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
     name: "Fade",
     preview: "Simple fade in/out",
     enter: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - fade enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       return {
         opacity: interpolate(frame, [0, animDuration], [0, 1], {
@@ -43,7 +42,6 @@ export const animationTemplates: Record<string, AnimationTemplate> = {
       };
     },
     exit: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       return {
         opacity: interpolate(frame, [duration - animDuration, duration], [1, 0], {
@@ -58,7 +56,6 @@ const animDuration = 30 / speed;
     isPro: true,
     directions: ["left", "right", "top", "bottom"],
     enter: (frame, duration, direction = "right", speed = 1) => {
-      console.log('Animation Debug - slide enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       const directions: Record<string, [number, number]> = {
         left: [-100, 0],
@@ -84,7 +81,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "right", speed = 1) => {
-      console.log('Animation Debug - slide exit:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       const directions: Record<string, [number, number]> = {
         left: [0, 100],
@@ -120,7 +116,6 @@ const animDuration = 30 / speed;
     name: "Scale",
     preview: "Scale in/out",
     enter: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - fade enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       return {
         transform: `scale(${interpolate(frame, [0, animDuration], [0, 1], {
@@ -132,8 +127,7 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
-const animDuration = 30 / speed;
+      const animDuration = 30 / speed;
       return {
         transform: `scale(${interpolate(
           frame,
@@ -153,8 +147,7 @@ const animDuration = 30 / speed;
     isPro: true,
     directions: ["left", "right", "top", "bottom"],
     enter: (frame, duration, direction = "bottom", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
-const animDuration = 30 / speed;
+      const animDuration = 30 / speed;
       const isHorizontal = direction === "left" || direction === "right";
       const multiplier = direction === "left" || direction === "top" ? -1 : 1;
       
@@ -178,7 +171,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "bottom", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const isHorizontal = direction === "left" || direction === "right";
       const multiplier = direction === "left" || direction === "top" ? -1 : 1;
@@ -209,7 +201,6 @@ const animDuration = 30 / speed;
     isPro: true,
     directions: ["horizontal", "vertical"],
     enter: (frame, duration, direction = "horizontal", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       return {
         transform: direction === "horizontal"
@@ -231,7 +222,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "horizontal", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       return {
         transform: direction === "horizontal"
@@ -263,7 +253,6 @@ const animDuration = 30 / speed;
     preview: "Zoom with blur effect",
     isPro: true,
     enter: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - fade enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       return {
         transform: `scale(${interpolate(frame, [0, animDuration], [1.5, 1], {
@@ -278,7 +267,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       return {
         transform: `scale(${interpolate(
@@ -302,7 +290,6 @@ const animDuration = 30 / speed;
     isPro: true,
     directions: ["clockwise", "counter-clockwise"],
     enter: (frame, duration, direction = "clockwise", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const multiplier = direction === "clockwise" ? 1 : -1;
       return {
@@ -322,7 +309,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "clockwise", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const multiplier = direction === "clockwise" ? 1 : -1;
       return {
@@ -345,7 +331,6 @@ const animDuration = 30 / speed;
     preview: "Digital glitch effect",
     isPro: true,
     enter: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - fade enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       const progress = interpolate(frame, [0, animDuration], [0, 1], {
         extrapolateRight: "clamp",
@@ -368,7 +353,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction, speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const progress = interpolate(frame, [duration - animDuration, duration], [0, 1], {
         extrapolateLeft: "clamp",
@@ -402,7 +386,6 @@ const animDuration = 30 / speed;
     isPro: true,
     directions: ["left", "right", "top", "bottom"],
     enter: (frame, duration, direction = "right", speed = 1) => {
-      console.log('Animation Debug - slide enter:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       const clipPaths: Record<string, string> = {
         left: `inset(0 0 0 ${interpolate(frame, [0, animDuration], [100, 0], {
@@ -426,7 +409,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "right", speed = 1) => {
-      console.log('Animation Debug - slide exit:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
       const animDuration = 30 / speed;
       const clipPaths: Record<string, string> = {
         left: `inset(0 ${interpolate(
@@ -467,7 +449,6 @@ const animDuration = 30 / speed;
     preview: "Smooth floating entrance",
     directions: ["left", "right", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"],
     enter: (frame, duration, direction = "bottom", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const movements: Record<string, [number, number]> = {
         left: [-20, 0],
@@ -489,7 +470,6 @@ const animDuration = 30 / speed;
       };
     },
     exit: (frame, duration, direction = "bottom", speed = 1) => {
-      console.log('Animation Debug - [ANIMATION_NAME] [enter/exit]:', { frame, duration, direction, speed, calculatedDuration: 30 / speed });
 const animDuration = 30 / speed;
       const movements: Record<string, [number, number]> = {
         left: [0, 20],

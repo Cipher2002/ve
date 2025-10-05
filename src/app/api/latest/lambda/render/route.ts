@@ -80,9 +80,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         diskSizeInMb: 2048,
         lambdasInvoked: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
       });
-      
-      console.log(`Estimated ${isAudio ? 'audio' : 'video'} render cost: $${estimatedCost.toFixed(5)} for ${body.inputProps.durationInFrames} frames`);
-      
+            
       // Base render options
       const renderOptions = {
         codec: remotionCodec,
@@ -126,8 +124,6 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       }
 
       const result = await renderMediaOnLambda(finalRenderOptions);
-
-      console.log(`${isAudio ? 'Audio' : 'Video'} render result:`, JSON.stringify(result, null, 2));
       
       return {
         ...result,
