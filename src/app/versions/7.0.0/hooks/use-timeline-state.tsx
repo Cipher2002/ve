@@ -27,6 +27,7 @@ interface DragInfo {
   startRow: number; // Initial row number
   ghostElement: null;
   ghostMarkerPosition: null;
+  draggedOverlays?: Overlay[]; // For multi-selection drag
 }
 
 export const useTimelineState = (

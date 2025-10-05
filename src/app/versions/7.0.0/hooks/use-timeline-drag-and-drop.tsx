@@ -21,7 +21,7 @@ interface DragInfo {
   ghostWidth?: number;
   ghostTop?: number;
   currentRow?: number;
-  // Remove potential position fields again
+  draggedOverlays?: Overlay[]; // For multi-selection drag
 }
 
 interface UseTimelineDragAndDropProps {
@@ -195,9 +195,15 @@ export const useTimelineDragAndDrop = ({
       overlay: Overlay,
       clientX: number,
       clientY: number,
-      action: "move" | "resize-start" | "resize-end"
+      action: "move" | "resize-start" | "resize-end",
+      selectedOverlayIds: number[] = []
     ) => {
       if (timelineRef.current) {
+        // Get all overlays that are being dragged (multi-selection support)
+        const draggedOverlays = selectedOverlayIds.length > 1 && selectedOverlayIds.includes(overlay.id)
+          ? overlays.filter(o => selectedOverlayIds.includes(o.id))
+          : [overlay];
+
         dragInfo.current = {
           id: overlay.id,
           action,
@@ -206,6 +212,7 @@ export const useTimelineDragAndDrop = ({
           startPosition: overlay.from,
           startDuration: overlay.durationInFrames,
           startRow: overlay.row || 0,
+          draggedOverlays, // Store all dragged overlays
         };
 
         // Call updateGhostElement with empty map initially
@@ -217,7 +224,7 @@ export const useTimelineDragAndDrop = ({
         );
       }
     },
-    [durationInFrames, maxRows, updateGhostElement]
+    [durationInFrames, maxRows, updateGhostElement, overlays]
   );
 
   const handleDrag = useCallback(
@@ -439,7 +446,12 @@ export const useTimelineDragAndDrop = ({
         }
       }
 
-      // Always add the dragged item update if the position is valid
+      // Calculate deltas for multi-selection
+      const deltaFrom = intendedNewFrom - currentDragInfo.startPosition;
+      const deltaRow = intendedNewRow - currentDragInfo.startRow;
+      const draggedOverlays = currentDragInfo.draggedOverlays || [originalOverlay];
+
+      // Update the primary dragged item
       itemsToUpdate.push({
         ...originalOverlay,
         ...additionalUpdates,
@@ -447,6 +459,22 @@ export const useTimelineDragAndDrop = ({
         durationInFrames: intendedNewDuration,
         row: intendedNewRow,
       });
+
+      // Update other selected overlays with the same delta (only for move action)
+      if (currentDragInfo.action === "move" && draggedOverlays.length > 1) {
+        draggedOverlays.forEach((overlay: Overlay) => {
+          if (overlay.id !== originalOverlay.id) {
+            const newFrom = Math.max(0, overlay.from + deltaFrom);
+            const newRow = Math.max(0, Math.min(maxRows - 1, overlay.row + deltaRow));
+            
+            itemsToUpdate.push({
+              ...overlay,
+              from: snapToGrid(newFrom),
+              row: newRow,
+            });
+          }
+        });
+      }
 
       // Always add pushed items update if canPush is true
       // Remove conditional check for ENABLE_PUSH_ON_DRAG here

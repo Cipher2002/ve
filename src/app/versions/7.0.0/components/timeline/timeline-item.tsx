@@ -514,6 +514,10 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         }}
         onMouseDown={(e) => {
           e.stopPropagation(); // Prevent event bubbling
+          // Don't start drag if modifier keys are held (for multi-selection)
+          if (e.metaKey || e.ctrlKey || e.shiftKey) {
+            return;
+          }
           handleItemInteraction(e, "mousedown");
         }}
         onTouchStart={(e) => {

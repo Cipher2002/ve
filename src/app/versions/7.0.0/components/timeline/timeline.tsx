@@ -436,9 +436,9 @@ const Timeline: React.FC<TimelineProps> = ({
       action: "move" | "resize-start" | "resize-end"
     ) => {
       timelineStateHandleDragStart(overlay, clientX, clientY, action);
-      hookHandleDragStart(overlay, clientX, clientY, action);
+      hookHandleDragStart(overlay, clientX, clientY, action, selectedOverlayIds);
     },
-    [timelineStateHandleDragStart, hookHandleDragStart]
+    [timelineStateHandleDragStart, hookHandleDragStart, selectedOverlayIds]
   );
 
   // Enhanced drag end handler that checks duration limit
