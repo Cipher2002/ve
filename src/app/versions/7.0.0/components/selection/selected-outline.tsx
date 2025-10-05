@@ -18,18 +18,22 @@ import { RotateHandle } from "./rotate-handle";
  */
 export const SelectionOutline: React.FC<{
   overlay: Overlay;
+  allOverlays: Overlay[];  // ADD THIS
   changeOverlay: (
     overlayId: number,
     updater: (overlay: Overlay) => Overlay
   ) => void;
   setSelectedOverlayId: React.Dispatch<React.SetStateAction<number | null>>;
   selectedOverlayId: number | null;
+  selectedOverlayIds?: number[];
   isDragging: boolean;
 }> = ({
   overlay,
+  allOverlays,  // ADD THIS
   changeOverlay,
   setSelectedOverlayId,
   selectedOverlayId,
+  selectedOverlayIds = [],
   isDragging,
 }) => {
   const scale = useCurrentScale();
@@ -85,29 +89,36 @@ export const SelectionOutline: React.FC<{
   }, [overlay, hovered, isDragging, isSelected, scaledBorder]);
 
   const startDragging = useCallback(
-    (e: PointerEvent | React.MouseEvent) => {
+    (e: PointerEvent | React.MouseEvent, draggedOverlays: Overlay[]) => {
       const initialX = e.clientX;
       const initialY = e.clientY;
 
       const onPointerMove = (pointerMoveEvent: PointerEvent) => {
         const offsetX = (pointerMoveEvent.clientX - initialX) / scale;
         const offsetY = (pointerMoveEvent.clientY - initialY) / scale;
-        changeOverlay(overlay.id, (o) => {
-          return {
-            ...o,
-            left: Math.round(overlay.left + offsetX),
-            top: Math.round(overlay.top + offsetY),
-            isDragging: true,
-          };
+        
+        // Update all selected overlays
+        draggedOverlays.forEach(draggedOverlay => {
+          changeOverlay(draggedOverlay.id, (o) => {
+            return {
+              ...o,
+              left: Math.round(draggedOverlay.left + offsetX),
+              top: Math.round(draggedOverlay.top + offsetY),
+              isDragging: true,
+            };
+          });
         });
       };
 
       const onPointerUp = () => {
-        changeOverlay(overlay.id, (o) => {
-          return {
-            ...o,
-            isDragging: false,
-          };
+        // Reset dragging state for all overlays
+        draggedOverlays.forEach(draggedOverlay => {
+          changeOverlay(draggedOverlay.id, (o) => {
+            return {
+              ...o,
+              isDragging: false,
+            };
+          });
         });
         window.removeEventListener("pointermove", onPointerMove);
       };
@@ -118,20 +129,27 @@ export const SelectionOutline: React.FC<{
         once: true,
       });
     },
-    [overlay, scale, changeOverlay]
+    [scale, changeOverlay]
   );
 
   const onPointerDown = useCallback(
-    (e: React.MouseEvent) => {
+    (e: React.MouseEvent, allOverlays: Overlay[]) => {
       e.stopPropagation();
       if (e.button !== 0) {
         return;
       }
 
       setSelectedOverlayId(overlay.id);
-      startDragging(e);
+      
+      // Determine which overlays to drag
+      const isPartOfMultiSelection = selectedOverlayIds.length > 1 && selectedOverlayIds.includes(overlay.id);
+      const overlaysToDrag = isPartOfMultiSelection
+        ? allOverlays.filter(o => selectedOverlayIds.includes(o.id))
+        : [overlay];
+      
+      startDragging(e, overlaysToDrag);
     },
-    [overlay.id, setSelectedOverlayId, startDragging]
+    [overlay, selectedOverlayIds, setSelectedOverlayId, startDragging]
   );
 
   if (overlay.type === OverlayType.SOUND) {
@@ -141,41 +159,11 @@ export const SelectionOutline: React.FC<{
   return (
     <>
       <div
-        onPointerDown={onPointerDown}
+        onPointerDown={(e) => onPointerDown(e, allOverlays)}
         onPointerEnter={onMouseEnter}
         onPointerLeave={onMouseLeave}
         style={style}
       >
-        {/* {isSelected ? (
-          <>
-            <ResizeHandle
-              overlay={overlay}
-              setOverlay={changeOverlay}
-              type="top-left"
-            />
-            <ResizeHandle
-              overlay={overlay}
-              setOverlay={changeOverlay}
-              type="top-right"
-            />
-            <ResizeHandle
-              overlay={overlay}
-              setOverlay={changeOverlay}
-              type="bottom-left"
-            />
-            <ResizeHandle
-              overlay={overlay}
-              setOverlay={changeOverlay}
-              type="bottom-right"
-            />
-            <RotateHandle
-              overlay={overlay}
-              setOverlay={changeOverlay}
-              scale={scale}
-            />
-          </>
-        ) : null} */}
-
         {isSelected ? (
           <>
             {/* Hide handles when crop edit mode is active for video and image overlays */}

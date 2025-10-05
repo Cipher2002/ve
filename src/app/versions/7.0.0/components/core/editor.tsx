@@ -93,6 +93,8 @@ export const Editor: React.FC = () => {
     overlays, // Array of current overlay objects
     selectedOverlayId, // ID of the currently selected overlay
     setSelectedOverlayId, // Function to update selected overlay
+    selectedOverlayIds: contextSelectedOverlayIds, // Multi-selection from context
+    setSelectedOverlayIds: contextSetSelectedOverlayIds, // Function to update multi-selection
     isPlaying, // Current playback state
     currentFrame, // Current frame position
     playerRef, // Reference to video player
@@ -110,10 +112,12 @@ export const Editor: React.FC = () => {
     setOverlays, // Function to update overlays
   } = useEditorContext();
 
-    // Multi-selection state for overlays
-  const [selectedOverlayIds, setSelectedOverlayIds] = React.useState<number[]>(
-    selectedOverlayId !== null ? [selectedOverlayId] : []
-  );
+    // Use context state if available, otherwise local state
+  const selectedOverlayIds = contextSelectedOverlayIds || (selectedOverlayId !== null ? [selectedOverlayId] : []);
+  const setSelectedOverlayIds = contextSetSelectedOverlayIds || ((ids: number[]) => {
+    // Fallback: just update the single selection
+    setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
+  });
 
   // Sync with single selection when it changes externally (only add, don't clear)
   React.useEffect(() => {

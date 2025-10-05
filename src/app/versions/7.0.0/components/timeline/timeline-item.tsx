@@ -347,6 +347,11 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    // If we're currently dragging, don't handle selection
+    if (isDragging) {
+      return;
+    }
+
     if (onSelectedOverlaysChange) {
       // Multi-selection logic
       if (e.metaKey || e.ctrlKey) {

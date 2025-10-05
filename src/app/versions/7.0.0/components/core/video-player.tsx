@@ -18,11 +18,12 @@ interface VideoPlayerProps {
  * The player automatically resizes based on its container and maintains the specified aspect ratio
  */
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
-  const {
+const {
     overlays,
     setSelectedOverlayId,
     changeOverlay,
     selectedOverlayId,
+    selectedOverlayIds,  // ADD THIS LINE
     aspectRatio,
     playerDimensions,
     updatePlayerDimensions,
@@ -118,6 +119,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ playerRef }) => {
                 setSelectedOverlayId,
                 changeOverlay,
                 selectedOverlayId,
+                selectedOverlayIds,
                 durationInFrames,
                 fps: FPS,
                 width: compositionWidth,

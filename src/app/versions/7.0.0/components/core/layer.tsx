@@ -13,12 +13,13 @@ import { Overlay, ClipOverlay } from "../../types";
 export const Layer: React.FC<{
   overlay: Overlay;
   selectedOverlayId: number | null;
+  selectedOverlayIds?: number[];  // ADD THIS LINE
   baseUrl?: string;
   allOverlays?: Overlay[];
   currentFrame?: number;
   premountFrames?: number;
   maxPremountedVideos?: number;
-}> = ({ overlay, selectedOverlayId, baseUrl, allOverlays = [], currentFrame = 0, premountFrames = 100, maxPremountedVideos = 3 }) => {
+}> = ({ overlay, selectedOverlayId, selectedOverlayIds = [], baseUrl, allOverlays = [], currentFrame = 0, premountFrames = 100, maxPremountedVideos = 3 }) => {
   /**
    * Memoized style calculations for the layer
    * Handles positioning, dimensions, rotation, and z-index based on:
@@ -30,12 +31,12 @@ export const Layer: React.FC<{
    *
    * @returns {React.CSSProperties} Computed styles for the layer
    */
-  const style: React.CSSProperties = useMemo(() => {
+const style: React.CSSProperties = useMemo(() => {
     // Higher row numbers should be at the bottom
     // e.g. row 4 = z-index 60, row 0 = z-index 100
     // Ensure z-index never goes negative by using Math.max with 1
     const zIndex = Math.max(1, 100 - (overlay.row || 0) * 10);
-    const isSelected = overlay.id === selectedOverlayId;
+    const isSelected = overlay.id === selectedOverlayId || selectedOverlayIds.includes(overlay.id);
 
     return {
       position: "absolute",
@@ -47,6 +48,13 @@ export const Layer: React.FC<{
       transformOrigin: "center center",
       zIndex,
       pointerEvents: isSelected ? "all" : "none",
+      // Add visual highlight for multi-selection
+      outline: selectedOverlayIds.length > 1 && selectedOverlayIds.includes(overlay.id) 
+        ? '3px solid rgba(59, 130, 246, 0.8)' 
+        : isSelected 
+        ? '2px solid rgba(59, 130, 246, 0.6)' 
+        : 'none',
+      outlineOffset: '2px',
     };
   }, [
     overlay.height,
@@ -57,6 +65,7 @@ export const Layer: React.FC<{
     overlay.row,
     overlay.id,
     selectedOverlayId,
+    selectedOverlayIds,  // ADD THIS LINE
   ]);
 
   /**

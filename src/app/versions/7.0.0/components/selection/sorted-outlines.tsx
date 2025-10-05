@@ -26,12 +26,13 @@ const sortOverlaysByRow = (overlays: Overlay[]): Overlay[] => {
 export const SortedOutlines: React.FC<{
   overlays: Overlay[];
   selectedOverlayId: number | null;
+  selectedOverlayIds?: number[];
   changeOverlay: (
     overlayId: number,
     updater: (overlay: Overlay) => Overlay
   ) => void;
   setSelectedOverlayId: React.Dispatch<React.SetStateAction<number | null>>;
-}> = ({ overlays, selectedOverlayId, changeOverlay, setSelectedOverlayId }) => {
+}> = ({ overlays, selectedOverlayId, selectedOverlayIds = [], changeOverlay, setSelectedOverlayId }) => {
   const overlaysToDisplay = React.useMemo(
     () => sortOverlaysByRow(overlays),
     [overlays]
@@ -53,8 +54,10 @@ export const SortedOutlines: React.FC<{
         <SelectionOutline
           changeOverlay={changeOverlay}
           overlay={overlay}
+          allOverlays={overlays}
           setSelectedOverlayId={setSelectedOverlayId}
           selectedOverlayId={selectedOverlayId}
+          selectedOverlayIds={selectedOverlayIds}
           isDragging={isDragging}
         />
       </Sequence>

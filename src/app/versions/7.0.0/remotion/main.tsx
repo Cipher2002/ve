@@ -21,6 +21,8 @@ export type MainProps = {
   >;
   /** Currently selected overlay ID, or null if none selected */
   readonly selectedOverlayId: number | null;
+  /** Array of selected overlay IDs for multi-selection */
+  readonly selectedOverlayIds?: number[];  // ← THIS LINE MUST BE HERE
   /**
    * Function to update an overlay
    * @param overlayId - The ID of the overlay to update
@@ -68,6 +70,7 @@ export const Main: React.FC<MainProps> = ({
   overlays,
   setSelectedOverlayId,
   selectedOverlayId,
+  selectedOverlayIds = [],
   changeOverlay,
   baseUrl,
   currentFrame,
@@ -106,6 +109,7 @@ export const Main: React.FC<MainProps> = ({
               key={overlay.id}
               overlay={overlay}
               selectedOverlayId={selectedOverlayId}
+              selectedOverlayIds={selectedOverlayIds}
               baseUrl={baseUrl}
               allOverlays={overlays}
               currentFrame={currentFrame}
@@ -168,6 +172,7 @@ export const Main: React.FC<MainProps> = ({
 
       <SortedOutlines
         selectedOverlayId={selectedOverlayId}
+        selectedOverlayIds={selectedOverlayIds}
         overlays={overlays}
         setSelectedOverlayId={setSelectedOverlayId}
         changeOverlay={changeOverlay}
