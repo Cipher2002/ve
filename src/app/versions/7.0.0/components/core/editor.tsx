@@ -160,11 +160,16 @@ export const Editor: React.FC = () => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       
+      // Check if clicking on the Remotion player canvas (the black area with video)
+      const isRemotionCanvas = target.closest('[data-remotion-canvas]') || 
+                               target.tagName === 'CANVAS' ||
+                               target.closest('canvas');
+      
       // Don't deselect if clicking on:
       // - Timeline items or controls
       // - Sidebar/panels (AppSidebar component)
       // - Editor canvas overlays (selection outlines)
-      // - Video player canvas area (allow selection there)
+      // - The actual Remotion canvas (black area with overlays)
       // - Any form controls (buttons, inputs, etc.)
       // - Dropdown menus, dialogs, popovers
       if (
@@ -173,7 +178,7 @@ export const Editor: React.FC = () => {
         target.closest('[data-selection-outline]') ||
         target.closest('[data-sidebar]') ||
         target.closest('aside') ||
-        target.closest('.video-container') || // ADD THIS - the video player area
+        isRemotionCanvas ||
         target.closest('[role="dialog"]') ||
         target.closest('[role="menu"]') ||
         target.closest('[role="menuitem"]') ||
@@ -196,6 +201,7 @@ export const Editor: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [handleDeselectAll]);
+
 
   /**
    * Main editor layout - MODIFIED to work within container
