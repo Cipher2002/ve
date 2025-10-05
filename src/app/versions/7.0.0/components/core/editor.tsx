@@ -154,6 +154,47 @@ export const Editor: React.FC = () => {
     setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
   }, [setSelectedOverlayId]);
 
+  
+  // Handle clicks outside to deselect overlays
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Don't deselect if clicking on:
+      // - Timeline items or controls
+      // - Sidebar/panels (AppSidebar component)
+      // - Editor canvas overlays (selection outlines)
+      // - Any form controls (buttons, inputs, etc.)
+      // - Dropdown menus, dialogs, popovers
+      if (
+        target.closest('[data-timeline-item]') ||
+        target.closest('[data-timeline-marker]') ||
+        target.closest('[data-selection-outline]') ||
+        target.closest('[data-sidebar]') ||
+        target.closest('aside') ||
+        target.closest('[role="dialog"]') ||
+        target.closest('[role="menu"]') ||
+        target.closest('[role="menuitem"]') ||
+        target.closest('button') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('[data-radix-popper-content-wrapper]') ||
+        target.closest('[data-radix-dialog-overlay]') ||
+        target.closest('.cm-editor') ||
+        target.closest('[contenteditable="true"]')
+      ) {
+        return;
+      }
+      
+      // Deselect all overlays
+      handleDeselectAll();
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [handleDeselectAll]);
+
   /**
    * Main editor layout - MODIFIED to work within container
    * Organized in a column layout with the following sections:

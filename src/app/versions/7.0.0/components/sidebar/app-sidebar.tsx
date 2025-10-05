@@ -178,6 +178,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar
+      data-sidebar="true"
       collapsible="icon"
       className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row bg-transparent rounded-l-2xl"
       {...props}
