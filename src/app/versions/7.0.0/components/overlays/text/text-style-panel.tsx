@@ -338,7 +338,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   </Popover> */}
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground">Text Color</label>
-                    <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-md border cursor-pointer flex items-center gap-2">
                       <input
                         type="color"
                         value={
@@ -347,7 +347,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                             : localOverlay?.styles?.color.replace(/rgba?\([^)]+\)/, "#ffffff")
                         }
                         onChange={(e) => updateStyle("color", e.target.value)}
-                        className="w-8 h-8 border border-gray-200 dark:border-gray-700 rounded-md p-0.5 cursor-pointer"
+                        className="w-[330px] dark:bg-gray-900 border border-gray-700"
                       />
                       {/* <input
                         type="text"
