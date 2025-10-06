@@ -322,75 +322,8 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                     />
                   </div>
                 </div>
-                {/* <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">Text Color</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div
-                        className="h-8 w-8 rounded-md border cursor-pointer"
-                        style={{
-                          backgroundColor:
-                            localOverlay?.styles?.color === "transparent"
-                              ? "#ffffff"
-                              : localOverlay?.styles?.color,
-                        }}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[330px] dark:bg-gray-900 border border-gray-700 p-3 flex justify-center"
-                      side="right"
-                    >
-                      <input
-                        type="color"
-                        value={
-                          localOverlay?.styles?.color === "transparent"
-                            ? "#ffffff"
-                            : localOverlay?.styles?.color.replace(/rgba?\([^)]+\)/, "#ffffff")
-                        }
-                        onChange={(e) => updateStyle("color", e.target.value)}
-                        className="h-10 w-16 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div> */}
-
-
-                {/* <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">Highlight</label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div
-                        className="h-8 w-8 rounded-md border cursor-pointer"
-                        style={{
-                          backgroundColor:
-                            localOverlay?.styles?.backgroundColor === "transparent"
-                              ? "#ffffff"
-                              : localOverlay?.styles?.backgroundColor,
-                        }}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[330px] dark:bg-gray-900 border border-gray-700 p-3 flex justify-center"
-                      side="right"
-                    >
-                      <input
-                        type="color"
-                        value={
-                          localOverlay?.styles?.backgroundColor === "transparent"
-                            ? "#ffffff"
-                            : localOverlay?.styles?.backgroundColor.replace(
-                                /rgba?\([^)]+\)/,
-                                "#ffffff"
-                              )
-                        }
-                        onChange={(e) => updateStyle("backgroundColor", e.target.value)}
-                        className="h-10 w-16 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div> */}
                 <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">Text Color</label>
+                  <label className="text-xs text-muted-foreground">Highlight</label>
                   <div className="h-8 w-8 rounded-md border cursor-pointer flex items-center gap-2">
                     <input
                       type="color"
@@ -399,7 +332,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                           ? "#ffffff"
                           : localOverlay?.styles?.backgroundColor.replace(/rgba?\([^)]+\)/, "#ffffff")
                       }
-                      onChange={(e) => updateStyle("color", e.target.value)}
+                      onChange={(e) => updateStyle("backgroundColor", e.target.value)}
                       className="h-8 w-8 border rounded-md cursor-pointer"
                     />
                   </div>
@@ -522,7 +455,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               />
             </div>
             
-            <div className="space-y-1">
+            {/* <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground">Color</label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -576,6 +509,36 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                   />
                 </PopoverContent>
               </Popover>
+            </div> */}
+            <div className="space-y-1">
+              <label className="text-[10px] text-muted-foreground">Color</label>
+              <input
+                type="color"
+                value={(() => {
+                  const shadow = localOverlay.styles.textShadow;
+                  if (!shadow || shadow === 'none') return '#808080'; // fallback
+                  const match = shadow.match(/rgba?\([^)]+\)|#[a-fA-F0-9]{3,6}|[a-zA-Z]+$/);
+                  return match ? match[0] : '#808080';
+                })()}
+                onChange={(e) => {
+                  const color = e.target.value;
+                  const currentShadow = localOverlay.styles.textShadow || 'none';
+                  let offsetX = '0', offsetY = '0', blur = '0';
+
+                  if (currentShadow !== 'none') {
+                    const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px/);
+                    if (match) {
+                      offsetX = match[1];
+                      offsetY = match[2];
+                      blur = match[3];
+                    }
+                  }
+
+                  const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
+                  updateStyle("textShadow", newShadow);
+                }}
+                className="h-6 w-16 rounded border cursor-pointer"
+              />
             </div>
           </div>
           
