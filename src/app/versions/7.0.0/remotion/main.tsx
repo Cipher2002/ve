@@ -51,7 +51,7 @@ export type MainProps = {
 };
 
 const outer: React.CSSProperties = {
-  backgroundColor: "grey",
+  backgroundColor: "#e5e7eb",
 };
 
 const layerContainer: React.CSSProperties = {
