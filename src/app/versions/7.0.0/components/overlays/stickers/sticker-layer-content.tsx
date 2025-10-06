@@ -59,6 +59,7 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
         style={{
           width: "100%",
           height: "100%",
+          opacity: overlay.stickerOpacity ?? 1,
           ...(isExitPhase ? exitAnimation : enterAnimation),
         }}
       >
@@ -83,7 +84,8 @@ export const StickerLayerContent: React.FC<StickerLayerContentProps> = memo(
       prevProps.overlay.shadowColor === nextProps.overlay.shadowColor &&
       prevProps.overlay.shadowBlur === nextProps.overlay.shadowBlur &&
       prevProps.overlay.shadowOffsetX === nextProps.overlay.shadowOffsetX &&
-      prevProps.overlay.shadowOffsetY === nextProps.overlay.shadowOffsetY
+      prevProps.overlay.shadowOffsetY === nextProps.overlay.shadowOffsetY &&
+      prevProps.overlay.stickerOpacity === nextProps.overlay.stickerOpacity
     );
   }
 );

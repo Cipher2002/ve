@@ -131,6 +131,7 @@ export const TextLayerContent: React.FC<TextLayerContentProps> = ({
         ? "flex-end"
         : "flex-start",
     overflow: "hidden",
+    opacity: overlay.styles.textOpacity ?? 1,
     ...(isExitPhase ? exitAnimation : enterAnimation),
   };
 
