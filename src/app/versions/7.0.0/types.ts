@@ -72,6 +72,7 @@ export type TextOverlay = BaseOverlay & {
     WebkitTextFillColor?: string;
     backdropFilter?: string;
     border?: string;
+    textOpacity?: number;
     animation?: AnimationConfig;
     cssClass?: string;
     customCSS?: string;
@@ -259,6 +260,7 @@ export type StickerOverlay = BaseOverlay & {
   shadowBlur?: number;
   shadowOffsetX?: number;
   shadowOffsetY?: number;
+  stickerOpacity?: number;
   styles: BaseStyles & {
     fill?: string;
     stroke?: string;

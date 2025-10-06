@@ -67,71 +67,6 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
             <div className="space-y-4">
               <h4 className="text-sm font-medium">Colors</h4>
               <div className="grid grid-cols-2 gap-4">
-                {/* <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">
-                    Fill Color
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div
-                        className="h-8 w-8 rounded-md border cursor-pointer"
-                        style={{ backgroundColor: fillColor }}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                      side="right"
-                    >
-                      <ColorPicker
-                        value={fillColor}
-                        onChange={(color) => handleStyleChange("fillColor", color)}
-                        hideInputs
-                        hideHue
-                        hideControls
-                        hideColorTypeBtns
-                        hideAdvancedSliders
-                        hideColorGuide
-                        hideInputType
-                        height={200}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">
-                    Stroke Color
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div
-                        className="h-8 w-8 rounded-md border cursor-pointer"
-                        style={{
-                          backgroundColor: strokeColor,
-                        }}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                      side="right"
-                    >
-                      <ColorPicker
-                        value={strokeColor}
-                        onChange={(color) => {
-                          handleStyleChange("strokeColor", color);
-                        }}
-                        hideInputs
-                        hideHue
-                        hideControls
-                        hideColorTypeBtns
-                        hideAdvancedSliders
-                        hideColorGuide
-                        hideInputType
-                        height={200}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div> */}
 
                 <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">Fill Color</label>
@@ -139,7 +74,7 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                     type="color"
                     value={fillColor || "#ffffff"} // default to white if fillColor is empty
                     onChange={(e) => handleStyleChange("fillColor", e.target.value)}
-                    className="h-8 w-8 rounded-md border cursor-pointer p-0"
+                    className="h-8 w-full rounded-md border cursor-pointer p-0"
                   />
                 </div>
 
@@ -149,10 +84,33 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                     type="color"
                     value={strokeColor || "#000000"} // default to black if strokeColor is empty
                     onChange={(e) => handleStyleChange("strokeColor", e.target.value)}
-                    className="h-8 w-8 rounded-md border cursor-pointer p-0"
+                    className="h-8 w-full rounded-md border cursor-pointer p-0"
                   />
                 </div>
 
+              </div>
+            </div>
+
+            {/* Sticker Opacity */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs text-muted-foreground">Sticker Opacity</label>
+                <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+                  {Math.round((localOverlay?.stickerOpacity ?? 1) * 100)}%
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={Math.round((localOverlay?.stickerOpacity ?? 1) * 100)}
+                  onChange={(e) => {
+                    handleStyleChange("stickerOpacity", parseInt(e.target.value) / 100);
+                  }}
+                  className="flex-1 accent-primary h-1.5 rounded-full bg-muted"
+                />
               </div>
             </div>
 
@@ -256,36 +214,7 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
-              
-              {/* <div className="space-y-1">
-                <label className="text-[10px] text-muted-foreground">Color</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div
-                      className="h-6 w-full rounded border cursor-pointer"
-                      style={{ backgroundColor: shadowColor }}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                    side="right"
-                  >
-                    <ColorPicker
-                      value={shadowColor}
-                      onChange={(color) => handleStyleChange("shadowColor", color)}
-                      hideInputs
-                      hideHue
-                      hideControls
-                      hideColorTypeBtns
-                      hideAdvancedSliders
-                      hideColorGuide
-                      hideInputType
-                      height={200}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div> */}
-              
+
               <div className="space-y-1">
                 <label className="text-[10px] text-muted-foreground">Color</label>
                 <input

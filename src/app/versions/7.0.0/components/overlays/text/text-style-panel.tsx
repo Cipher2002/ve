@@ -349,6 +349,29 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
           </div>
         </div>
 
+        {/* Text Opacity */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Text Opacity</label>
+            <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+              {Math.round((localOverlay?.styles?.textOpacity ?? 1) * 100)}%
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={Math.round((localOverlay?.styles?.textOpacity ?? 1) * 100)}
+              onChange={(e) => {
+                updateStyle("textOpacity", parseInt(e.target.value) / 100);
+              }}
+              className="flex-1 accent-primary h-1.5 rounded-full bg-muted"
+            />
+          </div>
+        </div>
+
         {/* Drop Shadow */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium">Drop Shadow</h4>
@@ -454,7 +477,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
             </div>
-            
+
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground">Color</label>
               <input
