@@ -82,7 +82,7 @@ export const SelectionOutline: React.FC<{
       userSelect: "none",
       touchAction: "none",
       zIndex,
-      pointerEvents: "all",
+      pointerEvents: ((overlay.type === OverlayType.VIDEO || overlay.type === OverlayType.IMAGE) && (overlay as any).styles?.crop?.enabled) ? "none" : "all",
       // hovered || isDragging ? "all" : isSelected ? "none" : "all",
       cursor: "pointer",
     };

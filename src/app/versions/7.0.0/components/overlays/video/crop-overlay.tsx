@@ -284,7 +284,7 @@ const cropStyle: React.CSSProperties = {
         onClick={(e) => e.stopPropagation()}
       />
 
-      <div
+      {/* <div
         style={{
           position: "absolute",
           top: "-18px",
@@ -300,7 +300,7 @@ const cropStyle: React.CSSProperties = {
         onClick={(e) => e.stopPropagation()}
       >
         Drag to Move
-      </div>
+      </div> */}
     </div>
   );
 }; 
