@@ -282,10 +282,14 @@ export function LocalMediaGallery({
       });
 
       if (cachedAudioUrl && onSelectMedia) {
+        // Extract audio duration from cached URL
+        const audioDuration = await getAudioDuration(cachedAudioUrl);
+        
         const audioFile = {
           ...file,
           path: file.path, // Keep original URL for Remotion
           cachedPath: cachedAudioUrl, // Store cached URL separately
+          duration: audioDuration, // Add extracted duration
         };
         
         onSelectMedia(audioFile);
@@ -364,6 +368,25 @@ export function LocalMediaGallery({
       };
       
       img.src = imageUrl;
+    });
+  };
+
+  // Helper function to get audio duration
+  const getAudioDuration = (audioUrl: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const audio = document.createElement('audio');
+      audio.preload = 'metadata';
+      
+      audio.onloadedmetadata = () => {
+        const durationInSeconds = audio.duration;
+        resolve(durationInSeconds);
+      };
+      
+      audio.onerror = () => {
+        resolve(0); // Fallback to 0 on error
+      };
+      
+      audio.src = audioUrl;
     });
   };
 

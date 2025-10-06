@@ -36,10 +36,23 @@ const getUrlParams = () => {
   return { uid: '', sid: '', user_ref: '' };
 };
 
-// Add this function to get user IP (you can implement this later)
-const getUserIP = async (): Promise<string> => {
-  // For now, return empty string as specified
-  return '';
+// Helper function to get audio duration
+const getAudioDuration = (audioUrl: string): Promise<number> => {
+  return new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    audio.preload = 'metadata';
+    
+    audio.onloadedmetadata = () => {
+      const durationInSeconds = audio.duration;
+      resolve(durationInSeconds);
+    };
+    
+    audio.onerror = () => {
+      resolve(0); // Fallback to 0 on error
+    };
+    
+    audio.src = audioUrl;
+  });
 };
 
 /**
@@ -259,6 +272,11 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
               }
             };
           });
+        } else if (fileType === 'audio') {
+          // Extract audio duration
+          const audioUrl = URL.createObjectURL(file);
+          duration = await getAudioDuration(audioUrl);
+          URL.revokeObjectURL(audioUrl);
         }
         
         // Construct file URLs
