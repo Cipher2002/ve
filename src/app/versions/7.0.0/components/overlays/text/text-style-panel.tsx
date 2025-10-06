@@ -307,7 +307,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
           <div className="grid grid-cols-3 gap-4">
             {!localOverlay.styles.WebkitBackgroundClip ? (
               <>
-                {/* <div className="space-y-2">
+                <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">Text Color</label>
                   <div className="h-8 w-8 rounded-md border cursor-pointer flex items-center gap-2">
                     <input
@@ -318,11 +318,11 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                           : localOverlay?.styles?.color.replace(/rgba?\([^)]+\)/, "#ffffff")
                       }
                       onChange={(e) => updateStyle("color", e.target.value)}
-                      className="w-[330px] dark:bg-gray-900 border border-gray-700"
+                      className="h-8 w-8 border rounded-md cursor-pointer"
                     />
                   </div>
-                </div> */}
-                <div className="space-y-2">
+                </div>
+                {/* <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">Text Color</label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -352,10 +352,10 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
+                </div> */}
 
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">Highlight</label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -388,6 +388,21 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                       />
                     </PopoverContent>
                   </Popover>
+                </div> */}
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Text Color</label>
+                  <div className="h-8 w-8 rounded-md border cursor-pointer flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={
+                        localOverlay?.styles?.backgroundColor === "transparent"
+                          ? "#ffffff"
+                          : localOverlay?.styles?.backgroundColor.replace(/rgba?\([^)]+\)/, "#ffffff")
+                      }
+                      onChange={(e) => updateStyle("color", e.target.value)}
+                      className="h-8 w-8 border rounded-md cursor-pointer"
+                    />
+                  </div>
                 </div>
 
               </>
