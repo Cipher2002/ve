@@ -322,7 +322,7 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                       className="w-[330px] dark:bg-gray-900 border border-gray-700"
                       side="right"
                     >
-                      <ColorPicker
+                      {/* <ColorPicker
                         value={localOverlay.styles.color}
                         onChange={(color) => updateStyle("color", color)}
                         // hideInputs
@@ -333,7 +333,29 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
                         hideColorGuide
                         hideInputType
                         height={200}
-                      />
+                      /> */}
+                      <div className="space-y-2">
+                        <label className="text-xs text-muted-foreground">Text Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={
+                              localOverlay?.styles?.color === "transparent"
+                                ? "#ffffff"
+                                : localOverlay?.styles?.color.replace(/rgba?\([^)]+\)/, "#ffffff")
+                            }
+                            onChange={(e) => updateStyle("color", e.target.value)}
+                            className="w-8 h-8 border border-gray-200 dark:border-gray-700 rounded-md p-0.5 cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={localOverlay?.styles?.color || "transparent"}
+                            onChange={(e) => updateStyle("color", e.target.value)}
+                            placeholder="transparent"
+                            className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-xs p-2 hover:border-gray-300 dark:hover:border-gray-600 transition-colors text-gray-900 dark:text-gray-100"
+                          />
+                        </div>
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
