@@ -164,7 +164,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         // Validate file type before processing
         const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
         const validVideoTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/mkv', 'video/flv', 'video/wmv'];
-        const validAudioTypes = ['audio/mp3', 'audio/wav', 'audio/aac', 'audio/flac', 'audio/ogg', 'audio/m4a'];
+        const validAudioTypes = ['audio/mp3', 'audio/wav', 'audio/aac', 'audio/flac', 'audio/ogg', 'audio/m4a', 'audio/mpeg'];
         
         let fileType: "image" | "video" | "audio";
         if (validImageTypes.includes(file.type.toLowerCase())) {
