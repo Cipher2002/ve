@@ -79,6 +79,8 @@ const LocalMediaPanel: React.FC = () => {
       'top'
     );
 
+    console.log('Adding media to timeline:', file);
+
     let newOverlay: Overlay;
 
     if (file.type === "video") {
