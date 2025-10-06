@@ -455,61 +455,6 @@ const handleFontSelect = async (font: GoogleFont, variant: FontVariant) => {
               />
             </div>
             
-            {/* <div className="space-y-1">
-              <label className="text-[10px] text-muted-foreground">Color</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div
-                    className="h-6 w-full rounded border cursor-pointer"
-                    style={{ 
-                      backgroundColor: (() => {
-                        const shadow = localOverlay.styles.textShadow;
-                        if (!shadow || shadow === 'none') return 'rgba(0,0,0,0.5)';
-                        const match = shadow.match(/rgba?\([^)]+\)|#[a-fA-F0-9]{3,6}|[a-zA-Z]+$/);
-                        return match ? match[0] : 'rgba(0,0,0,0.5)';
-                      })()
-                    }}
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[330px] dark:bg-gray-900 border border-gray-700"
-                  side="right"
-                >
-                  <ColorPicker
-                    value={(() => {
-                      const shadow = localOverlay.styles.textShadow;
-                      if (!shadow || shadow === 'none') return 'rgba(0,0,0,0.5)';
-                      const match = shadow.match(/rgba?\([^)]+\)|#[a-fA-F0-9]{3,6}|[a-zA-Z]+$/);
-                      return match ? match[0] : 'rgba(0,0,0,0.5)';
-                    })()}
-                    onChange={(color) => {
-                      const currentShadow = localOverlay.styles.textShadow || 'none';
-                      let offsetX = '0', offsetY = '0', blur = '0';
-                      
-                      if (currentShadow !== 'none') {
-                        const match = currentShadow.match(/(-?\d+)px\s+(-?\d+)px\s+(\d+)px/);
-                        if (match) {
-                          offsetX = match[1];
-                          offsetY = match[2];
-                          blur = match[3];
-                        }
-                      }
-                      
-                      const newShadow = `${offsetX}px ${offsetY}px ${blur}px ${color}`;
-                      updateStyle("textShadow", newShadow);
-                    }}
-                    hideInputs
-                    hideHue
-                    hideControls
-                    hideColorTypeBtns
-                    hideAdvancedSliders
-                    hideColorGuide
-                    hideInputType
-                    height={200}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div> */}
             <div className="space-y-1">
               <label className="text-[10px] text-muted-foreground">Color</label>
               <input

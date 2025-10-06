@@ -67,7 +67,7 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
             <div className="space-y-4">
               <h4 className="text-sm font-medium">Colors</h4>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">
                     Fill Color
                   </label>
@@ -131,7 +131,28 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                       />
                     </PopoverContent>
                   </Popover>
+                </div> */}
+
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Fill Color</label>
+                  <input
+                    type="color"
+                    value={fillColor || "#ffffff"} // default to white if fillColor is empty
+                    onChange={(e) => handleStyleChange("fillColor", e.target.value)}
+                    className="h-8 w-8 rounded-md border cursor-pointer p-0"
+                  />
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Stroke Color</label>
+                  <input
+                    type="color"
+                    value={strokeColor || "#000000"} // default to black if strokeColor is empty
+                    onChange={(e) => handleStyleChange("strokeColor", e.target.value)}
+                    className="h-8 w-8 rounded-md border cursor-pointer p-0"
+                  />
+                </div>
+
               </div>
             </div>
 
@@ -236,7 +257,7 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                 />
               </div>
               
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <label className="text-[10px] text-muted-foreground">Color</label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -263,7 +284,18 @@ export const StickerStylePanel: React.FC<StickerStylePanelProps> = ({
                     />
                   </PopoverContent>
                 </Popover>
+              </div> */}
+              
+              <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground">Color</label>
+                <input
+                  type="color"
+                  value={shadowColor || "#000000"} // default to black if shadowColor is empty
+                  onChange={(e) => handleStyleChange("shadowColor", e.target.value)}
+                  className="h-6 w-full rounded border cursor-pointer p-0"
+                />
               </div>
+
             </div>
             
             <button
