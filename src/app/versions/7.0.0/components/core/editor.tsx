@@ -149,7 +149,6 @@ export const Editor: React.FC = () => {
 
   // Handler for selection changes from timeline
   const handleSelectionChange = React.useCallback((ids: number[]) => {
-    console.log('🔵 handleSelectionChange called with:', ids);
     setSelectedOverlayIds(ids);
     setSelectedOverlayId(ids.length > 0 ? ids[ids.length - 1] : null);
   }, [setSelectedOverlayId]);
@@ -290,7 +289,7 @@ export const Editor: React.FC = () => {
        * Touch-friendly buttons with tooltips for content creation
        * Placed at the bottom of the timeline for easy access
        */}
-      <MobileNavBar />
+      {/* <MobileNavBar /> */}
     </div>
   );
 };
