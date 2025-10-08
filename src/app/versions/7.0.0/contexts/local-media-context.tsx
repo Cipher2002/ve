@@ -165,7 +165,10 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
           setCurrentPage(prev => prev + 1);
         }
         
-        setHasMore(files.length === 20);
+        // Check if there are more records based on TOTAL_RECORDS vs current count
+        const totalRecords = parseInt(data.TOTAL_RECORDS || '0');
+        const currentCount = isInitial ? files.length : localMediaFiles.length + files.length;
+        setHasMore(currentCount < totalRecords);
       }
     } catch (error) {
       console.error("Error loading media files from API:", error);
