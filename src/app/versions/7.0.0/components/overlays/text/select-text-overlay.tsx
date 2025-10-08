@@ -171,26 +171,19 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
             key={key}
             onClick={() => handleAddOverlay(option)}
             className="group relative overflow-hidden border-2 rounded-md transition-all duration-200 
-                      hover:border-secondary hover:bg-accent/30 cursor-pointer bg-gray-200"
+                      hover:border-secondary cursor-pointer bg-[#e5e7eb]"
           >
             {/* Preview Container */}
-            {/* <div className="aspect-[16/6] w-full flex items-center justify-center p-2 pb-12 overflow-hidden">
-              <div className="text-base transform-gpu transition-transform duration-200 group-hover:scale-102 text-foreground max-w-full">
-                <TextPreview option={option} />
-              </div>
-            </div> */}
-            <div className="aspect-[16/6] w-full flex items-center justify-center overflow-hidden bg-gray-100">
-              <div className="w-full h-full flex items-center justify-center">
-                <img
-                  src={`text_effects_preview/${option.name}.png`}
-                  alt={option.name}
-                  className="object-contain w-full h-full transition-transform duration-200 group-hover:scale-105"
-                />
-              </div>
+            <div className="aspect-[16/6] w-full flex items-center justify-center overflow-hidden bg-[#e5e7eb]">
+              <img
+                src={`text_effects_preview/${option.name}.png`}
+                alt={option.name}
+                className="object-contain w-full h-full transition-transform duration-200"
+              />
             </div>
 
             {/* Label */}
-            <div className="absolute bottom-0 left-0 right-0 backdrop-blur-[2px] px-3 py-1.5">
+            <div className="px-3 py-1.5 bg-[#e5e7eb] border-t">
               <div className="font-light text-foreground text-[11px]">
                 {option.name}
               </div>
@@ -199,6 +192,7 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
               </div>
             </div>
           </div>
+
         ))}
       </div>
     ),
