@@ -780,9 +780,9 @@ export function LocalMediaGallery({
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="flex-1 flex flex-col"
+        className="flex-1 flex flex-col min-h-0"
       >
-        <TabsList className="w-full grid grid-cols-4 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1">
+        <TabsList className="w-full grid grid-cols-4 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 flex-shrink-0">
           <TabsTrigger
             value="all"
             className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
@@ -822,7 +822,7 @@ export function LocalMediaGallery({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0" onScroll={handleScroll}>
+        <TabsContent value={activeTab} className="flex-1 min-h-0 overflow-y-auto p-0 mt-2" onScroll={handleScroll}>
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-sm text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
