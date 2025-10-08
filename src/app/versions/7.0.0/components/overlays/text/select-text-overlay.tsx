@@ -182,7 +182,7 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
             <div className="aspect-[16/6] w-full flex items-center justify-center overflow-hidden bg-gray-100">
               <div className="w-full h-full flex items-center justify-center">
                 <img
-                  src={`vedit/text_effects_preview/${option.name}.png`}
+                  src={`text_effects_preview/${option.name}.png`}
                   alt={option.name}
                   className="object-contain w-full h-full transition-transform duration-200 group-hover:scale-105"
                 />
