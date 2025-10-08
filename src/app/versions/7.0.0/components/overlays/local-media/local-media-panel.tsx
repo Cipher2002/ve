@@ -25,7 +25,7 @@ const LocalMediaPanel: React.FC = () => {
   const { findNextAvailablePosition, addAtPlayhead } = useTimelinePositioning();
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  // const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { hasMore, isLoading, loadMoreMedia } = useLocalMedia();
   const { downloadVideo } = useVideoCache();
 
@@ -208,21 +208,21 @@ const LocalMediaPanel: React.FC = () => {
     setIsOpen(false);
   };
 
-  // Handle infinite scroll
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight + 100) {
-      if (hasMore && !isLoadingMore && !isLoading) {
-        setIsLoadingMore(true);
-        loadMoreMedia().finally(() => setIsLoadingMore(false));
-      }
-    }
-  }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
+  // // Handle infinite scroll
+  // const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  //   if (scrollHeight - scrollTop <= clientHeight + 100) {
+  //     if (hasMore && !isLoadingMore && !isLoading) {
+  //       setIsLoadingMore(true);
+  //       loadMoreMedia().finally(() => setIsLoadingMore(false));
+  //     }
+  //   }
+  // }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
 
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
-      <div className="flex-1 overflow-y-auto" onScroll={handleScroll}>
-        <LocalMediaGallery onSelectMedia={handleAddToTimeline} isLoadingMore={isLoadingMore} autoAddToTimeline={false} />
+      <div className="flex-1 overflow-hidden">
+        <LocalMediaGallery onSelectMedia={handleAddToTimeline} isLoadingMore={false} autoAddToTimeline={false} />
       </div>
     </div>
   );

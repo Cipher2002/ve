@@ -743,7 +743,6 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
                     <SidebarInset>
                       <Editor />
                     </SidebarInset>
-  
                     {/* Autosave Status Indicator */}
                     <AutosaveStatus
                       isSaving={isSaving}

@@ -36,9 +36,9 @@ export function LocalMediaGallery({
   isLoadingMore?: boolean;
   autoAddToTimeline?: boolean;
 }) {
-  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles } =
+  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles, activeTab, setActiveTab, filteredMediaFiles } =
     useLocalMedia();
-  const [activeTab, setActiveTab] = useState("all");
+  // const [activeTab, setActiveTab] = useState("all");
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -53,12 +53,20 @@ export function LocalMediaGallery({
   const [showResult, setShowResult] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmingMediaId, setConfirmingMediaId] = useState<string | null>(null);
-  const hasInitialized = useRef(false);
   const [downloadingCards, setDownloadingCards] = useState<Set<string>>(new Set());
   const [downloadProgress, setDownloadProgress] = useState<Map<string, number>>(new Map());
   const { downloadVideo } = useVideoCache();
   const { downloadAudio } = useAudioCache();
   const [addingToTimeline, setAddingToTimeline] = useState<Set<string>>(new Set());
+  const hasInitialized = useRef(false);
+
+  // Load data only when component first becomes visible
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      loadMediaFiles(true); // Load initial data
+    }
+  }, [loadMediaFiles]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -75,20 +83,20 @@ export function LocalMediaGallery({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [confirmingMediaId]);
 
-  // Load data only when component first becomes visible (like image-overlay-panel pattern)
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      loadMediaFiles(true); // Load initial data
-    }
-  }, [loadMediaFiles]);
+  // // Load data only when component first becomes visible (like image-overlay-panel pattern)
+  // useEffect(() => {
+  //   if (!hasInitialized.current) {
+  //     hasInitialized.current = true;
+  //     loadMediaFiles(true); // Load initial data
+  //   }
+  // }, [loadMediaFiles]);
 
 
-  // Filter media files based on active tab
-  const filteredMedia = localMediaFiles.filter((file) => {
-    if (activeTab === "all") return true;
-    return file.type === activeTab;
-  });
+  // // Filter media files based on active tab
+  // const filteredMedia = localMediaFiles.filter((file) => {
+  //   if (activeTab === "all") return true;
+  //   return file.type === activeTab;
+  // });
 
   // Handle file upload
   const handleFileUpload = async (
@@ -684,6 +692,14 @@ export function LocalMediaGallery({
     );
   };
 
+// Handle infinite scroll
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !isLoadingMore && !isLoading) {
+      loadMoreMedia();
+    }
+  }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
+
   return (
   <div className="h-full flex flex-col" data-media-gallery>
       <div className="flex justify-between items-center mb-4">
@@ -808,13 +824,13 @@ export function LocalMediaGallery({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0">
+        <TabsContent value={activeTab} className="flex-1 overflow-y-auto p-0" onScroll={handleScroll}>
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-sm text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
               <p>Loading media files...</p>
             </div>
-          ) : filteredMedia.length === 0 ? (
+          ) : filteredMediaFiles.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-3">
               <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <Upload className="w-4 h-4 text-gray-400" />
@@ -836,7 +852,7 @@ export function LocalMediaGallery({
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 ">
-              {filteredMedia.map(renderMediaItem)}
+              {filteredMediaFiles.map(renderMediaItem)}
               
               {/* Loading more indicator */}
               {isLoadingMore && (
@@ -846,7 +862,7 @@ export function LocalMediaGallery({
               )}
               
               {/* No more content indicator */}
-              {!hasMore && !isLoading && !isLoadingMore && filteredMedia.length >= 20 && (
+              {!hasMore && !isLoading && !isLoadingMore && filteredMediaFiles.length >= 20 && (
                 <div className="col-span-2 text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
                   No more media files to load
                 </div>

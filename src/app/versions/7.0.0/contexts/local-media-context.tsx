@@ -17,6 +17,9 @@ interface LocalMediaContextType {
   loadMoreMedia: () => Promise<void>;
   hasMore: boolean;
   loadMediaFiles: (isInitial?: boolean) => Promise<void>;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  filteredMediaFiles: LocalMediaFile[];
 }
 
 const LocalMediaContext = createContext<LocalMediaContextType | undefined>(
@@ -73,7 +76,14 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("all");
   const { uid, user_ref } = getUrlParams();
+
+  // Filter media files based on active tab
+  const filteredMediaFiles = localMediaFiles.filter((file) => {
+    if (activeTab === "all") return true;
+    return file.type === activeTab;
+  });
 
   // Define BASE_URL at the top where API calls are made
   // const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
@@ -93,7 +103,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoadingMore(true);
       }
 
-      const startFrom = isInitial ? 0 : currentPage * 20;
+      const startFrom = isInitial ? 0 : (currentPage + 1) * 20;
 
       const response = await fetch(`${apiBaseUrl}/media/get`, {
         method: 'POST',
@@ -129,7 +139,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (isInitial) {
           setLocalMediaFiles(files);
-          setCurrentPage(1);
+          setCurrentPage(0);
         } else {
           setLocalMediaFiles(prev => {
             // Merge new files with existing, avoiding duplicates
@@ -378,6 +388,9 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
     loadMoreMedia,
     hasMore,
     loadMediaFiles,
+    activeTab,
+    setActiveTab,
+    filteredMediaFiles,
   };
 
   return (
