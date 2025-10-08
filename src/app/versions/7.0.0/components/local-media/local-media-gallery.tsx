@@ -29,14 +29,12 @@ import { useAudioCache } from "../../hooks/use-audio-cache";
  */
 export function LocalMediaGallery({
   onSelectMedia,
-  isLoadingMore,
   autoAddToTimeline = false,
 }: {
   onSelectMedia?: (mediaFile: LocalMediaFile) => void;
-  isLoadingMore?: boolean;
   autoAddToTimeline?: boolean;
 }) {
-  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, loadMoreMedia, hasMore, loadMediaFiles, activeTab, setActiveTab, filteredMediaFiles } =
+  const { localMediaFiles, addMediaFile, removeMediaFile, isLoading, isLoadingMore, loadMoreMedia, hasMore, loadMediaFiles, activeTab, setActiveTab, filteredMediaFiles } =
     useLocalMedia();
   // const [activeTab, setActiveTab] = useState("all");
   const [selectedFile, setSelectedFile] = useState<LocalMediaFile | null>(null);

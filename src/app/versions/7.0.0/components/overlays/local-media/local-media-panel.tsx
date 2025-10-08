@@ -26,7 +26,7 @@ const LocalMediaPanel: React.FC = () => {
   const { getAspectRatioDimensions } = useAspectRatio();
   const { visibleRows } = useTimeline();
   // const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const { hasMore, isLoading, loadMoreMedia } = useLocalMedia();
+  // const { } = useLocalMedia();
   const { downloadVideo } = useVideoCache();
 
   const getVideoDurationInFrames = (videoUrl: string): Promise<number> => {
@@ -222,7 +222,7 @@ const LocalMediaPanel: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
       <div className="flex-1 overflow-hidden">
-        <LocalMediaGallery onSelectMedia={handleAddToTimeline} isLoadingMore={false} autoAddToTimeline={false} />
+        <LocalMediaGallery onSelectMedia={handleAddToTimeline} autoAddToTimeline={false} />
       </div>
     </div>
   );

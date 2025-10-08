@@ -14,6 +14,7 @@ interface LocalMediaContextType {
   removeMediaFile: (id: string) => Promise<void>;
   clearMediaFiles: () => Promise<void>;
   isLoading: boolean;
+  isLoadingMore: boolean;
   loadMoreMedia: () => Promise<void>;
   hasMore: boolean;
   loadMediaFiles: (isInitial?: boolean) => Promise<void>;
@@ -385,6 +386,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
     removeMediaFile,
     clearMediaFiles,
     isLoading,
+    isLoadingMore,
     loadMoreMedia,
     hasMore,
     loadMediaFiles,
