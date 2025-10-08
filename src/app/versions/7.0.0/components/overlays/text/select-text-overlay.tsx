@@ -174,9 +174,18 @@ export const SelectTextOverlay: React.FC<SelectTextOverlayProps> = () => {
                       hover:border-secondary hover:bg-accent/30 cursor-pointer bg-gray-200"
           >
             {/* Preview Container */}
-            <div className="aspect-[16/6] w-full flex items-center justify-center p-2 pb-12 overflow-hidden">
+            {/* <div className="aspect-[16/6] w-full flex items-center justify-center p-2 pb-12 overflow-hidden">
               <div className="text-base transform-gpu transition-transform duration-200 group-hover:scale-102 text-foreground max-w-full">
                 <TextPreview option={option} />
+              </div>
+            </div> */}
+            <div className="aspect-[16/6] w-full flex items-center justify-center overflow-hidden bg-gray-100">
+              <div className="w-full h-full flex items-center justify-center">
+                <img
+                  src={`/text_effects_preview/${option.name}.png`}
+                  alt={option.name}
+                  className="object-contain w-full h-full transition-transform duration-200 group-hover:scale-105"
+                />
               </div>
             </div>
 
