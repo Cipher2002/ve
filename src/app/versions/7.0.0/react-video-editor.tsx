@@ -43,6 +43,7 @@ import { clearAutosave } from "./utils/indexdb-helper";
 
 //Loading templates with downloaded videos
 import { useTemplateLoader } from "./hooks/use-template-loader";
+import { textOverlayTemplates } from "./templates/text-overlay-templates";
 
 //SETTING THE API BASE URL
 const apiBaseUrl = 'https://zanopy.ai/vedit/api/latest';
@@ -711,6 +712,18 @@ export default function ReactVideoEditor({ projectId, isAdminMode = false }: { p
     videoHeight: getAspectRatioDimensions().height,
     
   };
+
+  // Preload text effect preview images on mount
+  useEffect(() => {
+    const preloadImages = () => {
+      Object.values(textOverlayTemplates).forEach((template) => {
+        const img = new Image();
+        img.src = `text_effects_preview/${template.name}.png`;
+      });
+    };
+
+    preloadImages();
+  }, []);
 
   return (
       <div 
