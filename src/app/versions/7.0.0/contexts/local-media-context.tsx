@@ -86,6 +86,15 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
     return file.type === activeTab;
   });
 
+  // Reset pagination and reload when tab changes
+  useEffect(() => {
+    // Don't run on initial mount
+    if (localMediaFiles.length > 0) {
+      setCurrentPage(0);
+      setHasMore(true);
+    }
+  }, [activeTab]);
+
   // Define BASE_URL at the top where API calls are made
   // const BASE_URL = 'http://zanopy.ai/vedit/'; // You can change this to your desired base URL
 
@@ -170,9 +179,64 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [uid, user_ref, currentPage]);
 
   const loadMoreMedia = useCallback(async (): Promise<void> => {
-    if (!hasMore || isLoadingMore || isLoading) return;
-    await loadMediaFiles(false);
-  }, [hasMore, isLoadingMore, isLoading, loadMediaFiles]);
+    if (!hasMore || isLoadingMore || isLoading || !uid || !user_ref) return;
+    
+    setIsLoadingMore(true);
+    
+    try {
+      const startFrom = (currentPage + 1) * 20;
+
+      const response = await fetch(`${apiBaseUrl}/media/get`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: uid,
+          user_ref: user_ref,
+          start_from: startFrom.toString(),
+          max_results: '20',
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.RESULT === 'SUCCESS' && data.RESPONSE) {
+        const files: LocalMediaFile[] = data.RESPONSE
+          .map((item: any) => ({
+            id: item.file_id,
+            name: item.file_url.split('/').pop() || 'Unknown',
+            type: item.file_type,
+            path: item.file_url,
+            size: 0,
+            lastModified: new Date(item.file_timestamp).getTime(),
+            thumbnail: item.file_thumbnail_url || null,
+            duration: 0,
+          }))
+          .filter((file: any, index: any, self: any) => {
+            return index === self.findIndex((f: any) => f.id === file.id);
+          });
+
+        setLocalMediaFiles(prev => {
+          const combined = [...prev];
+          files.forEach(newFile => {
+            const existingIndex = combined.findIndex(existing => existing.id === newFile.id);
+            if (existingIndex === -1) {
+              combined.push(newFile);
+            }
+          });
+          return combined;
+        });
+        
+        setCurrentPage(prev => prev + 1);
+        setHasMore(files.length === 20);
+      }
+    } catch (error) {
+      console.error("Error loading more media files:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [hasMore, isLoadingMore, isLoading, uid, user_ref, currentPage, apiBaseUrl]);
 
   /**
    * Add a new media file to the collection
