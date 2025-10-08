@@ -227,10 +227,7 @@ export const LocalMediaProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const uploadResult = await uploadResponse.json();
-        
-        // // Get file metadata
-        // const fileType: "image" | "video" | "audio" = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio'; // Default to audio if not image or video
-
+      
         // Generate thumbnail for videos and get duration
         let thumbnailServerPath = '';
         let duration = 0;

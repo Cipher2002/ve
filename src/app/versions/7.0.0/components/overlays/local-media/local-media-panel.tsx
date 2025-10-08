@@ -79,8 +79,6 @@ const LocalMediaPanel: React.FC = () => {
       'top'
     );
 
-    console.log('Adding media to timeline:', file);
-
     let newOverlay: Overlay;
 
     if (file.type === "video") {
@@ -207,17 +205,6 @@ const LocalMediaPanel: React.FC = () => {
     setActivePanel(OverlayType.NONE);
     setIsOpen(false);
   };
-
-  // // Handle infinite scroll
-  // const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-  //   const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-  //   if (scrollHeight - scrollTop <= clientHeight + 100) {
-  //     if (hasMore && !isLoadingMore && !isLoading) {
-  //       setIsLoadingMore(true);
-  //       loadMoreMedia().finally(() => setIsLoadingMore(false));
-  //     }
-  //   }
-  // }, [hasMore, isLoadingMore, isLoading, loadMoreMedia]);
 
   return (
     <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">

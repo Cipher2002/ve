@@ -81,21 +81,6 @@ export function LocalMediaGallery({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [confirmingMediaId]);
 
-  // // Load data only when component first becomes visible (like image-overlay-panel pattern)
-  // useEffect(() => {
-  //   if (!hasInitialized.current) {
-  //     hasInitialized.current = true;
-  //     loadMediaFiles(true); // Load initial data
-  //   }
-  // }, [loadMediaFiles]);
-
-
-  // // Filter media files based on active tab
-  // const filteredMedia = localMediaFiles.filter((file) => {
-  //   if (activeTab === "all") return true;
-  //   return file.type === activeTab;
-  // });
-
   // Handle file upload
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -626,22 +611,6 @@ export function LocalMediaGallery({
                     Video
                   </div>
                   
-                  {/* Download Progress Overlay */}
-                  {/* {downloadingCards.has(file.id) && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
-                        <p className="text-xs font-medium">Downloading...</p>
-                        <p className="text-xs">{downloadProgress.get(file.id) || 0}%</p>
-                        <div className="w-16 h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
-                          <div 
-                            className="h-full bg-white transition-all duration-300"
-                            style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
                 </>
               )}
               {file.type === "audio" && (
@@ -655,22 +624,6 @@ export function LocalMediaGallery({
                     Audio
                   </div>
                   
-                  {/* Download Progress Overlay
-                  {downloadingCards.has(file.id) && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2 mx-auto"></div>
-                        <p className="text-xs font-medium">Downloading...</p>
-                        <p className="text-xs">{downloadProgress.get(file.id) || 0}%</p>
-                        <div className="w-16 h-1 bg-gray-600 rounded-full mt-1 overflow-hidden">
-                          <div 
-                            className="h-full bg-white transition-all duration-300"
-                            style={{ width: `${downloadProgress.get(file.id) || 0}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
                 </>
               )}
             </div>
@@ -695,20 +648,7 @@ export function LocalMediaGallery({
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     const isNearBottom = scrollHeight - scrollTop <= clientHeight + 100;
     
-    console.log('Scroll Debug:', {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-      isNearBottom,
-      hasMore,
-      isLoadingMore,
-      isLoading,
-      filteredCount: filteredMediaFiles.length,
-      totalCount: localMediaFiles.length
-    });
-    
     if (isNearBottom && hasMore && !isLoadingMore && !isLoading) {
-      console.log('Loading more media...');
       loadMoreMedia();
     }
   }, [hasMore, isLoadingMore, isLoading, loadMoreMedia, filteredMediaFiles.length, localMediaFiles.length]);
