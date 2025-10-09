@@ -444,7 +444,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
 
       {/* Center section: Play/Pause control and time display */}
       <div className="flex items-center justify-center gap-2 flex-grow select-none">
-        {/* Playback Speed Control */}
+        {/* Playback Speed Control
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -473,7 +473,7 @@ export const TimelineControls: React.FC<TimelineControlsProps> = ({
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
         <TooltipProvider delayDuration={50}>
           <Tooltip>
             <TooltipTrigger asChild>
