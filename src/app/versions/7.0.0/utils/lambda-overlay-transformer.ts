@@ -78,16 +78,22 @@ const getOriginalUrl = (videoOverlay: ClipOverlay): string => {
  * Gets the original URL for a sound overlay, prioritizing non-blob URLs
  */
 const getOriginalUrlForSound = (soundOverlay: SoundOverlay): string => {
-  // Similar logic for sound overlays
+  // If originalUrl exists and is not a blob, use it
+  if (soundOverlay.originalUrl && !soundOverlay.originalUrl.startsWith('blob:')) {
+    return soundOverlay.originalUrl;
+  }
+  
+  // If content exists and is not a blob, use it
   if (soundOverlay.content && !soundOverlay.content.startsWith('blob:')) {
     return soundOverlay.content;
   }
   
+  // If src is not a blob, use it
   if (soundOverlay.src && !soundOverlay.src.startsWith('blob:')) {
     return soundOverlay.src;
   }
 
-  return soundOverlay.content || soundOverlay.src;
+  return soundOverlay.originalUrl || soundOverlay.content || soundOverlay.src;
 };
 
 /**

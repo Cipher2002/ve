@@ -37,6 +37,11 @@ const SoundsPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState("system-audio");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Helper function to convert content to filename
+  const contentToFilename = (content: string): string => {
+    return content.replace(/\s+/g, '_') + '.mp3';
+  };
+
 
   const filteredSounds = useMemo(() => {
     if (localOverlay || activeTab !== "system-audio") return [];
@@ -279,6 +284,9 @@ const SoundsPanel: React.FC = () => {
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
 
+    // Create accessible URL for Lambda rendering
+    const accessibleUrl = `https://zanopy.ai/vedit/sounds/${contentToFilename(sound.title)}`;
+
     // Clear loading state
     setLoadingTrack(null);
 
@@ -293,6 +301,7 @@ const SoundsPanel: React.FC = () => {
       type: OverlayType.SOUND,
       content: sound.title,
       src: blobUrl,
+      originalUrl: accessibleUrl,
       from,
       row,
       left: 0,
@@ -501,6 +510,7 @@ const SoundsPanel: React.FC = () => {
                             type: OverlayType.SOUND,
                             content: audio.filename,
                             src: blobUrl,
+                            originalUrl: audio.url,
                             from,
                             row,
                             left: 0,

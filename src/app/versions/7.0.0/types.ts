@@ -170,6 +170,7 @@ export type SoundOverlay = BaseOverlay & {
   type: OverlayType.SOUND;
   content: string;
   src: string;
+  originalUrl?: string;
   startFromSound?: number;
   speed?: number; // Keep this like video
   isLoading?: boolean;

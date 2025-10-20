@@ -170,6 +170,7 @@ const LocalMediaPanel: React.FC = () => {
         },
       };
     } else if (file.type === "audio") {
+      const audioSrc = file.path && file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`;
       newOverlay = {
         left: 0,
         top: 0,
@@ -183,7 +184,8 @@ const LocalMediaPanel: React.FC = () => {
         isDragging: false,
         type: OverlayType.SOUND,
         content: file.name,
-        src: file.path && file.path.startsWith("http") ? file.path : `${window.location.origin}${file.path}`,
+        src: file.cachedPath || audioSrc,
+        originalUrl: audioSrc,
         styles: {
           volume: 1,
         },
