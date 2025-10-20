@@ -11,8 +11,10 @@ export const useTemplateLoader = () => {
     template: TemplateOverlay,
     onProgress?: (current: number, total: number) => void
   ): Promise<Overlay[]> => {
-    const videoOverlays = template.overlays.filter(overlay => 
-      overlay.type === 'video' && overlay.originalUrl
+    // Count both video and audio overlays that need downloading
+    const mediaOverlays = template.overlays.filter(overlay => 
+      (overlay.type === 'video' && overlay.originalUrl) ||
+      (overlay.type === 'sound' && overlay.originalUrl)
     );
     
     let processedCount = 0;
@@ -27,7 +29,6 @@ export const useTemplateLoader = () => {
         // If this is a video overlay, we need to re-download the video
         if (newOverlay.type === 'video' && newOverlay.originalUrl) {
           try {
-            
             // Download the video and get a new blob URL
             const newBlobUrl = await downloadVideo(newOverlay.originalUrl);
             
@@ -47,7 +48,30 @@ export const useTemplateLoader = () => {
           
           processedCount++;
           if (onProgress) {
-            onProgress(processedCount, videoOverlays.length);
+            onProgress(processedCount, mediaOverlays.length);
+          }
+        }
+
+        // If this is a sound overlay, we need to re-download the audio
+        if (newOverlay.type === 'sound' && newOverlay.originalUrl) {
+          try {
+            // Download the audio file
+            const response = await fetch(newOverlay.originalUrl);
+            const blob = await response.blob();
+            const newBlobUrl = URL.createObjectURL(blob);
+            
+            // Update the overlay with the new blob URL
+            newOverlay.src = newBlobUrl;
+            // Keep originalUrl as is for rendering
+          } catch (error) {
+            console.error('Error re-downloading audio for template:', error);
+            // Fallback: use the original URL directly
+            newOverlay.src = newOverlay.originalUrl;
+          }
+          
+          processedCount++;
+          if (onProgress) {
+            onProgress(processedCount, mediaOverlays.length);
           }
         }
 
