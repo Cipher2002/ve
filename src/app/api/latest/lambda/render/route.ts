@@ -16,6 +16,8 @@ const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
   FRAMES_PER_LAMBDA: 50,
   MAX_RETRIES: 2,
+  TIMEOUT_IN_SECONDS: 900, // 15 minutes (maximum allowed)
+  MEMORY_SIZE_MB: 3008, // Increased from 2048 for better performance
 } as const;
 
 // Codec mapping for different media types
@@ -71,12 +73,12 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       const codecMap = isAudio ? AUDIO_CODEC_MAP : VIDEO_CODEC_MAP;
       const remotionCodec = codecMap[body.codec] || body.codec;
       
-      // Estimate render cost
+      // Estimate render cost with updated memory size
       const durationInMs = (body.inputProps.durationInFrames / body.inputProps.fps) * 1000;
       const estimatedCost = estimatePrice({
         region: REGION as AwsRegion,
         durationInMilliseconds: durationInMs,
-        memorySizeInMb: 2048,
+        memorySizeInMb: LAMBDA_CONFIG.MEMORY_SIZE_MB,
         diskSizeInMb: 2048,
         lambdasInvoked: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
       });
@@ -90,6 +92,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         composition: body.id,
         inputProps: body.inputProps,
         framesPerLambda: LAMBDA_CONFIG.FRAMES_PER_LAMBDA,
+        timeoutInMilliseconds: LAMBDA_CONFIG.TIMEOUT_IN_SECONDS * 1000, // Convert to milliseconds
         downloadBehavior: {
           type: "download" as const,
           fileName: isAudio ? `audio.${body.format}` : `video.${body.format}`,
