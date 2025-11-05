@@ -380,123 +380,197 @@ const SoundsPanel: React.FC = () => {
     );
   }, [playingTrack, loadingTrack, handleAddToTimeline, togglePlay]);
 
-  return (
-    <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
-          <TabsTrigger
-            value="system-audio"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">System Audio</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="rendered-audio"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">Rendered Audio</span>
-          </TabsTrigger>
-        </TabsList>
+return (
+    <section className="flex flex-col bg-[rgb(244,242,250)] h-full overflow-hidden">
+      {/* Header */}
+      {/* <div className="w-full flex flex-col items-center" style={{ gap: '8px', marginTop: '8px' }}>
+        <div className="bg-[rgb(65,77,92)] rounded-[1px]" style={{ width: '42px', height: '2px', minHeight: '2px' }} />
+        <p className="flex items-center font-bold text-[rgb(47,46,46)]" style={{ fontSize: '14px', lineHeight: '1.14', fontFamily: "'Poppins',Helvetica,Arial,serif" }}>
+          Audio
+        </p>
+      </div> */}
 
-        <TabsContent value="system-audio" className="flex-1 min-h-0 flex flex-col space-y-4">
-          {!localOverlay && (
-            <div className="flex gap-2 flex-shrink-0">
-              <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    placeholder="Search sounds..."
-                    value={searchQuery}
-                    className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ fontSize: "16px" }}
-                  />
-                </div>
-              </form>
-            </div>
-          )}
-          {!localOverlay ? (
-            <div 
-              ref={scrollContainerRef}
-              className="overflow-y-auto flex-1 space-y-2"
-            >
-              {filteredSounds.map(renderSoundCard)}
-              {hasMoreItems && (
-                <div className="flex justify-center p-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
-                </div>
-              )}
-            </div>
+      {/* Title with decorative line */}
+      <div className="w-full flex flex-col items-center gap-y-2 flex-shrink-0" style={{ gap: '8px', marginTop: '8px' }}>
+        <div className="flex flex-col gap-y-2 items-center">
+          <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+          <h1 className="flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] w-full">
+            Audio
+          </h1>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex items-center" style={{ gap: '8px', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+        <button
+          onClick={() => setActiveTab('system-audio')}
+          className="flex justify-center items-center font-bold text-center transition-colors"
+          style={{ 
+            fontSize: '12px', 
+            lineHeight: '1', 
+            fontFamily: "'Poppins',Helvetica,Arial,serif",
+            letterSpacing: '-0.06px',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+            flex: '1',
+            borderBottom: activeTab === 'system-audio' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+            color: activeTab === 'system-audio' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+            boxShadow: activeTab === 'system-audio' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+          }}
+        >
+          System Audio
+        </button>
+        <button
+          onClick={() => setActiveTab('rendered-audio')}
+          className="flex justify-center items-center font-bold text-center transition-colors"
+          style={{ 
+            fontSize: '12px', 
+            lineHeight: '1', 
+            fontFamily: "'Poppins',Helvetica,Arial,serif",
+            letterSpacing: '-0.06px',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+            flex: '1',
+            borderBottom: activeTab === 'rendered-audio' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+            color: activeTab === 'rendered-audio' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+            boxShadow: activeTab === 'rendered-audio' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+          }}
+        >
+          Rendered Audio
+        </button>
+      </div>
+
+      {/* Search Input */}
+      {!localOverlay && (
+        <form onSubmit={(e) => e.preventDefault()} className="flex" style={{ gap: '8px', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+          <input
+            placeholder="Search Sounds.."
+            value={searchQuery}
+            className="flex items-center bg-white rounded border border-[rgb(135,133,133)] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[rgb(135,133,133)] focus:outline-none"
+            style={{ 
+              fontSize: '12px',
+              lineHeight: '1',
+              fontFamily: "'Poppins',Helvetica,Arial,serif",
+              color: 'rgb(135,133,133)',
+              paddingLeft: '10px',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              marginRight: '2px',
+              width: '100%'
+            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
+      )}
+
+      {/* Content with Independent Scroll */}
+      <div className="flex gap-x-px" style={{ flex: '1', minHeight: '0', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+        <div className="flex-1 overflow-y-auto" style={{ paddingRight: '4px' }}>
+          {activeTab === 'system-audio' ? (
+            // System Audio Tab
+            !localOverlay ? (
+              <div 
+                ref={scrollContainerRef}
+                className="flex flex-col" 
+                style={{ gap: '8px' }}
+              >
+                {filteredSounds.map((sound) => (
+                  <div
+                    key={sound.id}
+                    className="bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                    style={{ padding: '8px', display: 'flex', gap: '6px' }}
+                    onClick={() => handleAddToTimeline(sound)}
+                  >
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlay(sound.id);
+                      }}
+                      className="bg-[rgb(227,222,253)] rounded flex flex-col items-center justify-center cursor-pointer"
+                      style={{ width: '40px', minWidth: '40px', padding: '8px 3px 6px 2px', gap: '2px' }}
+                    >
+                      <div className="flex items-center justify-center" style={{ width: '11px', height: '11px' }}>
+                        {loadingTrack === sound.id ? (
+                          <div className="animate-spin rounded-full border-2 border-[rgb(73,9,114)] border-t-transparent" style={{ height: '11px', width: '11px' }} />
+                        ) : playingTrack === sound.id ? (
+                          <Pause style={{ width: '11px', height: '11px' }} className="text-[rgb(65,77,92)]" />
+                        ) : (
+                          <Play style={{ width: '11px', height: '11px' }} className="text-[rgb(65,77,92)]" />
+                        )}
+                      </div>
+                      <span className="text-center text-[rgb(65,77,92)]" style={{ fontSize: '10px', lineHeight: '1.2', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px', width: '100%' }}>
+                        {loadingTrack === sound.id ? "Loading" : playingTrack === sound.id ? "Pause" : "Play"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col" style={{ gap: '4px', flex: '1', marginTop: '3px', marginBottom: '3px' }}>
+                      <p className="font-semibold text-[rgb(47,46,46)]" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                        {sound.title}
+                      </p>
+                      <p className="text-[rgb(65,77,92)]" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                        {sound.artist}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {hasMoreItems && (
+                  <div className="flex justify-center" style={{ padding: '16px' }}>
+                    <div className="animate-spin rounded-full border-2 border-[rgb(73,9,114)] border-t-transparent" style={{ height: '24px', width: '24px' }} />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ padding: '16px' }}>
+                <SoundDetails
+                  localOverlay={localOverlay}
+                  setLocalOverlay={handleUpdateOverlay}
+                />
+              </div>
+            )
           ) : (
-            <SoundDetails
-              localOverlay={localOverlay}
-              setLocalOverlay={handleUpdateOverlay}
-            />
-          )}
-        </TabsContent>
-
-        <TabsContent value="rendered-audio" className="flex-1 min-h-0 flex flex-col">
-          {!localOverlay && (
-            <div className="flex gap-2 flex-shrink-0">
-              <form onSubmit={(e) => e.preventDefault()} className="flex-1 flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    placeholder="Search sounds..."
-                    value={searchQuery}
-                    className="w-full h-10 pl-10 pr-3 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/5 rounded-md text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ fontSize: "16px" }}
-                  />
-                </div>
-              </form>
-            </div>
-          )}
-          
-          <div className="overflow-y-auto flex-1 space-y-2">
-            {renderedLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, index) => (
+            // Rendered Audio Tab
+            <div className="flex flex-col" style={{ gap: '8px' }}>
+              {renderedLoading ? (
+                Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={`skeleton-${index}`}
-                    className="h-16 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-md"
-                  />
-                ))}
-              </div>
-            ) : renderedAudio.length > 0 ? (
-              renderedAudio
-                .filter(audio => 
-                  searchQuery === "" ||
-                  audio.filename.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-                .map((audio) => (
-                  <div
-                    key={audio.id}
-                    onClick={async () => {
-                        // Set this audio as loading in the UI
+                    className="bg-white rounded animate-pulse"
+                    style={{ padding: '8px', display: 'flex', gap: '6px', height: '56px' }}
+                  >
+                    <div className="rounded bg-gray-200" style={{ width: '40px', height: '40px' }} />
+                    <div className="flex flex-col flex-1" style={{ gap: '4px' }}>
+                      <div className="h-3 bg-gray-200 rounded" style={{ width: '70%' }} />
+                      <div className="h-3 bg-gray-200 rounded" style={{ width: '40%' }} />
+                    </div>
+                  </div>
+                ))
+              ) : renderedAudio.length > 0 ? (
+                renderedAudio
+                  .filter(audio => 
+                    searchQuery === "" ||
+                    audio.filename.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((audio) => (
+                    <div
+                      key={audio.id}
+                      onClick={async () => {
                         setLoadingTrack(audio.id);
-
                         try {
-                          // Download the audio file using proxy to avoid CORS
                           const proxyUrl = `${apiBaseUrl}/proxy-audio?url=${encodeURIComponent(audio.url)}`;
                           const response = await fetch(proxyUrl);
                           const blob = await response.blob();
                           const blobUrl = URL.createObjectURL(blob);
 
-                          // Get actual audio duration
                           const audioDuration = await new Promise<number>((resolve) => {
                             const audioElement = new Audio(blobUrl);
                             audioElement.addEventListener('loadedmetadata', () => {
                               resolve(audioElement.duration);
                             });
                             audioElement.addEventListener('error', () => {
-                              resolve(30); // Fallback to 30 seconds if duration can't be determined
+                              resolve(30);
                             });
                           });
 
-                          // Clear loading state
                           setLoadingTrack(null);
 
                           const { from, row, updatedOverlays } = addAtPlayhead(
@@ -519,17 +593,15 @@ const SoundsPanel: React.FC = () => {
                             height: 100,
                             rotation: 0,
                             isDragging: false,
-                            durationInFrames: Math.round(audioDuration * 30), // Convert seconds to frames (30fps)
+                            durationInFrames: Math.round(audioDuration * 30),
                             styles: {
                               opacity: 1,
                             },
                           };
 
-                          // Create final overlays array
                           const finalOverlays = [...updatedOverlays, newSoundOverlay];
                           setOverlays(finalOverlays);
                           
-                          // Request timeline to adjust rows
                           window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
                             detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
                           }));
@@ -538,64 +610,62 @@ const SoundsPanel: React.FC = () => {
                           setLoadingTrack(null);
                         }
                       }}
-                    className="group flex items-center gap-3 p-2.5 bg-white dark:bg-gray-900 rounded-md 
-                      border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900
-                      transition-all duration-150 cursor-pointer relative"
-                  >
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const isLoading = loadingTrack === audio.id;
-                        if (!isLoading) {
-                          togglePlay(audio.id);
-                        }
-                      }}
-                      className={`flex flex-col items-center justify-center w-14 h-14 rounded-full 
-                        ${loadingTrack === audio.id ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-200 dark:bg-gray-800'} 
-                        hover:bg-gray-200 dark:hover:bg-gray-700 transition-all 
-                        ${loadingTrack === audio.id ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                      className="bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                      style={{ padding: '8px', display: 'flex', gap: '6px' }}
                     >
-                      <div className="flex items-center justify-center h-6 w-6">
-                        {loadingTrack === audio.id ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
-                        ) : playingTrack === audio.id ? (
-                          <Pause className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-                        ) : (
-                          <Play className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-                        )}
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const isLoading = loadingTrack === audio.id;
+                          if (!isLoading) {
+                            togglePlay(audio.id);
+                          }
+                        }}
+                        className="bg-[rgb(227,222,253)] rounded flex flex-col items-center justify-center"
+                        style={{ width: '40px', minWidth: '40px', padding: '8px 3px 6px 2px', gap: '2px', cursor: loadingTrack === audio.id ? 'not-allowed' : 'pointer' }}
+                      >
+                        <div className="flex items-center justify-center" style={{ width: '11px', height: '11px' }}>
+                          {loadingTrack === audio.id ? (
+                            <div className="animate-spin rounded-full border-2 border-[rgb(73,9,114)] border-t-transparent" style={{ height: '11px', width: '11px' }} />
+                          ) : playingTrack === audio.id ? (
+                            <Pause style={{ width: '11px', height: '11px' }} className="text-[rgb(65,77,92)]" />
+                          ) : (
+                            <Play style={{ width: '11px', height: '11px' }} className="text-[rgb(65,77,92)]" />
+                          )}
+                        </div>
+                        <span className="text-center text-[rgb(65,77,92)]" style={{ fontSize: '10px', lineHeight: '1.2', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px', width: '100%' }}>
+                          {loadingTrack === audio.id ? "Loading" : "Play"}
+                        </span>
                       </div>
-                      <span className="text-[10px] mt-1 text-gray-700 dark:text-gray-300 select-none">
-                        {loadingTrack === audio.id ? "Loading" : playingTrack === audio.id ? "Pause" : "Play"}
-                      </span>
-                    </div>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 select-none">
-                        {audio.filename}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 select-none">
-                        {(audio.size / (1024 * 1024)).toFixed(1)} MB • {new Date(audio.createdAt).toLocaleDateString()}
-                      </p>
+                      <div className="flex flex-col flex-1" style={{ gap: '4px', marginTop: '3px', marginBottom: '3px' }}>
+                        <p className="font-semibold text-[rgb(47,46,46)]" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                          {audio.filename}
+                        </p>
+                        <p className="text-[rgb(65,77,92)]" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                          {(audio.size / (1024 * 1024)).toFixed(1)} MB • {new Date(audio.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-500" style={{ padding: '32px 0', fontSize: '14px', textAlign: 'center', gap: '12px' }}>
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <Radio className="w-4 h-4 text-[rgb(135,133,133)]" />
                   </div>
-                ))
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-3 p-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <Radio className="w-4 h-4 text-gray-400" />
+                  <div style={{ gap: '4px' }}>
+                    <p className="font-medium" style={{ fontSize: '14px' }}>No rendered audio</p>
+                    <p className="text-[rgb(135,133,133)]" style={{ fontSize: '12px' }}>
+                      Rendered audio will appear here after you render audio
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">No rendered audio</p>
-                  <p className="text-xs text-gray-500">
-                    Rendered audio will appear here after you render audio
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 

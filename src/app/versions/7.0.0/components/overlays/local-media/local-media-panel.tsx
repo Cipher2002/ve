@@ -209,10 +209,8 @@ const LocalMediaPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-white dark:bg-gray-900/50 h-full">
-      <div className="flex-1 overflow-hidden">
-        <LocalMediaGallery onSelectMedia={handleAddToTimeline} autoAddToTimeline={false} />
-      </div>
+    <div className="h-full overflow-hidden flex flex-col">
+      <LocalMediaGallery onSelectMedia={handleAddToTimeline} autoAddToTimeline={false} />
     </div>
   );
 };

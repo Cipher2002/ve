@@ -654,24 +654,40 @@ export function LocalMediaGallery({
   }, [hasMore, isLoadingMore, isLoading, loadMoreMedia, filteredMediaFiles.length, localMediaFiles.length]);
 
   return (
-  <div className="h-full flex flex-col" data-media-gallery>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm">Saved Uploads</h2>
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
+    <div
+      className="flex flex-col bg-[rgb(244,242,250)] rounded-lg h-full"
+      data-media-gallery
+    >
+      <div className="flex flex-col gap-y-2 p-3 flex-1 min-h-0">
+        <section className="flex flex-col items-center gap-y-2 flex-shrink-0">
+          <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+          <p
+            className={`flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)]`}>
+            Uploads
+          </p>
+        </section>
+
+        <section className="flex justify-between items-center flex-shrink-0">
+          <p
+            className={`font-semibold text-3 leading-1 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] -tracking-[-0.06px]`}>
+            Saved Uploads
+          </p>
+
+          <button 
+            className="bg-[rgb(65,77,92)] rounded pl-2 pt-1.5 pr-2 pb-1.5 flex justify-center items-center gap-x-1.5 hover:bg-[rgb(55,67,82)] transition-colors disabled:opacity-50"
             onClick={handleUploadClick}
             disabled={isLoading || uploadProgress.isUploading}
           >
             {isLoading || uploadProgress.isUploading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3 h-3 animate-spin text-white" />
             ) : (
-              <Upload className="w-4 h-4" />
+              <Upload className="w-3 h-3 text-white" />
             )}
-            Upload
-          </Button>
+            <p
+              className={`flex justify-center text-3 leading-1.25 font-['Poppins',Helvetica,Arial,serif] text-white text-center -tracking-[-0.08px]`}>
+              Upload
+            </p>
+          </button>
           <input
             ref={fileInputRef}
             id="file-upload"
@@ -682,148 +698,141 @@ export function LocalMediaGallery({
             multiple
             disabled={isLoading}
           />
-        </div>
-      </div>
+        </section>
 
-      {uploadError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
-          {uploadError}
-        </div>
-      )}
-
-      {uploadProgress.isUploading && (
-        <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded mb-4">
-          <div className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-            <span className="text-blue-700 text-sm">
-              {uploadProgress.total === 1 
-                ? "Uploading file..." 
-                : `Uploading ${uploadProgress.current}/${uploadProgress.total} files...`
-              }
-            </span>
+        {uploadError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm flex-shrink-0">
+            {uploadError}
           </div>
-        </div>
-      )}
+        )}
 
-      {showResult && (
-        <div className={`border px-4 py-2 rounded mb-4 ${
-          uploadProgress.failedFiles.length > 0 
-            ? 'bg-yellow-50 border-yellow-200' 
-            : 'bg-green-50 border-green-200'
-        }`}>
-          <div className="text-sm">
-            {uploadProgress.completedFiles.length > 0 && (
-              <div className="text-green-700 mb-1">
-                {uploadProgress.completedFiles.length === 1 
-                  ? "File uploaded successfully!" 
-                  : `${uploadProgress.completedFiles.length} files uploaded successfully!`
+        {uploadProgress.isUploading && (
+          <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              <span className="text-blue-700 text-sm">
+                {uploadProgress.total === 1 
+                  ? "Uploading file..." 
+                  : `Uploading ${uploadProgress.current}/${uploadProgress.total} files...`
                 }
-              </div>
-            )}
-            {uploadProgress.failedFiles.length > 0 && (
-              <div className="text-red-700">
-                {uploadProgress.failedFiles.length === 1 
-                  ? "1 file failed to upload" 
-                  : `${uploadProgress.failedFiles.length} files failed to upload`
-                }
-              </div>
-            )}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="flex-1 flex flex-col min-h-0"
-      >
-        <TabsList className="w-full grid grid-cols-4 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 flex-shrink-0">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">All</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="image"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">
-              <ImageIcon className="w-3 h-3" />
-              Images
-            </span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="video"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">
-              <Video className="w-3 h-3" />
-              Videos
-            </span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="audio"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">
-              <Music className="w-3 h-3" />
-              Audio
-            </span>
-          </TabsTrigger>
-        </TabsList>
+        {showResult && (
+          <div className={`border px-4 py-2 rounded flex-shrink-0 ${
+            uploadProgress.failedFiles.length > 0 
+              ? 'bg-yellow-50 border-yellow-200' 
+              : 'bg-green-50 border-green-200'
+          }`}>
+            <div className="text-sm">
+              {uploadProgress.completedFiles.length > 0 && (
+                <div className="text-green-700 mb-1">
+                  {uploadProgress.completedFiles.length === 1 
+                    ? "File uploaded successfully!" 
+                    : `${uploadProgress.completedFiles.length} files uploaded successfully!`
+                  }
+                </div>
+              )}
+              {uploadProgress.failedFiles.length > 0 && (
+                <div className="text-red-700">
+                  {uploadProgress.failedFiles.length === 1 
+                    ? "1 file failed to upload" 
+                    : `${uploadProgress.failedFiles.length} files failed to upload`
+                  }
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
-        <TabsContent value={activeTab} className="flex-1 min-h-0 overflow-y-auto p-0 mt-2" onScroll={handleScroll}>
+        <section className="flex flex-shrink-0">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`flex justify-center font-bold text-3 leading-1 font-['Poppins',Helvetica,Arial,serif] text-center -tracking-[-0.06px] px-3 pt-2 pb-2 transition-all flex-1 ${
+              activeTab === "all"
+                ? "text-[rgb(73,9,114)] border-solid border-[rgb(73,9,114)] border-t-0 border-r-0 border-b border-l-0 shadow-[inset_10px_10px_50px_0px_rgba(57,_25,_148,_0.15)]"
+                : "text-[rgb(135,133,133)]"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setActiveTab("image")}
+            className={`flex justify-center font-bold text-3 leading-1 font-['Poppins',Helvetica,Arial,serif] text-center -tracking-[-0.06px] px-3 pt-2 pb-2 transition-all flex-1 ${
+              activeTab === "image"
+                ? "text-[rgb(73,9,114)] border-solid border-[rgb(73,9,114)] border-t-0 border-r-0 border-b border-l-0 shadow-[inset_10px_10px_50px_0px_rgba(57,_25,_148,_0.15)]"
+                : "text-[rgb(135,133,133)]"
+            }`}
+          >
+            Images
+          </button>
+          <button
+            onClick={() => setActiveTab("video")}
+            className={`flex justify-center font-bold text-3 leading-1 font-['Poppins',Helvetica,Arial,serif] text-center -tracking-[-0.06px] px-3 pt-2 pb-2 transition-all flex-1 ${
+              activeTab === "video"
+                ? "text-[rgb(73,9,114)] border-solid border-[rgb(73,9,114)] border-t-0 border-r-0 border-b border-l-0 shadow-[inset_10px_10px_50px_0px_rgba(57,_25,_148,_0.15)]"
+                : "text-[rgb(135,133,133)]"
+            }`}
+          >
+            Videos
+          </button>
+          <button
+            onClick={() => setActiveTab("audio")}
+            className={`flex justify-center font-bold text-3 leading-1 font-['Poppins',Helvetica,Arial,serif] text-center -tracking-[-0.06px] px-3 pt-2 pb-2 transition-all flex-1 ${
+              activeTab === "audio"
+                ? "text-[rgb(73,9,114)] border-solid border-[rgb(73,9,114)] border-t-0 border-r-0 border-b border-l-0 shadow-[inset_10px_10px_50px_0px_rgba(57,_25,_148,_0.15)]"
+                : "text-[rgb(135,133,133)]"
+            }`}
+          >
+            Audio
+          </button>
+        </section>
+
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden" onScroll={handleScroll}>
           {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 text-sm text-gray-500">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <p>Loading media files...</p>
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+              <Loader2 className="w-5 h-5 animate-spin text-[rgb(73,9,114)]" />
+              <p className="text-sm text-[rgb(135,133,133)] font-['Poppins',Helvetica,Arial,serif]">Loading media files...</p>
             </div>
           ) : filteredMediaFiles.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-3">
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <Upload className="w-4 h-4 text-gray-400" />
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-3 p-4">
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                <Upload className="w-4 h-4 text-[rgb(135,133,133)]" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">No media files</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-semibold text-[rgb(47,46,46)] font-['Poppins',Helvetica,Arial,serif]">No media files</p>
+                <p className="text-xs text-[rgb(135,133,133)] font-['Poppins',Helvetica,Arial,serif]">
                   Choose media from your device. User agrees not to use media that infringe rights, violate privacy, or are obscene.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={handleUploadClick}
-                className="text-xs"
+                className="bg-[rgb(65,77,92)] rounded px-4 py-2 text-xs text-white font-['Poppins',Helvetica,Arial,serif] hover:bg-[rgb(55,67,82)] transition-colors"
               >
                 Upload Media
-              </Button>
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 ">
+            <div className="grid grid-cols-2 gap-y-2 gap-x-2 pb-4">
               {filteredMediaFiles.map(renderMediaItem)}
               
-              {/* Loading more indicator */}
               {isLoadingMore && (
                 <div className="col-span-2 flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[rgb(73,9,114)]"></div>
                 </div>
               )}
               
-              {/* No more content indicator */}
               {!hasMore && !isLoading && !isLoadingMore && filteredMediaFiles.length >= 20 && (
-                <div className="col-span-2 text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                <div className="col-span-2 text-center py-4 text-[rgb(135,133,133)] text-sm font-['Poppins',Helvetica,Arial,serif]">
                   No more media files to load
                 </div>
               )}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       {/* Media Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>

@@ -9,7 +9,6 @@ import { useAspectRatio } from "../../../hooks/use-aspect-ratio";
 import { useTimeline } from "../../../contexts/timeline-context";
 import { ImageOverlay, Overlay, OverlayType } from "../../../types";
 import { ImageDetails } from "./image-details";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ApiImage {
   id: number | string;
@@ -59,7 +58,6 @@ export const ImageOverlayPanel: React.FC = () => {
   const [isLoadingMoreZanopy, setIsLoadingMoreZanopy] = useState(false);
   const [hasMoreZanopy, setHasMoreZanopy] = useState(true);
   const [currentPageZanopy, setCurrentPageZanopy] = useState(0);
-  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   
   const {
     addOverlay,
@@ -161,6 +159,7 @@ export const ImageOverlayPanel: React.FC = () => {
       setIsSearchingShared(false);
     }
   };
+
   const fetchGeneratedImages = async (startFrom = 0, append = false, ratio?: string, tags?: string, imageType?: string) => {
     if (append) {
       setIsLoadingMoreGenerated(true);
@@ -201,7 +200,7 @@ export const ImageOverlayPanel: React.FC = () => {
           if (ratio || aspectRatioGenerated) {
             const currentRatio = ratio || aspectRatioGenerated;
             const ratioValue = aspectRatioOptions.find(option => option.label === currentRatio)?.label || "1:1";
-            queryParams.append('ratio', ratioValue); // Use the label (1:1) instead of pre-encoded value
+            queryParams.append('ratio', ratioValue);
           }
         } else {
           baseUrl = 'https://zanopy.ai/ai-images/process_request.php';
@@ -247,7 +246,6 @@ export const ImageOverlayPanel: React.FC = () => {
         } else if (data.projects && Array.isArray(data.projects)) {
           rawImages = data.projects.reverse();
         } else {
-          // Handle error cases or no data
           rawImages = [];
         }
         
@@ -264,8 +262,8 @@ export const ImageOverlayPanel: React.FC = () => {
           } else if (currentImageType === 'Product Photography') {
             return {
               id: item.product_id || item.id,
-              url: item.org_url || item.jn_url || item.lg_url || item.url, // org_url is the main one
-              thumbnail: item.jn_url || item.org_url || item.lg_url || item.url, // jn might be thumbnail
+              url: item.org_url || item.jn_url || item.lg_url || item.url,
+              thumbnail: item.jn_url || item.org_url || item.lg_url || item.url,
               title: item.scene_prompt || item.title || `${currentImageType} Image`,
               tags: item.scene_tags || item.product_type || item.tags || ''
             };
@@ -278,7 +276,6 @@ export const ImageOverlayPanel: React.FC = () => {
               tags: item.type || item.tags || ''
             };
           } else {
-            // Default for Text to Image
             return {
               id: item.image_id || item.id,
               url: item.image_url || item.url,
@@ -298,10 +295,8 @@ export const ImageOverlayPanel: React.FC = () => {
           setGeneratedZanopyImages(transformedImages);
         }
         
-        // Continue loading if we got exactly 20 images, stop if we got less
         setHasMoreZanopy(transformedImages.length === 20);
         
-        // If no images found and it's the first page, show appropriate message
         if (transformedImages.length === 0 && !append) {
         }
           return;
@@ -334,14 +329,12 @@ export const ImageOverlayPanel: React.FC = () => {
       const { user_ref } = getUrlParams();
       
       if (user_ref && activeTab === "generated-zanopy") {
-        // Handle Zanopy-specific states
         if (append) {
           setIsLoadingMoreZanopy(false);
         } else {
           setIsLoadingZanopyGenerated(false);
         }
       } else {
-        // Handle regular generated images states
         if (append) {
           setIsLoadingMoreGenerated(false);
         } else {
@@ -407,26 +400,22 @@ export const ImageOverlayPanel: React.FC = () => {
     setGeneratedZanopyImages([]);
     setHasMoreZanopy(true);
     
-    // Pass the new type directly to avoid stale state
     fetchGeneratedImages(0, false, aspectRatioGenerated, searchQueryGenerated.trim(), newType);
   };
 
   const handleSharedSearchInputChange = (value: string) => {
     setSearchQueryShared(value);
     
-    // Clear existing timeout
     if (searchTimeoutShared.current) {
       clearTimeout(searchTimeoutShared.current);
     }
     
-    // Show search loader if there's a query
     if (value.trim()) {
       setIsSearchingShared(true);
     } else {
       setIsSearchingShared(false);
     }
     
-    // Set new timeout for 1000ms delay
     searchTimeoutShared.current = setTimeout(() => {
       setCurrentPageShared(0);
       setSharedImages([]);
@@ -439,19 +428,16 @@ export const ImageOverlayPanel: React.FC = () => {
   const handleGeneratedSearchInputChange = (value: string) => {
     setSearchQueryGenerated(value);
     
-    // Clear existing timeout
     if (searchTimeoutGenerated.current) {
       clearTimeout(searchTimeoutGenerated.current);
     }
     
-    // Show search loader if there's a query
     if (value.trim()) {
       setIsSearchingGenerated(true);
     } else {
       setIsSearchingGenerated(false);
     }
     
-    // Set new timeout for 1000ms delay
     searchTimeoutGenerated.current = setTimeout(() => {
       const { user_ref } = getUrlParams();
       if (user_ref && activeTab === "generated-zanopy") {
@@ -469,7 +455,6 @@ export const ImageOverlayPanel: React.FC = () => {
     }, 1000);
   };
 
-  // Load more functions - fixed implementation based on old working version
   const loadMoreSharedImages = () => {
     if (!isLoadingMoreShared && hasMoreShared) {
       const nextPage = currentPageShared + 1;
@@ -494,7 +479,6 @@ export const ImageOverlayPanel: React.FC = () => {
     }
   };
 
-  // Fixed scroll handlers based on old working version
   const handleSharedScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - scrollTop <= clientHeight + 100 && hasMoreShared && !isLoadingMoreShared) {
@@ -506,7 +490,6 @@ export const ImageOverlayPanel: React.FC = () => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     const { user_ref } = getUrlParams();
     
-    // Use the same logic as the old working version
     if (scrollHeight - scrollTop <= clientHeight + 100) {
       if (user_ref && activeTab === "generated-zanopy") {
         if (hasMoreZanopy && !isLoadingMoreZanopy && !isLoadingZanopyGenerated) {
@@ -557,7 +540,6 @@ export const ImageOverlayPanel: React.FC = () => {
     }
   }, [selectedOverlayId, overlays]);
 
-  // Helper function to get image's natural dimensions
   const getImageNaturalDimensions = (imageUrl: string): Promise<{ width: number; height: number }> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -570,20 +552,14 @@ export const ImageOverlayPanel: React.FC = () => {
       };
       
       img.onerror = () => {
-        // Fallback to editor dimensions if image can't be loaded
-        resolve({ width: 400, height: 300 }); // Default fallback dimensions
+        resolve({ width: 400, height: 300 });
       };
       
       img.src = imageUrl;
     });
   };
 
-  /**
-   * Adds a new image overlay to the editor
-   * @param image - The selected Pexels image to add
-   * Creates a new overlay with default positioning and animation settings
-   */
-const handleAddImage = async (image: ApiImage) => {
+  const handleAddImage = async (image: ApiImage) => {
     const { width, height } = await getImageNaturalDimensions(image.url);
     const { from, row, updatedOverlays } = addAtPlayhead(
       currentFrame,
@@ -613,194 +589,230 @@ const handleAddImage = async (image: ApiImage) => {
       },
     };
 
-    // Create final overlays array with shifted overlays + new overlay
     const finalOverlays = [...updatedOverlays, newOverlay];
     setOverlays(finalOverlays);
     
-    // Request timeline to adjust rows to accommodate all overlays
     window.dispatchEvent(new CustomEvent('adjustTimelineRows', {
       detail: { requiredRows: Math.max(...finalOverlays.map(o => o.row)) + 1 }
     }));
   };
 
-  /**
-   * Updates an existing image overlay's properties
-   * @param updatedOverlay - The modified overlay object
-   * Updates both local state and global editor context
-   */
   const handleUpdateOverlay = (updatedOverlay: Overlay) => {
     setLocalOverlay(updatedOverlay);
     changeOverlay(updatedOverlay.id, updatedOverlay);
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
+    <section className="flex flex-col bg-[rgb(244,242,250)] h-full font-['Poppins',Helvetica,Arial,serif]">
       {!localOverlay ? (
-        <>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-            <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
-              <TabsTrigger
-                value="generated-zanopy"
-                className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-                rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-              >
-                <span className="flex items-center gap-2 text-xs">Generated on Zanopy</span>
-              </TabsTrigger>
-              
-              <TabsTrigger
-                value="shared-images"
-                className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-                rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-              >
-                <span className="flex items-center gap-2 text-xs">Shared Images</span>
-              </TabsTrigger>
-            </TabsList>
+        <div className="flex flex-col items-center gap-y-2 mt-2 mx-3 mb-2 h-full min-h-0">
+          {/* Title with decorative line */}
+          <div className="w-full flex flex-col items-center gap-y-2 flex-shrink-0">
+            <div className="flex flex-col gap-y-2 items-center">
+              <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+              <h1 className="flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] w-full">
+                Image
+              </h1>
+            </div>
+          </div>
 
-            <TabsContent value="generated-zanopy" className="flex-1 min-h-0 flex flex-col space-y-4">
-              {/* <div className="flex flex-col gap-2 p-2 bg-background/50 rounded-md border border-border/50 mb-4 flex-shrink-0"> */}
-                <div className="flex gap-2 flex-shrink-0">
-                  <select
-                    value={selectedImageType}
-                    onChange={(e) => handleImageTypeChange(e.target.value)}
-                    className="bg-background border border-border text-foreground rounded-md text-sm"
-                    disabled={false}
-                    style={{ pointerEvents: 'auto', zIndex: 10 }}
-                  >
-                    {imageTypeOptions.map((option) => (
-                      <option key={option.label} value={option.label}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={aspectRatioGenerated}
-                    onChange={(e) => handleGeneratedAspectRatioChange(e.target.value)}
-                    className="bg-background border border-border text-foreground rounded-md px-3 py-2 text-sm"
-                    disabled={false}
-                    style={{ pointerEvents: 'auto', zIndex: 10 }}
-                  >
-                    {aspectRatioOptions.map((option) => (
-                      <option key={option.label} value={option.label}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant="default"
-                    onClick={() => setIsSearchDropdownOpen(!isSearchDropdownOpen)}
-                    className="bg-background hover:bg-muted text-foreground border-border"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
+          {/* Tabs */}
+          <div className="w-full flex items-center flex-shrink-0">
+            <button
+              onClick={() => setActiveTab("generated-zanopy")}
+              className="flex justify-center items-center font-bold text-center transition-colors"
+              style={{ 
+                fontSize: '12px', 
+                lineHeight: '1', 
+                fontFamily: "'Poppins',Helvetica,Arial,serif",
+                letterSpacing: '-0.06px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                flex: '1',
+                whiteSpace: 'nowrap',
+                borderBottom: activeTab === 'generated-zanopy' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+                color: activeTab === 'generated-zanopy' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+                boxShadow: activeTab === 'generated-zanopy' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+              }}
+            >
+              Generated by you
+            </button>
+            <button
+              onClick={() => setActiveTab("shared-images")}
+              className="flex justify-center items-center font-bold text-center transition-colors"
+              style={{ 
+                fontSize: '12px', 
+                lineHeight: '1', 
+                fontFamily: "'Poppins',Helvetica,Arial,serif",
+                letterSpacing: '-0.06px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                flex: '1',
+                whiteSpace: 'nowrap',
+                borderBottom: activeTab === 'shared-images' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+                color: activeTab === 'shared-images' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+                boxShadow: activeTab === 'shared-images' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+              }}
+            >
+              Shared Image
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="w-full flex flex-col gap-y-2 flex-1 min-h-0">
+            {activeTab === "generated-zanopy" ? (
+              <>
+                {/* Search Input */}
+                <Input
+                  placeholder="Search Image"
+                  value={searchQueryGenerated}
+                  className="w-full text-xs leading-4 text-[rgb(135,133,133)] bg-white rounded border border-[rgb(135,133,133)] px-2.5 py-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[rgb(135,133,133)]"
+                  onChange={(e) => handleGeneratedSearchInputChange(e.target.value)}
+                />
+
+                {/* Dropdowns */}
+                <div className="flex gap-x-1">
+                  <div className="relative flex-1 bg-white rounded border border-[rgb(135,133,133)]">
+                    <select
+                      value={selectedImageType}
+                      onChange={(e) => handleImageTypeChange(e.target.value)}
+                      className="w-full text-xs leading-4 text-[rgb(135,133,133)] bg-transparent px-2.5 py-1.5 pr-8 appearance-none cursor-pointer border-none focus:outline-none"
+                    >
+                      {imageTypeOptions.map((option) => (
+                        <option key={option.label} value={option.label}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <img
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
+                      src={'/assets/Image/09892b39ddd760baf1d9bd1ec8fc0e7d.svg'}
+                      alt="dropdown arrow"
+                    />
+                  </div>
+
+                  <div className="relative bg-white rounded border border-[rgb(135,133,133)]" style={{ width: '55px' }}>
+                    <select
+                      value={aspectRatioGenerated}
+                      onChange={(e) => handleGeneratedAspectRatioChange(e.target.value)}
+                      className="w-full text-xs leading-4 text-[rgb(135,133,133)] bg-transparent px-2.5 py-1.5 pr-7 appearance-none cursor-pointer border-none focus:outline-none"
+                    >
+                      {aspectRatioOptions.map((option) => (
+                        <option key={option.label} value={option.label}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <img
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
+                      src={'/assets/Image/6df6b37361f223e73f0eeb0f9b12f52c.svg'}
+                      alt="dropdown arrow"
+                    />
+                  </div>
                 </div>
-                
-                {/* Expandable search row */}
-                {isSearchDropdownOpen && (
-                    <Input
-                      placeholder="Search images..."
-                      value={searchQueryGenerated}
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgb(41,0,156)]"
-                      onChange={(e) => handleGeneratedSearchInputChange(e.target.value)}
-                      style={{ fontSize: "16px" }}
-                      autoFocus
-                    />
-                )}
-              {/* </div> */}
 
-              {/* Fixed scroll container structure based on old working version */}
-              <div 
-                className="grid grid-cols-2 gap-3 overflow-y-auto flex-1" 
-                onScroll={handleGeneratedScroll}
-              >
-                {(() => {
-                  const { user_ref } = getUrlParams();
-                  const isLoading = user_ref && activeTab === "generated-zanopy" 
-                    ? (isLoadingZanopyGenerated || isSearchingGenerated)
-                    : (isLoadingGenerated || isSearchingGenerated);
-                  return isLoading;
-                })() ? (
-                  Array.from({ length: 16 }).map((_, index) => (
-                    <div
-                      key={`skeleton-${index}`}
-                      className="relative aspect-video bg-muted animate-pulse rounded-sm"
-                    />
-                  ))
-                ) : (() => {
-                  const imagesToShow = generatedZanopyImages.length > 0 ? generatedZanopyImages : filteredGeneratedImages;
-                  return imagesToShow.length > 0;
-                })() ? (
-                  <>
+                {/* Image Grid with Scroll */}
+                <div className="w-full flex-1 min-h-0">
+                  <div 
+                    className="grid grid-cols-3 gap-2 overflow-y-auto h-full content-start"
+                    onScroll={handleGeneratedScroll}
+                  >
                     {(() => {
-                      const imagesToShow = generatedZanopyImages.length > 0 ? generatedZanopyImages : filteredGeneratedImages;
-                      return imagesToShow.map((image) => (
-                        <button
-                          key={image.id}
-                          className="relative aspect-video cursor-pointer border border-border hover:border-foreground rounded-md"
-                          onClick={() => handleAddImage(image)}
-                        >
-                          <div className="relative">
-                            <img
-                              src={image.thumbnail || image.url}
-                              alt={image.title}
-                              className="rounded-sm object-cover w-full h-full hover:opacity-60 transition-opacity duration-200"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-background/20 opacity-0 hover:opacity-100 transition-opacity duration-200" />
-                          </div>
-                        </button>
-                      ));
-                    })()}
-                    
+                      const { user_ref } = getUrlParams();
+                      const isLoading = user_ref && activeTab === "generated-zanopy" 
+                        ? (isLoadingZanopyGenerated || isSearchingGenerated)
+                        : (isLoadingGenerated || isSearchingGenerated);
+                      return isLoading;
+                    })() ? (
+                      Array.from({ length: 18 }).map((_, index) => (
+                        <div
+                          key={`skeleton-${index}`}
+                          className="relative aspect-square bg-gray-300 animate-pulse rounded"
+                        />
+                      ))
+                      ) : (() => {
+const imagesToShow = generatedZanopyImages.length > 0 ? generatedZanopyImages : filteredGeneratedImages;
+return imagesToShow.length > 0;
+})() ? (
+<>
+{(() => {
+const imagesToShow = generatedZanopyImages.length > 0 ? generatedZanopyImages : filteredGeneratedImages;
+return imagesToShow.map((image) => (
+<button
+key={image.id}
+className="relative aspect-square cursor-pointer rounded overflow-hidden"
+onClick={() => handleAddImage(image)}
+>
+<img
+src={image.thumbnail || image.url}
+alt={image.title}
+className="rounded object-cover w-full h-full"
+onError={(e) => {
+const target = e.target as HTMLImageElement;
+target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIEVycm9yPC90ZXh0Pjwvc3ZnPg==';
+}}
+/>
+</button>
+));
+})()}
                     {/* Load more indicator */}
                     {((generatedZanopyImages.length > 0 && isLoadingMoreZanopy) || 
                       (filteredGeneratedImages.length > 0 && isLoadingMoreGenerated)) && (
-                      <div className="col-span-2 flex justify-center py-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground"></div>
+                      <div className="col-span-3 flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[rgb(73,9,114)]"></div>
                       </div>
                     )}
                     
                     {/* No more content indicator */}
                     {((generatedZanopyImages.length > 0 && !hasMoreZanopy && !isLoadingMoreZanopy) ||
                       (filteredGeneratedImages.length > 0 && !hasMoreGenerated && !isLoadingMoreGenerated)) && (
-                      <div className="col-span-2 text-center py-4 text-muted-foreground text-sm">
+                      <div className="col-span-3 text-center py-4 text-[rgb(135,133,133)] text-xs">
                         No more images to load
                       </div>
                     )}
                   </>
                 ) : searchQueryGenerated.trim() ? (
-                  <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Search className="w-6 h-6 text-gray-400" />
+                  <div className="col-span-3 flex flex-col items-center justify-center py-12 text-center space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+                      <Search className="w-6 h-6 text-[rgb(135,133,133)]" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">No images found</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                      <p className="text-sm font-medium text-[rgb(47,46,46)]">No images found</p>
+                      <p className="text-xs text-[rgb(135,133,133)] max-w-xs">
                         No {selectedImageType} images found for "{searchQueryGenerated}". Try different keywords or generate this image using Zanopy's Image generator.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center space-y-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Search className="w-4 h-4 text-gray-400" />
+                  <div className="col-span-3 flex flex-col items-center justify-center py-8 text-center space-y-3">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                      <Search className="w-4 h-4 text-[rgb(135,133,133)]" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">No {selectedImageType} images found</p>
+                      <p className="text-sm font-medium text-[rgb(47,46,46)]">No {selectedImageType} images found</p>
                     </div>
                   </div>
                 )}
               </div>
-            </TabsContent>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Shared Images Tab */}
+            <Input
+              placeholder="Search Image"
+              value={searchQueryShared}
+              className="w-full text-xs leading-4 text-[rgb(135,133,133)] bg-white rounded border border-[rgb(135,133,133)] px-2.5 py-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[rgb(135,133,133)]"
+              onChange={(e) => handleSharedSearchInputChange(e.target.value)}
+            />
 
-            <TabsContent value="shared-images" className="flex-1 min-h-0 flex flex-col space-y-4">
-              <div className="flex gap-2 flex-shrink-0">
+            {/* Aspect Ratio Dropdown */}
+            <div className="flex gap-x-1">
+              <div className="relative bg-white rounded border border-[rgb(135,133,133)]" style={{ width: '55px' }}>
                 <select
                   value={aspectRatioShared}
                   onChange={(e) => handleSharedAspectRatioChange(e.target.value)}
-                  className="bg-background border border-border text-foreground rounded-md px-3 py-2 text-sm"
+                  className="w-full text-xs leading-4 text-[rgb(135,133,133)] bg-transparent px-2.5 py-1.5 pr-7 appearance-none cursor-pointer border-none focus:outline-none"
                   disabled={isLoadingShared}
                 >
                   {aspectRatioOptions.map((option) => (
@@ -809,32 +821,25 @@ const handleAddImage = async (image: ApiImage) => {
                     </option>
                   ))}
                 </select>
-                <Input
-                  placeholder="Search images..."
-                  value={searchQueryShared}
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-blue-400"
-                  onChange={(e) => handleSharedSearchInputChange(e.target.value)}
-                  style={{ fontSize: "16px" }}
+                <img
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
+                  src={'/assets/Image/6df6b37361f223e73f0eeb0f9b12f52c.svg'}
+                  alt="dropdown arrow"
                 />
-                <Button
-                  variant="default"
-                  disabled={isLoadingShared}
-                  className="bg-background hover:bg-muted text-foreground border-border"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
               </div>
+            </div>
 
-              {/* Fixed scroll container structure based on old working version */}
+            {/* Image Grid with Scroll */}
+            <div className="w-full flex-1 min-h-0">
               <div 
-                className="grid grid-cols-2 gap-3 overflow-y-auto flex-1" 
+                className="grid grid-cols-3 gap-2 overflow-y-auto h-full content-start"
                 onScroll={handleSharedScroll}
               >
                 {isLoadingShared || isSearchingShared ? (
-                  Array.from({ length: 16 }).map((_, index) => (
+                  Array.from({ length: 18 }).map((_, index) => (
                     <div
                       key={`skeleton-${index}`}
-                      className="relative aspect-video bg-muted animate-pulse rounded-sm"
+                      className="relative aspect-square bg-gray-300 animate-pulse rounded"
                     />
                   ))
                 ) : filteredSharedImages.length > 0 ? (
@@ -842,67 +847,66 @@ const handleAddImage = async (image: ApiImage) => {
                     {filteredSharedImages.map((image) => (
                       <button
                         key={image.id}
-                        className="relative aspect-video cursor-pointer border border-border hover:border-foreground rounded-md"
+                        className="relative aspect-square cursor-pointer rounded overflow-hidden"
                         onClick={() => handleAddImage(image)}
                       >
-                        <div className="relative">
-                          <img
-                            src={image.thumbnail || image.url}
-                            alt={`Image thumbnail ${image.id}`}
-                            className="rounded-sm object-cover w-full h-full hover:opacity-60 transition-opacity duration-200"
-                            onError={(e) => {
-                              const button = (e.target as HTMLImageElement).closest('button');
-                              if (button) {
-                                button.style.display = 'none';
-                              }
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-background/20 opacity-0 hover:opacity-100 transition-opacity duration-200" />
-                        </div>
+                        <img
+                          src={image.thumbnail || image.url}
+                          alt={`Image thumbnail ${image.id}`}
+                          className="rounded object-cover w-full h-full"
+                          onError={(e) => {
+                            const button = (e.target as HTMLImageElement).closest('button');
+                            if (button) {
+                              button.style.display = 'none';
+                            }
+                          }}
+                        />
                       </button>
                     ))}
                     
                     {/* Load more indicator */}
                     {isLoadingMoreShared && (
-                      <div className="col-span-2 flex justify-center py-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground"></div>
+                      <div className="col-span-3 flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[rgb(73,9,114)]"></div>
                       </div>
                     )}
                     
                     {/* No more content indicator */}
                     {!hasMoreShared && !isLoadingMoreShared && filteredSharedImages.length >= 20 && (
-                      <div className="col-span-2 text-center py-4 text-muted-foreground text-sm">
+                      <div className="col-span-3 text-center py-4 text-[rgb(135,133,133)] text-xs">
                         No more images to load
                       </div>
                     )}
                   </>
                 ) : searchQueryShared.trim() ? (
-                  <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Search className="w-6 h-6 text-gray-400" />
+                  <div className="col-span-3 flex flex-col items-center justify-center py-12 text-center space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+                      <Search className="w-6 h-6 text-[rgb(135,133,133)]" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">No images found</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+                      <p className="text-sm font-medium text-[rgb(47,46,46)]">No images found</p>
+                      <p className="text-xs text-[rgb(135,133,133)] max-w-xs">
                         Couldn't find any images matching "{searchQueryShared}". Try creating this image using Zanopy's Image generator.
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="col-span-2 flex flex-col items-center justify-center py-8 text-muted-foreground"></div>
+                  <div className="col-span-3 flex flex-col items-center justify-center py-8 text-[rgb(135,133,133)]"></div>
                 )}
               </div>
-            </TabsContent>
-          </Tabs>
-        </>
-      ) : (
-        <div className="p-4">
-          <ImageDetails
-            localOverlay={localOverlay as ImageOverlay}
-            setLocalOverlay={handleUpdateOverlay}
-          />
-        </div>
-      )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
-  );
+  ) : (
+    <div className="p-4">
+      <ImageDetails
+        localOverlay={localOverlay as ImageOverlay}
+        setLocalOverlay={handleUpdateOverlay}
+      />
+    </div>
+  )}
+</section>
+);
 };

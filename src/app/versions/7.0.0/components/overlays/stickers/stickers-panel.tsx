@@ -119,6 +119,7 @@ export function StickersPanel() {
   const stickerCategories = getStickerCategories();
   const isMobile = useIsMobile();
   const [localOverlay, setLocalOverlay] = useState<StickerOverlay | null>(null);
+  const [activeCategory, setActiveCategory] = useState(stickerCategories[0]);
 
   // Update local overlay when selected overlay changes or when overlays change
   React.useEffect(() => {
@@ -228,51 +229,137 @@ export function StickersPanel() {
     </div>
   );
 
-  return (
-    <div className="p-2 h-full bg-background">
+return (
+    <section className="flex flex-col bg-[rgb(244,242,250)] h-full overflow-hidden">
       {!isValidStickerOverlay ? (
-        <div className="flex flex-col gap-4 p-2 bg-white dark:bg-gray-900/50 h-full">
-          <Tabs defaultValue={stickerCategories[0]} className="w-full">
-            <TabsList className="w-full flex space-x-1 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-1">
-              {stickerCategories.map((category) => (
-                <TabsTrigger
-                  key={category}
-                  value={category}
-                  className="flex-1 px-3 py-1.5 text-sm font-medium
-                    data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800
-                    data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400
-                    data-[state=active]:shadow-sm
-                    rounded-md transition-all duration-200
-                    text-gray-600 dark:text-gray-400"
-                >
-                  {category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {stickerCategories.map((category) => (
-              <TabsContent key={category} value={category} className="mt-2">
-                {isMobile ? (
-                  renderStickerContent(category)
-                ) : (
-                  <ScrollArea className="h-[calc(100vh-140px)]">
-                    {renderStickerContent(category)}
-                  </ScrollArea>
-                )}
-              </TabsContent>
-            ))}
-          </Tabs>
-          
-          <div className="mt-4">
-            <SelectStickerOverlay setLocalOverlay={handleSetLocalOverlay} />
+        <>
+          {/* Header
+          <div className="w-full flex flex-col items-center" style={{ gap: '8px', margin: '0 auto' }}>
+            <div className="bg-[rgb(65,77,92)] rounded-[1px]" style={{ width: '42px', height: '2px', minHeight: '2px' }} />
+            <p className="flex items-center font-bold text-[rgb(47,46,46)]" style={{ fontSize: '14px', lineHeight: '1.14', fontFamily: "'Poppins',Helvetica,Arial,serif" }}>
+              Stickers
+            </p>
+          </div> */}
+          {/* Title with decorative line */}
+          <div className="w-full flex flex-col items-center gap-y-2 flex-shrink-0" style={{ gap: '8px', marginTop: '8px' }}>
+            <div className="flex flex-col gap-y-2 items-center">
+              <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+              <h1 className="flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] w-full">
+                Stickers
+              </h1>
+            </div>
           </div>
-        </div>
+          
+
+          {/* Tab Navigation */}
+          <div className="flex items-center" style={{ gap: '8px', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+            {stickerCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className="flex justify-center items-center font-bold text-center transition-colors"
+                style={{ 
+                  fontSize: '12px', 
+                  lineHeight: '1', 
+                  fontFamily: "'Poppins',Helvetica,Arial,serif",
+                  letterSpacing: '-0.06px',
+                  paddingTop: '8px',
+                  paddingBottom: '8px',
+                  flex: '1',
+                  borderBottom: activeCategory === category ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+                  color: activeCategory === category ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+                  boxShadow: activeCategory === category ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {/* Content with Independent Scroll */}
+          <div className="flex gap-x-px" style={{ flex: '1', minHeight: '0',  marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+            <div className="flex-1 overflow-y-auto" style={{ paddingRight: '4px' }}>
+              <div className="h-full">
+                <div className="grid grid-cols-3" style={{ gap: '8px', padding: '8px 0' }}>
+                  {templatesByCategory[activeCategory]?.map((template) => (
+                    <div
+                      key={template.config.id}
+                      style={{ height: '65px' }}
+                    >
+                      <button
+                        onClick={() => handleStickerClick(template.config.id)}
+                        className="group relative w-full h-full rounded bg-white hover:bg-gray-50 transition-colors border border-gray-200"
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div style={{ 
+                            width: '57px',
+                            height: '57px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden'
+                          }}>
+                            <Player
+                              component={() => (
+                                <Sequence from={0} durationInFrames={template.config.defaultProps?.durationInFrames || 100}>
+                                  {React.createElement(memo(template.Component), {
+                                    overlay: {
+                                      id: -1,
+                                      type: OverlayType.STICKER,
+                                      content: template.config.id,
+                                      category: template.config.category as StickerCategory,
+                                      durationInFrames: template.config.defaultProps?.durationInFrames || 100,
+                                      from: 0,
+                                      height: 57,
+                                      width: 57,
+                                      left: 0,
+                                      top: 0,
+                                      row: 0,
+                                      isDragging: false,
+                                      rotation: 0,
+                                      styles: {
+                                        opacity: 1,
+                                        ...template.config.defaultProps?.styles,
+                                      },
+                                    },
+                                    isSelected: false,
+                                    ...template.config.defaultProps,
+                                  })}
+                                </Sequence>
+                              )}
+                              durationInFrames={template.config.defaultProps?.durationInFrames || 100}
+                              compositionWidth={57}
+                              compositionHeight={57}
+                              fps={30}
+                              initialFrame={15}
+                              autoPlay={false}
+                              loop
+                              controls={false}
+                              style={{
+                                width: "57px",
+                                height: "57px",
+                                maxWidth: "57px",
+                                maxHeight: "57px"
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       ) : (
         <StickerDetails
           localOverlay={localOverlay}
           setLocalOverlay={handleSetLocalOverlay}
         />
       )}
-    </div>
+    </section>
   );
 }

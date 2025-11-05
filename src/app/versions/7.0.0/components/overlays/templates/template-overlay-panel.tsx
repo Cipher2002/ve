@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { useEditorContext } from "../../../contexts/editor-context";
 import { TemplateOverlay, OverlayType } from "../../../types";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTemplates } from "../../../hooks/use-templates";
 import { TemplateThumbnail } from "./template-thumbnail";
 import { Pencil } from "lucide-react";
@@ -310,218 +308,286 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-2 sm:gap-4 sm:p-4 bg-gray-100/40 dark:bg-gray-900/40 h-full">
-      <Tabs value={activeTab} onValueChange={(value) => {
-        setActiveTab(value);
-        if (value === "created-by-you") {
-          fetchClientTemplates();
-        }
-      }} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-full grid grid-cols-2 bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-sm border border-gray-200 dark:border-gray-700 gap-1 mb-2 flex-shrink-0">
-          <TabsTrigger
-            value="templates"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">System Templates</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="created-by-you"
-            className="data-[state=active]:bg-[rgb(41,0,156)]/15 data-[state=active]:text-[rgb(41,0,156)] dark:data-[state=active]:text-white 
-            rounded-sm transition-all duration-200 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-200 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
-          >
-            <span className="flex items-center gap-2 text-xs">Created By You</span>
-          </TabsTrigger>
-        </TabsList>
+    <section className="flex flex-col bg-[rgb(244,242,250)] h-full overflow-hidden" style={{margin}}>
+      {/* Header */}
+      {/* <div className="w-full flex flex-col items-center" style={{ gap: '8px', marginTop: '8px'}}>
+        <div className="bg-[rgb(65,77,92)] rounded-[1px]" style={{ width: '42px', height: '2px', minHeight: '2px' }} />
+        <p className="flex items-center font-bold text-[rgb(47,46,46)]" style={{ fontSize: '14px', lineHeight: '1.14', fontFamily: "'Poppins',Helvetica,Arial,serif" }}>
+          Templates
+        </p>
+      </div> */}
 
-        {/* Filter buttons for Created By You tab */}
-        {activeTab === "created-by-you" && (
-          <div className="flex border rounded-lg overflow-hidden mb-2 self-start">
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTemplateFilter('active')}
-              className={`px-4 py-[10px] rounded-l-lg rounded-r-none font-medium ${
-                activeTemplateFilter === 'active'
-                  ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
-                  : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
-              }`}
-            >
-              Active View
-            </Button>
-            {/* <div className="w-px bg-[rgb(41,0,156)]"></div> */}
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTemplateFilter('all')}
-              className={`px-4 py-[10px] rounded-l-none rounded-r-lg font-medium  ${
-                activeTemplateFilter === 'all'
-                  ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
-                  : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
-              }`}
-            >
-              All
-            </Button>
+      <div className="w-full flex flex-col items-center gap-y-2 flex-shrink-0">
+            <div className="flex flex-col gap-y-2 items-center">
+              <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+              <h1 className="flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] w-full">
+                Templates
+              </h1>
+            </div>
           </div>
-        )}
-        
-        <div className="flex gap-2 flex-shrink-0">
-          <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-            <Input
-              placeholder="Search system templates..."
-              value={searchQuery}
-              className="flex-1 h-8 sm:h-10 text-xs sm:text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-white/5 text-gray-900 dark:text-zinc-200 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:ring-blue-400 md:text-base"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              // NOTE: Stops zooming in on input focus on iPhone
-              style={{ fontSize: "16px" }}
-            />
-          </form>
 
-          <div className="relative">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportTemplate}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              title="Import template"
-            />
-          </div>
+      {/* Tab Navigation */}
+      <div className="flex items-center" style={{marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px'}}>
+        <button
+          onClick={() => setActiveTab('templates')}
+          className="flex justify-center items-center font-bold text-center transition-colors"
+          style={{ 
+            fontSize: '12px', 
+            lineHeight: '1', 
+            fontFamily: "'Poppins',Helvetica,Arial,serif",
+            letterSpacing: '-0.06px',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+            flex: '1',
+            borderBottom: activeTab === 'templates' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+            color: activeTab === 'templates' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+            boxShadow: activeTab === 'templates' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+          }}
+        >
+          System Templates
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('created-by-you');
+            fetchClientTemplates();
+          }}
+          className="flex justify-center items-center font-bold text-center transition-colors"
+          style={{ 
+            fontSize: '12px', 
+            lineHeight: '1', 
+            fontFamily: "'Poppins',Helvetica,Arial,serif",
+            letterSpacing: '-0.06px',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+            flex: '1',
+            borderBottom: activeTab === 'created-by-you' ? '1px solid rgb(73,9,114)' : '1px solid transparent',
+            color: activeTab === 'created-by-you' ? 'rgb(73,9,114)' : 'rgb(135,133,133)',
+            boxShadow: activeTab === 'created-by-you' ? 'inset 10px 10px 50px 0px rgba(57, 25, 148, 0.15)' : 'none'
+          }}
+        >
+          Created by you
+        </button>
+      </div>
+
+      {/* Filter buttons - only show for Created By You tab */}
+      {activeTab === "created-by-you" && (
+        <div className="flex border rounded-lg overflow-hidden self-start" style={{ marginTop: '8px', marginLeft: '12px'}}>
+          <Button
+            variant="ghost"
+            onClick={() => setActiveTemplateFilter('active')}
+            className={`px-4 py-[10px] rounded-l-lg rounded-r-none font-medium ${
+              activeTemplateFilter === 'active'
+                ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
+            }`}
+          >
+            Active View
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => setActiveTemplateFilter('all')}
+            className={`px-4 py-[10px] rounded-l-none rounded-r-lg font-medium ${
+              activeTemplateFilter === 'all'
+                ? 'bg-[rgb(41,0,156)]/15 text-[rgb(41,0,156)] border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15'
+                : 'bg-white text-[rgb(65,77,92)] border border-[rgb(135,133,133)] hover:bg-gray-50'
+            }`}
+          >
+            All
+          </Button>
         </div>
+      )}
 
-        {error && (
-          <div className="text-red-500 text-xs sm:text-sm p-2 flex-shrink-0">
-            Error loading templates: {error}
-          </div>
-        )}
+      {/* Search Input */}
+      <form onSubmit={handleSearch} className="flex" style={{ gap: '8px', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+        <Input
+          placeholder="Search Template"
+          value={searchQuery}
+          className="flex items-center bg-white rounded border border-[rgb(135,133,133)] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[rgb(135,133,133)]"
+          style={{ 
+            fontSize: '12px',
+            lineHeight: '1',
+            fontFamily: "'Poppins',Helvetica,Arial,serif",
+            color: 'rgb(135,133,133)',
+            paddingLeft: '10px',
+            paddingTop: '6px',
+            paddingBottom: '6px',
+            marginRight: '2px'
+          }}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </form>
 
-        <TabsContent value="templates" className="flex-1 min-h-0">
-          <div className="h-full overflow-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 p-1">
+      {error && (
+        <div className="text-red-500 text-xs" style={{ padding: '8px' }}>
+          Error loading templates: {error}
+        </div>
+      )}
+
+      {/* Template Content with Independent Scroll */}
+      <div className="flex gap-x-px" style={{ flex: '1', minHeight: '0', marginTop: '8px', marginRight: '10px', marginBottom: '8px', marginLeft: '12px' }}>
+        <div className="flex-1 overflow-y-auto" style={{ paddingRight: '4px' }}>
+          {activeTab === 'templates' ? (
+            // System Templates Tab
+            <div className="flex flex-col" style={{ gap: '8px' }}>
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, index) => (
+                Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={`skeleton-${index}`}
-                    className="relative aspect-video bg-gray-200 dark:bg-gray-800 animate-pulse rounded-sm"
-                  />
+                    className="bg-white rounded animate-pulse"
+                    style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  >
+                    <div className="flex" style={{ gap: '6px' }}>
+                      <div className="rounded bg-gray-200" style={{ width: '65px', height: '60px' }} />
+                      <div className="flex flex-col" style={{ width: '136px', gap: '4px' }}>
+                        <div className="h-3 bg-gray-200 rounded" style={{ width: '80px' }} />
+                        <div className="h-4 bg-gray-200 rounded" style={{ width: '128px' }} />
+                        <div className="h-3 bg-gray-200 rounded w-full" />
+                      </div>
+                    </div>
+                  </div>
                 ))
               ) : templates.length > 0 ? (
                 templates.map((template) => (
-                <Card
-                  key={template.id}
-                  className="cursor-pointer hover:bg-accent transition-colors duration-200"
-                >
-                {confirmingTemplateId === template.id ? (
-                  <div className="p-4 bg-[rgb(41,0,156)]/15 dark:bg-[rgb(41,0,156)]/15 border border-[rgb(41,0,156)] hover:bg-[rgb(41,0,156)]/15 rounded-md">
-                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
-                    {isLoadingTemplate ? (
-                      <div className="space-y-3">
-                        <p className="text-xs text-gray-600 dark:text-gray-300">
-                          Loading template and downloading videos...
-                        </p>
-                        {templateLoadingProgress.total > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-xs">
-                              <span>Videos: {templateLoadingProgress.current}/{templateLoadingProgress.total}</span>
-                              <span>{Math.round((templateLoadingProgress.current / templateLoadingProgress.total) * 100)}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                style={{ width: `${(templateLoadingProgress.current / templateLoadingProgress.total) * 100}%` }}
-                              ></div>
+                  <div
+                    key={template.id}
+                    className="bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                    style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  >
+                    {confirmingTemplateId === template.id ? (
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded" style={{ padding: '16px' }}>
+                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px' }}>Apply Template</h3>
+                        {isLoadingTemplate ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <p className="text-gray-600" style={{ fontSize: '12px' }}>
+                              Loading template and downloading videos...
+                            </p>
+                            {templateLoadingProgress.total > 0 && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div className="flex justify-between" style={{ fontSize: '12px' }}>
+                                  <span>Videos: {templateLoadingProgress.current}/{templateLoadingProgress.total}</span>
+                                  <span>{Math.round((templateLoadingProgress.current / templateLoadingProgress.total) * 100)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full" style={{ height: '8px' }}>
+                                  <div 
+                                    className="bg-blue-600 rounded-full transition-all duration-300" 
+                                    style={{ 
+                                      height: '8px',
+                                      width: `${(templateLoadingProgress.current / templateLoadingProgress.total) * 100}%` 
+                                    }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex justify-center">
+                              <div className="animate-spin rounded-full border-2 border-blue-500 border-t-transparent" style={{ height: '24px', width: '24px' }}></div>
                             </div>
                           </div>
+                        ) : (
+                          <>
+                            <p className="text-gray-600 mb-4" style={{ fontSize: '12px' }}>
+                              Are you sure you want to add this template to your timeline? It will replace all existing overlays.
+                            </p>
+                            <div className="flex justify-end" style={{ gap: '8px' }}>
+                              <button 
+                                className="border rounded hover:bg-gray-50"
+                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                onClick={() => setConfirmingTemplateId(null)}
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                className="bg-[#490972] text-white rounded hover:bg-[#490972]/90"
+                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                onClick={() => handleApplyTemplate(template)}
+                              >
+                                Apply Template
+                              </button>
+                            </div>
+                          </>
                         )}
-                        <div className="flex justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
-                        </div>
                       </div>
                     ) : (
-                      <>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
-                          Are you sure you want to add this template to your timeline? It will replace all existing overlays.
-                        </p>
-                        <div className="flex gap-2 justify-end">
-                          <button 
-                            className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                            onClick={() => setConfirmingTemplateId(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button 
-                            className="px-3 py-1.5 text-xs bg-[#490972] text-white rounded hover:bg-[#490972]/90"
-                            onClick={() => handleApplyTemplate(template)}
-                          >
-                            Apply Template
-                          </button>
+                      <div onClick={(e) => handleSelectTemplate(template, e)}>
+                        <div className="flex" style={{ gap: '6px' }}>
+                          <div className="rounded overflow-hidden flex-shrink-0" style={{ width: '65px', height: '60px' }}>
+                            <TemplateThumbnail
+                              thumbnail={template.thumbnail}
+                              name={template.name}
+                            />
+                          </div>
+
+                          <div className="w-full flex flex-col" style={{ gap: '4px' }}>
+                            <p className="font-light text-[rgb(65,77,92)]" style={{ fontSize: '10px', lineHeight: '1.2', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                              {new Date(template.updatedAt).toLocaleDateString()}
+                            </p>
+
+                            <div className="flex flex-col" style={{ gap: '4px' }}>
+                              <div className="flex items-start" style={{ gap: '4px' }}>
+                                <p className="font-semibold text-[rgb(47,46,46)] flex-1" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                                  {template.name}
+                                </p>
+                                <img
+                                  style={{ width: '12px', marginTop: '2px' }}
+                                  src={'/assets/Templates/b10b0e74eb96e748c742287fdf3da959.png'}
+                                  alt="icon"
+                                />
+                              </div>
+
+                              <p className="text-[rgb(65,77,92)] line-clamp-2" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                                {template.description}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <div onClick={(e) => handleSelectTemplate(template, e)}>
-                    <CardHeader className="p-2 sm:p-3 space-y-2">
-                      {/* Keep all the existing CardHeader content here */}
-                      <div className="aspect-video w-full overflow-hidden rounded-md">
-                        <TemplateThumbnail
-                          thumbnail={template.thumbnail}
-                          name={template.name}
-                        />
-                      </div>
-                      <div className="space-y-1 sm:space-y-2">
-                        <CardTitle className="text-xs sm:text-sm font-light">
-                          {template.name}
-                        </CardTitle>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
-                          {template.description}
-                        </p>
-                      </div>
-                      <div className="pt-1 sm:pt-2 border-t border-border">
-                        <div className="flex flex-wrap float-left gap-1 sm:gap-2">
-                          {template.tags.slice(0, 3).map((tag, index) => (
-                            <span
+
+                        <div className="flex ml-auto" style={{ gap: '4px', marginTop: '8px' }}>
+                          {template.tags.slice(0, 2).map((tag, index) => (
+                            <p
                               key={index}
-                              className="px-1.5 py-0.5 bg-sky-200 dark:bg-sky-400/30 rounded-sm text-[8px] sm:text-[9px] text-gray-800/70 dark:text-white"
+                              className="flex justify-center text-center bg-[rgb(224,224,224)] rounded-sm text-[rgb(65,77,92)]"
+                              style={{ fontSize: '10px', lineHeight: '1.5', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px', padding: '0 4px' }}
                             >
                               {tag}
-                            </span>
+                            </p>
                           ))}
-                          {template.tags.length > 3 && (
-                            <span className="text-[8px] sm:text-[10px] text-muted-foreground">
-                              +{template.tags.length - 3}
+                          {template.tags.length > 2 && (
+                            <span className="text-[rgb(135,133,133)]" style={{ fontSize: '10px' }}>
+                              +{template.tags.length - 2}
                             </span>
                           )}
                         </div>
-                        <div className="flex float-right gap-1 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
-                          <span>
-                            {new Date(template.updatedAt).toLocaleDateString()}
-                          </span>
-                        </div>
                       </div>
-                    </CardHeader>
+                    )}
                   </div>
-                )}
-                </Card>
                 ))
               ) : (
-                <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-gray-500 text-xs sm:text-sm">
+                <div className="flex flex-col items-center justify-center text-gray-500" style={{ padding: '32px 0', fontSize: '14px' }}>
                   No templates found
                 </div>
               )}
             </div>
-          </div>
-        </TabsContent>
-      
-        <TabsContent value="created-by-you" className="flex-1 min-h-0">
-          <div className="h-full overflow-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 p-1">
+          ) : (
+            // Created By You Tab
+            <div className="flex flex-col" style={{ gap: '8px' }}>
               {clientTemplatesLoading ? (
-                Array.from({ length: 6 }).map((_, index) => (
+                Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={`skeleton-${index}`}
-                    className="relative aspect-video bg-gray-200 dark:bg-gray-800 animate-pulse rounded-sm"
-                  />
+                    className="bg-white rounded animate-pulse"
+                    style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  >
+                    <div className="flex" style={{ gap: '6px' }}>
+                      <div className="rounded bg-gray-200" style={{ width: '65px', height: '60px' }} />
+                      <div className="flex flex-col" style={{ width: '136px', gap: '4px' }}>
+                        <div className="h-3 bg-gray-200 rounded" style={{ width: '80px' }} />
+                        <div className="h-4 bg-gray-200 rounded" style={{ width: '128px' }} />
+                        <div className="h-3 bg-gray-200 rounded w-full" />
+                      </div>
+                    </div>
+                  </div>
                 ))
               ) : clientTemplatesError ? (
-                <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-red-500 text-xs sm:text-sm">
+                <div className="flex flex-col items-center justify-center text-red-500" style={{ padding: '32px 0', fontSize: '14px' }}>
                   Error loading templates: {clientTemplatesError}
                 </div>
               ) : clientTemplates.filter(template => 
@@ -530,147 +596,159 @@ export const TemplateOverlayPanel: React.FC = () => {
                 clientTemplates.filter(template => 
                   activeTemplateFilter === 'all' || (template as any).status === 'active'
                 ).map((template) => (
-                <Card
-                  key={template.id}
-                  className="cursor-pointer hover:bg-accent transition-colors duration-200 group"
-                >
-                {confirmingTemplateId === template.id ? (
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-md">
-                    <h3 className="text-sm font-semibold mb-2">Apply Template</h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-4">
-                      Are you sure you want to add this template to your timeline? It will replace all existing overlays.
-                    </p>
-                    <div className="flex gap-2 justify-end">
-                      <button 
-                        className="px-3 py-1.5 text-xs border rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                        onClick={() => setConfirmingTemplateId(null)}
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-                        onClick={() => {
-                          handleApplyTemplate(template);
-                          setConfirmingTemplateId(null);
-                        }}
-                      >
-                        Apply Template
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div onClick={(e) => handleSelectTemplate(template, e)}>
-                    <CardHeader className="p-2 sm:p-3 space-y-2 relative">
-                      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleTemplateStatus(template.id, (template as any).status || 'active');
-                          }}
-                          className={`p-1 text-white rounded-sm text-xs px-2 py-1 flex items-center gap-1 ${
-                            (template as any).status === 'inactive' 
-                              ? 'bg-green-500 hover:bg-green-600' 
-                              : 'bg-gray-500 hover:bg-gray-600'
-                          }`}
-                          title={(template as any).status === 'inactive' ? 'Show in Active View' : 'Hide from Active View'}
-                        >
-                          {hidingTemplateId === template.id ? (
-                            <>
-                              <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent" />
-                              <span>Hiding</span>
-                            </>
-                          ) : (
-                            <span>{(template as any).status === 'inactive' ? 'Show' : 'Hide'}</span>
-                          )}
-                        </button>
-                      </div>
-                      {/* Keep all the existing CardHeader content here */}
-                      <div className="aspect-video w-full overflow-hidden rounded-md">
-                        <TemplateThumbnail
-                          thumbnail={template.thumbnail}
-                          name={template.name}
-                        />
-                      </div>
-                      <div className="space-y-1 sm:space-y-2">
-                        {/* <CardTitle className="text-xs sm:text-sm font-light">
-                          {template.name}
-                        </CardTitle> */}
-                        <div className="flex items-center gap-2">
-                        {editingTemplateId === template.id ? (
-                          <input
-                            type="text"
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            onBlur={handleEditSave}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleEditSave();
-                              } else if (e.key === 'Escape') {
-                                handleEditCancel();
-                              }
-                            }}
-                            className="text-xs sm:text-sm font-light bg-transparent border-b border-gray-300 focus:outline-none focus:border-purple-500 flex-1"
-                            autoFocus
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        ) : (
-                          <>
-                            <CardTitle className="text-xs sm:text-sm font-light flex-1">
-                              {template.name}
-                            </CardTitle>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditStart(template);
-                              }}
-                              className="p-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition-all"
-                              title="Edit template name"
-                            >
-                              <Pencil size={13} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                        <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">
-                          {template.description}
+                  <div
+                    key={template.id}
+                    className="bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors group relative"
+                    style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  >
+                    {confirmingTemplateId === template.id ? (
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded" style={{ padding: '16px' }}>
+                        <h3 className="font-semibold mb-2" style={{ fontSize: '14px' }}>Apply Template</h3>
+                        <p className="text-gray-600 mb-4" style={{ fontSize: '12px' }}>
+                          Are you sure you want to add this template to your timeline? It will replace all existing overlays.
                         </p>
+                        <div className="flex justify-end" style={{ gap: '8px' }}>
+                          <button 
+                            className="border rounded hover:bg-gray-50"
+                            style={{ padding: '6px 12px', fontSize: '12px' }}
+                            onClick={() => setConfirmingTemplateId(null)}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            className="bg-blue-500 text-white rounded hover:bg-blue-600"
+                            style={{ padding: '6px 12px', fontSize: '12px' }}
+                            onClick={() => {
+                              handleApplyTemplate(template);
+                              setConfirmingTemplateId(null);
+                            }}
+                          >
+                            Apply Template
+                          </button>
+                        </div>
                       </div>
-                      <div className="pt-1 sm:pt-2 border-t border-border">
-                        <div className="flex flex-wrap float-left gap-1 sm:gap-2">
-                          {template.tags.slice(0, 3).map((tag, index) => (
-                            <span
+                    ) : (
+                      <div onClick={(e) => handleSelectTemplate(template, e)}>
+                        {/* Hide/Show button - appears on hover */}
+                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ top: '8px', right: '8px', zIndex: 10 }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleTemplateStatus(template.id, (template as any).status || 'active');
+                            }}
+                            className={`text-white rounded-sm flex items-center ${
+                              (template as any).status === 'inactive' 
+                                ? 'bg-green-500 hover:bg-green-600' 
+                                : 'bg-gray-500 hover:bg-gray-600'
+                            }`}
+                            style={{ padding: '4px 8px', fontSize: '12px', gap: '4px' }}
+                            title={(template as any).status === 'inactive' ? 'Show in Active View' : 'Hide from Active View'}
+                          >
+                            {hidingTemplateId === template.id ? (
+                              <>
+                                <div className="animate-spin rounded-full border border-white border-t-transparent" style={{ height: '12px', width: '12px' }} />
+                                <span>Hiding</span>
+                              </>
+                            ) : (
+                              <span>{(template as any).status === 'inactive' ? 'Show' : 'Hide'}</span>
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="flex" style={{ gap: '6px' }}>
+                          <div className="rounded overflow-hidden flex-shrink-0" style={{ width: '65px', height: '60px' }}>
+                            <TemplateThumbnail
+                              thumbnail={template.thumbnail}
+                              name={template.name}
+                            />
+                          </div>
+
+                          <div className="w-full flex flex-col" style={{ gap: '4px' }}>
+                            <p className="font-light text-[rgb(65,77,92)]" style={{ fontSize: '10px', lineHeight: '1.2', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                              {new Date(template.updatedAt).toLocaleDateString()}
+                            </p>
+
+                            <div className="flex flex-col" style={{ gap: '4px' }}>
+                              <div className="flex items-center" style={{ gap: '4px' }}>
+                                {editingTemplateId === template.id ? (
+                                  <input
+                                    type="text"
+                                    value={editingName}
+                                    onChange={(e) => setEditingName(e.target.value)}
+                                    onBlur={handleEditSave}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleEditSave();
+                                      } else if (e.key === 'Escape') {
+                                        handleEditCancel();
+                                      }
+                                    }}
+                                    className="font-semibold text-[rgb(47,46,46)] flex-1 bg-transparent border-b border-gray-300 focus:outline-none focus:border-purple-500"
+                                    style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                ) : (
+                                  <>
+                                    <p className="font-semibold text-[rgb(47,46,46)] flex-1" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                                      {template.name}
+                                    </p>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEditStart(template);
+                                      }}
+                                      className="bg-gray-200 hover:bg-gray-300 rounded transition-all"
+                                      style={{ padding: '4px' }}
+                                      title="Edit template name"
+                                    >
+                                      <Pencil size={13} />
+                                    </button>
+                                  </>
+                                )}
+                                <img
+                                  style={{ width: '12px', marginTop: '2px' }}
+                                  src={'/assets/Templates/b10b0e74eb96e748c742287fdf3da959.png'}
+                                  alt="icon"
+                                />
+                              </div>
+
+                              <p className="text-[rgb(65,77,92)] line-clamp-2" style={{ fontSize: '12px', lineHeight: '1.25', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px' }}>
+                                {template.description || 'Template created from editor'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex ml-auto" style={{ gap: '4px', marginTop: '8px' }}>
+                          {template.tags.slice(0, 2).map((tag, index) => (
+                            <p
                               key={index}
-                              className="px-1.5 py-0.5 bg-sky-200 dark:bg-sky-400/30 rounded-sm text-[8px] sm:text-[9px] text-gray-800/70 dark:text-white"
+                              className="flex justify-center text-center bg-[rgb(224,224,224)] rounded-sm text-[rgb(65,77,92)]"
+                              style={{ fontSize: '10px', lineHeight: '1.5', fontFamily: "'Poppins',Helvetica,Arial,serif", letterSpacing: '-0.08px', padding: '0 4px' }}
                             >
                               {tag}
-                            </span>
+                            </p>
                           ))}
-                          {template.tags.length > 3 && (
-                            <span className="text-[8px] sm:text-[10px] text-muted-foreground">
-                              +{template.tags.length - 3}
+                          {template.tags.length > 2 && (
+                            <span className="text-[rgb(135,133,133)]" style={{ fontSize: '10px' }}>
+                              +{template.tags.length - 2}
                             </span>
                           )}
                         </div>
-                        <div className="flex float-right gap-1 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
-                          <span>
-                            {new Date(template.updatedAt).toLocaleDateString()}
-                          </span>
-                        </div>
                       </div>
-                    </CardHeader>
+                    )}
                   </div>
-                )}
-                </Card>
                 ))
               ) : (
-                <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center py-4 sm:py-8 text-gray-500 text-xs sm:text-sm">
+                <div className="flex flex-col items-center justify-center text-gray-500" style={{ padding: '32px 0', fontSize: '14px' }}>
                   No templates created yet
                 </div>
               )}
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
+          )}
+        </div>
+      </div>
+    </section>
+  );
 };

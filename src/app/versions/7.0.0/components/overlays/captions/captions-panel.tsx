@@ -554,86 +554,88 @@ export const CaptionsPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 bg-white dark:bg-gray-900/40">
+    <section
+      className={`caption-video flex flex-col bg-[rgb(244,242,250)] rounded-lg w-62 h-full`}>
       {(!localOverlay) ? (
         <>
-          <div className="space-y-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <Button
-                  className="w-full bg-[#490972] hover:bg-[#3a0759] text-white 
-                    disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-800 
-                    disabled:dark:text-gray-600 disabled:opacity-100 disabled:cursor-not-allowed 
-                    transition-colors"
-                  onClick={handleAutomaticCaptions}
-                  disabled={isGeneratingCaptions}
-                >
+          {/* Main content section for captions. */}
+
+          <section className="flex flex-col items-center gap-y-2 my-2 mx-3">
+            {/* Title with decorative line */}
+            <div className="w-full flex flex-col items-center gap-y-2 flex-shrink-0">
+              <div className="flex flex-col gap-y-2 items-center">
+                <hr className="bg-[rgb(65,77,92)] rounded w-[2.625rem] h-[2px] border-0" />
+                <h1 className="flex items-center font-bold text-3.5 leading-1.14 font-['Poppins',Helvetica,Arial,serif] text-[rgb(47,46,46)] w-full">
+                  Caption
+                </h1>
+              </div>
+            </div>
+
+            <div className="w-full flex flex-col items-center gap-y-2">
+              <Button
+                className="bg-[rgb(73,9,114)] rounded w-full pl-1.5 pt-1.5 pr-1.5 pb-1.5 flex hover:bg-[rgb(83,19,124)] disabled:opacity-70 h-auto"
+                onClick={handleAutomaticCaptions}
+                disabled={isGeneratingCaptions}
+              >
+                <p
+                  className={`flex items-center justify-center font-medium text-3 leading-1.67 font-['Poppins',Helvetica,Arial,serif] text-white text-center -tracking-[-0.08px] w-42.5 my-0.5`}>
                   {isGeneratingCaptions ? (
                     'Generating Captions...'
                   ) : (
-                    <>
-                      <img
-                        src="https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png"
-                        alt="Export"
-                        className="w-3.5 h-3.5 mr-0.5"
-                      />
-                      20
-                      <span className="ml-2">Automatically Add Captions</span>
-                    </>
+                    'Automatically Add Captions'
                   )}
-                </Button>
-              </div>
+                </p>
 
-
-              <div className="relative">
-                <div className="absolute inset-x-0 -top-3 flex items-center justify-center">
+                <div className="w-10.5 flex items-center gap-x-0.5">
+                  {/* Inline content with image and accompanying texts. */}
                   <span
-                    className="px-3 py-1 text-xs text-gray-600 dark:text-gray-500 bg-white dark:bg-gray-900 
-                  rounded-full border border-gray-200 dark:border-gray-800"
-                  >
-                    or
+                    className={`font-semibold text-3 leading-2 font-['Poppins',Helvetica,Arial,serif] text-white -tracking-[-0.27001px] w-1.5`}>
+                    (
+                  </span>
+                  <img
+                    className="rounded-md outline outline-white outline-[0.44999998807907104px] outline-offset-0 w-3"
+                    src={
+                      'https://zanopy.ai/assets/images/3491bfc1ad15744a7aa565f8f4cbce1e.png'
+                    }
+                    alt="alt text"
+                  />
+                  <span
+                    className={`font-semibold text-3 leading-2 font-['Poppins',Helvetica,Arial,serif] text-white -tracking-[-0.27001px] w-5`}>
+                    20)
                   </span>
                 </div>
-                <div className="pt-4">
-                  <Textarea
-                    value={script}
-                    onChange={(e) => setScript(e.target.value)}
-                    placeholder="Type or paste your script here..."
-                    className="min-h-[200px] bg-white dark:bg-gray-800/50 
-                    border-gray-200 dark:border-gray-700 
-                    text-gray-900 dark:text-gray-200 
-                    placeholder:text-gray-400 dark:placeholder:text-gray-500 
-                    focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30 
-                    transition-all rounded-lg"
-                  />
-                </div>
-              </div>
+              </Button>
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={generateCaptions}
-                  className="flex-1 text-white bg-[#490972] hover:bg-[#3a0759] disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-800 
-                  disabled:dark:text-gray-600 disabled:opacity-100 disabled:cursor-not-allowed 
-                  transition-colors"
-                  disabled={!script.trim()}
-                >
-                  Generate Captions
-                </Button>
-                {script && (
-                  <Button
-                    variant="ghost"
-                    className="text-sm text-gray-600 dark:text-gray-400 
-                    hover:text-gray-700 dark:hover:text-gray-300 
-                    hover:bg-gray-100/80 dark:hover:bg-gray-800/80 
-                    transition-colors"
-                    onClick={() => setScript("")}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </div>
+              <p
+                className={`font-bold text-3.5 leading-[0.86] font-['Poppins',Helvetica,Arial,serif] text-[rgb(73,9,114)] -tracking-[-0.07001px] w-[9.38%]`}>
+                OR
+              </p>
+              <Textarea
+                value={script}
+                onChange={(e) => setScript(e.target.value)}
+                placeholder="Type or paste your script here.."
+                className={`flex justify-center text-3 leading-1.67 font-['Poppins',Helvetica,Arial,serif] text-[rgb(135,133,133)] text-center bg-white rounded-[3px] outline outline-[rgb(135,133,133)] outline-[0.6000000238418579px] -outline-offset-[-0.6000000238418579px] w-full pl-2 pt-2 pr-2 pb-26.5`}
+              />
             </div>
-          </div>
+
+            <div className="w-full flex gap-2">
+              <Button
+                onClick={generateCaptions}
+                className={`flex items-center justify-center font-semibold text-3 leading-1.5 font-['Poppins',Helvetica,Arial,serif] text-white text-center bg-[rgb(65,77,92)] rounded w-full pl-2 pt-2.25 pr-2 pb-2.25 hover:bg-[rgb(55,67,82)] disabled:opacity-50 disabled:cursor-not-allowed h-auto`}
+                disabled={!script.trim()}
+              >
+                Generate Captions
+              </Button>
+              {script && (
+                <Button
+                  onClick={() => setScript("")}
+                  className={`flex items-center justify-center font-semibold text-3 leading-1.5 font-['Poppins',Helvetica,Arial,serif] text-white text-center bg-[rgb(135,133,133)] rounded pl-2 pt-2.25 pr-2 pb-2.25 hover:bg-[rgb(115,113,113)] h-auto`}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </section>
         </>
       ) : (
         <CaptionSettings
@@ -646,6 +648,6 @@ export const CaptionsPanel: React.FC = () => {
         />
       )}
 
-    </div>
+    </section>
   );
 };
