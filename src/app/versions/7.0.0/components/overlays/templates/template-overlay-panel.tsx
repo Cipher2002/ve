@@ -308,7 +308,7 @@ export const TemplateOverlayPanel: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col bg-[rgb(244,242,250)] h-full overflow-hidden" style={{margin}}>
+    <section className="flex flex-col bg-[rgb(244,242,250)] h-full overflow-hidden">
       {/* Header */}
       {/* <div className="w-full flex flex-col items-center" style={{ gap: '8px', marginTop: '8px'}}>
         <div className="bg-[rgb(65,77,92)] rounded-[1px]" style={{ width: '42px', height: '2px', minHeight: '2px' }} />
