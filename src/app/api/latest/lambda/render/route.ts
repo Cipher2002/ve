@@ -14,7 +14,7 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 50,
+  FRAMES_PER_LAMBDA: 25,
   MAX_RETRIES: 2,
   TIMEOUT_IN_SECONDS: 900, // 15 minutes (maximum allowed)
   MEMORY_SIZE_MB: 3008, // Increased from 2048 for better performance
