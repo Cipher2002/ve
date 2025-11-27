@@ -109,7 +109,7 @@ export const useAudioCache = () => {
       }
 
       // Combine all chunks into a single blob
-      const blob = new Blob(chunks, { type: 'audio/mpeg' });
+      const blob = new Blob(chunks.map(chunk => new Uint8Array(chunk as unknown as ArrayBuffer)), { type: 'audio/mpeg' });
       const filename = url.split('/').pop() || 'audio.mp3';
       
       // Cache the audio
