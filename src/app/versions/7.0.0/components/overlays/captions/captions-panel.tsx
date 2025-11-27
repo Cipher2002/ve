@@ -172,7 +172,7 @@ export const CaptionsPanel: React.FC = () => {
     
     // Get extracted audio
     const data = await ffmpeg.readFile('output.wav');
-    const audioBlob = new Blob([data], { type: 'audio/wav' });
+    const audioBlob = new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'audio/wav' });
     
     // Clean up FFmpeg files
     await ffmpeg.deleteFile('input.mp4');
