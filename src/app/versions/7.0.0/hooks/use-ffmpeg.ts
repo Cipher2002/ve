@@ -55,21 +55,19 @@ const load = useCallback(async () => {
         await ffmpeg.exec(['-i', 'input.mp4', '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', 'output.wav']);
         
         // Update the blob creation to handle WAV
-        const data = await ffmpeg.readFile('output.wav');
-        const audioBlob = new Blob([data], { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
+          const data = await ffmpeg.readFile('output.wav');
+          const audioBlob = new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
         
-        // Clean up WAV file
-        await ffmpeg.deleteFile('output.wav');
-        return audioUrl;
+          // Clean up WAV file
+          await ffmpeg.deleteFile('output.wav');
+          return audioUrl;
         }
 
         // Read output
-        const data = await ffmpeg.readFile('output.mp3');
-        
-        // Create blob URL for the extracted audio
-        const audioBlob = new Blob([data], { type: 'audio/mp3' });
-        const audioUrl = URL.createObjectURL(audioBlob);
+          const data = await ffmpeg.readFile('output.mp3');
+          const audioBlob = new Blob([new Uint8Array(data as unknown as ArrayBuffer)], { type: 'audio/mp3' });
+          const audioUrl = URL.createObjectURL(audioBlob);
 
         // Clean up
         await ffmpeg.deleteFile('input.mp4');
