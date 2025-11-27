@@ -82,14 +82,6 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         diskSizeInMb: 2048,
         lambdasInvoked: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
       });
-
-      console.log('Rendering with config:', {
-        codec: remotionCodec,
-        durationInFrames: body.inputProps.durationInFrames,
-        framesPerLambda: LAMBDA_CONFIG.FRAMES_PER_LAMBDA,
-        estimatedLambdas: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
-        dimensions: `${body.inputProps.width}x${body.inputProps.height}`,
-      });
             
       // Base render options
       const renderOptions = {
@@ -100,7 +92,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         composition: body.id,
         inputProps: body.inputProps,
         framesPerLambda: LAMBDA_CONFIG.FRAMES_PER_LAMBDA,
-        timeoutInMilliseconds: LAMBDA_CONFIG.TIMEOUT_IN_SECONDS * 1000,
+        timeoutInMilliseconds: LAMBDA_CONFIG.TIMEOUT_IN_SECONDS * 1000, // Convert to milliseconds
         downloadBehavior: {
           type: "download" as const,
           fileName: isAudio ? `audio.${body.format}` : `video.${body.format}`,
@@ -116,31 +108,23 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
         if (body.codec === 'vp8') {
           finalRenderOptions = {
             ...renderOptions,
-            crf: 9, // VP8: higher = lower quality (range 4-63)
-            imageFormat: "jpeg" as const,
+            crf: 4, // VP8 minimum CRF value
+            imageFormat: "png" as const,
             colorSpace: "bt709" as const,
-            jpegQuality: 90,
+            jpegQuality: 100,
           };
         } else {
-          // H.264 - OPTIMIZED FOR SPEED
+          // H.264 and other codecs
           finalRenderOptions = {
             ...renderOptions,
-            crf: 18, // Good quality, much faster than 1
-            imageFormat: "jpeg" as const, // Faster than png
+            crf: 1,
+            imageFormat: "png" as const,
             colorSpace: "bt709" as const,
-            x264Preset: "medium" as const, // Balance of speed and quality
-            jpegQuality: 90, // Good quality, faster than 100
+            x264Preset: "veryslow" as const,
+            jpegQuality: 100,
           };
         }
       }
-
-      console.log('Final render options:', {
-        ...finalRenderOptions,
-        inputProps: {
-          overlaysCount: body.inputProps.overlays?.length || 0,
-          durationInFrames: body.inputProps.durationInFrames,
-        }
-      });
 
       const result = await renderMediaOnLambda(finalRenderOptions);
       
@@ -153,9 +137,7 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
           duration: `${(body.inputProps.durationInFrames / body.inputProps.fps).toFixed(2)}s`,
           mediaType: body.mediaType,
           codec: body.codec,
-          format: body.format,
-          framesPerLambda: LAMBDA_CONFIG.FRAMES_PER_LAMBDA,
-          estimatedLambdas: Math.ceil(body.inputProps.durationInFrames / LAMBDA_CONFIG.FRAMES_PER_LAMBDA),
+          format: body.format
         }
       };
     } catch (error) {
@@ -163,4 +145,4 @@ export const POST = executeApi<RenderMediaOnLambdaOutput, typeof RenderRequest>(
       throw error;
     }
   }
-);.0
+);
