@@ -111,7 +111,7 @@ export const useVideoCache = () => {
       }
 
       // Combine all chunks into a single blob
-      const blob = new Blob(chunks, { type: 'video/mp4' });
+      const blob = new Blob(chunks.map(chunk => new Uint8Array(chunk as unknown as ArrayBuffer)), { type: 'video/mp4' });
       const filename = url.split('/').pop() || 'video.mp4';
       
       // Cache the video
