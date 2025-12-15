@@ -14,10 +14,10 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 50, // Reduced from 50 for better parallelization
-  MAX_RETRIES: 3, // Increased from 2
-  TIMEOUT_IN_SECONDS: 900, // 15 minutes (maximum allowed)
-  MEMORY_SIZE_MB: 3008, // Increased from 2048 for better performance
+  FRAMES_PER_LAMBDA: 20, // Reduced to process faster per chunk
+  MAX_RETRIES: 3,
+  TIMEOUT_IN_SECONDS: 900, // 15 minutes timeout
+  MEMORY_SIZE_MB: 2048, // Match the actual Lambda function memory
 } as const;
 
 // Codec mapping for different media types
