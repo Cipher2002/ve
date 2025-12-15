@@ -31,7 +31,7 @@ export const DISABLE_VIDEO_KEYFRAMES = false;
 // AWS deployment configuration
 export const SITE_NAME = "video-editor-site";
 export const LAMBDA_FUNCTION_NAME =
-  "remotion-render-4-0-332-mem2048mb-disk2048mb-120sec";
+  "remotion-render-4-0-332-mem2048mb-disk2048mb-900sec";
 export const REGION = "us-east-1";
 
 // Zoom control configuration
