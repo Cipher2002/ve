@@ -14,7 +14,7 @@ import {
  */
 const LAMBDA_CONFIG = {
   FUNCTION_NAME: LAMBDA_FUNCTION_NAME,
-  FRAMES_PER_LAMBDA: 20, // Reduced to process faster per chunk
+  FRAMES_PER_LAMBDA: 50, // Reduced to process faster per chunk
   MAX_RETRIES: 3,
   TIMEOUT_IN_SECONDS: 900, // 15 minutes timeout
   MEMORY_SIZE_MB: 2048, // Match the actual Lambda function memory
